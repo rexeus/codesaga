@@ -27,7 +27,10 @@ export const expertsOf = (
       size: file.size,
     }),
   }));
-  const best = Math.max(...degrees.map(({ degree }) => degree));
+  const best = degrees.reduce(
+    (max, { degree }) => Math.max(max, degree),
+    -Infinity,
+  );
   return degrees
     .filter(
       ({ contribution, degree }) =>

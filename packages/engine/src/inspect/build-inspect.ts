@@ -52,7 +52,10 @@ const entryOf = (
   const touching = windowed.filter(({ changes }) =>
     changes.some(({ path }) => matched.has(path)),
   );
-  const last = Math.max(...touching.map(({ time }) => time));
+  const last = touching.reduce(
+    (max, { time }) => Math.max(max, time),
+    -Infinity,
+  );
   return {
     pattern,
     files: set.files,
