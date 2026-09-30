@@ -1,0 +1,1714 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "codesaga",
+    "version": "0.1.0"
+  },
+  "generatedAt": "2026-09-30T10:15:00.000Z",
+  "repository": {
+    "name": "aurora-web",
+    "head": "9f3c2b1a7d5e4f60b8a1c2d3e4f5a6b7c8d9e0f1",
+    "branch": "main",
+    "scope": ".",
+    "shallow": false,
+    "firstCommitAt": "2023-10-10T08:12:31.000Z",
+    "lastCommitAt": "2026-09-29T15:41:07.000Z"
+  },
+  "window": {
+    "since": "2023-10-10T08:12:31.000Z",
+    "until": "2026-09-30T10:15:00.000Z",
+    "commits": 2246
+  },
+  "thresholds": {
+    "activeDays": 183
+  },
+  "totals": {
+    "contributors": 8
+  },
+  "overview": {
+    "commits": 2246,
+    "contributors": {
+      "total": 8,
+      "active30": 2,
+      "active90": 3,
+      "active365": 7
+    },
+    "files": 473,
+    "loc": 60942,
+    "languages": [
+      {
+        "name": "TypeScript",
+        "files": 318,
+        "loc": 46412
+      },
+      {
+        "name": "CSS",
+        "files": 64,
+        "loc": 7905
+      },
+      {
+        "name": "SQL",
+        "files": 41,
+        "loc": 3188
+      },
+      {
+        "name": "JavaScript",
+        "files": 27,
+        "loc": 2140
+      },
+      {
+        "name": "Shell",
+        "files": 14,
+        "loc": 611
+      },
+      {
+        "name": "HTML",
+        "files": 6,
+        "loc": 472
+      },
+      {
+        "name": "Python",
+        "files": 3,
+        "loc": 214
+      }
+    ]
+  },
+  "activity": {
+    "weeks": [
+      {
+        "start": "2023-10-09",
+        "commits": 10,
+        "added": 835,
+        "deleted": 451
+      },
+      {
+        "start": "2023-10-16",
+        "commits": 14,
+        "added": 1014,
+        "deleted": 628
+      },
+      {
+        "start": "2023-10-23",
+        "commits": 15,
+        "added": 1114,
+        "deleted": 512
+      },
+      {
+        "start": "2023-10-30",
+        "commits": 12,
+        "added": 895,
+        "deleted": 382
+      },
+      {
+        "start": "2023-11-06",
+        "commits": 15,
+        "added": 1245,
+        "deleted": 557
+      },
+      {
+        "start": "2023-11-13",
+        "commits": 19,
+        "added": 1231,
+        "deleted": 668
+      },
+      {
+        "start": "2023-11-20",
+        "commits": 10,
+        "added": 707,
+        "deleted": 258
+      },
+      {
+        "start": "2023-11-27",
+        "commits": 9,
+        "added": 763,
+        "deleted": 400
+      },
+      {
+        "start": "2023-12-04",
+        "commits": 10,
+        "added": 599,
+        "deleted": 256
+      },
+      {
+        "start": "2023-12-11",
+        "commits": 10,
+        "added": 899,
+        "deleted": 471
+      },
+      {
+        "start": "2023-12-18",
+        "commits": 15,
+        "added": 1361,
+        "deleted": 891
+      },
+      {
+        "start": "2023-12-25",
+        "commits": 12,
+        "added": 524,
+        "deleted": 296
+      },
+      {
+        "start": "2024-01-01",
+        "commits": 6,
+        "added": 154,
+        "deleted": 94
+      },
+      {
+        "start": "2024-01-08",
+        "commits": 14,
+        "added": 1286,
+        "deleted": 448
+      },
+      {
+        "start": "2024-01-15",
+        "commits": 9,
+        "added": 447,
+        "deleted": 248
+      },
+      {
+        "start": "2024-01-22",
+        "commits": 11,
+        "added": 1108,
+        "deleted": 545
+      },
+      {
+        "start": "2024-01-29",
+        "commits": 14,
+        "added": 990,
+        "deleted": 485
+      },
+      {
+        "start": "2024-02-05",
+        "commits": 24,
+        "added": 2327,
+        "deleted": 1113
+      },
+      {
+        "start": "2024-02-12",
+        "commits": 16,
+        "added": 1323,
+        "deleted": 411
+      },
+      {
+        "start": "2024-02-19",
+        "commits": 11,
+        "added": 624,
+        "deleted": 305
+      },
+      {
+        "start": "2024-02-26",
+        "commits": 20,
+        "added": 1800,
+        "deleted": 850
+      },
+      {
+        "start": "2024-03-04",
+        "commits": 12,
+        "added": 836,
+        "deleted": 561
+      },
+      {
+        "start": "2024-03-11",
+        "commits": 15,
+        "added": 1084,
+        "deleted": 554
+      },
+      {
+        "start": "2024-03-18",
+        "commits": 7,
+        "added": 345,
+        "deleted": 156
+      },
+      {
+        "start": "2024-03-25",
+        "commits": 19,
+        "added": 1185,
+        "deleted": 551
+      },
+      {
+        "start": "2024-04-01",
+        "commits": 7,
+        "added": 362,
+        "deleted": 239
+      },
+      {
+        "start": "2024-04-08",
+        "commits": 11,
+        "added": 1183,
+        "deleted": 530
+      },
+      {
+        "start": "2024-04-15",
+        "commits": 16,
+        "added": 1601,
+        "deleted": 715
+      },
+      {
+        "start": "2024-04-22",
+        "commits": 14,
+        "added": 1060,
+        "deleted": 557
+      },
+      {
+        "start": "2024-04-29",
+        "commits": 9,
+        "added": 694,
+        "deleted": 297
+      },
+      {
+        "start": "2024-05-06",
+        "commits": 12,
+        "added": 898,
+        "deleted": 575
+      },
+      {
+        "start": "2024-05-13",
+        "commits": 13,
+        "added": 821,
+        "deleted": 507
+      },
+      {
+        "start": "2024-05-20",
+        "commits": 17,
+        "added": 1486,
+        "deleted": 648
+      },
+      {
+        "start": "2024-05-27",
+        "commits": 10,
+        "added": 582,
+        "deleted": 190
+      },
+      {
+        "start": "2024-06-03",
+        "commits": 18,
+        "added": 1188,
+        "deleted": 568
+      },
+      {
+        "start": "2024-06-10",
+        "commits": 17,
+        "added": 1773,
+        "deleted": 997
+      },
+      {
+        "start": "2024-06-17",
+        "commits": 8,
+        "added": 910,
+        "deleted": 379
+      },
+      {
+        "start": "2024-06-24",
+        "commits": 24,
+        "added": 1824,
+        "deleted": 905
+      },
+      {
+        "start": "2024-07-01",
+        "commits": 9,
+        "added": 608,
+        "deleted": 220
+      },
+      {
+        "start": "2024-07-08",
+        "commits": 16,
+        "added": 1722,
+        "deleted": 834
+      },
+      {
+        "start": "2024-07-15",
+        "commits": 12,
+        "added": 894,
+        "deleted": 513
+      },
+      {
+        "start": "2024-07-22",
+        "commits": 20,
+        "added": 1069,
+        "deleted": 483
+      },
+      {
+        "start": "2024-07-29",
+        "commits": 11,
+        "added": 757,
+        "deleted": 431
+      },
+      {
+        "start": "2024-08-05",
+        "commits": 21,
+        "added": 1323,
+        "deleted": 701
+      },
+      {
+        "start": "2024-08-12",
+        "commits": 14,
+        "added": 1111,
+        "deleted": 780
+      },
+      {
+        "start": "2024-08-19",
+        "commits": 9,
+        "added": 800,
+        "deleted": 412
+      },
+      {
+        "start": "2024-08-26",
+        "commits": 7,
+        "added": 626,
+        "deleted": 343
+      },
+      {
+        "start": "2024-09-02",
+        "commits": 15,
+        "added": 1437,
+        "deleted": 830
+      },
+      {
+        "start": "2024-09-09",
+        "commits": 12,
+        "added": 848,
+        "deleted": 479
+      },
+      {
+        "start": "2024-09-16",
+        "commits": 18,
+        "added": 1403,
+        "deleted": 700
+      },
+      {
+        "start": "2024-09-23",
+        "commits": 18,
+        "added": 1937,
+        "deleted": 802
+      },
+      {
+        "start": "2024-09-30",
+        "commits": 19,
+        "added": 2208,
+        "deleted": 970
+      },
+      {
+        "start": "2024-10-07",
+        "commits": 14,
+        "added": 1333,
+        "deleted": 620
+      },
+      {
+        "start": "2024-10-14",
+        "commits": 13,
+        "added": 1233,
+        "deleted": 600
+      },
+      {
+        "start": "2024-10-21",
+        "commits": 10,
+        "added": 395,
+        "deleted": 212
+      },
+      {
+        "start": "2024-10-28",
+        "commits": 18,
+        "added": 1563,
+        "deleted": 703
+      },
+      {
+        "start": "2024-11-04",
+        "commits": 10,
+        "added": 392,
+        "deleted": 214
+      },
+      {
+        "start": "2024-11-11",
+        "commits": 18,
+        "added": 1779,
+        "deleted": 918
+      },
+      {
+        "start": "2024-11-18",
+        "commits": 17,
+        "added": 1608,
+        "deleted": 810
+      },
+      {
+        "start": "2024-11-25",
+        "commits": 19,
+        "added": 1701,
+        "deleted": 897
+      },
+      {
+        "start": "2024-12-02",
+        "commits": 16,
+        "added": 1187,
+        "deleted": 556
+      },
+      {
+        "start": "2024-12-09",
+        "commits": 11,
+        "added": 1240,
+        "deleted": 745
+      },
+      {
+        "start": "2024-12-16",
+        "commits": 22,
+        "added": 2209,
+        "deleted": 1049
+      },
+      {
+        "start": "2024-12-23",
+        "commits": 16,
+        "added": 1049,
+        "deleted": 553
+      },
+      {
+        "start": "2024-12-30",
+        "commits": 18,
+        "added": 1210,
+        "deleted": 485
+      },
+      {
+        "start": "2025-01-06",
+        "commits": 9,
+        "added": 689,
+        "deleted": 433
+      },
+      {
+        "start": "2025-01-13",
+        "commits": 23,
+        "added": 1764,
+        "deleted": 955
+      },
+      {
+        "start": "2025-01-20",
+        "commits": 10,
+        "added": 961,
+        "deleted": 530
+      },
+      {
+        "start": "2025-01-27",
+        "commits": 20,
+        "added": 1463,
+        "deleted": 832
+      },
+      {
+        "start": "2025-02-03",
+        "commits": 14,
+        "added": 631,
+        "deleted": 330
+      },
+      {
+        "start": "2025-02-10",
+        "commits": 15,
+        "added": 997,
+        "deleted": 519
+      },
+      {
+        "start": "2025-02-17",
+        "commits": 10,
+        "added": 788,
+        "deleted": 441
+      },
+      {
+        "start": "2025-02-24",
+        "commits": 20,
+        "added": 2133,
+        "deleted": 951
+      },
+      {
+        "start": "2025-03-03",
+        "commits": 13,
+        "added": 1244,
+        "deleted": 652
+      },
+      {
+        "start": "2025-03-10",
+        "commits": 16,
+        "added": 1019,
+        "deleted": 522
+      },
+      {
+        "start": "2025-03-17",
+        "commits": 16,
+        "added": 1381,
+        "deleted": 803
+      },
+      {
+        "start": "2025-03-24",
+        "commits": 17,
+        "added": 1655,
+        "deleted": 799
+      },
+      {
+        "start": "2025-03-31",
+        "commits": 20,
+        "added": 1854,
+        "deleted": 704
+      },
+      {
+        "start": "2025-04-07",
+        "commits": 18,
+        "added": 1615,
+        "deleted": 742
+      },
+      {
+        "start": "2025-04-14",
+        "commits": 19,
+        "added": 1176,
+        "deleted": 438
+      },
+      {
+        "start": "2025-04-21",
+        "commits": 15,
+        "added": 1113,
+        "deleted": 540
+      },
+      {
+        "start": "2025-04-28",
+        "commits": 14,
+        "added": 1280,
+        "deleted": 539
+      },
+      {
+        "start": "2025-05-05",
+        "commits": 18,
+        "added": 1874,
+        "deleted": 894
+      },
+      {
+        "start": "2025-05-12",
+        "commits": 15,
+        "added": 1259,
+        "deleted": 814
+      },
+      {
+        "start": "2025-05-19",
+        "commits": 14,
+        "added": 1268,
+        "deleted": 537
+      },
+      {
+        "start": "2025-05-26",
+        "commits": 13,
+        "added": 956,
+        "deleted": 484
+      },
+      {
+        "start": "2025-06-02",
+        "commits": 25,
+        "added": 2543,
+        "deleted": 1362
+      },
+      {
+        "start": "2025-06-09",
+        "commits": 14,
+        "added": 1289,
+        "deleted": 694
+      },
+      {
+        "start": "2025-06-16",
+        "commits": 10,
+        "added": 622,
+        "deleted": 277
+      },
+      {
+        "start": "2025-06-23",
+        "commits": 19,
+        "added": 869,
+        "deleted": 372
+      },
+      {
+        "start": "2025-06-30",
+        "commits": 18,
+        "added": 1650,
+        "deleted": 793
+      },
+      {
+        "start": "2025-07-07",
+        "commits": 17,
+        "added": 1179,
+        "deleted": 586
+      },
+      {
+        "start": "2025-07-14",
+        "commits": 13,
+        "added": 1237,
+        "deleted": 851
+      },
+      {
+        "start": "2025-07-21",
+        "commits": 14,
+        "added": 1517,
+        "deleted": 801
+      },
+      {
+        "start": "2025-07-28",
+        "commits": 15,
+        "added": 1168,
+        "deleted": 609
+      },
+      {
+        "start": "2025-08-04",
+        "commits": 19,
+        "added": 1353,
+        "deleted": 554
+      },
+      {
+        "start": "2025-08-11",
+        "commits": 14,
+        "added": 837,
+        "deleted": 496
+      },
+      {
+        "start": "2025-08-18",
+        "commits": 17,
+        "added": 1218,
+        "deleted": 642
+      },
+      {
+        "start": "2025-08-25",
+        "commits": 17,
+        "added": 1274,
+        "deleted": 669
+      },
+      {
+        "start": "2025-09-01",
+        "commits": 17,
+        "added": 1072,
+        "deleted": 641
+      },
+      {
+        "start": "2025-09-08",
+        "commits": 19,
+        "added": 1696,
+        "deleted": 720
+      },
+      {
+        "start": "2025-09-15",
+        "commits": 11,
+        "added": 1261,
+        "deleted": 538
+      },
+      {
+        "start": "2025-09-22",
+        "commits": 21,
+        "added": 1729,
+        "deleted": 759
+      },
+      {
+        "start": "2025-09-29",
+        "commits": 14,
+        "added": 1014,
+        "deleted": 399
+      },
+      {
+        "start": "2025-10-06",
+        "commits": 19,
+        "added": 1623,
+        "deleted": 956
+      },
+      {
+        "start": "2025-10-13",
+        "commits": 17,
+        "added": 1646,
+        "deleted": 726
+      },
+      {
+        "start": "2025-10-20",
+        "commits": 19,
+        "added": 1452,
+        "deleted": 583
+      },
+      {
+        "start": "2025-10-27",
+        "commits": 20,
+        "added": 1715,
+        "deleted": 744
+      },
+      {
+        "start": "2025-11-03",
+        "commits": 11,
+        "added": 704,
+        "deleted": 268
+      },
+      {
+        "start": "2025-11-10",
+        "commits": 9,
+        "added": 1225,
+        "deleted": 668
+      },
+      {
+        "start": "2025-11-17",
+        "commits": 15,
+        "added": 1015,
+        "deleted": 559
+      },
+      {
+        "start": "2025-11-24",
+        "commits": 17,
+        "added": 2090,
+        "deleted": 1073
+      },
+      {
+        "start": "2025-12-01",
+        "commits": 21,
+        "added": 1141,
+        "deleted": 586
+      },
+      {
+        "start": "2025-12-08",
+        "commits": 14,
+        "added": 1080,
+        "deleted": 466
+      },
+      {
+        "start": "2025-12-15",
+        "commits": 17,
+        "added": 1355,
+        "deleted": 697
+      },
+      {
+        "start": "2025-12-22",
+        "commits": 19,
+        "added": 1888,
+        "deleted": 1023
+      },
+      {
+        "start": "2025-12-29",
+        "commits": 13,
+        "added": 1432,
+        "deleted": 753
+      },
+      {
+        "start": "2026-01-05",
+        "commits": 18,
+        "added": 1315,
+        "deleted": 729
+      },
+      {
+        "start": "2026-01-12",
+        "commits": 16,
+        "added": 1332,
+        "deleted": 600
+      },
+      {
+        "start": "2026-01-19",
+        "commits": 16,
+        "added": 928,
+        "deleted": 398
+      },
+      {
+        "start": "2026-01-26",
+        "commits": 18,
+        "added": 1251,
+        "deleted": 721
+      },
+      {
+        "start": "2026-02-02",
+        "commits": 22,
+        "added": 1319,
+        "deleted": 552
+      },
+      {
+        "start": "2026-02-09",
+        "commits": 16,
+        "added": 987,
+        "deleted": 507
+      },
+      {
+        "start": "2026-02-16",
+        "commits": 20,
+        "added": 1743,
+        "deleted": 676
+      },
+      {
+        "start": "2026-02-23",
+        "commits": 9,
+        "added": 494,
+        "deleted": 196
+      },
+      {
+        "start": "2026-03-02",
+        "commits": 19,
+        "added": 2127,
+        "deleted": 1082
+      },
+      {
+        "start": "2026-03-09",
+        "commits": 10,
+        "added": 596,
+        "deleted": 315
+      },
+      {
+        "start": "2026-03-16",
+        "commits": 11,
+        "added": 896,
+        "deleted": 419
+      },
+      {
+        "start": "2026-03-23",
+        "commits": 16,
+        "added": 1538,
+        "deleted": 720
+      },
+      {
+        "start": "2026-03-30",
+        "commits": 11,
+        "added": 1140,
+        "deleted": 470
+      },
+      {
+        "start": "2026-04-06",
+        "commits": 25,
+        "added": 1203,
+        "deleted": 543
+      },
+      {
+        "start": "2026-04-13",
+        "commits": 18,
+        "added": 825,
+        "deleted": 410
+      },
+      {
+        "start": "2026-04-20",
+        "commits": 8,
+        "added": 623,
+        "deleted": 249
+      },
+      {
+        "start": "2026-04-27",
+        "commits": 20,
+        "added": 1971,
+        "deleted": 839
+      },
+      {
+        "start": "2026-05-04",
+        "commits": 11,
+        "added": 1052,
+        "deleted": 522
+      },
+      {
+        "start": "2026-05-11",
+        "commits": 17,
+        "added": 982,
+        "deleted": 483
+      },
+      {
+        "start": "2026-05-18",
+        "commits": 13,
+        "added": 1195,
+        "deleted": 679
+      },
+      {
+        "start": "2026-05-25",
+        "commits": 11,
+        "added": 1043,
+        "deleted": 450
+      },
+      {
+        "start": "2026-06-01",
+        "commits": 13,
+        "added": 690,
+        "deleted": 345
+      },
+      {
+        "start": "2026-06-08",
+        "commits": 9,
+        "added": 914,
+        "deleted": 435
+      },
+      {
+        "start": "2026-06-15",
+        "commits": 14,
+        "added": 1195,
+        "deleted": 544
+      },
+      {
+        "start": "2026-06-22",
+        "commits": 10,
+        "added": 957,
+        "deleted": 529
+      },
+      {
+        "start": "2026-06-29",
+        "commits": 13,
+        "added": 1157,
+        "deleted": 784
+      },
+      {
+        "start": "2026-07-06",
+        "commits": 8,
+        "added": 158,
+        "deleted": 89
+      },
+      {
+        "start": "2026-07-13",
+        "commits": 10,
+        "added": 337,
+        "deleted": 234
+      },
+      {
+        "start": "2026-07-20",
+        "commits": 10,
+        "added": 623,
+        "deleted": 330
+      },
+      {
+        "start": "2026-07-27",
+        "commits": 16,
+        "added": 1158,
+        "deleted": 592
+      },
+      {
+        "start": "2026-08-03",
+        "commits": 10,
+        "added": 926,
+        "deleted": 493
+      },
+      {
+        "start": "2026-08-10",
+        "commits": 9,
+        "added": 601,
+        "deleted": 223
+      },
+      {
+        "start": "2026-08-17",
+        "commits": 6,
+        "added": 271,
+        "deleted": 147
+      },
+      {
+        "start": "2026-08-24",
+        "commits": 7,
+        "added": 320,
+        "deleted": 191
+      },
+      {
+        "start": "2026-08-31",
+        "commits": 9,
+        "added": 707,
+        "deleted": 410
+      },
+      {
+        "start": "2026-09-07",
+        "commits": 10,
+        "added": 462,
+        "deleted": 264
+      },
+      {
+        "start": "2026-09-14",
+        "commits": 10,
+        "added": 389,
+        "deleted": 202
+      },
+      {
+        "start": "2026-09-21",
+        "commits": 11,
+        "added": 485,
+        "deleted": 288
+      },
+      {
+        "start": "2026-09-28",
+        "commits": 4,
+        "added": 300,
+        "deleted": 202
+      }
+    ],
+    "months": [
+      {
+        "month": "2023-10",
+        "commits": 44,
+        "contributors": 2
+      },
+      {
+        "month": "2023-11",
+        "commits": 58,
+        "contributors": 3
+      },
+      {
+        "month": "2023-12",
+        "commits": 49,
+        "contributors": 3
+      },
+      {
+        "month": "2024-01",
+        "commits": 50,
+        "contributors": 4
+      },
+      {
+        "month": "2024-02",
+        "commits": 71,
+        "contributors": 5
+      },
+      {
+        "month": "2024-03",
+        "commits": 57,
+        "contributors": 5
+      },
+      {
+        "month": "2024-04",
+        "commits": 53,
+        "contributors": 5
+      },
+      {
+        "month": "2024-05",
+        "commits": 56,
+        "contributors": 5
+      },
+      {
+        "month": "2024-06",
+        "commits": 67,
+        "contributors": 6
+      },
+      {
+        "month": "2024-07",
+        "commits": 64,
+        "contributors": 6
+      },
+      {
+        "month": "2024-08",
+        "commits": 55,
+        "contributors": 6
+      },
+      {
+        "month": "2024-09",
+        "commits": 66,
+        "contributors": 7
+      },
+      {
+        "month": "2024-10",
+        "commits": 62,
+        "contributors": 7
+      },
+      {
+        "month": "2024-11",
+        "commits": 72,
+        "contributors": 7
+      },
+      {
+        "month": "2024-12",
+        "commits": 72,
+        "contributors": 7
+      },
+      {
+        "month": "2025-01",
+        "commits": 72,
+        "contributors": 7
+      },
+      {
+        "month": "2025-02",
+        "commits": 59,
+        "contributors": 7
+      },
+      {
+        "month": "2025-03",
+        "commits": 68,
+        "contributors": 6
+      },
+      {
+        "month": "2025-04",
+        "commits": 76,
+        "contributors": 7
+      },
+      {
+        "month": "2025-05",
+        "commits": 66,
+        "contributors": 7
+      },
+      {
+        "month": "2025-06",
+        "commits": 72,
+        "contributors": 7
+      },
+      {
+        "month": "2025-07",
+        "commits": 70,
+        "contributors": 7
+      },
+      {
+        "month": "2025-08",
+        "commits": 70,
+        "contributors": 7
+      },
+      {
+        "month": "2025-09",
+        "commits": 73,
+        "contributors": 7
+      },
+      {
+        "month": "2025-10",
+        "commits": 81,
+        "contributors": 7
+      },
+      {
+        "month": "2025-11",
+        "commits": 55,
+        "contributors": 7
+      },
+      {
+        "month": "2025-12",
+        "commits": 82,
+        "contributors": 6
+      },
+      {
+        "month": "2026-01",
+        "commits": 70,
+        "contributors": 6
+      },
+      {
+        "month": "2026-02",
+        "commits": 67,
+        "contributors": 5
+      },
+      {
+        "month": "2026-03",
+        "commits": 59,
+        "contributors": 6
+      },
+      {
+        "month": "2026-04",
+        "commits": 75,
+        "contributors": 6
+      },
+      {
+        "month": "2026-05",
+        "commits": 56,
+        "contributors": 5
+      },
+      {
+        "month": "2026-06",
+        "commits": 52,
+        "contributors": 4
+      },
+      {
+        "month": "2026-07",
+        "commits": 49,
+        "contributors": 3
+      },
+      {
+        "month": "2026-08",
+        "commits": 37,
+        "contributors": 3
+      },
+      {
+        "month": "2026-09",
+        "commits": 41,
+        "contributors": 2
+      }
+    ]
+  },
+  "punchcard": [
+    [
+      5, 11, 0, 4, 3, 54, 57, 0, 20, 30, 25, 35, 24, 25, 25, 38, 33, 25, 27, 15,
+      7, 4, 6, 3
+    ],
+    [
+      6, 7, 1, 1, 2, 1, 3, 4, 20, 32, 23, 39, 36, 36, 46, 52, 46, 41, 24, 20,
+      13, 5, 5, 7
+    ],
+    [
+      5, 6, 3, 1, 1, 4, 6, 4, 8, 28, 37, 51, 31, 31, 35, 40, 37, 30, 22, 16, 9,
+      10, 7, 7
+    ],
+    [
+      3, 5, 1, 3, 1, 2, 3, 4, 8, 23, 32, 49, 38, 47, 25, 50, 20, 26, 17, 13, 7,
+      2, 6, 5
+    ],
+    [
+      6, 2, 4, 3, 2, 3, 4, 8, 18, 27, 23, 38, 22, 15, 19, 48, 27, 18, 16, 10, 8,
+      2, 5, 2
+    ],
+    [1, 2, 3, 0, 3, 0, 1, 2, 2, 4, 4, 7, 8, 7, 6, 7, 9, 7, 3, 3, 2, 0, 1, 5],
+    [0, 2, 1, 1, 0, 0, 2, 1, 1, 5, 4, 10, 3, 7, 4, 5, 6, 6, 4, 2, 0, 0, 0, 0]
+  ],
+  "contributors": [
+    {
+      "name": "Maya Lindqvist",
+      "email": "maya.lindqvist@aurora.example",
+      "commits": 690,
+      "agentAssistedCommits": 80,
+      "activeDays": 486,
+      "added": 59188,
+      "deleted": 29691,
+      "firstCommitAt": "2023-10-10T08:12:31.000Z",
+      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+      "active": true,
+      "areas": [
+        {
+          "path": "apps/web",
+          "commits": 399
+        },
+        {
+          "path": "packages/ui",
+          "commits": 215
+        },
+        {
+          "path": "docs",
+          "commits": 76
+        }
+      ]
+    },
+    {
+      "name": "Tomás Herrera",
+      "email": "tomas.herrera@aurora.example",
+      "commits": 430,
+      "agentAssistedCommits": 46,
+      "activeDays": 330,
+      "added": 39290,
+      "deleted": 19692,
+      "firstCommitAt": "2023-10-18T09:30:12.000Z",
+      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+      "active": true,
+      "areas": [
+        {
+          "path": "packages/api",
+          "commits": 288
+        },
+        {
+          "path": "packages/db",
+          "commits": 101
+        },
+        {
+          "path": "infra",
+          "commits": 41
+        }
+      ]
+    },
+    {
+      "name": "Priya Raman",
+      "email": "priya.raman@aurora.example",
+      "commits": 310,
+      "agentAssistedCommits": 29,
+      "activeDays": 258,
+      "added": 26478,
+      "deleted": 13115,
+      "firstCommitAt": "2024-01-09T05:20:00.000Z",
+      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+      "active": true,
+      "areas": [
+        {
+          "path": "packages/ui",
+          "commits": 136
+        },
+        {
+          "path": "apps/web",
+          "commits": 109
+        },
+        {
+          "path": "apps/admin",
+          "commits": 65
+        }
+      ]
+    },
+    {
+      "name": "Jonas Weber",
+      "email": "jonas.weber@aurora.example",
+      "commits": 205,
+      "agentAssistedCommits": 26,
+      "activeDays": 175,
+      "added": 18054,
+      "deleted": 8584,
+      "firstCommitAt": "2024-06-03T07:45:00.000Z",
+      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+      "active": true,
+      "areas": [
+        {
+          "path": "packages/api",
+          "commits": 83
+        },
+        {
+          "path": "packages/auth",
+          "commits": 80
+        },
+        {
+          "path": "packages/db",
+          "commits": 42
+        }
+      ]
+    },
+    {
+      "name": "Aiko Tanaka",
+      "email": "aiko.tanaka@aurora.example",
+      "commits": 135,
+      "agentAssistedCommits": 8,
+      "activeDays": 120,
+      "added": 12004,
+      "deleted": 5823,
+      "firstCommitAt": "2024-09-16T01:05:00.000Z",
+      "lastCommitAt": "2026-05-05T08:33:51.000Z",
+      "active": true,
+      "areas": [
+        {
+          "path": "apps/admin",
+          "commits": 94
+        },
+        {
+          "path": "packages/ui",
+          "commits": 41
+        }
+      ]
+    },
+    {
+      "name": "Sam Okafor",
+      "email": "sam.okafor@aurora.example",
+      "commits": 82,
+      "agentAssistedCommits": 12,
+      "activeDays": 74,
+      "added": 7716,
+      "deleted": 3942,
+      "firstCommitAt": "2025-01-14T14:40:00.000Z",
+      "lastCommitAt": "2026-04-08T19:02:26.000Z",
+      "active": true,
+      "areas": [
+        {
+          "path": "infra",
+          "commits": 52
+        },
+        {
+          "path": ".github",
+          "commits": 16
+        },
+        {
+          "path": "packages/api",
+          "commits": 14
+        }
+      ]
+    },
+    {
+      "name": "Lena Fischer",
+      "email": "lena.fischer@aurora.example",
+      "commits": 61,
+      "agentAssistedCommits": 2,
+      "activeDays": 55,
+      "added": 5985,
+      "deleted": 2856,
+      "firstCommitAt": "2024-02-06T10:15:00.000Z",
+      "lastCommitAt": "2025-11-14T14:48:10.000Z",
+      "active": false,
+      "areas": [
+        {
+          "path": "docs",
+          "commits": 34
+        },
+        {
+          "path": "apps/web",
+          "commits": 27
+        }
+      ]
+    },
+    {
+      "name": "Dmitri Volkov",
+      "email": "dmitri.volkov@aurora.example",
+      "commits": 26,
+      "agentAssistedCommits": 0,
+      "activeDays": 26,
+      "added": 2053,
+      "deleted": 924,
+      "firstCommitAt": "2023-11-07T12:00:00.000Z",
+      "lastCommitAt": "2024-12-03T09:26:38.000Z",
+      "active": false,
+      "areas": [
+        {
+          "path": "packages/db",
+          "commits": 14
+        },
+        {
+          "path": "packages/api",
+          "commits": 12
+        }
+      ]
+    }
+  ],
+  "automation": {
+    "totals": {
+      "human": 1736,
+      "agentAssisted": 203,
+      "agent": 111,
+      "bot": 196
+    },
+    "months": [
+      {
+        "month": "2023-10",
+        "human": 41,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 3
+      },
+      {
+        "month": "2023-11",
+        "human": 53,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 5
+      },
+      {
+        "month": "2023-12",
+        "human": 43,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 6
+      },
+      {
+        "month": "2024-01",
+        "human": 45,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 5
+      },
+      {
+        "month": "2024-02",
+        "human": 65,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 6
+      },
+      {
+        "month": "2024-03",
+        "human": 53,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 4
+      },
+      {
+        "month": "2024-04",
+        "human": 46,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 7
+      },
+      {
+        "month": "2024-05",
+        "human": 49,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 7
+      },
+      {
+        "month": "2024-06",
+        "human": 60,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 7
+      },
+      {
+        "month": "2024-07",
+        "human": 60,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 4
+      },
+      {
+        "month": "2024-08",
+        "human": 50,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 5
+      },
+      {
+        "month": "2024-09",
+        "human": 60,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 6
+      },
+      {
+        "month": "2024-10",
+        "human": 59,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 3
+      },
+      {
+        "month": "2024-11",
+        "human": 69,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 3
+      },
+      {
+        "month": "2024-12",
+        "human": 65,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 7
+      },
+      {
+        "month": "2025-01",
+        "human": 67,
+        "agentAssisted": 0,
+        "agent": 0,
+        "bot": 5
+      },
+      {
+        "month": "2025-02",
+        "human": 53,
+        "agentAssisted": 1,
+        "agent": 0,
+        "bot": 5
+      },
+      {
+        "month": "2025-03",
+        "human": 50,
+        "agentAssisted": 12,
+        "agent": 0,
+        "bot": 6
+      },
+      {
+        "month": "2025-04",
+        "human": 54,
+        "agentAssisted": 16,
+        "agent": 0,
+        "bot": 6
+      },
+      {
+        "month": "2025-05",
+        "human": 41,
+        "agentAssisted": 19,
+        "agent": 0,
+        "bot": 6
+      },
+      {
+        "month": "2025-06",
+        "human": 53,
+        "agentAssisted": 11,
+        "agent": 0,
+        "bot": 8
+      },
+      {
+        "month": "2025-07",
+        "human": 58,
+        "agentAssisted": 4,
+        "agent": 3,
+        "bot": 5
+      },
+      {
+        "month": "2025-08",
+        "human": 48,
+        "agentAssisted": 12,
+        "agent": 6,
+        "bot": 4
+      },
+      {
+        "month": "2025-09",
+        "human": 48,
+        "agentAssisted": 13,
+        "agent": 6,
+        "bot": 6
+      },
+      {
+        "month": "2025-10",
+        "human": 56,
+        "agentAssisted": 10,
+        "agent": 9,
+        "bot": 6
+      },
+      {
+        "month": "2025-11",
+        "human": 34,
+        "agentAssisted": 8,
+        "agent": 8,
+        "bot": 5
+      },
+      {
+        "month": "2025-12",
+        "human": 48,
+        "agentAssisted": 22,
+        "agent": 8,
+        "bot": 4
+      },
+      {
+        "month": "2026-01",
+        "human": 49,
+        "agentAssisted": 9,
+        "agent": 6,
+        "bot": 6
+      },
+      {
+        "month": "2026-02",
+        "human": 38,
+        "agentAssisted": 14,
+        "agent": 9,
+        "bot": 6
+      },
+      {
+        "month": "2026-03",
+        "human": 39,
+        "agentAssisted": 7,
+        "agent": 7,
+        "bot": 6
+      },
+      {
+        "month": "2026-04",
+        "human": 53,
+        "agentAssisted": 9,
+        "agent": 8,
+        "bot": 5
+      },
+      {
+        "month": "2026-05",
+        "human": 35,
+        "agentAssisted": 9,
+        "agent": 7,
+        "bot": 5
+      },
+      {
+        "month": "2026-06",
+        "human": 30,
+        "agentAssisted": 8,
+        "agent": 7,
+        "bot": 7
+      },
+      {
+        "month": "2026-07",
+        "human": 28,
+        "agentAssisted": 8,
+        "agent": 8,
+        "bot": 5
+      },
+      {
+        "month": "2026-08",
+        "human": 19,
+        "agentAssisted": 6,
+        "agent": 6,
+        "bot": 6
+      },
+      {
+        "month": "2026-09",
+        "human": 17,
+        "agentAssisted": 5,
+        "agent": 13,
+        "bot": 6
+      }
+    ],
+    "tools": [
+      {
+        "name": "Claude Code",
+        "kind": "agent",
+        "authored": 41,
+        "assisted": 155
+      },
+      {
+        "name": "Dependabot",
+        "kind": "bot",
+        "authored": 108,
+        "assisted": 0
+      },
+      {
+        "name": "GitHub Actions",
+        "kind": "bot",
+        "authored": 88,
+        "assisted": 0
+      },
+      {
+        "name": "Copilot cloud agent",
+        "kind": "agent",
+        "authored": 57,
+        "assisted": 18
+      },
+      {
+        "name": "Cursor (cloud)",
+        "kind": "agent",
+        "authored": 13,
+        "assisted": 30
+      }
+    ]
+  }
+}

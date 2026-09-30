@@ -176,9 +176,15 @@ catalogs:
     '@types/node':
       specifier: 24.19.0
       version: 24.19.0
+    '@types/picomatch':
+      specifier: 4.0.3
+      version: 4.0.3
     effect:
       specifier: 4.0.0-rc.118
       version: 4.0.0-rc.118
+    picomatch:
+      specifier: 4.0.7
+      version: 4.0.7
     rolldown:
       specifier: 1.2.11
       version: 1.2.11
@@ -238,6 +244,9 @@ importers:
 
   apps/cli:
     devDependencies:
+      '@codesaga/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
       '@codesaga/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -256,6 +265,31 @@ importers:
       tsx:
         specifier: 4.23.15
         version: 4.23.15
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.2(@types/node@24.19.0)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/engine:
+    dependencies:
+      effect:
+        specifier: 'catalog:'
+        version: 4.0.0-rc.118
+      picomatch:
+        specifier: 'catalog:'
+        version: 4.0.7
+    devDependencies:
+      '@codesaga/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@effect/platform-node':
+        specifier: 'catalog:'
+        version: 4.0.0-rc.118(effect@4.0.0-rc.118)(redis@6.2.1)
+      '@effect/vitest':
+        specifier: 'catalog:'
+        version: 4.0.0-rc.118(effect@4.0.0-rc.118)(vitest@5.0.2(@types/node@24.19.0)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)))
+      '@types/picomatch':
+        specifier: 'catalog:'
+        version: 4.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.2(@types/node@24.19.0)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
@@ -1351,6 +1385,9 @@ packages:
 
   '@types/node@24.19.0':
     resolution: {integrity: sha512-zY+5tKxXdhGh1PYI0ac+7juvEu4OI6vWtVVoj5i2m42jxAY1U+zHGt6QCyOFwykdP62sM3MJ9stoYYUw5aCWew==}
+
+  '@types/picomatch@4.0.3':
+    resolution: {integrity: sha512-iG0T6+nYJ9FAPmx9SsUlnwcq1ZVRuCXcVEvWnntoPlrOpwtSTKNDC9uVAxTsC3PUvJ+99n4RpAcNgBbHX3JSnQ==}
 
   '@types/ws@8.18.2':
     resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
@@ -2927,6 +2964,8 @@ snapshots:
   '@types/node@24.19.0':
     dependencies:
       undici-types: 7.24.6
+
+  '@types/picomatch@4.0.3': {}
 
   '@types/ws@8.18.2':
     dependencies:
