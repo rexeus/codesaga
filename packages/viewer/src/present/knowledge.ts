@@ -62,8 +62,11 @@ export const truckFactorSentence = ({
   if (truckFactor.value === 0) {
     return "More than half of the files already have no expert.";
   }
-  const people = truckFactor.value === 1 ? "person" : "people";
-  return `If these ${formatCount(truckFactor.value)} ${people} leave, more than half of the ${formatCount(files)} files have no expert.`;
+  const departure =
+    truckFactor.value === 1
+      ? "this person leaves"
+      : `these ${formatCount(truckFactor.value)} people leave`;
+  return `If ${departure}, more than half of the ${formatCount(files)} files have no expert.`;
 };
 
 /** How many files lack an expert, and an active one. */

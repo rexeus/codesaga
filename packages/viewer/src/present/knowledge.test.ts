@@ -78,6 +78,14 @@ describe("truck factor", () => {
     expect(
       truckFactorSentence({
         ...knowledge,
+        truckFactor: { value: 1, people: [] },
+      }),
+    ).toBe(
+      "If this person leaves, more than half of the 473 files have no expert.",
+    );
+    expect(
+      truckFactorSentence({
+        ...knowledge,
         truckFactor: { value: 0, people: [] },
       }),
     ).toBe("More than half of the files already have no expert.");
