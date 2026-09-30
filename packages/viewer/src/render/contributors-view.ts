@@ -1,6 +1,10 @@
 import type { Report } from "@codesaga/engine";
 
-import { naturalDirection, sortContributors } from "../present/contributors.js";
+import {
+  areaLabel,
+  naturalDirection,
+  sortContributors,
+} from "../present/contributors.js";
 import { formatCount, formatDate } from "../present/format.js";
 import { h } from "./dom.js";
 import { section } from "./section.js";
@@ -14,7 +18,7 @@ const person = ({ name, email }: Contributor): HTMLElement =>
 
 const areas = ({ areas: top }: Contributor): string =>
   top
-    .map(({ path, commits }) => `${path} (${formatCount(commits)})`)
+    .map(({ path, commits }) => `${areaLabel(path)} (${formatCount(commits)})`)
     .join(", ");
 
 const status = ({ active }: Contributor): HTMLElement =>

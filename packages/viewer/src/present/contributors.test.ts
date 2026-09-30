@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { sampleReport } from "../testing/reports.js";
-import { naturalDirection, sortContributors } from "./contributors.js";
+import {
+  areaLabel,
+  naturalDirection,
+  sortContributors,
+} from "./contributors.js";
 import { nextSort } from "./sort-state.js";
 
 const contributors = sampleReport().contributors;
@@ -111,5 +115,12 @@ describe("nextSort", () => {
     const from = { key: "commits", direction: "desc" } as const;
 
     expect(nextSort(from, "commits", "desc").direction).toBe("asc");
+  });
+});
+
+describe("areaLabel", () => {
+  it("names the engine's dot the repository root and keeps other paths", () => {
+    expect(areaLabel(".")).toBe("repository root");
+    expect(areaLabel("packages/engine")).toBe("packages/engine");
   });
 });

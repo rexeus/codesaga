@@ -16,6 +16,10 @@ type ContributorSortKey =
   | "areas"
   | "active";
 
+/** A directory as the contributors table names it; the engine's "." is the repository root. */
+export const areaLabel = (path: string): string =>
+  path === "." ? "repository root" : path;
+
 const TEXT_COLUMNS = new Set(["name", "areas"]);
 
 /** Names and areas read A to Z first; counts, dates and status start with the most. */
