@@ -4,6 +4,7 @@ import { layoutAutomation } from "../layout/automation.js";
 import type { AutomationLayout } from "../layout/automation.js";
 import { barPath } from "../layout/bars.js";
 import { AUTOMATION_CLASSES, classShares } from "../present/automation.js";
+import { emptyWindowNotice } from "../present/empty-window.js";
 import { formatCount, formatPercent } from "../present/format.js";
 import {
   chartFigure,
@@ -122,9 +123,19 @@ const monthTable = (months: Automation["months"]): HTMLElement =>
   );
 
 /** Commits per month by human, agent-assisted, agent and bot, and the detected tools. */
-export const renderAutomation = ({ automation }: Report): HTMLElement => {
+export const renderAutomation = (report: Report): HTMLElement => {
+  const { automation } = report;
   const description =
     "Who authored the commits: people, people with an agent, agents and bots";
+  const notice = emptyWindowNotice(report);
+  if (notice !== null) {
+    return section(
+      "automation",
+      "Automation",
+      description,
+      h("p", "empty", notice),
+    );
+  }
   const classes = legend(
     ...classShares(automation.totals).map(({ entity, label, commits, share }) =>
       legendItem(

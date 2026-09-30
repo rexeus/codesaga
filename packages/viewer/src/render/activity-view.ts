@@ -5,6 +5,7 @@ import type { ActivityLayout } from "../layout/activity.js";
 import { barPath } from "../layout/bars.js";
 import type { Bar } from "../layout/bars.js";
 import type { Resolution } from "../layout/time-buckets.js";
+import { emptyWindowNotice } from "../present/empty-window.js";
 import { formatCount } from "../present/format.js";
 import {
   chartFigure,
@@ -166,14 +167,16 @@ const activityTables = ({
 ];
 
 /** Commits and lines per week, and active contributors per month, on one time axis. */
-export const renderActivity = ({ activity }: Report): HTMLElement => {
+export const renderActivity = (report: Report): HTMLElement => {
+  const { activity } = report;
   const description = "Commits, lines changed and people over time";
-  if (activity.weeks.length === 0 && activity.months.length === 0) {
+  const notice = emptyWindowNotice(report);
+  if (notice !== null) {
     return section(
       "activity",
       "Activity",
       description,
-      h("p", "empty", "No commits in the window."),
+      h("p", "empty", notice),
     );
   }
   return section(
