@@ -26,12 +26,67 @@ describe("renderAnalysis", () => {
       "  Priya Raman                  310          258  1 month ago",
       "  Jonas Weber                  205          175  3 months ago",
       "  Aiko Tanaka                  135          120  4 months ago",
+      "Truck factor               2 · Maya Lindqvist, Tomás Herrera",
+      "Knowledge risks            files  flags             leading expert",
+      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)",
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)",
+      "  packages/auth               19  island            Jonas Weber 95%",
+      "  apps/admin                  58                    Aiko Tanaka 72%",
+      "  infra                       27                    Tomás Herrera 78%",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
       "",
       "--html for the dashboard, --json for agents",
     ]);
+  });
+});
+
+describe("renderAnalysis knowledge", () => {
+  it("prints no ANSI codes with plain style and marks an inactive person in the truck factor", () => {
+    const report = sampleReport();
+    const text = renderAnalysis(
+      {
+        ...report,
+        knowledge: {
+          ...report.knowledge,
+          truckFactor: {
+            value: 2,
+            people: report.knowledge.truckFactor.people.map((person, index) =>
+              Object.assign({}, person, { active: index === 0 }),
+            ),
+          },
+        },
+      },
+      plain,
+    );
+
+    expect(text).toContain(
+      "Truck factor               2 · Maya Lindqvist, Tomás Herrera (inactive)",
+    );
+    expect(text).not.toContain("\u001B");
+  });
+
+  it("says when most files have no expert and omits the directory table without directories", () => {
+    const report = sampleReport();
+    const lines = renderAnalysis(
+      {
+        ...report,
+        knowledge: {
+          ...report.knowledge,
+          truckFactor: { value: 0, people: [] },
+          directories: [],
+        },
+      },
+      plain,
+    ).split("\n");
+
+    expect(lines).toContain(
+      "Truck factor               0 · most files have no expert",
+    );
+    expect(lines.some((line) => line.startsWith("Knowledge risks"))).toBe(
+      false,
+    );
   });
 });
 
@@ -87,6 +142,13 @@ describe("renderAnalysis escaping", () => {
         ...person,
         name: "\u001B[2Jevil",
       })),
+      knowledge: {
+        ...report.knowledge,
+        directories: report.knowledge.directories.map((directory) => ({
+          ...directory,
+          path: "dir\u001B[31m",
+        })),
+      },
       automation: {
         ...report.automation,
         tools: [
@@ -107,6 +169,7 @@ describe("renderAnalysis escaping", () => {
     expect(text).toContain("b\\u000ac");
     expect(text).toContain("\\u001b[2Jevil");
     expect(text).toContain("bot\\u0007[bot] 1");
+    expect(text).toContain("dir\\u001b[31m");
   });
 
   it("bolds the headline and labels only when styled", () => {

@@ -12,20 +12,17 @@ import {
   span,
   sparkline,
 } from "./format.js";
+import { knowledgeLines } from "./knowledge-lines.js";
+import { fit, labelledTable, MAX_NAME_WIDTH, section } from "./layout.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 
-const LABEL_WIDTH = 27;
 const ACTIVITY_MONTHS = 12;
 const TOP_CONTRIBUTORS = 5;
 const TOP_TOOLS = 3;
 const TOP_LANGUAGES = 5;
-const MAX_NAME_WIDTH = 24;
 const SHORT_SHA = 7;
 const SEPARATOR = " · ";
-
-const fit = (text: string, width: number): string =>
-  text.length > width ? `${text.slice(0, width - 1)}…` : text;
 
 const headline = (report: Report): string => {
   const { repository } = report;
@@ -51,18 +48,6 @@ const summary = (report: Report): string => {
     `${plural(overview.loc, "line")} in ${plural(overview.languages.length, "language")}`,
   ].join(SEPARATOR);
 };
-
-/** A labelled section: the label in the left column, its lines beside and below it. */
-const section = (
-  label: string,
-  lines: ReadonlyArray<string>,
-  style: Style,
-): ReadonlyArray<string> =>
-  lines.map((line, index) =>
-    index === 0
-      ? `${style.bold(label.padEnd(LABEL_WIDTH))}${line}`
-      : `${" ".repeat(LABEL_WIDTH)}${line}`,
-  );
 
 const activitySection = (
   report: Report,
@@ -100,15 +85,12 @@ const contributorLines = (
     ]),
     style,
   );
-  const labels = [
-    style.bold("Contributors".padEnd(LABEL_WIDTH)),
-    ...top.map((person) =>
-      `  ${fit(escapeForTerminal(person.name), MAX_NAME_WIDTH)}`.padEnd(
-        LABEL_WIDTH,
-      ),
-    ),
-  ];
-  return table.map((line, index) => `${labels[index] ?? ""}${line}`);
+  return labelledTable(
+    "Contributors",
+    top.map((person) => fit(escapeForTerminal(person.name), MAX_NAME_WIDTH)),
+    table,
+    style,
+  );
 };
 
 const automationLines = (report: Report): ReadonlyArray<string> => {
@@ -158,6 +140,7 @@ export const renderAnalysis = (report: Report, style: Style): string =>
     "",
     ...activitySection(report, style),
     ...contributorLines(report, style),
+    ...knowledgeLines(report, style),
     ...section("Automation", automationLines(report), style),
     ...section("Languages", [languageLine(report)], style),
     "",
