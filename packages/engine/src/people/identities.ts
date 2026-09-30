@@ -24,7 +24,17 @@ type Authorship = {
  * entry of `authorships`.
  */
 export const buildIdentities = (
-  _authorships: ReadonlyArray<Authorship>,
+  authorships: ReadonlyArray<Authorship>,
 ): ReadonlyMap<string, Identity> => {
-  throw new Error("@scaffold not implemented");
+  const newest = new Map<string, Authorship>();
+  for (const authorship of authorships) {
+    const email = authorship.email.toLowerCase();
+    const before = newest.get(email);
+    if (before === undefined || authorship.time >= before.time) {
+      newest.set(email, authorship);
+    }
+  }
+  return new Map(
+    [...newest].map(([email, { name }]) => [email, { email, name }]),
+  );
 };

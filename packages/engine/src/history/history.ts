@@ -8,7 +8,7 @@ import { LOG_FORMAT_ARGS, LogParser } from "./parse-log.js";
 import type { Commit } from "./parse-log.js";
 
 /** The lines one commit added to and deleted from one file. */
-type FileChange = {
+export type FileChange = {
   readonly path: string;
   readonly added: number;
   readonly deleted: number;
