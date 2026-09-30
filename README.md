@@ -146,6 +146,8 @@ The report states every threshold under `thresholds`, and the JSON contract is v
 - **Commits dated before 1970 or in the future** are left out.
 - **No forge data.** Pull requests, reviews and issues live on GitHub or GitLab, not in git.
 - **The cache keys on the mailmap and the shallow boundary, not on every git setting.** A change to `.gitattributes` (such as marking files `-diff`) or to `diff.renameLimit` alters what `git log` prints for old commits without invalidating the cache; run once with `--no-cache` and clear it with `rm -rf .git/codesaga`.
+- **Linked worktrees share one cache** and rewrite it when their HEADs differ.
+- **The cache file grows with history**, about 1.2 KB per commit.
 
 ## Contributing
 
