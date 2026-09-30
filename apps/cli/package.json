@@ -30,13 +30,14 @@
   },
   "scripts": {
     "build": "tsx scripts/build.ts && tsx scripts/package-files.ts",
-    "dev": "tsx src/bin.ts",
+    "dev": "turbo run build --filter=@codesaga/viewer --output-logs=errors-only >&2 && tsx src/bin.ts",
     "test:unit": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json"
   },
   "devDependencies": {
     "@codesaga/engine": "workspace:*",
     "@codesaga/tsconfig": "workspace:*",
+    "@codesaga/viewer": "workspace:*",
     "@effect/platform-node": "catalog:",
     "@types/node": "catalog:",
     "effect": "catalog:",

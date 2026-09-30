@@ -57,8 +57,6 @@ pnpm --filter codesaga dev <args>                        # run the CLI from sour
 | `@codesaga/viewer`      | the dashboard and the self-contained HTML document                                            | `renderReportHtml`                                                       |
 | `codesaga` (`apps/cli`) | arguments, terminal and JSON output, exit codes, opening the browser                          | none — only the `bin`                                                    |
 
-The viewer does not exist yet. The lint boundaries below already apply to it.
-
 - The engine imports no workspace package and no `node:` builtin; it reaches the platform through Effect services (`FileSystem`, `Path`, `ChildProcessSpawner`). Its only runtime dependencies are `effect` and `picomatch`.
 - The viewer is plain browser code: no Effect, no `node:`, and engine **types** only (`import type`). Its charts use `d3-scale` and `d3-shape`.
 - The CLI composes engine and viewer through their entry points only.

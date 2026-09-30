@@ -262,6 +262,9 @@ importers:
       '@codesaga/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
+      '@codesaga/viewer':
+        specifier: workspace:*
+        version: link:../../packages/viewer
       '@effect/platform-node':
         specifier: 'catalog:'
         version: 4.0.0-rc.118(effect@4.0.0-rc.118)(redis@6.2.1)
