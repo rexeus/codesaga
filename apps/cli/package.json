@@ -1,0 +1,49 @@
+{
+  "name": "codesaga",
+  "version": "0.0.0",
+  "description": "The story of a git repository — activity, people, knowledge and AI agents. A dashboard for humans, JSON for agents.",
+  "keywords": [
+    "ai-agents",
+    "cli",
+    "contributors",
+    "git",
+    "git-history",
+    "knowledge",
+    "truck-factor"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rexeus/codesaga.git",
+    "directory": "apps/cli"
+  },
+  "bin": {
+    "codesaga": "dist/codesaga.js"
+  },
+  "files": [
+    "dist/codesaga.js"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsx scripts/build.ts && tsx scripts/package-files.ts",
+    "dev": "tsx src/bin.ts",
+    "test:unit": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@codesaga/tsconfig": "workspace:*",
+    "@effect/platform-node": "catalog:",
+    "@types/node": "catalog:",
+    "effect": "catalog:",
+    "rolldown": "catalog:",
+    "tsx": "4.23.15",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
