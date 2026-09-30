@@ -32,8 +32,10 @@ export type RepositoryFacts = {
     Report["repository"],
     "firstCommitAt" | "lastCommitAt"
   >;
-  /** The whole history, newest first. */
+  /** The whole history, newest first, each commit before its parents. */
   readonly commits: ReadonlyArray<HistoryCommit>;
+  /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
+  readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
   /** Whether a path counts as code, for files that no longer exist too. */
   readonly isCodePath: (path: string) => boolean;
@@ -86,9 +88,9 @@ const gatherInRepository = (
       include: options.include,
       exclude: options.exclude,
     });
-    const commits =
+    const { commits, headTime } =
       head === null
-        ? []
+        ? { commits: [], headTime: 0 }
         : yield* readHistory({
             root,
             head,
@@ -107,6 +109,7 @@ const gatherInRepository = (
         shallow: shallowBoundary !== undefined,
       },
       commits,
+      headTime,
       universe,
       isCodePath: namedAsCode(options),
     } satisfies RepositoryFacts;

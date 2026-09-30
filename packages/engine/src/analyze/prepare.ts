@@ -64,15 +64,12 @@ const timeExtent = (
 
 /** The facts, cut to the scope, classified and narrowed to the window. */
 export type Analysis = {
-  /** The scope's commits over the full history, newest first. */
+  /** The scope's commits over the full history, newest first, each before its parents. */
   readonly scoped: ReadonlyArray<ClassifiedCommit>;
   /** The scoped commits inside `window`. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   readonly window: TimeRange;
-  /**
-   * Author time in seconds of the newest commit by committer time, the HEAD
-   * commit unless HEAD is a merge; 0 without commits.
-   */
+  /** Author time in seconds of the HEAD commit itself, even a merge; 0 on an unborn branch. */
   readonly headTime: number;
   /** ISO timestamps of the oldest and newest scoped commit; null without commits. */
   readonly firstCommitAt: string | null;
@@ -106,7 +103,7 @@ export const prepareAnalysis = (facts: RepositoryFacts): Analysis => {
     scoped,
     commits: scoped.filter(({ time }) => time >= from && time <= to),
     window,
-    headTime: facts.commits[0]?.time ?? 0,
+    headTime: facts.headTime,
     firstCommitAt: extent === undefined ? null : isoOf(extent.first),
     lastCommitAt: extent === undefined ? null : isoOf(extent.last),
   };

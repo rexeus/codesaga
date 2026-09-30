@@ -27,6 +27,14 @@ export type HistoryCommit = Omit<Commit, "changes"> & {
   readonly changes: ReadonlyArray<FileChange>;
 };
 
+/** The resolved history and the author time of the commit it was read from. */
+export type History = {
+  /** Every non-merge commit, newest first, each before its parents. */
+  readonly commits: ReadonlyArray<HistoryCommit>;
+  /** Author time in seconds of the HEAD commit itself, merge or not; NaN if git cannot read it. */
+  readonly headTime: number;
+};
+
 export type HistoryOptions = {
   /** The absolute root of the work tree; the `Git` service runs there. */
   readonly root: string;
@@ -89,8 +97,8 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
 };
 
 /**
- * Reads every non-merge commit of `options.head` from newest to oldest, author
- * and committer after `.mailmap`. A rename makes every older commit that touched
+ * Reads every non-merge commit of `options.head`, each before its parents,
+ * author and committer after `.mailmap`. A rename makes every older commit that touched
  * the old path name the new one, so a file keeps its history under its
  * current name; deleted files keep the path they had when they were deleted.
  * A deletion ends the life of the file that had the deleted name: its own
@@ -106,19 +114,21 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
  */
 export const readHistory = (
   options: HistoryOptions,
-): Effect.Effect<
-  ReadonlyArray<HistoryCommit>,
-  GitError,
-  Git | FileSystem.FileSystem | Path.Path
-> =>
-  Effect.map(readCommits(options), (commits) => {
+): Effect.Effect<History, GitError, Git | FileSystem.FileSystem | Path.Path> =>
+  Effect.map(readCommits(options), (all) => {
     const lineage: Lineage = {
       renamedTo: new Map(),
       deletedNames: new Set(),
     };
-    return commits
-      .filter((commit) => !options.shallowBoundary.has(commit.sha))
-      .map((commit) => resolveLineage(commit, lineage));
+    return {
+      commits: all
+        .filter(
+          ({ parents, sha }) =>
+            parents.length <= 1 && !options.shallowBoundary.has(sha),
+        )
+        .map((commit) => resolveLineage(commit, lineage)),
+      headTime: all.find(({ sha }) => sha === options.head)?.time ?? 0,
+    };
   });
 
 /** The lines the commits added to and deleted from the paths that `isCodePath` accepts. */

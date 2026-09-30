@@ -2,9 +2,9 @@
 //
 // The log is requested with the format in `LOG_FORMAT_ARGS`. Each commit then
 // arrives as NUL-terminated tokens:
-//   \u0001<sha> NUL <9 header fields, NUL-terminated> [\n]<raw entries><numstat entries>
-// The header fields are author time, committer time, author date with offset, author and
-// committer name and email, the unfolded trailers, and the message.
+//   \u0001<sha> NUL <10 header fields, NUL-terminated> [\n]<raw entries><numstat entries>
+// The header fields are the parents, author time, committer time, author date with offset,
+// author and committer name and email, the unfolded trailers, and the message.
 // A raw entry is `:<modes> <ids> <status>` followed by one path token, or two
 // (old and new) for a rename or copy; it tells which files the commit deletes.
 // A numstat entry is `<added>\t<deleted>\t<path>`. A rename entry has an empty
@@ -32,6 +32,8 @@ type Trailer = { readonly key: string; readonly value: string };
 
 export type Commit = {
   readonly sha: string;
+  /** The parents as git shows them: none for a root or a shallow boundary, several for a merge. */
+  readonly parents: ReadonlyArray<string>;
   /** Author time in seconds since the epoch; NaN when git cannot read the date (a negative or malformed one). */
   readonly time: number;
   /** Committer time in seconds since the epoch; NaN when git cannot read the date. */
@@ -47,21 +49,24 @@ export type Commit = {
   readonly changes: ReadonlyArray<Change>;
 };
 
-/** Arguments that make `git log` print what `LogParser` reads. */
+/**
+ * Arguments that make `git log` print what `LogParser` reads. Merge commits
+ * are printed, without a diff, so that the commit graph stays connected.
+ */
 export const LOG_FORMAT_ARGS = [
-  "--no-merges",
+  "--diff-merges=off",
   "-M",
   "--raw",
   "--numstat",
   "-z",
   "--use-mailmap",
   "--no-show-signature",
-  "--format=%x01%H%x00%at%x00%ct%x00%aI%x00%aN%x00%aE%x00%cN%x00%cE%x00%(trailers:unfold,separator=%x1f)%x00%B%x00",
+  "--format=%x01%H%x00%P%x00%at%x00%ct%x00%aI%x00%aN%x00%aE%x00%cN%x00%cE%x00%(trailers:unfold,separator=%x1f)%x00%B%x00",
 ] as const;
 
 const COMMIT_MARKER = "\u0001";
 const TRAILER_SEPARATOR = "\u001F";
-const HEADER_FIELDS = 9;
+const HEADER_FIELDS = 10;
 const GENERATED_WITH = /^\W*Generated with \[[^\]]+\]/iu;
 const OFFSET = /([+-])(\d{2}):(\d{2})$/u;
 const NUMSTAT = /^(\d+|-)\t(\d+|-)\t(.*)$/su;
@@ -104,6 +109,7 @@ const parseMarkers = (message: string): ReadonlyArray<string> =>
 
 const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
   const [
+    parents,
     time,
     committerTime,
     date,
@@ -111,16 +117,19 @@ const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
     authorEmail,
     committerName,
     committerEmail,
+    trailers,
+    message,
   ] = fields;
   return {
     sha,
+    parents: (parents ?? "").split(" ").filter((parent) => parent !== ""),
     time: secondsOf(time),
     committerTime: secondsOf(committerTime),
     offsetMinutes: offsetMinutesOf(date ?? ""),
     author: { name: authorName ?? "", email: authorEmail ?? "" },
     committer: { name: committerName ?? "", email: committerEmail ?? "" },
-    trailers: parseTrailers(fields[7] ?? ""),
-    markers: parseMarkers(fields[8] ?? ""),
+    trailers: parseTrailers(trailers ?? ""),
+    markers: parseMarkers(message ?? ""),
     changes: [],
   };
 };

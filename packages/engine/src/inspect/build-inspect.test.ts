@@ -13,6 +13,7 @@ const newest = at("2026-03-01T00:00:00Z");
 const commitsTouchingA = (count: number): ReadonlyArray<HistoryCommit> =>
   Array.from({ length: count }, (_, index) => ({
     sha: String(index),
+    parents: [String(index + 1)],
     time: newest - index * 60,
     committerTime: newest - index * 60,
     offsetMinutes: 0,
@@ -35,6 +36,7 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
     shallow: false,
   },
   commits,
+  headTime: commits[0]?.time ?? 0,
   universe: [{ path: "src/a.ts", loc: 10 }],
   isCodePath: () => true,
 });

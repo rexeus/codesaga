@@ -21,12 +21,13 @@ const history = (
 ) =>
   Effect.gen(function* () {
     const head = (yield* repo.git("rev-parse", "HEAD")).trim();
-    return yield* readHistory({
+    const { commits } = yield* readHistory({
       root: repo.directory,
       head,
       shallowBoundary,
       useCache: false,
     });
+    return commits;
   }).pipe(Effect.provide(Git.layer(repo.directory)));
 
 /** a.ts is created, edited, renamed to b.ts, edited, renamed to c.ts, edited. */

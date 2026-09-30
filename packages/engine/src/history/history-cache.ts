@@ -9,6 +9,7 @@ const Person = Schema.Struct({ name: Schema.String, email: Schema.String });
 
 const CachedCommit = Schema.Struct({
   sha: Schema.String,
+  parents: Schema.Array(Schema.String),
   /** Null for the NaN of a date git cannot read, which JSON cannot hold; likewise `committerTime`. */
   time: Schema.NullOr(Schema.Finite),
   committerTime: Schema.NullOr(Schema.Finite),
@@ -40,7 +41,7 @@ const CachedHistory = Schema.Struct({
   head: Schema.String,
   /** Everything besides `head` that changes what git prints for the same commits. */
   fingerprint: Schema.String,
-  /** The commits as `LogParser` yields them, in `inCanonicalOrder`, before any resolution. */
+  /** The commits as `LogParser` yields them, in `inTopologicalOrder`, merges included, before any resolution. */
   commits: Schema.Array(CachedCommit),
 });
 

@@ -9,6 +9,7 @@ const parse = (chunks: ReadonlyArray<string>) => {
 
 type Header = {
   readonly sha: string;
+  readonly parents?: ReadonlyArray<string>;
   readonly time?: number | string;
   readonly committerTime?: number | string;
   readonly date?: string;
@@ -21,6 +22,7 @@ type Header = {
 /** One commit's header as `--format` prints it, with its NUL-terminated fields. */
 const header = ({
   sha,
+  parents = [],
   time = 100,
   committerTime = time,
   date = "1970-01-01T00:01:40+00:00",
@@ -29,7 +31,7 @@ const header = ({
   trailers = [],
   body = "subject\n",
 }: Header) =>
-  `\u0001${sha}\0${time}\0${committerTime}\0${date}\0${author.join("\0")}\0${committer.join("\0")}\0` +
+  `\u0001${sha}\0${parents.join(" ")}\0${time}\0${committerTime}\0${date}\0${author.join("\0")}\0${committer.join("\0")}\0` +
   `${trailers.join("\u001F")}\0${body}\0\0`;
 
 describe("LogParser time", () => {
@@ -50,6 +52,22 @@ describe("LogParser time", () => {
     expect(dated).toMatchObject({ time: 100, committerTime: 700 });
     expect(undated?.time).toBe(100);
     expect(undated?.committerTime).toBeNaN();
+  });
+});
+
+describe("LogParser parents", () => {
+  it("reads the parents of a root, a commit and a merge", () => {
+    const parsed = parse([
+      header({ sha: "a" }),
+      header({ sha: "b", parents: ["a"] }),
+      header({ sha: "m", parents: ["a", "b"] }),
+    ]);
+
+    expect(parsed.map(({ parents }) => parents)).toStrictEqual([
+      [],
+      ["a"],
+      ["a", "b"],
+    ]);
   });
 });
 

@@ -8,6 +8,7 @@ import type { Commit } from "./parse-log.js";
 
 const commit: Commit = {
   sha: "a".repeat(40),
+  parents: ["c".repeat(40), "d".repeat(40)],
   time: 1_772_366_400,
   committerTime: 1_772_366_500,
   offsetMinutes: -330,
@@ -33,6 +34,7 @@ const cache: HistoryCache = {
     {
       ...commit,
       sha: "b".repeat(40),
+      parents: [],
       time: NaN,
       committerTime: NaN,
       changes: [],

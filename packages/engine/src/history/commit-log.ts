@@ -6,7 +6,7 @@ import type { FileSystem, Path } from "effect";
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import { logFingerprint } from "./cache-fingerprint.js";
-import { inCanonicalOrder } from "./commit-order.js";
+import { inTopologicalOrder } from "./commit-order.js";
 import {
   cacheFile,
   cacheStatus,
@@ -80,14 +80,15 @@ const readThroughCache = (
       (yield* isAncestor(cache.head, head))
         ? [...(yield* readLog(`${cache.head}..${head}`)), ...cache.commits]
         : undefined;
-    const commits = inCanonicalOrder(newer ?? (yield* readLog(head)));
+    const commits = inTopologicalOrder(newer ?? (yield* readLog(head)));
     yield* storeCache(file, { head, fingerprint, commits });
     return commits;
   });
 
 /**
- * Every non-merge commit reachable from `options.head`, as `LogParser` yields
- * them, in `inCanonicalOrder` however they were assembled. With the cache on,
+ * Every commit reachable from `options.head`, merges included (without
+ * changes), as `LogParser` yields them, in `inTopologicalOrder` however they
+ * were assembled. With the cache on,
  * a cache written for the same head answers without running `git log`, and
  * one written for an ancestor costs only the log of the commits since; any
  * other cache is rewritten.
@@ -103,6 +104,6 @@ export const readCommits = (
   Effect.gen(function* () {
     const file = options.useCache ? yield* cacheFile(options.root) : undefined;
     return file === undefined
-      ? inCanonicalOrder(yield* readLog(options.head))
+      ? inTopologicalOrder(yield* readLog(options.head))
       : yield* readThroughCache(file, options);
   });
