@@ -6,16 +6,40 @@ import type { Tick, Zone } from "./plot.js";
 
 const X_TICK_SPACING = 90;
 
+const MS_PER_DAY = 86_400_000;
+const MONTH_STEP = 28 * MS_PER_DAY;
+
 const monthName = new Intl.DateTimeFormat("en", {
   month: "short",
   timeZone: "UTC",
 });
 
+const monthAndDay = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
 /** The year on the first of January, the short month name on any other tick. */
-const timeTickLabel = (tick: Date): string =>
+const monthTickLabel = (tick: Date): string =>
   tick.getUTCMonth() === 0 && tick.getUTCDate() === 1
     ? String(tick.getUTCFullYear())
     : monthName.format(tick);
+
+/**
+ * Ticks a month or more apart read as months; closer ones carry the day, so
+ * a short history never repeats one month name along the axis.
+ */
+const timeTickLabels = (ticks: readonly Date[]): string[] => {
+  const [first, second] = ticks;
+  const spansMonths =
+    first !== undefined &&
+    second !== undefined &&
+    second.getTime() - first.getTime() >= MONTH_STEP;
+  return ticks.map((tick) =>
+    spansMonths ? monthTickLabel(tick) : monthAndDay.format(tick),
+  );
+};
 
 /** A UTC time axis over a plot `width` pixels wide. */
 export type TimeAxis = {
@@ -35,12 +59,15 @@ export const timeAxisOf = (
     .range([0, width]);
   const x = (timestamp: number): number => scale(new Date(timestamp));
   const count = Math.max(2, Math.floor(width / X_TICK_SPACING));
+  const ticks = scale.ticks(count);
+  const labels = timeTickLabels(ticks);
   return {
     x,
     zone: (from, to) => ({ x: x(from), width: x(to) - x(from) }),
-    ticks: scale
-      .ticks(count)
-      .map((tick) => ({ position: scale(tick), label: timeTickLabel(tick) })),
+    ticks: ticks.map((tick, index) => ({
+      position: scale(tick),
+      label: labels[index] ?? "",
+    })),
   };
 };
 
@@ -51,12 +78,18 @@ export const countScale = (
 ): ScaleLinear<number, number> =>
   scaleLinear().domain([low, high]).nice().range([height, 0]);
 
-/** Labelled ticks of a count scale; negative values read as their magnitude. */
+/**
+ * Labelled ticks of a count scale; negative values read as their magnitude.
+ * Only whole numbers get a tick, since the scale counts commits and people.
+ */
 export const countTicks = (
   scale: ScaleLinear<number, number>,
   count: number,
 ): Tick[] =>
-  scale.ticks(count).map((value) => ({
-    position: scale(value),
-    label: formatCount(Math.abs(value)),
-  }));
+  scale
+    .ticks(count)
+    .filter((value) => Number.isInteger(value))
+    .map((value) => ({
+      position: scale(value),
+      label: formatCount(Math.abs(value)),
+    }));
