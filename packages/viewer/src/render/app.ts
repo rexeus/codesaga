@@ -4,6 +4,7 @@ import { renderActivity } from "./activity-view.js";
 import { renderAutomation } from "./automation-view.js";
 import { renderContributors } from "./contributors-view.js";
 import { renderHeader, renderTiles } from "./header.js";
+import { renderKnowledge } from "./knowledge-view.js";
 import { renderLanguages } from "./languages-view.js";
 import { renderPunchcard } from "./punchcard-view.js";
 
@@ -14,6 +15,7 @@ export const mountApp = (report: Report, root: HTMLElement): void => {
     renderTiles(report),
     renderActivity(report),
     renderAutomation(report),
+    renderKnowledge(report),
     renderContributors(report),
     renderPunchcard(report),
     renderLanguages(report),
