@@ -101,7 +101,7 @@ export const analyzeCommand = Command.make(
   }),
 ).pipe(
   Command.withDescription(
-    "Tell the story of a git repository: activity, people and automation.",
+    "Tell the story of a git repository: activity, people, knowledge and automation.",
   ),
   Command.withExamples([
     {
