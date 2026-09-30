@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import { Report } from "@codesaga/engine";
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
@@ -180,5 +182,28 @@ describe("codesaga analyze a shallow clone", () => {
         expect(report.repository.shallow).toBe(true);
         expect(report.window.commits).toBe(1);
       }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga analyze --no-cache", () => {
+  it.live("reads git every time and leaves no cache in the repository", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      const cacheFile = `${repo.root}/.git/codesaga/history-v1.json`;
+
+      const uncached = yield* journey({
+        args: ["analyze", "--json", "--no-cache"],
+        cwd: repo.root,
+      });
+      expect(uncached.exitCode).toBe(0);
+      expect(existsSync(cacheFile)).toBe(false);
+
+      const cached = yield* journey({
+        args: ["analyze", "--json"],
+        cwd: repo.root,
+      });
+      expect(cached.exitCode).toBe(0);
+      expect(existsSync(cacheFile)).toBe(true);
+    }).pipe(Effect.scoped),
   );
 });

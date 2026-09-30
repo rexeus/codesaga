@@ -8,7 +8,7 @@ import { printResult } from "../output/print-result.js";
 import { renderInspect } from "../output/terminal/inspect-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
-import { jsonFlag, sinceFlag } from "./shared-flags.js";
+import { cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
 
 export const inspectCommand = Command.make(
   "inspect",
@@ -21,14 +21,16 @@ export const inspectCommand = Command.make(
     ),
     json: jsonFlag,
     since: sinceFlag,
+    cache: cacheFlag,
   },
-  Effect.fn(function* ({ patterns, json, since }) {
+  Effect.fn(function* ({ patterns, json, since, cache }) {
     const result = yield* inspect({
       cwd: yield* WorkingDirectory,
       since: Option.getOrUndefined(since),
       include: [],
       exclude: [],
       toolVersion: version,
+      cache,
       patterns,
     });
     if (result.matches.length === 0) {

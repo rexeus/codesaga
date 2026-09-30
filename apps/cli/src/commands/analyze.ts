@@ -11,7 +11,7 @@ import { renderAnalysis } from "../output/terminal/analysis-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
-import { jsonFlag, sinceFlag } from "./shared-flags.js";
+import { cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
 
 const DEFAULT_LIMIT = 25;
 const DEFAULT_HTML_FILE = "codesaga-report.html";
@@ -27,6 +27,7 @@ export const analyzeCommand = Command.make(
     ),
     json: jsonFlag,
     since: sinceFlag,
+    cache: cacheFlag,
     include: Flag.String("include").pipe(
       Flag.withDescription(
         "Glob of files that count as code instead of the language list; repeatable",
@@ -69,7 +70,7 @@ export const analyzeCommand = Command.make(
     ),
   },
   Effect.fn(function* (flags) {
-    const { path, json, since, include, exclude, limit } = flags;
+    const { path, json, since, cache, include, exclude, limit } = flags;
     const cwd = yield* WorkingDirectory;
     // A path argument both locates the repository and narrows the scope,
     // so `codesaga analyze ../other-repo` works from anywhere.
@@ -80,6 +81,7 @@ export const analyzeCommand = Command.make(
       include,
       exclude,
       toolVersion: version,
+      cache,
     };
     const report = yield* analyze(options);
     yield* warnIfShallow(report);

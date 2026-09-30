@@ -26,7 +26,7 @@ Run `npx codesaga inspect <path> --json` (a file, a directory, or a quoted glob)
 | "How much of this package did agents write?"    | `codesaga inspect packages/billing --since 3m --json` | One entry, `automation` counts            |
 | "Everything, for a dashboard or a script"       | `codesaga analyze --json --limit 0`                   | Full report                               |
 
-Every call reads the history again (seconds on a repository with a few thousand commits). Call `analyze` once per task, and `inspect` per area you are about to change.
+The first call in a clone reads the whole history (seconds on a repository with a few thousand commits) and caches it in `.git/codesaga`; later calls read only the commits made since and take well under a second. Call `analyze` once per task, and `inspect` per area you are about to change. `--no-cache` skips the cache.
 
 ## Contract
 

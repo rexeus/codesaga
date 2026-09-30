@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import { InspectResult } from "@codesaga/engine";
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
@@ -149,6 +151,29 @@ describe("codesaga inspect output", () => {
         `codesaga: no file matches "nope/**", "gone.ts" ${RELATIVE_TO_ROOT}`,
       );
       expect(result.exitCode).toBe(4);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect --no-cache", () => {
+  it.live("reads git every time and leaves no cache in the repository", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      const cacheFile = `${repo.root}/.git/codesaga/history-v1.json`;
+
+      const uncached = yield* journey({
+        args: ["inspect", "src/a.ts", "--json", "--no-cache"],
+        cwd: repo.root,
+      });
+      expect(uncached.exitCode).toBe(0);
+      expect(existsSync(cacheFile)).toBe(false);
+
+      const cached = yield* journey({
+        args: ["inspect", "src/a.ts", "--json"],
+        cwd: repo.root,
+      });
+      expect(cached.exitCode).toBe(0);
+      expect(existsSync(cacheFile)).toBe(true);
     }).pipe(Effect.scoped),
   );
 });

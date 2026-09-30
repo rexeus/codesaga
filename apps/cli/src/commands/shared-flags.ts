@@ -13,3 +13,10 @@ export const sinceFlag = Flag.String("since").pipe(
   ),
   Flag.optional,
 );
+
+export const cacheFlag = Flag.Boolean("cache").pipe(
+  Flag.withDescription(
+    "Reuse the parsed history cached in the git directory; --no-cache reads git every time and leaves the cache alone",
+  ),
+  Flag.withDefault(true),
+);
