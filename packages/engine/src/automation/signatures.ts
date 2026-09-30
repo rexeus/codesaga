@@ -225,6 +225,15 @@ export const SIGNATURES: ReadonlyArray<Signature> = [
     people: [{ githubId: 41_898_282, name: /^github-actions\[bot\]$/iu }],
   },
   {
+    // https://docs.github.com/en/actions/tutorials/authenticate-with-github_token
+    // Not in the researched table: the identity that workflows set by hand with
+    // `git config user.email actions@github.com`, seen on 368 of the 798
+    // commits of anthropics/claude-code-action.
+    name: "GitHub Actions",
+    kind: "bot",
+    people: [{ email: "actions@github.com" }],
+  },
+  {
     // https://pre-commit.ci
     name: "pre-commit.ci",
     kind: "bot",
