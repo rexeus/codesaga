@@ -17,9 +17,17 @@ const tenLines = Array.from(
 
 const history = (
   repo: TempRepository,
-  skipCommits: ReadonlySet<string> = new Set(),
+  shallowBoundary: ReadonlySet<string> = new Set(),
 ) =>
-  readHistory({ skipCommits }).pipe(Effect.provide(Git.layer(repo.directory)));
+  Effect.gen(function* () {
+    const head = (yield* repo.git("rev-parse", "HEAD")).trim();
+    return yield* readHistory({
+      root: repo.directory,
+      head,
+      shallowBoundary,
+      useCache: false,
+    });
+  }).pipe(Effect.provide(Git.layer(repo.directory)));
 
 /** a.ts is created, edited, renamed to b.ts, edited, renamed to c.ts, edited. */
 const commitRenamedTwice = (repo: TempRepository) =>

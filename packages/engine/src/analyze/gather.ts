@@ -61,6 +61,12 @@ export type AnalyzeOptions = {
   readonly exclude: ReadonlyArray<string>;
   /** Written to `Report.tool.version`. */
   readonly toolVersion: string;
+  /**
+   * Reuse the parsed history cached in the repository's git directory and
+   * update it; `false` reads git every time and leaves the cache alone.
+   * Absent, the cache is used. Results are identical either way.
+   */
+  readonly cache?: boolean | undefined;
 };
 
 const gatherInRepository = (
@@ -83,7 +89,12 @@ const gatherInRepository = (
     const commits =
       head === null
         ? []
-        : yield* readHistory({ skipCommits: shallowBoundary ?? new Set() });
+        : yield* readHistory({
+            root,
+            head,
+            shallowBoundary: shallowBoundary ?? new Set(),
+            useCache: options.cache ?? true,
+          });
     return {
       toolVersion: options.toolVersion,
       now: yield* DateTime.now,

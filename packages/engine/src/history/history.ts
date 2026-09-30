@@ -1,11 +1,12 @@
 // Owns the repository's commits as the analysis reads them: the whole
 // non-merge history, with every change under the path its file has today and
 // told apart by the life of that path it belongs to.
-import { Effect, Stream } from "effect";
+import { Effect } from "effect";
+import type { FileSystem, Path } from "effect";
 
 import type { GitError } from "../git/git-errors.js";
-import { Git } from "../git/git.js";
-import { LOG_FORMAT_ARGS, LogParser } from "./parse-log.js";
+import type { Git } from "../git/git.js";
+import { readCommits } from "./commit-log.js";
 import type { Commit } from "./parse-log.js";
 
 /** The lines one commit added to and deleted from one file. */
@@ -27,8 +28,17 @@ export type HistoryCommit = Omit<Commit, "changes"> & {
 };
 
 export type HistoryOptions = {
-  /** Commits left out entirely, such as the boundary of a shallow clone. */
-  readonly skipCommits: ReadonlySet<string>;
+  /** The absolute root of the work tree; the `Git` service runs there. */
+  readonly root: string;
+  /** The commit to read the history of. */
+  readonly head: string;
+  /**
+   * The commits a shallow clone was cut at, or an empty set; they are left
+   * out entirely, as their changes say nothing about the files.
+   */
+  readonly shallowBoundary: ReadonlySet<string>;
+  /** Whether parsed commits are read from and written to the history cache. */
+  readonly useCache: boolean;
 };
 
 /** What the walk from the newest commit has learned about paths. */
@@ -79,8 +89,8 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
 };
 
 /**
- * Reads every non-merge commit of `HEAD` from newest to oldest, author and
- * committer after `.mailmap`. A rename makes every older commit that touched
+ * Reads every non-merge commit of `options.head` from newest to oldest, author
+ * and committer after `.mailmap`. A rename makes every older commit that touched
  * the old path name the new one, so a file keeps its history under its
  * current name; deleted files keep the path they had when they were deleted.
  * A deletion ends the life of the file that had the deleted name: its own
@@ -89,36 +99,26 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
  *
  * The whole repository's log is read, never a path-limited one: a file moved
  * into the universe from outside keeps the history it had before the move.
+ * The parsed log is cached in the git directory (see `readCommits`); renames
+ * and deletions are resolved on every call, over the whole list.
  *
- * Git must run in the repository root, and the repository needs a `HEAD`.
+ * Git must run in the repository root.
  */
 export const readHistory = (
   options: HistoryOptions,
-): Effect.Effect<ReadonlyArray<HistoryCommit>, GitError, Git> =>
-  Effect.gen(function* () {
-    const git = yield* Git;
+): Effect.Effect<
+  ReadonlyArray<HistoryCommit>,
+  GitError,
+  Git | FileSystem.FileSystem | Path.Path
+> =>
+  Effect.map(readCommits(options), (commits) => {
     const lineage: Lineage = {
       renamedTo: new Map(),
       deletedNames: new Set(),
     };
-    const commits: Array<HistoryCommit> = [];
-
-    yield* git.stream(["log", ...LOG_FORMAT_ARGS]).pipe(
-      Stream.mapAccum(
-        () => new LogParser(),
-        (parser, chunk) => [parser, parser.push(chunk)],
-        { onHalt: (parser) => parser.end() },
-      ),
-      Stream.runForEach((commit) =>
-        Effect.sync(() => {
-          if (!options.skipCommits.has(commit.sha)) {
-            commits.push(resolveLineage(commit, lineage));
-          }
-        }),
-      ),
-    );
-
-    return commits;
+    return commits
+      .filter((commit) => !options.shallowBoundary.has(commit.sha))
+      .map((commit) => resolveLineage(commit, lineage));
   });
 
 /** The lines the commits added to and deleted from the paths that `isCodePath` accepts. */
