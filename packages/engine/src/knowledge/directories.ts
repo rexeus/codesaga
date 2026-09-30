@@ -3,6 +3,7 @@
 
 import { Order } from "effect";
 
+import { groupBy } from "../collections/group-by.js";
 import type { Report } from "../report/report.js";
 import { ancestorsOf } from "../universe/ancestors.js";
 import { describeFileSet } from "./file-set.js";
@@ -42,17 +43,16 @@ export const directoryKnowledge = (
   scope: string,
   model: KnowledgeModel,
 ): ReadonlyArray<Directory> => {
-  const filesByDirectory = new Map<string, Array<string>>();
-  for (const path of paths) {
-    for (const directory of ancestorsOf(path)) {
-      if (scope === "." || directory.startsWith(`${scope}/`)) {
-        filesByDirectory.set(directory, [
-          ...(filesByDirectory.get(directory) ?? []),
-          path,
-        ]);
-      }
-    }
-  }
+  const filesByDirectory = groupBy(
+    paths.flatMap((path) =>
+      ancestorsOf(path)
+        .filter(
+          (directory) => scope === "." || directory.startsWith(`${scope}/`),
+        )
+        .map((directory) => ({ directory, path })),
+    ),
+    ({ directory }) => directory,
+  );
   return [...filesByDirectory]
     .filter(
       ([directory, files]) =>
@@ -60,7 +60,10 @@ export const directoryKnowledge = (
         filesByDirectory.get(parentOf(directory))?.length !== files.length,
     )
     .map(([path, files]): Directory => {
-      const set = describeFileSet(files, model);
+      const set = describeFileSet(
+        files.map((file) => file.path),
+        model,
+      );
       return {
         path,
         files: set.files,
