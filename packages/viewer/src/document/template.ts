@@ -8,7 +8,8 @@ const escapeHtmlText = (text: string): string =>
 
 /**
  * The complete viewer page for `report`, as one self-contained HTML document:
- * styles, script and data are inline, and nothing loads from the network.
+ * styles, script and data are inline, and a content security policy forbids
+ * loading anything from the network.
  * The report is embedded whole; the page renders every name and path as text.
  */
 export const renderReportHtml = (report: Report): string => `<!doctype html>
@@ -17,6 +18,7 @@ export const renderReportHtml = (report: Report): string => `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
 <link rel="icon" href="data:,">
 <title>codesaga · ${escapeHtmlText(report.repository.name)}</title>
 <style>${viewerStyles}</style>

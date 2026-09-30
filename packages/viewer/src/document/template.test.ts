@@ -61,4 +61,12 @@ describe("renderReportHtml", () => {
     expect(html).not.toMatch(/\s(?:src|href)="(?!data:)/u);
     expect(html).not.toContain("@import");
   });
+
+  it("forbids every request except inline styles, inline script and data images", () => {
+    const html = renderReportHtml(report);
+
+    expect(html).toContain(
+      `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">`,
+    );
+  });
 });
