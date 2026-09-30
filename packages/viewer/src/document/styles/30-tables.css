@@ -42,3 +42,73 @@ table.data .num {
 .show-all:hover {
   background: var(--hairline);
 }
+
+table.data th button.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+table.data th button.sort:hover {
+  color: var(--text);
+}
+
+table.data th .arrow {
+  min-width: 1em;
+  font-size: 9px;
+}
+
+.person {
+  display: grid;
+  min-width: 160px;
+}
+
+.person .muted {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--wash);
+  color: var(--text-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.badge.active {
+  color: var(--active-text);
+}
+
+.lang-bar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lang-segment {
+  flex-basis: 0;
+  min-width: 2px;
+  background: var(--mark);
+}
+
+.lang-segment:hover {
+  filter: brightness(1.1);
+}

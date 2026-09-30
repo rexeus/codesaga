@@ -17,3 +17,9 @@ export const plotSize = ({ width, height }: Size): Size => ({
   width: Math.max(0, width - MARGIN.left - MARGIN.right),
   height: Math.max(0, height - MARGIN.top - MARGIN.bottom),
 });
+
+/** The chart size whose plotting area is `plotHeight` tall and as wide as `width` allows. */
+export const chartSizeFor = (width: number, plotHeight: number): Size => ({
+  width,
+  height: plotHeight + MARGIN.top + MARGIN.bottom,
+});

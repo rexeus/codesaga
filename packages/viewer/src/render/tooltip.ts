@@ -53,3 +53,16 @@ export const showTooltip = (
 export const hideTooltip = (): void => {
   byId("tooltip", HTMLElement).hidden = true;
 };
+
+/** Makes `target` show `content` while the pointer is over it. */
+export const bindTooltip = (
+  target: SVGElement | HTMLElement,
+  content: TooltipContent,
+): void => {
+  target.addEventListener("pointermove", (event) => {
+    if (event instanceof PointerEvent) {
+      showTooltip(content, event);
+    }
+  });
+  target.addEventListener("pointerleave", hideTooltip);
+};

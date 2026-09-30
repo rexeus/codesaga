@@ -2,8 +2,8 @@ import type { Report } from "@codesaga/engine";
 
 import { layoutActivity } from "../layout/activity.js";
 import type { ActivityLayout } from "../layout/activity.js";
-import { barPath } from "../layout/bar-path.js";
-import type { Bar } from "../layout/bar-path.js";
+import { barPath } from "../layout/bars.js";
+import type { Bar } from "../layout/bars.js";
 import type { Resolution } from "../layout/time-buckets.js";
 import { formatCount } from "../present/format.js";
 import {
@@ -15,7 +15,7 @@ import {
 } from "./chart-frame.js";
 import { h, s } from "./dom.js";
 import { hoverZones } from "./hover.js";
-import { legend, legendItem, section } from "./section.js";
+import { legend, legendItem, section, tableView } from "./section.js";
 import { dataTable } from "./table.js";
 
 const CHART_HEIGHT = 170;
@@ -108,7 +108,8 @@ const chart = (activity: Report["activity"], spec: ChartSpec): HTMLElement => {
     spec.title("weeks"),
     ...(spec.extras ?? []),
   );
-  responsiveChart(host, CHART_HEIGHT, (size) => {
+  responsiveChart(host, (width) => {
+    const size = { width, height: CHART_HEIGHT };
     const layout = layoutActivity(activity, size);
     if (layout === null) {
       return chartSvg(size, spec.description);
@@ -119,57 +120,50 @@ const chart = (activity: Report["activity"], spec: ChartSpec): HTMLElement => {
   return figure;
 };
 
-const tableView = ({ weeks, months }: Report["activity"]): HTMLElement => {
-  const details = h("details", "table-view", h("summary", "", "Table view"));
-  details.addEventListener(
-    "toggle",
-    () => {
-      details.append(
-        dataTable(
-          "Commits and lines per week",
-          [
-            { label: "Week of", cell: (week) => week.start },
-            {
-              label: "Commits",
-              numeric: true,
-              cell: (week) => formatCount(week.commits),
-            },
-            {
-              label: "Lines added",
-              numeric: true,
-              cell: (week) => formatCount(week.added),
-            },
-            {
-              label: "Lines deleted",
-              numeric: true,
-              cell: (week) => formatCount(week.deleted),
-            },
-          ],
-          weeks,
-        ),
-        dataTable(
-          "Commits and active contributors per month",
-          [
-            { label: "Month", cell: (month) => month.month },
-            {
-              label: "Commits",
-              numeric: true,
-              cell: (month) => formatCount(month.commits),
-            },
-            {
-              label: "Active contributors",
-              numeric: true,
-              cell: (month) => formatCount(month.contributors),
-            },
-          ],
-          months,
-        ),
-      );
-    },
-    { once: true },
-  );
-  return details;
-};
+const activityTables = ({
+  weeks,
+  months,
+}: Report["activity"]): HTMLElement[] => [
+  dataTable(
+    "Commits and lines per week",
+    [
+      { label: "Week of", cell: (week) => week.start },
+      {
+        label: "Commits",
+        numeric: true,
+        cell: (week) => formatCount(week.commits),
+      },
+      {
+        label: "Lines added",
+        numeric: true,
+        cell: (week) => formatCount(week.added),
+      },
+      {
+        label: "Lines deleted",
+        numeric: true,
+        cell: (week) => formatCount(week.deleted),
+      },
+    ],
+    weeks,
+  ),
+  dataTable(
+    "Commits and active contributors per month",
+    [
+      { label: "Month", cell: (month) => month.month },
+      {
+        label: "Commits",
+        numeric: true,
+        cell: (month) => formatCount(month.commits),
+      },
+      {
+        label: "Active contributors",
+        numeric: true,
+        cell: (month) => formatCount(month.contributors),
+      },
+    ],
+    months,
+  ),
+];
 
 /** Commits and lines per week, and active contributors per month, on one time axis. */
 export const renderActivity = ({ activity }: Report): HTMLElement => {
@@ -208,6 +202,6 @@ export const renderActivity = ({ activity }: Report): HTMLElement => {
       description: "Line chart of contributors with a commit in each month",
       marks: contributorsChart,
     }),
-    tableView(activity),
+    tableView(() => activityTables(activity)),
   );
 };

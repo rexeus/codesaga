@@ -71,8 +71,7 @@ export const chartSvg = (
  */
 export const responsiveChart = (
   host: HTMLElement,
-  height: number,
-  draw: (size: Size) => SVGElement,
+  draw: (width: number) => SVGElement,
 ): void => {
   let drawnWidth = 0;
   const render = (): void => {
@@ -81,7 +80,7 @@ export const responsiveChart = (
       return;
     }
     drawnWidth = width;
-    host.replaceChildren(draw({ width, height }));
+    host.replaceChildren(draw(width));
   };
   new ResizeObserver(render).observe(host);
   render();
