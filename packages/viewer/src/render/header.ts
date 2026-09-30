@@ -32,7 +32,9 @@ export const renderHeader = (report: Report): HTMLElement => {
           h(
             "p",
             "notice",
-            "Shallow clone: history before the oldest fetched commit is missing, so counts undercount. `git fetch --unshallow` completes it.",
+            "Shallow clone: history before the oldest fetched commit is missing, so counts undercount. ",
+            h("code", "", "git fetch --unshallow"),
+            " completes it.",
           ),
         ]
       : []),
