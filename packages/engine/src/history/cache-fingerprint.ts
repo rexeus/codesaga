@@ -3,7 +3,7 @@
 import { Effect, FileSystem, Path } from "effect";
 
 import { Git } from "../git/git.js";
-import { LOG_FORMAT_ARGS } from "./parse-log.js";
+import { LOG_FORMAT_ARGS, PARSER_VERSION } from "./parse-log.js";
 
 const sha256 = (text: string): Effect.Effect<string> =>
   Effect.promise(() =>
@@ -27,10 +27,10 @@ const textOrEmpty = (
   );
 
 /**
- * A digest of the log arguments, the mailmap (`.mailmap` in the work tree,
- * `mailmap.file`, and the blob `mailmap.blob` names), and the shallow
- * boundary: a commit's author, and a shallow commit's changes, read
- * differently when any of them changes.
+ * A digest of the log arguments, the parser version, the mailmap (`.mailmap`
+ * in the work tree, `mailmap.file`, and the blob `mailmap.blob` names), the
+ * replace refs, the grafts file, and the shallow boundary: what git prints for
+ * the same head, or how it is read, differs when any of them changes.
  *
  * Runs git inside `root`, so the `Git` service must be built for it.
  */
@@ -46,6 +46,11 @@ export const logFingerprint = (
       fs
         .readFileString(path.resolve(root, file))
         .pipe(Effect.orElseSucceed(() => ""));
+    const graftsFile = yield* textOrEmpty(git, [
+      "rev-parse",
+      "--git-path",
+      "info/grafts",
+    ]);
     const mailmapFile = yield* textOrEmpty(git, [
       "config",
       "--type=path",
@@ -60,6 +65,13 @@ export const logFingerprint = (
     return yield* sha256(
       JSON.stringify({
         args: LOG_FORMAT_ARGS,
+        parserVersion: PARSER_VERSION,
+        replaceRefs: yield* textOrEmpty(git, [
+          "for-each-ref",
+          "--format=%(refname) %(objectname)",
+          "refs/replace/",
+        ]),
+        grafts: graftsFile === "" ? "" : yield* readOrEmpty(graftsFile),
         workTreeMailmap: yield* readOrEmpty(".mailmap"),
         mailmapFile,
         mailmapFileContent:

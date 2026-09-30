@@ -49,6 +49,9 @@ export type Commit = {
   readonly changes: ReadonlyArray<Change>;
 };
 
+/** Bump on any change to how commits, trailers, markers, renames or removals are parsed. */
+export const PARSER_VERSION = 1;
+
 /**
  * Arguments that make `git log` print what `LogParser` reads. Merge commits
  * are printed, without a diff, so that the commit graph stays connected.

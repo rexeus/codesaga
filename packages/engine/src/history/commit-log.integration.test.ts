@@ -199,6 +199,71 @@ layer(NodeServices.layer)("readCommits after git settings changed", (it) => {
   );
 });
 
+const commitThreeWithSideBranch = (repo: TempRepository) =>
+  Effect.gen(function* () {
+    yield* commitTwice(repo);
+    yield* repo.commit("2026-03-03T12:00:00Z", { "c.ts": "c\n" });
+    yield* repo.git("switch", "--create", "side", "HEAD~2");
+    yield* repo.commit(
+      "2026-03-04T12:00:00Z",
+      { "s.ts": "s\n" },
+      { author: { name: "Bob", email: "bob@example.com" } },
+    );
+    yield* repo.git("switch", "-");
+  });
+
+layer(NodeServices.layer)(
+  "readCommits after the graph git sees changed",
+  (it) => {
+    it.effect("rereads with a commit replaced by git replace", () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitThreeWithSideBranch(repo);
+        const middle = (yield* repo.git("rev-parse", "HEAD~1")).trim();
+        yield* read(repo);
+        yield* repo.git("replace", middle, "side");
+
+        const cached = yield* read(repo);
+        const fresh = yield* read(repo, { useCache: false });
+
+        assert.lengthOf(cached.logged, 1);
+        assert.deepStrictEqual(cached.commits, fresh.commits);
+        assert.include(
+          cached.commits.map(({ author }) => author.name),
+          "Bob",
+        );
+      }),
+    );
+
+    it.effect("rereads with a parent cut off by the grafts file", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const repo = yield* makeTempRepository;
+        yield* commitThreeWithSideBranch(repo);
+        const [tip, root] = (yield* Effect.all([
+          repo.git("rev-parse", "HEAD"),
+          repo.git("rev-parse", "HEAD~2"),
+        ])).map((sha) => sha.trim());
+        yield* read(repo);
+        yield* fs.makeDirectory(`${repo.directory}/.git/info`, {
+          recursive: true,
+        });
+        yield* fs.writeFileString(
+          `${repo.directory}/.git/info/grafts`,
+          `${tip} ${root}\n`,
+        );
+
+        const cached = yield* read(repo);
+        const fresh = yield* read(repo, { useCache: false });
+
+        assert.lengthOf(cached.logged, 1);
+        assert.deepStrictEqual(cached.commits, fresh.commits);
+        assert.lengthOf(cached.commits, 2);
+      }),
+    );
+  },
+);
+
 layer(NodeServices.layer)(
   "readCommits when the cache is off or unusable",
   (it) => {
