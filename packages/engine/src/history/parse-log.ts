@@ -1,10 +1,12 @@
 // Owns reading `git log -z --numstat` output, incrementally.
 //
-// The log is requested with `--format=%x01%H%x00%ct`. Each commit then
+// The log is requested with the format in `LOG_FORMAT_ARGS`. Each commit then
 // arrives as NUL-terminated tokens:
-//   \u0001<sha> NUL <unix time> NUL [\n]<added>\t<deleted>\t<path> NUL ...
-// A rename entry has an empty path after the counts and is followed by two
-// more tokens, the old and the new path. Binary files show `-` for counts.
+//   \u0001<sha> NUL <8 header fields, NUL-terminated> [\n]<added>\t<deleted>\t<path> NUL ...
+// The header fields are author time, author date with offset, author and
+// committer name and email, the unfolded trailers, and the message. A rename
+// entry has an empty path after the counts and is followed by two more
+// tokens, the old and the new path. Binary files show `-` for counts.
 
 /** One file touched by a commit. */
 type Change = {
@@ -17,10 +19,24 @@ type Change = {
   readonly deleted: number;
 };
 
+/** A name and email as git prints them, after `.mailmap`. */
+type Person = { readonly name: string; readonly email: string };
+
+/** One `Key: value` line of a commit's trailer block. */
+type Trailer = { readonly key: string; readonly value: string };
+
 export type Commit = {
   readonly sha: string;
-  /** Commit time in seconds since the epoch. */
+  /** Author time in seconds since the epoch. */
   readonly time: number;
+  /** The author's UTC offset in minutes, as in the author date. */
+  readonly offsetMinutes: number;
+  readonly author: Person;
+  readonly committer: Person;
+  /** Every trailer in message order, with whitespace collapsed. */
+  readonly trailers: ReadonlyArray<Trailer>;
+  /** Lines of the message that name a tool, such as "Generated with [Claude Code](...)". */
+  readonly markers: ReadonlyArray<string>;
   readonly changes: ReadonlyArray<Change>;
 };
 
@@ -30,19 +46,64 @@ export const LOG_FORMAT_ARGS = [
   "-M",
   "--numstat",
   "-z",
+  "--use-mailmap",
   "--no-show-signature",
-  "--format=%x01%H%x00%ct",
+  "--format=%x01%H%x00%at%x00%aI%x00%aN%x00%aE%x00%cN%x00%cE%x00%(trailers:unfold,separator=%x1f)%x00%B%x00",
 ] as const;
 
 const COMMIT_MARKER = "\u0001";
+const TRAILER_SEPARATOR = "\u001F";
+const HEADER_FIELDS = 8;
+const GENERATED_WITH = /^\W*Generated with \[[^\]]+\]/iu;
+const OFFSET = /([+-])(\d{2}):(\d{2})$/u;
 const NUMSTAT = /^(\d+|-)\t(\d+|-)\t(.*)$/su;
 
-type Phase = "entry" | "time" | "renamedFrom" | "renamedTo";
+type Phase = "header" | "entry" | "renamedFrom" | "renamedTo";
 
-type OpenCommit = { sha: string; time: number; changes: Array<Change> };
+type OpenCommit = Omit<Commit, "changes"> & { changes: Array<Change> };
 
 const lineCount = (field: string | undefined): number =>
   field === undefined || field === "-" ? 0 : Number(field);
+
+const offsetMinutesOf = (date: string): number => {
+  const [, sign, hours = "0", minutes = "0"] = OFFSET.exec(date) ?? [];
+  const total = Number(hours) * 60 + Number(minutes);
+  return sign === "-" ? -total : total;
+};
+
+const parseTrailers = (field: string): ReadonlyArray<Trailer> =>
+  field
+    .split(TRAILER_SEPARATOR)
+    .map((line) => [line.indexOf(":"), line] as const)
+    .filter(([colon]) => colon > 0)
+    .map(([colon, line]) => ({
+      key: line.slice(0, colon).trim(),
+      value: line
+        .slice(colon + 1)
+        .replaceAll(/\s+/gu, " ")
+        .trim(),
+    }));
+
+const parseMarkers = (message: string): ReadonlyArray<string> =>
+  message
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => GENERATED_WITH.test(line));
+
+const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
+  const [time, date, authorName, authorEmail, committerName, committerEmail] =
+    fields;
+  return {
+    sha,
+    time: Number(time),
+    offsetMinutes: offsetMinutesOf(date ?? ""),
+    author: { name: authorName ?? "", email: authorEmail ?? "" },
+    committer: { name: committerName ?? "", email: committerEmail ?? "" },
+    trailers: parseTrailers(fields[6] ?? ""),
+    markers: parseMarkers(fields[7] ?? ""),
+    changes: [],
+  };
+};
 
 /**
  * Turns chunks of log output into commits. It holds the state between
@@ -52,6 +113,8 @@ export class LogParser {
   #tail = "";
   #phase: Phase = "entry";
   #open: OpenCommit | undefined;
+  #sha = "";
+  #header: Array<string> = [];
   #counts = { added: 0, deleted: 0 };
   #renamedFrom = "";
 
@@ -70,8 +133,9 @@ export class LogParser {
   }
 
   #consume(token: string): ReadonlyArray<Commit> {
-    if (this.#phase === "time") {
-      return this.#readTime(token);
+    if (this.#phase === "header") {
+      this.#readHeaderField(token);
+      return [];
     }
     if (this.#phase === "renamedFrom") {
       this.#renamedFrom = token;
@@ -104,17 +168,18 @@ export class LogParser {
 
   #begin(sha: string): ReadonlyArray<Commit> {
     const finished = this.#close();
-    this.#open = { sha, time: 0, changes: [] };
-    this.#phase = "time";
+    this.#sha = sha;
+    this.#header = [];
+    this.#phase = "header";
     return finished;
   }
 
-  #readTime(token: string): ReadonlyArray<Commit> {
-    if (this.#open !== undefined) {
-      this.#open.time = Number(token);
+  #readHeaderField(token: string): void {
+    this.#header.push(token);
+    if (this.#header.length === HEADER_FIELDS) {
+      this.#open = openCommit(this.#sha, this.#header);
+      this.#phase = "entry";
     }
-    this.#phase = "entry";
-    return [];
   }
 
   #readEntry(token: string): ReadonlyArray<Commit> {
