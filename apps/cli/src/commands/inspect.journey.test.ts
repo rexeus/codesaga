@@ -8,6 +8,8 @@ import { makeTeamProject } from "../testing/projects.js";
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(InspectResult)(JSON.parse(stdout));
 
+const RELATIVE_TO_ROOT = "(patterns are relative to the repository root)";
+
 // Real clock: the analysis window is resolved against now, and the commits are dated relative to it.
 describe("codesaga inspect --json", () => {
   it.live(
@@ -74,6 +76,27 @@ describe("codesaga inspect --json", () => {
   );
 });
 
+describe("codesaga inspect the whole repository", () => {
+  it.live.each(["", "."])("answers %j for every file", (pattern) =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", pattern, "--json"],
+        cwd: repo.root,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe("");
+      const inspected = yield* decode(result.stdout);
+      expect(inspected.unmatched).toStrictEqual([]);
+      expect(
+        inspected.matches.map((entry) => [entry.pattern, entry.files]),
+      ).toStrictEqual([[pattern, 2]]);
+    }).pipe(Effect.scoped),
+  );
+});
+
 describe("codesaga inspect output", () => {
   it.live("prints the terminal view without ANSI codes when piped", () =>
     Effect.gen(function* () {
@@ -103,7 +126,9 @@ describe("codesaga inspect output", () => {
         });
 
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toBe('codesaga: no file matches "nope/**"');
+        expect(result.stderr).toBe(
+          `codesaga: no file matches "nope/**" ${RELATIVE_TO_ROOT}`,
+        );
         const inspected = yield* decode(result.stdout);
         expect(inspected.unmatched).toStrictEqual(["nope/**"]);
         expect(inspected.matches).toHaveLength(1);
@@ -121,7 +146,7 @@ describe("codesaga inspect output", () => {
 
       expect(result.stdout).toBe("");
       expect(result.stderr).toBe(
-        'codesaga: no file matches "nope/**", "gone.ts"',
+        `codesaga: no file matches "nope/**", "gone.ts" ${RELATIVE_TO_ROOT}`,
       );
       expect(result.exitCode).toBe(4);
     }).pipe(Effect.scoped),

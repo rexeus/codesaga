@@ -2,7 +2,7 @@ import { inspect } from "@codesaga/engine";
 import { Console, Effect, Option } from "effect";
 import { Argument, Command } from "effect/cli";
 
-import { NothingMatched } from "../errors/nothing-matched.js";
+import { NothingMatched, noFileMatches } from "../errors/nothing-matched.js";
 import { escapeForTerminal } from "../output/escape.js";
 import { printResult } from "../output/print-result.js";
 import { renderInspect } from "../output/terminal/inspect-view.js";
@@ -36,7 +36,7 @@ export const inspectCommand = Command.make(
     }
     for (const pattern of result.unmatched) {
       yield* Console.error(
-        `codesaga: no file matches "${escapeForTerminal(pattern)}"`,
+        `codesaga: ${escapeForTerminal(noFileMatches([pattern]))}`,
       );
     }
     return yield* printResult(result, json, renderInspect);

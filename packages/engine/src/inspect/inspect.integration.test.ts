@@ -138,6 +138,29 @@ layer(NodeServices.layer)("inspect several arguments", (it) => {
   );
 });
 
+layer(NodeServices.layer)("inspect the whole repository", (it) => {
+  it.effect.each(["", ".", "./", "/"])(
+    "treats %j as every universe file and keeps the argument as written",
+    (pattern) =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* commitKnowledgeHistory(repo);
+
+        const result = yield* inspect({
+          ...analyzeOptionsFor(repo),
+          patterns: [pattern],
+        });
+
+        assert.deepStrictEqual(result.unmatched, []);
+        assert.deepStrictEqual(
+          result.matches.map((entry) => [entry.pattern, entry.files]),
+          [[pattern, 6]],
+        );
+      }),
+  );
+});
+
 layer(NodeServices.layer)("inspect window and agents", (it) => {
   it.effect("narrows commits and automation to --since, not expertise", () =>
     Effect.gen(function* () {

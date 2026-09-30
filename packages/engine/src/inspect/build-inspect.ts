@@ -22,12 +22,20 @@ type Entry = InspectResult["matches"][number];
 const isoOf = (seconds: number): string =>
   DateTime.formatIso(DateTime.makeUnsafe(seconds * 1000));
 
-/** The paths an argument matches: the file itself, files below a matching directory. */
+/**
+ * The paths an argument matches: the file itself, files below a matching
+ * directory, and every file when the argument names the repository root
+ * (`.`, `./`, `/` or an empty string).
+ */
 const pathsMatching = (
   pattern: string,
   paths: ReadonlyArray<string>,
 ): ReadonlyArray<string> => {
-  const matches = matchesAny([pattern.replace(/\/+$/u, "")]);
+  const target = pattern.replace(/\/+$/u, "");
+  if (target === "" || target === ".") {
+    return paths;
+  }
+  const matches = matchesAny([target]);
   return paths.filter((path) =>
     [path, ...ancestorsOf(path)].some((candidate) => matches(candidate)),
   );

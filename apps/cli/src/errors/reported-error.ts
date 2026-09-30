@@ -4,6 +4,7 @@ import { Runtime, Schema } from "effect";
 import { CliError } from "effect/cli";
 
 import { escapeForTerminal } from "../output/escape.js";
+import { noFileMatches } from "./nothing-matched.js";
 import type { NothingMatched } from "./nothing-matched.js";
 import type { PathNotFound } from "./path-not-found.js";
 
@@ -79,7 +80,7 @@ const engineFailure = (
   }
   if (error._tag === "NothingMatched") {
     return {
-      message: `no file matches ${error.patterns.map((pattern) => `"${pattern}"`).join(", ")}`,
+      message: noFileMatches(error.patterns),
       exitCode: NOTHING_MATCHED,
     };
   }
