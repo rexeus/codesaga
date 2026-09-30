@@ -102,3 +102,20 @@ describe("automation tools", () => {
     expect(result.tools).toStrictEqual([]);
   });
 });
+
+describe("automation generic bot accounts", () => {
+  it("lists bot accounts that differ only in case as one tool under the newest spelling", () => {
+    const result = automation({
+      window,
+      commits: [
+        botAuthored("Foo[bot]", "2026-02-10T00:00:00Z"),
+        botAuthored("foo[BOT]", "2026-03-10T00:00:00Z"),
+        botAuthored("FOO[bot]", "2026-01-10T00:00:00Z"),
+      ],
+    });
+
+    expect(result.tools).toStrictEqual([
+      { name: "foo[BOT]", kind: "bot", authored: 3, assisted: 0 },
+    ]);
+  });
+});

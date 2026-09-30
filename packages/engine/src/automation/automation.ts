@@ -38,6 +38,14 @@ const byCommitsThenName = Order.combine(
   Order.mapInput(Order.String, (tool: Tool) => tool.name),
 );
 
+/** The tool name of the newest commit; equal times keep the later entry, as identities do. */
+const newestNameOf = (
+  commits: ReadonlyArray<{ readonly tool: string; readonly time: number }>,
+): string =>
+  commits.reduce((newest, commit) =>
+    commit.time >= newest.time ? commit : newest,
+  ).tool;
+
 const toolsOf = (
   commits: ReadonlyArray<ClassifiedCommit>,
 ): Report["automation"]["tools"] =>
@@ -46,11 +54,11 @@ const toolsOf = (
       commits.flatMap((commit) =>
         commit.tool === undefined ? [] : [{ ...commit, tool: commit.tool }],
       ),
-      (commit) => commit.tool,
-    ),
+      (commit) => commit.tool.toLowerCase(),
+    ).values(),
   ]
-    .map(([name, own]): Tool => ({
-      name,
+    .map((own): Tool => ({
+      name: newestNameOf(own),
       kind: countOf(own, "bot") > 0 ? "bot" : "agent",
       authored: countOf(own, "agent") + countOf(own, "bot"),
       assisted: countOf(own, "agent-assisted"),
@@ -61,7 +69,8 @@ const toolsOf = (
  * The `automation` section: totals and per-month counts by class (every month
  * of the window, empty ones with zeros), and per tool the commits it authored
  * and the human commits it assisted, most commits first. A bot matched only
- * by the generic `[bot]` rule is listed under its account name.
+ * by the generic `[bot]` rule is listed under its account name, which matches
+ * case-insensitively and shows the newest spelling.
  */
 export const automation = ({
   commits,
