@@ -3,7 +3,7 @@ import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem, Path } from "effect";
 
 import { makeTempRepository } from "../testing/temp-repository.js";
-import { NotAGitRepository } from "./git-errors.js";
+import { GitCommandFailed, NotAGitRepository } from "./git-errors.js";
 import { Git } from "./git.js";
 import {
   locateRepository,
@@ -69,6 +69,35 @@ layer(NodeServices.layer)("locateRepository", (it) => {
       }),
   );
 });
+
+layer(NodeServices.layer)(
+  "locateRepository failures other than absence",
+  (it) => {
+    it.effect(
+      "fails with GitCommandFailed carrying stderr for a fatal error that is not about the repository's absence",
+      () =>
+        Effect.gen(function* () {
+          const fs = yield* FileSystem.FileSystem;
+          const path = yield* Path.Path;
+          const repo = yield* makeTempRepository;
+          yield* fs.writeFileString(
+            path.join(repo.directory, ".git", "config"),
+            "[broken\n",
+          );
+
+          const failure = yield* Effect.flip(
+            locateRepository(repo.directory).pipe(
+              Effect.provide(Git.layer(repo.directory)),
+            ),
+          );
+
+          assert.instanceOf(failure, GitCommandFailed);
+          assert.strictEqual(failure.exitCode, 128);
+          assert.include(failure.stderr, "bad config");
+        }),
+    );
+  },
+);
 
 layer(NodeServices.layer)("repositoryScope", (it) => {
   it.effect("resolves a relative scope against cwd to a POSIX path", () =>

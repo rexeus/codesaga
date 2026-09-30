@@ -52,6 +52,9 @@ const runStreaming = (
     Effect.gen(function* () {
       const command = ChildProcess.make("git", args, {
         cwd: directory,
+        // Untranslated messages, so callers can tell failures apart by stderr.
+        env: { LC_ALL: "C" },
+        extendEnv: true,
         stdin:
           stdin === undefined
             ? "ignore"
