@@ -4,9 +4,11 @@ import { Effect, FileSystem } from "effect";
 import { TestClock } from "effect/testing";
 
 import { GitNotFound, NotAGitRepository } from "../git/git-errors.js";
+import { Git } from "../git/git.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { setScopedEnv } from "../testing/scoped-env.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
+import type { TempRepository } from "../testing/temp-repository.js";
 import { InvalidSince } from "./analysis-window.js";
 import { analyze } from "./analyze.js";
 
@@ -138,5 +140,61 @@ layer(NodeServices.layer)("analyze failures", (it) => {
 
       assert.deepStrictEqual(failure, new InvalidSince({ input: "last week" }));
     }),
+  );
+});
+
+/** Commits on top of HEAD with a raw author time that `git commit` refuses. */
+const commitAtRawTime = (repo: TempRepository, rawDate: string) =>
+  Effect.gen(function* () {
+    const git = yield* Git.make(repo.directory);
+    const tree = (yield* repo.git("rev-parse", "HEAD^{tree}")).trim();
+    const parent = (yield* repo.git("rev-parse", "HEAD")).trim();
+    const person = `Raw <raw@example.com> ${rawDate}`;
+    const commit = yield* git
+      .text(
+        ["hash-object", "-w", "-t", "commit", "--literally", "--stdin"],
+        `tree ${tree}\nparent ${parent}\nauthor ${person}\ncommitter ${person}\n\nraw\n`,
+      )
+      .pipe(Effect.orDie);
+    yield* repo.git("update-ref", "HEAD", commit.trim());
+  });
+
+layer(NodeServices.layer)("analyze implausible commit times", (it) => {
+  it.effect(
+    "leaves commits dated before the epoch or after now out of every section",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* repo.commit("2026-01-05T09:00:00Z", { "a.ts": "a\n" });
+        yield* repo.commit("2026-02-01T09:00:00Z", { "a.ts": "b\n" });
+        yield* commitAtRawTime(repo, "-5000 +0000");
+        yield* commitAtRawTime(repo, "4102444800 +0000");
+        yield* commitAtRawTime(repo, "9999999999999 +0000");
+        yield* commitAtRawTime(repo, "99999999999999999999 +0000");
+
+        const report = yield* analyze(analyzeOptionsFor(repo));
+
+        assert.strictEqual(
+          report.repository.firstCommitAt,
+          "2026-01-05T09:00:00.000Z",
+        );
+        assert.strictEqual(
+          report.repository.lastCommitAt,
+          "2026-02-01T09:00:00.000Z",
+        );
+        assert.deepStrictEqual(report.window, {
+          since: "2026-01-05T09:00:00.000Z",
+          until: "2026-03-10T00:00:00.000Z",
+          commits: 2,
+        });
+        assert.strictEqual(report.overview.commits, 2);
+        assert.deepStrictEqual(report.automation.totals, {
+          human: 2,
+          agentAssisted: 0,
+          agent: 0,
+          bot: 0,
+        });
+      }),
   );
 });

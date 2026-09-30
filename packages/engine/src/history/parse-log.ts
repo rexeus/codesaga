@@ -27,7 +27,7 @@ type Trailer = { readonly key: string; readonly value: string };
 
 export type Commit = {
   readonly sha: string;
-  /** Author time in seconds since the epoch. */
+  /** Author time in seconds since the epoch; NaN when git cannot read the date (a negative or malformed one). */
   readonly time: number;
   /** The author's UTC offset in minutes, as in the author date. */
   readonly offsetMinutes: number;
@@ -95,7 +95,7 @@ const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
     fields;
   return {
     sha,
-    time: Number(time),
+    time: time === undefined || time === "" ? NaN : Number(time),
     offsetMinutes: offsetMinutesOf(date ?? ""),
     author: { name: authorName ?? "", email: authorEmail ?? "" },
     committer: { name: committerName ?? "", email: committerEmail ?? "" },

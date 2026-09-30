@@ -9,7 +9,7 @@ const parse = (chunks: ReadonlyArray<string>) => {
 
 type Header = {
   readonly sha: string;
-  readonly time?: number;
+  readonly time?: number | string;
   readonly date?: string;
   readonly author?: readonly [string, string];
   readonly committer?: readonly [string, string];
@@ -29,6 +29,16 @@ const header = ({
 }: Header) =>
   `\u0001${sha}\0${time}\0${date}\0${author.join("\0")}\0${committer.join("\0")}\0` +
   `${trailers.join("\u001F")}\0${body}\0\0`;
+
+describe("LogParser time", () => {
+  it("reads the time of a date git cannot read as NaN, not as the epoch", () => {
+    const [commit] = parse([
+      header({ sha: "aaa", time: "", date: "%aI" }) + "\n1\t0\ta.ts\0",
+    ]);
+
+    expect(commit?.time).toBeNaN();
+  });
+});
 
 describe("LogParser header", () => {
   it("reads author, committer, time and the author's UTC offset", () => {

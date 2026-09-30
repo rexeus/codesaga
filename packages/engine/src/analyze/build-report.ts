@@ -28,7 +28,7 @@ export type ReportFacts = {
     Report["repository"],
     "firstCommitAt" | "lastCommitAt"
   >;
-  /** The whole history, newest first. */
+  /** The whole history, newest first; times outside the epoch-to-`now` range are ignored. */
   readonly commits: ReadonlyArray<HistoryCommit>;
   readonly universe: ReadonlyArray<InventoryFile>;
   /** Whether a path counts as code, for files that no longer exist too. */
@@ -86,13 +86,22 @@ const timeExtent = (
         last: commits.reduce((max, { time }) => Math.max(max, time), -Infinity),
       };
 
+/** Whether a commit time lies between the Unix epoch and `now`, the only times a window ending now can place. */
+const isPlaceable = (seconds: number, now: DateTime.Utc): boolean =>
+  seconds >= 0 && seconds <= DateTime.toEpochMillis(now) / 1000;
+
 /**
  * Builds the report from the facts: commits are cut to the repository scope,
  * classified, and narrowed to the activity window before the sections see them.
+ * Commits dated before the epoch or after `now` count nowhere, not even in
+ * `firstCommitAt` and `lastCommitAt`.
  */
 export const buildReport = (facts: ReportFacts): Report => {
   const { scope } = facts.repository;
-  const scoped = classify(inScope(facts.commits, scope));
+  const placeable = facts.commits.filter(({ time }) =>
+    isPlaceable(time, facts.now),
+  );
+  const scoped = classify(inScope(placeable, scope));
   const extent = timeExtent(scoped);
   const until = DateTime.formatIso(facts.now);
   const window = {
