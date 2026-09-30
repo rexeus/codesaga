@@ -6,7 +6,7 @@ import { Schema } from "effect";
 const Count = Schema.Natural;
 
 /** Commits per class; the four classes partition the commits they count. */
-const AutomationTotals = Schema.Struct({
+export const AutomationTotals = Schema.Struct({
   /** Commits by a human with no agent detected. */
   human: Count,
   /** Commits by a human that carry an agent's trailer, marker or committer. */
@@ -39,7 +39,7 @@ const Repository = Schema.Struct({
 });
 
 /** The history range the activity sections consider, resolved to ISO timestamps. */
-const ActivityWindow = Schema.Struct({
+export const ActivityWindow = Schema.Struct({
   since: Schema.String,
   until: Schema.String,
   /** Commits in the window. */
@@ -179,7 +179,7 @@ const Person = Schema.Struct({
 });
 
 /** A person's expertise over the files of one directory or inspected path set. */
-const Expert = Schema.Struct({
+export const Expert = Schema.Struct({
   ...Person.fields,
   /** Files the person is an expert on. */
   files: Count,

@@ -4,11 +4,13 @@ import { Runtime, Schema } from "effect";
 import { CliError } from "effect/cli";
 
 import { escapeForTerminal } from "../output/escape.js";
+import type { NothingMatched } from "./nothing-matched.js";
 import type { PathNotFound } from "./path-not-found.js";
 
 const UNEXPECTED = 1;
 const USAGE = 2;
 const NOT_A_REPOSITORY = 3;
+const NOTHING_MATCHED = 4;
 
 /**
  * A failure that is already worded for the user. Its message is escaped and
@@ -27,7 +29,11 @@ export class CliReportedError extends Schema.TaggedError<CliReportedError>()(
 }
 
 /** Every expected failure a command can end with, except a help request. */
-export type KnownFailure = AnalyzeError | PathNotFound | CliError.CliError;
+export type KnownFailure =
+  | AnalyzeError
+  | NothingMatched
+  | PathNotFound
+  | CliError.CliError;
 
 type Failure = { readonly message: string; readonly exitCode: number };
 
@@ -44,7 +50,9 @@ const cliFailure = (error: CliError.CliError): Failure => {
   };
 };
 
-const engineFailure = (error: AnalyzeError | PathNotFound): Failure => {
+const engineFailure = (
+  error: AnalyzeError | NothingMatched | PathNotFound,
+): Failure => {
   if (error._tag === "InvalidSince") {
     return {
       message: `invalid --since "${error.input}": use <n>d, <n>w, <n>m, <n>y or YYYY-MM-DD`,
@@ -69,6 +77,12 @@ const engineFailure = (error: AnalyzeError | PathNotFound): Failure => {
       exitCode: NOT_A_REPOSITORY,
     };
   }
+  if (error._tag === "NothingMatched") {
+    return {
+      message: `no file matches ${error.patterns.map((pattern) => `"${pattern}"`).join(", ")}`,
+      exitCode: NOTHING_MATCHED,
+    };
+  }
   return {
     message: `git ${error.args.join(" ")} failed with exit code ${error.exitCode}: ${error.stderr.trim()}`,
     exitCode: UNEXPECTED,
@@ -84,7 +98,7 @@ const reported = ({ message, exitCode }: Failure): CliReportedError =>
 /**
  * Words an expected failure and assigns its exit code: 2 for usage errors
  * (an invalid `--since`, a path that does not exist), 3 for no git repository or no git,
- * 1 for the rest.
+ * 4 when `inspect` matched nothing, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>
   reported(describe(error));

@@ -24,7 +24,7 @@ const countOf = (
   commitClass: ClassifiedCommit["class"],
 ): number => commits.filter((commit) => commit.class === commitClass).length;
 
-const totalsOf = (commits: ReadonlyArray<ClassifiedCommit>): Totals => ({
+export const totalsOf = (commits: ReadonlyArray<ClassifiedCommit>): Totals => ({
   human: countOf(commits, "human"),
   agentAssisted: countOf(commits, "agent-assisted"),
   agent: countOf(commits, "agent"),

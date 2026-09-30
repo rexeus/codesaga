@@ -50,3 +50,6 @@ export const sparkline = (values: ReadonlyArray<number>): string => {
     )
     .join("");
 };
+
+/** The date part of an ISO timestamp: `2026-03-10`. */
+export const day = (timestamp: string): string => timestamp.slice(0, 10);

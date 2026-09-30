@@ -1,0 +1,62 @@
+import { inspect } from "@codesaga/engine";
+import { Console, Effect, Option } from "effect";
+import { Argument, Command } from "effect/cli";
+
+import { NothingMatched } from "../errors/nothing-matched.js";
+import { escapeForTerminal } from "../output/escape.js";
+import { printResult } from "../output/print-result.js";
+import { renderInspect } from "../output/terminal/inspect-view.js";
+import { version } from "../version.js";
+import { WorkingDirectory } from "../working-directory.js";
+import { jsonFlag, sinceFlag } from "./shared-flags.js";
+
+export const inspectCommand = Command.make(
+  "inspect",
+  {
+    patterns: Argument.String("path-or-glob").pipe(
+      Argument.withDescription(
+        "Repository-relative file, directory or glob, quoted so the shell leaves it alone; one answer per argument",
+      ),
+      Argument.variadic({ min: 1 }),
+    ),
+    json: jsonFlag,
+    since: sinceFlag,
+  },
+  Effect.fn(function* ({ patterns, json, since }) {
+    const result = yield* inspect({
+      cwd: yield* WorkingDirectory,
+      since: Option.getOrUndefined(since),
+      include: [],
+      exclude: [],
+      toolVersion: version,
+      patterns,
+    });
+    if (result.matches.length === 0) {
+      return yield* new NothingMatched({ patterns: result.unmatched });
+    }
+    for (const pattern of result.unmatched) {
+      yield* Console.error(
+        `codesaga: no file matches "${escapeForTerminal(pattern)}"`,
+      );
+    }
+    return yield* printResult(result, json, renderInspect);
+  }),
+).pipe(
+  Command.withDescription(
+    "Show who knows a file, directory or glob and whether they are still around, before editing or picking reviewers.",
+  ),
+  Command.withExamples([
+    {
+      command: "codesaga inspect src/billing/invoice.ts",
+      description: "Who to ask about one file",
+    },
+    {
+      command: 'codesaga inspect "packages/*/src/index.ts" --json',
+      description: "The experts and agent share of the public barrels",
+    },
+    {
+      command: "codesaga inspect packages/engine apps/cli --since 3m",
+      description: "One answer per directory, with the last three months",
+    },
+  ]),
+);

@@ -1,5 +1,5 @@
 // Tests only: `analyze` options for a temporary repository, with the defaults tests share.
-import type { AnalyzeOptions } from "../analyze/analyze.js";
+import type { AnalyzeOptions } from "../analyze/gather.js";
 import type { TempRepository } from "./temp-repository.js";
 
 /** Analyzes the whole repository and its whole history unless `overrides` say otherwise. */

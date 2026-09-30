@@ -2,6 +2,7 @@ import { Cause, Console, Effect, Exit } from "effect";
 import { CliError, Command } from "effect/cli";
 
 import { analyzeCommand } from "./commands/analyze.js";
+import { inspectCommand } from "./commands/inspect.js";
 import {
   CliReportedError,
   toReportedError,
@@ -13,7 +14,7 @@ const root = Command.make("codesaga").pipe(
   Command.withDescription(
     "The story of a git repository: activity, people, knowledge and AI agents.",
   ),
-  Command.withSubcommands([analyzeCommand]),
+  Command.withSubcommands([analyzeCommand, inspectCommand]),
 );
 
 const isHelpRequest = (error: unknown): boolean =>

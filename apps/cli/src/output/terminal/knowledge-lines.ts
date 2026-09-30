@@ -17,7 +17,8 @@ type Expert = Directory["experts"][number];
 
 const INACTIVE = " (inactive)";
 
-const nameOf = (person: { name: string }): string =>
+/** A person's name, escaped and cut to the name column. */
+export const nameOf = (person: { name: string }): string =>
   fit(escapeForTerminal(person.name), MAX_NAME_WIDTH);
 
 const inactiveMark = (person: { active: boolean }): string =>
@@ -30,7 +31,14 @@ const truckFactorLine = ({ truckFactor }: Knowledge): string =>
         .map((person) => `${nameOf(person)}${inactiveMark(person)}`)
         .join(", ")}`;
 
-const badgesOf = ({ island, orphaned }: Directory): string =>
+/** `orphaned, island`: the flags of a file set, riskiest first; empty for neither. */
+export const badgesOf = ({
+  island,
+  orphaned,
+}: {
+  island: boolean;
+  orphaned: boolean;
+}): string =>
   [...(orphaned ? ["orphaned"] : []), ...(island ? ["island"] : [])].join(", ");
 
 const leadingExpert = (directory: Directory): string => {
