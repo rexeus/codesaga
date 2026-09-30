@@ -2,7 +2,11 @@
 // It counts what classification found; "not detected" stays in the human numbers.
 // One entry per tool and per month of the window.
 
+import { Order } from "effect";
+
+import { monthOf, monthsOf } from "../activity/buckets.js";
 import type { TimeRange } from "../analyze/analysis-window.js";
+import { groupBy } from "../collections/group-by.js";
 import type { Report } from "../report/report.js";
 import type { ClassifiedCommit } from "./classify.js";
 
@@ -12,11 +16,63 @@ type AutomationInput = {
   readonly window: TimeRange;
 };
 
+type Totals = Report["automation"]["totals"];
+type Tool = Report["automation"]["tools"][number];
+
+const countOf = (
+  commits: ReadonlyArray<ClassifiedCommit>,
+  commitClass: ClassifiedCommit["class"],
+): number => commits.filter((commit) => commit.class === commitClass).length;
+
+const totalsOf = (commits: ReadonlyArray<ClassifiedCommit>): Totals => ({
+  human: countOf(commits, "human"),
+  agentAssisted: countOf(commits, "agent-assisted"),
+  agent: countOf(commits, "agent"),
+  bot: countOf(commits, "bot"),
+});
+
+const byCommitsThenName = Order.combine(
+  Order.flip(
+    Order.mapInput(Order.Number, (tool: Tool) => tool.authored + tool.assisted),
+  ),
+  Order.mapInput(Order.String, (tool: Tool) => tool.name),
+);
+
+const toolsOf = (
+  commits: ReadonlyArray<ClassifiedCommit>,
+): Report["automation"]["tools"] =>
+  [
+    ...groupBy(
+      commits.flatMap((commit) =>
+        commit.tool === undefined ? [] : [{ ...commit, tool: commit.tool }],
+      ),
+      (commit) => commit.tool,
+    ),
+  ]
+    .map(([name, own]): Tool => ({
+      name,
+      kind: countOf(own, "bot") > 0 ? "bot" : "agent",
+      authored: countOf(own, "agent") + countOf(own, "bot"),
+      assisted: countOf(own, "agent-assisted"),
+    }))
+    .toSorted(byCommitsThenName);
+
 /**
  * The `automation` section: totals and per-month counts by class (every month
  * of the window, empty ones with zeros), and per tool the commits it authored
- * and the human commits it assisted, most commits first.
+ * and the human commits it assisted, most commits first. A bot matched only
+ * by the generic `[bot]` rule is listed under its account name.
  */
-export const automation = (_input: AutomationInput): Report["automation"] => {
-  throw new Error("@scaffold not implemented");
+export const automation = ({
+  commits,
+  window,
+}: AutomationInput): Report["automation"] => {
+  const byMonth = groupBy(commits, (commit) => monthOf(commit.time));
+  return {
+    totals: totalsOf(commits),
+    months: monthsOf(window).map((month) =>
+      Object.assign({ month }, totalsOf(byMonth.get(month) ?? [])),
+    ),
+    tools: toolsOf(commits),
+  };
 };

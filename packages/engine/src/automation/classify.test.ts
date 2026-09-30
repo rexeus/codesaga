@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyCommit } from "./classify.js";
+import { classifyCommit, isContributorCommit } from "./classify.js";
 
 type Signals = Parameters<typeof classifyCommit>[0];
 
@@ -362,5 +362,17 @@ describe("classifyCommit human commits", () => {
       class: "human",
       tool: undefined,
     });
+  });
+});
+
+describe("isContributorCommit", () => {
+  it("counts human and agent-assisted commits, not bot or agent commits", () => {
+    const classes = ["human", "agent-assisted", "agent", "bot"] as const;
+
+    expect(
+      classes.map((commitClass) =>
+        isContributorCommit({ class: commitClass, tool: undefined }),
+      ),
+    ).toStrictEqual([true, true, false, false]);
   });
 });

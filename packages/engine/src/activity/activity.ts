@@ -3,12 +3,12 @@
 // Cost is one pass over the commits plus one entry per week and month.
 
 import type { TimeRange } from "../analyze/analysis-window.js";
+import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
+import { groupBy } from "../collections/group-by.js";
+import { countCodeLines } from "../history/history.js";
 import type { Report } from "../report/report.js";
 import { monthOf, monthsOf, weekStartOf, weeksOf } from "./buckets.js";
-
-// @scaffold links the buckets into the module graph; the body calls them once implemented.
-void [monthOf, monthsOf, weekStartOf, weeksOf];
 
 type ActivityInput = {
   /** The window's commits of every class. */
@@ -18,12 +18,39 @@ type ActivityInput = {
   readonly isCodePath: (path: string) => boolean;
 };
 
+const distinctContributors = (commits: ReadonlyArray<ClassifiedCommit>) =>
+  new Set(
+    commits
+      .filter((commit) => isContributorCommit(commit))
+      .map((commit) => commit.author.email),
+  ).size;
+
 /**
  * The `activity` section: every week and month of the window, empty ones
  * with zeros. Weeks count every commit and the lines of code paths; a
  * month's `contributors` counts the distinct identities with a human or
  * agent-assisted commit.
  */
-export const activity = (_input: ActivityInput): Report["activity"] => {
-  throw new Error("@scaffold not implemented");
+export const activity = ({
+  commits,
+  window,
+  isCodePath,
+}: ActivityInput): Report["activity"] => {
+  const byWeek = groupBy(commits, (commit) => weekStartOf(commit.time));
+  const byMonth = groupBy(commits, (commit) => monthOf(commit.time));
+  return {
+    weeks: weeksOf(window).map((start) => {
+      const inWeek = byWeek.get(start) ?? [];
+      const { added, deleted } = countCodeLines(inWeek, isCodePath);
+      return { start, commits: inWeek.length, added, deleted };
+    }),
+    months: monthsOf(window).map((month) => {
+      const inMonth = byMonth.get(month) ?? [];
+      return {
+        month,
+        commits: inMonth.length,
+        contributors: distinctContributors(inMonth),
+      };
+    }),
+  };
 };

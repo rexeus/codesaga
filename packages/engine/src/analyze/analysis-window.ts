@@ -70,3 +70,7 @@ export const resolveTimeRange = (
       until: DateTime.formatIso(now),
     };
   });
+
+/** An ISO 8601 timestamp as seconds since the epoch, the unit of commit times. */
+export const toEpochSeconds = (iso: string): number =>
+  DateTime.toEpochMillis(DateTime.makeUnsafe(iso)) / 1000;

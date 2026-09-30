@@ -123,3 +123,7 @@ export const classifyCommit = (signals: CommitSignals): Classification => {
     ? { class: "human", tool: undefined }
     : { class: "agent-assisted", tool: assistant.name };
 };
+
+/** Whether the commit counts for a person: a human wrote it, possibly with an agent's help. */
+export const isContributorCommit = ({ class: commitClass }: Classification) =>
+  commitClass === "human" || commitClass === "agent-assisted";

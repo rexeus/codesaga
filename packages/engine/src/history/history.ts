@@ -75,3 +75,17 @@ export const readHistory = (
 
     return commits;
   });
+
+/** The lines the commits added to and deleted from the paths that `isCodePath` accepts. */
+export const countCodeLines = (
+  commits: ReadonlyArray<Pick<HistoryCommit, "changes">>,
+  isCodePath: (path: string) => boolean,
+): { readonly added: number; readonly deleted: number } => {
+  const changes = commits
+    .flatMap((commit) => commit.changes)
+    .filter((change) => isCodePath(change.path));
+  return {
+    added: changes.reduce((sum, change) => sum + change.added, 0),
+    deleted: changes.reduce((sum, change) => sum + change.deleted, 0),
+  };
+};
