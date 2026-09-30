@@ -1,6 +1,6 @@
 // Proves the packed `codesaga` package works the way `npx codesaga` will run it:
-// one bundled file, no runtime dependencies, and installable with npm and pnpm
-// with a working executable. Run after `pnpm --filter codesaga build`.
+// one bundled file, no runtime dependencies, installable with npm and pnpm, and
+// able to analyze a real git repository. Run after `pnpm --filter codesaga build`.
 import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -131,11 +131,42 @@ const expectBundledArtifact = (tarball) => {
   }
 };
 
+/** A tiny repository with three commits by one author. */
+const makeRepository = () => {
+  const root = join(temporary, "repository");
+  mkdirSync(root);
+  const env = {
+    ...process.env,
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_NOSYSTEM: "1",
+  };
+  /** @param {string[]} args */
+  const git = (...args) =>
+    execFileSync("git", ["-C", root, ...args], { env, stdio: "ignore" });
+  git("init", "--quiet");
+  for (const round of [1, 2, 3]) {
+    writeFileSync(join(root, "a.ts"), `run(${round});\n`);
+    git("add", "--all");
+    git(
+      "-c",
+      "user.name=Pack",
+      "-c",
+      "user.email=pack@example.invalid",
+      "commit",
+      "--quiet",
+      "-m",
+      `round ${round}`,
+    );
+  }
+  return root;
+};
+
 /**
  * @param {string} applicationRoot
  * @param {string} installer
+ * @param {string} repositoryRoot
  */
-const expectWorkingInstall = (applicationRoot, installer) => {
+const expectWorkingInstall = (applicationRoot, installer, repositoryRoot) => {
   const bin = join(applicationRoot, "node_modules", ".bin", binName);
   if (!existsSync(bin)) {
     throw new Error(
@@ -148,11 +179,27 @@ const expectWorkingInstall = (applicationRoot, installer) => {
       `codesaga from ${installer} reports:\n${version.stdout}${version.stderr}`,
     );
   }
+  const analysis = spawnSync(bin, ["analyze", "--json"], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+  });
+  const json = analysis.status === 0 ? analysis.stdout : "{}";
+  const contributors = fieldOf(json, "contributors");
+  if (
+    fieldOf(json, "schemaVersion") !== 1 ||
+    !Array.isArray(contributors) ||
+    contributors.length !== 1
+  ) {
+    throw new Error(
+      `codesaga from ${installer} did not analyze the repository:\n${analysis.stdout}${analysis.stderr}`,
+    );
+  }
 };
 
 try {
   const tarball = pack();
   expectBundledArtifact(tarball);
+  const repositoryRoot = makeRepository();
 
   const pnpmApplication = join(temporary, "application-pnpm");
   mkdirSync(pnpmApplication);
@@ -161,7 +208,7 @@ try {
     JSON.stringify({ name: "consumer", private: true }),
   );
   run(pnpm, ["add", "--ignore-scripts", tarball], pnpmApplication);
-  expectWorkingInstall(pnpmApplication, "pnpm");
+  expectWorkingInstall(pnpmApplication, "pnpm", repositoryRoot);
 
   // npm (and therefore npx) resolves dependencies differently from pnpm.
   const npmApplication = join(temporary, "application-npm");
@@ -178,7 +225,7 @@ try {
   if (existsSync(join(npmApplication, "node_modules", "effect"))) {
     throw new Error("npm installed effect; the bundle must not need it.");
   }
-  expectWorkingInstall(npmApplication, "npm");
+  expectWorkingInstall(npmApplication, "npm", repositoryRoot);
 
   console.log(
     `Package verified: codesaga v${expectedVersion} installs and runs with pnpm and npm.`,

@@ -17,7 +17,6 @@
     },
     "apps/cli": {
       "entry": ["src/bin.ts!"],
-      "ignoreDependencies": ["@codesaga/engine"],
       "project": ["src/**/*.ts!", "!src/testing/**!"]
     }
   }

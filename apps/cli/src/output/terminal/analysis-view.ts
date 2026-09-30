@@ -1,0 +1,165 @@
+// Owns the human view of `analyze`: one screen with the headline, activity, people, automation and languages.
+// Every name that came from git or the file system passes through terminal-safe escaping.
+import type { Report } from "@codesaga/engine";
+
+import { escapeForTerminal } from "../escape.js";
+import {
+  ago,
+  count,
+  daysBetween,
+  plural,
+  share,
+  span,
+  sparkline,
+} from "./format.js";
+import type { Style } from "./style.js";
+import { plain, renderTable } from "./table.js";
+
+const LABEL_WIDTH = 27;
+const ACTIVITY_MONTHS = 12;
+const TOP_CONTRIBUTORS = 5;
+const TOP_TOOLS = 3;
+const TOP_LANGUAGES = 5;
+const MAX_NAME_WIDTH = 24;
+const SHORT_SHA = 7;
+const SEPARATOR = " · ";
+
+const fit = (text: string, width: number): string =>
+  text.length > width ? `${text.slice(0, width - 1)}…` : text;
+
+const headline = (report: Report): string => {
+  const { repository } = report;
+  const place =
+    repository.head === null
+      ? "no commits"
+      : `${escapeForTerminal(repository.branch ?? "detached HEAD")} @ ${repository.head.slice(0, SHORT_SHA)}`;
+  return ["codesaga", escapeForTerminal(repository.name), place].join(
+    SEPARATOR,
+  );
+};
+
+const summary = (report: Report): string => {
+  const { overview, repository } = report;
+  const age =
+    repository.firstCommitAt === null
+      ? []
+      : [span(daysBetween(repository.firstCommitAt, report.generatedAt))];
+  return [
+    ...age,
+    plural(overview.commits, "commit"),
+    `${plural(overview.contributors.total, "contributor")}, ${count(overview.contributors.active90)} active in 90 days`,
+    `${plural(overview.loc, "line")} in ${plural(overview.languages.length, "language")}`,
+  ].join(SEPARATOR);
+};
+
+/** A labelled section: the label in the left column, its lines beside and below it. */
+const section = (
+  label: string,
+  lines: ReadonlyArray<string>,
+  style: Style,
+): ReadonlyArray<string> =>
+  lines.map((line, index) =>
+    index === 0
+      ? `${style.bold(label.padEnd(LABEL_WIDTH))}${line}`
+      : `${" ".repeat(LABEL_WIDTH)}${line}`,
+  );
+
+const activitySection = (
+  report: Report,
+  style: Style,
+): ReadonlyArray<string> => {
+  const months = report.activity.months.slice(-ACTIVITY_MONTHS);
+  const commits = months.map((month) => month.commits);
+  const total = commits.reduce((sum, value) => sum + value, 0);
+  const label =
+    months.length === 1
+      ? "Activity, last month"
+      : `Activity, last ${months.length} months`;
+  return section(
+    label,
+    [`${sparkline(commits)}  ${plural(total, "commit")}`],
+    style,
+  );
+};
+
+const contributorLines = (
+  report: Report,
+  style: Style,
+): ReadonlyArray<string> => {
+  const top = report.contributors.slice(0, TOP_CONTRIBUTORS);
+  const table = renderTable(
+    [
+      { header: "commits", align: "right" },
+      { header: "active days", align: "right" },
+      { header: "last commit", align: "left" },
+    ],
+    top.map((person) => [
+      plain(count(person.commits)),
+      plain(count(person.activeDays)),
+      plain(ago(person.lastCommitAt, report.generatedAt)),
+    ]),
+    style,
+  );
+  const labels = [
+    style.bold("Contributors".padEnd(LABEL_WIDTH)),
+    ...top.map((person) =>
+      `  ${fit(escapeForTerminal(person.name), MAX_NAME_WIDTH)}`.padEnd(
+        LABEL_WIDTH,
+      ),
+    ),
+  ];
+  return table.map((line, index) => `${labels[index] ?? ""}${line}`);
+};
+
+const automationLines = (report: Report): ReadonlyArray<string> => {
+  const { totals, tools } = report.automation;
+  const all = totals.human + totals.agentAssisted + totals.agent + totals.bot;
+  const shares = Object.entries({
+    "agent-assisted": totals.agentAssisted,
+    agent: totals.agent,
+    bot: totals.bot,
+  })
+    .filter(([, value]) => value > 0)
+    .map(([name, value]) => `${name} ${share(value, all)}`);
+  const toolNames = tools
+    .slice(0, TOP_TOOLS)
+    .map(
+      (tool) =>
+        `${escapeForTerminal(tool.name)} ${count(tool.authored + tool.assisted)}`,
+    );
+  return [
+    shares.length === 0 ? "none detected" : shares.join(SEPARATOR),
+    ...(toolNames.length === 0 ? [] : [toolNames.join(SEPARATOR)]),
+  ];
+};
+
+const languageLine = (report: Report): string => {
+  const { languages, loc } = report.overview;
+  return languages.length === 0
+    ? "no code files"
+    : languages
+        .slice(0, TOP_LANGUAGES)
+        .map(
+          ({ name, loc: lines }) =>
+            `${escapeForTerminal(name)} ${share(lines, loc)}`,
+        )
+        .join(SEPARATOR);
+};
+
+/**
+ * Renders the terminal view of an `analyze` report. The report must not be
+ * cut to `--limit`: the view picks its own top entries. The result has no
+ * trailing newline.
+ */
+export const renderAnalysis = (report: Report, style: Style): string =>
+  [
+    style.bold(headline(report)),
+    summary(report),
+    "",
+    ...activitySection(report, style),
+    ...contributorLines(report, style),
+    ...section("Automation", automationLines(report), style),
+    ...section("Languages", [languageLine(report)], style),
+    "",
+    style.dim("--html for the dashboard, --json for agents"),
+  ].join("\n");
