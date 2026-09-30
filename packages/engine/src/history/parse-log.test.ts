@@ -174,12 +174,52 @@ describe("LogParser changes", () => {
   });
 });
 
+describe("LogParser deletions", () => {
+  it("marks the file a commit deletes, and not a modified, added or renamed one", () => {
+    const raw =
+      `${header({ sha: "d" })}\n` +
+      ":100644 100644 f00c965 f00c965 R100\0old.ts\0new.ts\0" +
+      ":000000 100644 0000000 30bf1cc A\0added.ts\0" +
+      ":100644 000000 587be6b 0000000 D\0dir/gone.ts\0" +
+      ":100644 100644 3e75765 337b506 M\0edited.ts\0" +
+      "0\t0\t\0old.ts\0new.ts\0" +
+      "11\t0\tadded.ts\0" +
+      "0\t7\tdir/gone.ts\0" +
+      "1\t1\tedited.ts\0";
+
+    expect(parse([raw])[0]?.changes).toStrictEqual([
+      { path: "new.ts", renamedFrom: "old.ts", added: 0, deleted: 0 },
+      { path: "added.ts", added: 11, deleted: 0 },
+      { path: "dir/gone.ts", added: 0, deleted: 7, removed: true },
+      { path: "edited.ts", added: 1, deleted: 1 },
+    ]);
+  });
+
+  it("does not carry a deletion over to the next commit's file of the same name", () => {
+    const raw =
+      `${header({ sha: "e" })}\n:100644 000000 587be6b 0000000 D\0a.ts\0` +
+      "0\t3\ta.ts\0" +
+      `${header({ sha: "f" })}\n:000000 100644 0000000 587be6b A\0a.ts\0` +
+      "3\t0\ta.ts\0";
+
+    expect(parse([raw]).map(({ changes }) => changes)).toStrictEqual([
+      [{ path: "a.ts", added: 0, deleted: 3, removed: true }],
+      [{ path: "a.ts", added: 3, deleted: 0 }],
+    ]);
+  });
+});
+
 describe("LogParser chunking", () => {
   it("yields the same commits however the output is split into chunks", () => {
     const raw =
-      `${header({ sha: "aaa", trailers: ["Made-with: Cursor"] })}\n3\t1\tsrc/a.ts\0` +
+      `${header({ sha: "aaa", trailers: ["Made-with: Cursor"] })}\n` +
+      ":100644 100644 3e75765 337b506 M\0src/a.ts\0" +
+      ":100644 100644 f00c965 f00c965 R100\0old.ts\0new.ts\0" +
+      "3\t1\tsrc/a.ts\0" +
       "2\t1\t\0old.ts\0new.ts\0" +
-      `${header({ sha: "bbb", author: ["Zoë", "z@example.com"] })}\n-\t-\tlogo.png\0`;
+      `${header({ sha: "bbb", author: ["Zoë", "z@example.com"] })}\n` +
+      ":100644 000000 587be6b 0000000 D\0logo.png\0" +
+      "-\t-\tlogo.png\0";
 
     const whole = parse([raw]);
     const bySingleCharacters = parse(raw.split(""));

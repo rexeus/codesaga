@@ -69,3 +69,35 @@ describe("contributionsByFile", () => {
     expect(first.map(({ email }) => email)).toStrictEqual(["ada@example.com"]);
   });
 });
+
+const previousLife = (added: number): Partial<ClassifiedCommit> => ({
+  changes: [{ path: "src/a.ts", added, deleted: 0, previousLife: true }],
+});
+
+describe("contributionsByFile lives", () => {
+  it("credits only the current life of a file, with its creator as first author", () => {
+    const contributions = contributionsByFile(
+      [
+        touching("2026-03-01T00:00:00Z", 20, { author: grace }),
+        touching("2026-02-01T00:00:00Z", 0, {
+          author: ada,
+          ...previousLife(0),
+        }),
+        touching("2026-01-01T00:00:00Z", 400, {
+          author: ada,
+          ...previousLife(400),
+        }),
+      ],
+      new Set(["src/a.ts"]),
+    ).get("src/a.ts");
+
+    expect(contributions).toStrictEqual([
+      {
+        email: "grace@example.com",
+        adds: 20,
+        lastTime: at("2026-03-01T00:00:00Z"),
+        firstAuthor: true,
+      },
+    ]);
+  });
+});

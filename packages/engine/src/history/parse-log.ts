@@ -1,12 +1,15 @@
-// Owns reading `git log -z --numstat` output, incrementally.
+// Owns reading `git log -z --raw --numstat` output, incrementally.
 //
 // The log is requested with the format in `LOG_FORMAT_ARGS`. Each commit then
 // arrives as NUL-terminated tokens:
-//   \u0001<sha> NUL <8 header fields, NUL-terminated> [\n]<added>\t<deleted>\t<path> NUL ...
+//   \u0001<sha> NUL <8 header fields, NUL-terminated> [\n]<raw entries><numstat entries>
 // The header fields are author time, author date with offset, author and
-// committer name and email, the unfolded trailers, and the message. A rename
-// entry has an empty path after the counts and is followed by two more
-// tokens, the old and the new path. Binary files show `-` for counts.
+// committer name and email, the unfolded trailers, and the message.
+// A raw entry is `:<modes> <ids> <status>` followed by one path token, or two
+// (old and new) for a rename or copy; it tells which files the commit deletes.
+// A numstat entry is `<added>\t<deleted>\t<path>`. A rename entry has an empty
+// path after the counts and is followed by two more tokens, the old and the
+// new path. Binary files show `-` for counts.
 
 /** One file touched by a commit. */
 type Change = {
@@ -14,6 +17,8 @@ type Change = {
   readonly path: string;
   /** Set when the commit renamed the file. */
   readonly renamedFrom?: string;
+  /** Set when the commit deletes the file; a rename's old path is not a deletion. */
+  readonly removed?: true;
   /** 0 for binary files. */
   readonly added: number;
   readonly deleted: number;
@@ -44,6 +49,7 @@ export type Commit = {
 export const LOG_FORMAT_ARGS = [
   "--no-merges",
   "-M",
+  "--raw",
   "--numstat",
   "-z",
   "--use-mailmap",
@@ -57,8 +63,9 @@ const HEADER_FIELDS = 8;
 const GENERATED_WITH = /^\W*Generated with \[[^\]]+\]/iu;
 const OFFSET = /([+-])(\d{2}):(\d{2})$/u;
 const NUMSTAT = /^(\d+|-)\t(\d+|-)\t(.*)$/su;
+const RAW_STATUS = /^:\d+ \d+ \w+ \w+ ([A-Z])\d*$/u;
 
-type Phase = "header" | "entry" | "renamedFrom" | "renamedTo";
+type Phase = "header" | "entry" | "rawPath" | "renamedFrom" | "renamedTo";
 
 type OpenCommit = Omit<Commit, "changes"> & { changes: Array<Change> };
 
@@ -117,6 +124,10 @@ export class LogParser {
   #header: Array<string> = [];
   #counts = { added: 0, deleted: 0 };
   #renamedFrom = "";
+  /** Paths the open commit deletes, from its raw entries. */
+  #removed = new Set<string>();
+  #rawPaths = 0;
+  #rawStatus = "";
 
   /** Consumes the next piece of output and returns the commits it completed. */
   push(chunk: string): ReadonlyArray<Commit> {
@@ -135,6 +146,10 @@ export class LogParser {
   #consume(token: string): ReadonlyArray<Commit> {
     if (this.#phase === "header") {
       this.#readHeaderField(token);
+      return [];
+    }
+    if (this.#phase === "rawPath") {
+      this.#readRawPath(token);
       return [];
     }
     if (this.#phase === "renamedFrom") {
@@ -170,6 +185,7 @@ export class LogParser {
     const finished = this.#close();
     this.#sha = sha;
     this.#header = [];
+    this.#removed = new Set();
     this.#phase = "header";
     return finished;
   }
@@ -182,8 +198,26 @@ export class LogParser {
     }
   }
 
+  #readRawPath(path: string): void {
+    if (this.#rawStatus === "D") {
+      this.#removed.add(path);
+    }
+    this.#rawPaths -= 1;
+    if (this.#rawPaths === 0) {
+      this.#phase = "entry";
+    }
+  }
+
   #readEntry(token: string): ReadonlyArray<Commit> {
-    const match = NUMSTAT.exec(token.replace(/^\n/u, ""));
+    const entry = token.replace(/^\n/u, "");
+    const status = RAW_STATUS.exec(entry)?.[1];
+    if (status !== undefined) {
+      this.#rawStatus = status;
+      this.#rawPaths = status === "R" || status === "C" ? 2 : 1;
+      this.#phase = "rawPath";
+      return [];
+    }
+    const match = NUMSTAT.exec(entry);
     if (this.#open === undefined || match === null) {
       return [];
     }
@@ -192,7 +226,11 @@ export class LogParser {
     if (path === "") {
       this.#phase = "renamedFrom";
     } else {
-      this.#open.changes.push({ path, ...this.#counts });
+      this.#open.changes.push({
+        path,
+        ...this.#counts,
+        ...(this.#removed.has(path) ? { removed: true } : {}),
+      });
     }
     return [];
   }

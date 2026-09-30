@@ -1,5 +1,6 @@
 // Owns the repository's commits as the analysis reads them: the whole
-// non-merge history, with every change under the path its file has today.
+// non-merge history, with every change under the path its file has today and
+// told apart by the life of that path it belongs to.
 import { Effect, Stream } from "effect";
 
 import type { GitError } from "../git/git-errors.js";
@@ -12,6 +13,12 @@ export type FileChange = {
   readonly path: string;
   readonly added: number;
   readonly deleted: number;
+  /**
+   * Set when the change belongs to an earlier life of the path: the commit
+   * deleted the file, or a later commit did and the path was used again.
+   * Absent for the life of the file that exists at the path today.
+   */
+  readonly previousLife?: true;
 };
 
 /** A commit whose changes are named by current paths. */
@@ -24,26 +31,48 @@ export type HistoryOptions = {
   readonly skipCommits: ReadonlySet<string>;
 };
 
-/** Renames the commit's changes to current paths and records its own renames in `renamedTo`. */
-const resolveRenames = (
-  commit: Commit,
-  renamedTo: Map<string, string>,
-): HistoryCommit => ({
-  ...commit,
-  changes: commit.changes.map((change) => {
-    const path = renamedTo.get(change.path) ?? change.path;
+/** What the walk from the newest commit has learned about paths. */
+type Lineage = {
+  /** Old path to the path its file has today. */
+  readonly renamedTo: Map<string, string>;
+  /** Current paths whose deletion the walk has passed; everything older is a previous life. */
+  readonly deleted: Set<string>;
+};
+
+/**
+ * Renames the commit's changes to current paths and marks the ones of a
+ * previous life; records the commit's own renames and deletions in `lineage`.
+ * A rename's old path is not a deletion, and deleting and re-adding a path in
+ * one commit is an edit, as the commit's diff shows it.
+ */
+const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
+  const deletedHere: Array<string> = [];
+  const changes = commit.changes.map((change): FileChange => {
+    const path = lineage.renamedTo.get(change.path) ?? change.path;
     if (change.renamedFrom !== undefined) {
-      renamedTo.set(change.renamedFrom, path);
+      lineage.renamedTo.set(change.renamedFrom, path);
     }
-    return { path, added: change.added, deleted: change.deleted };
-  }),
-});
+    if (change.removed === true) {
+      deletedHere.push(path);
+    }
+    const { added, deleted } = change;
+    return change.removed === true || lineage.deleted.has(path)
+      ? { path, added, deleted, previousLife: true }
+      : { path, added, deleted };
+  });
+  for (const path of deletedHere) {
+    lineage.deleted.add(path);
+  }
+  return { ...commit, changes };
+};
 
 /**
  * Reads every non-merge commit of `HEAD` from newest to oldest, author and
  * committer after `.mailmap`. A rename makes every older commit that touched
  * the old path name the new one, so a file keeps its history under its
  * current name; deleted files keep the path they had when they were deleted.
+ * A deletion ends a path's life: its own change and every older change to the
+ * path are marked `previousLife`, so a file created there later starts fresh.
  *
  * The whole repository's log is read, never a path-limited one: a file moved
  * into the universe from outside keeps the history it had before the move.
@@ -55,7 +84,7 @@ export const readHistory = (
 ): Effect.Effect<ReadonlyArray<HistoryCommit>, GitError, Git> =>
   Effect.gen(function* () {
     const git = yield* Git;
-    const renamedTo = new Map<string, string>();
+    const lineage: Lineage = { renamedTo: new Map(), deleted: new Set() };
     const commits: Array<HistoryCommit> = [];
 
     yield* git.stream(["log", ...LOG_FORMAT_ARGS]).pipe(
@@ -67,7 +96,7 @@ export const readHistory = (
       Stream.runForEach((commit) =>
         Effect.sync(() => {
           if (!options.skipCommits.has(commit.sha)) {
-            commits.push(resolveRenames(commit, renamedTo));
+            commits.push(resolveLineage(commit, lineage));
           }
         }),
       ),

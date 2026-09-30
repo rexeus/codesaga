@@ -211,3 +211,50 @@ layer(NodeServices.layer)("inspect window and agents", (it) => {
     }),
   );
 });
+
+const lines = (count: number) =>
+  Array.from({ length: count }, (_, index) => `line ${index}\n`).join("");
+
+layer(NodeServices.layer)("inspect a recreated file", (it) => {
+  it.effect(
+    "names only the recreating author as expert, while the activity counts every life",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* repo.commit(
+          "2026-01-05T09:00:00Z",
+          { "src/life.ts": lines(400) },
+          { author: { name: "Ada Lovelace", email: "ada@example.com" } },
+        );
+        yield* repo.git("rm", "src/life.ts");
+        yield* repo.commit(
+          "2026-02-01T09:00:00Z",
+          {},
+          { author: { name: "Ada Lovelace", email: "ada@example.com" } },
+        );
+        yield* repo.commit(
+          "2026-02-20T09:00:00Z",
+          { "src/life.ts": lines(20) },
+          { author: grace },
+        );
+
+        const { matches } = yield* inspect({
+          ...analyzeOptionsFor(repo),
+          patterns: ["src/life.ts"],
+        });
+
+        assert.deepStrictEqual(
+          matches[0]?.experts.map(({ email }) => email),
+          ["grace@example.com"],
+        );
+        assert.strictEqual(matches[0]?.commits, 3);
+        assert.deepStrictEqual(matches[0]?.automation, {
+          human: 3,
+          agentAssisted: 0,
+          agent: 0,
+          bot: 0,
+        });
+      }),
+  );
+});

@@ -65,9 +65,11 @@ const tally = (
 };
 
 /**
- * What each human did to each of `paths`. `commits` run newest first, so the
- * last commit seen for a path is its oldest: its author is the first author
- * unless a bot or an agent wrote it, in which case nobody is.
+ * What each human did to each of `paths`, in the file's current life only: a
+ * path deleted and created again gives the old file's work no credit.
+ * `commits` run newest first, so the last commit seen for a path is its
+ * oldest: its author is the first author unless a bot or an agent wrote it,
+ * in which case nobody is.
  */
 export const contributionsByFile = (
   commits: ReadonlyArray<ClassifiedCommit>,
@@ -77,8 +79,8 @@ export const contributionsByFile = (
   const oldest = new Map<string, ClassifiedCommit>();
   for (const commit of commits) {
     const contributor = isContributorCommit(commit);
-    for (const { path, added } of commit.changes) {
-      if (!paths.has(path)) {
+    for (const { path, added, previousLife } of commit.changes) {
+      if (previousLife === true || !paths.has(path)) {
         continue;
       }
       oldest.set(path, commit);

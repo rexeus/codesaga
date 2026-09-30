@@ -16,6 +16,8 @@
 
 **Bot commit** — a commit whose author is an automation account such as Dependabot, or any other `[bot]` account that is not an agent.
 
+**Life of a path** — the history of the file that exists at a path today: from the commit that created it (or renamed a file onto the path) to HEAD, following renames. A deletion ends a life, so a file recreated at the path starts a new one. Knowledge reads only the current life; the activity sections count every life, because that work happened. Deleting and re-adding a path in one commit is an edit, not a new life.
+
 **Expert (DOE)** — a human whose Degree of Expertise for a file is at least 0.7 times the highest DOE among the file's authors, with at least one added line. DOE weighs lines added, first authorship, days since the last commit to the file (measured from the HEAD commit) and file size. Bot and agent commits never make an expert; agent-assisted commits credit their human author.
 
 **Truck factor** — the number of people who must leave before more than half of a file set has no expert, found by removing, greedily, the person who is expert on the most still-covered files. The report names the removed people in order.

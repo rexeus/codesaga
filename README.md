@@ -105,7 +105,7 @@ Repository-relative files, directories or globs (quote globs so the shell leaves
 
 ## How the numbers work
 
-- **One pass over the history.** codesaga reads `git log` of HEAD once, without merge commits, following renames. Every section is computed from that.
+- **One pass over the history.** codesaga reads `git log` of HEAD once, without merge commits, following renames. A file deleted and later recreated at the same path starts a new life: knowledge credits only the file that exists today, while the activity sections still count the earlier work. Every section is computed from that.
 - **Universe** — the files that count as code: tracked by git, not ignored, not marked `linguist-generated` or `linguist-vendored`, not in `vendor/`, `node_modules/`, `dist/`, `build/` or generated folders, not binary or minified, and matching the language list or `--include`. Lines added and deleted only count for such paths, so lockfiles and vendored code do not dominate the charts.
 - **Activity window** — `--since` until now; without `--since`, the whole history. Weeks start on Monday and, like months, are in UTC. The punch card uses each author's own time zone and counts only commits by people.
 - **Identities** — a person is their author email after `.mailmap`. Two emails of one person count as two people until `.mailmap` joins them; codesaga never merges by name, because names collide.
@@ -139,7 +139,7 @@ The report states every threshold under `thresholds`, and the JSON contract is v
 - **Expertise is an estimate from history, not a fact.** The model's constants were fitted on other projects; `git blame` line ownership is not used.
 - **A commit with several agents counts for one of them** in the per-tool list.
 - **Indented `Co-Authored-By:` lines** inside a squashed commit body are not git trailers and are not detected.
-- **Scope follows current paths.** A file moved out of `analyze <path>` takes its history with it; a file moved in brings its history along. A path that is deleted and later recreated shares one history.
+- **Scope follows current paths.** A file moved out of `analyze <path>` takes its history with it; a file moved in brings its history along.
 - **Shallow clones lack history.** codesaga warns and ignores the boundary commit; run `git fetch --unshallow` for full results. Partial clones (`--filter=blob:none`) make git fetch every blob during the run; use a full clone.
 - **Commits dated before 1970 or in the future** are left out.
 - **No forge data.** Pull requests, reviews and issues live on GitHub or GitLab, not in git.
