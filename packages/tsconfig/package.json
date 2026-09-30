@@ -1,0 +1,11 @@
+{
+  "name": "@codesaga/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./dom.json": "./dom.json",
+    "./node.json": "./node.json"
+  }
+}
