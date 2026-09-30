@@ -78,3 +78,30 @@ export const coverageSentence = ({
   files === 0
     ? "No code files."
     : `${formatCount(withoutExpert)} of ${formatCount(files)} files have no expert; ${formatCount(withoutActiveExpert)} have no active expert.`;
+
+/**
+ * The one sentence that replaces a table of identical rows: set when every
+ * listed directory has the same single expert, `null` otherwise. The table
+ * then leaves out the per-row reasons, which would only repeat it.
+ */
+export const soleExpertSummary = ({
+  directories,
+}: Knowledge): string | null => {
+  const [first] = directories;
+  const sole = first?.experts[0];
+  if (
+    sole === undefined ||
+    !directories.every(
+      ({ experts }) => experts.length === 1 && experts[0]?.email === sole.email,
+    )
+  ) {
+    return null;
+  }
+  const { name, active, status } = personLine(sole);
+  const who = active ? name : `${name} (${status})`;
+  const where =
+    directories.length === 1
+      ? "this directory"
+      : `all ${formatCount(directories.length)} directories`;
+  return `${who} is the only expert in ${where}.`;
+};

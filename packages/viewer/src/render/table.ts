@@ -1,3 +1,5 @@
+import { showAllLabel, visibleRows } from "../present/row-limit.js";
+import type { RowLimit } from "../present/row-limit.js";
 import { nextSort } from "../present/sort-state.js";
 import type { Direction, SortState } from "../present/sort-state.js";
 import { h } from "./dom.js";
@@ -12,13 +14,20 @@ export type Column<Row> = {
 };
 
 /** How a table sorts: its first state, the order a state gives and each column's first direction. */
-export type Sorting<Row> = {
+type Sorting<Row> = {
   readonly initial: SortState;
   readonly sort: (rows: readonly Row[], state: SortState) => Row[];
   readonly natural: (key: string) => Direction;
 };
 
-const ROW_LIMIT = 100;
+/** How a table behaves beyond its columns. */
+export type TableOptions<Row> = {
+  readonly sorting?: Sorting<Row>;
+  /** Defaults to the first 100 rows. */
+  readonly rowLimit?: RowLimit;
+};
+
+const DEFAULT_ROW_LIMIT: RowLimit = { rows: 100, noun: "rows" };
 const ARROWS: Record<Direction, string> = { asc: "▲", desc: "▼" };
 const ARIA_SORT: Record<Direction, string> = {
   asc: "ascending",
@@ -78,7 +87,7 @@ const headerCell = <Row>(
 };
 
 /**
- * A table of `rows`. Only the first `ROW_LIMIT` rows are built until the
+ * A table of `rows`. Only the first `rowLimit.rows` rows are built until the
  * reader asks for all of them, so a report with thousands of rows stays fast.
  * With `sorting`, headers of columns with a `sortKey` sort the rows on click.
  */
@@ -86,12 +95,12 @@ export const dataTable = <Row>(
   caption: string,
   columns: readonly Column<Row>[],
   rows: readonly Row[],
-  sorting?: Sorting<Row>,
+  { sorting, rowLimit = DEFAULT_ROW_LIMIT }: TableOptions<Row> = {},
 ): HTMLElement => {
   let state = sorting?.initial;
   let showAll = false;
   const body = h("tbody", "");
-  const more = h("button", "show-all", `Show all ${rows.length} rows`);
+  const more = h("button", "show-all", showAllLabel(rows.length, rowLimit));
   more.type = "button";
 
   const render = (): void => {
@@ -99,10 +108,9 @@ export const dataTable = <Row>(
       sorting === undefined || state === undefined
         ? rows
         : sorting.sort(rows, state);
-    body.replaceChildren(
-      ...bodyRows(columns, showAll ? ordered : ordered.slice(0, ROW_LIMIT)),
-    );
-    more.hidden = showAll || rows.length <= ROW_LIMIT;
+    const shown = visibleRows(ordered, rowLimit, showAll);
+    body.replaceChildren(...bodyRows(columns, shown));
+    more.hidden = shown.length === rows.length;
     for (const { show } of headers) {
       show(state);
     }

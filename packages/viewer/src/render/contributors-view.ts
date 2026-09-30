@@ -74,9 +74,12 @@ export const renderContributors = (report: Report): HTMLElement => {
     report.contributors.length === 0
       ? h("p", "empty", "No contributors in the window.")
       : dataTable("Contributors", columns, report.contributors, {
-          initial: { key: "commits", direction: "desc" },
-          sort: sortContributors,
-          natural: naturalDirection,
+          sorting: {
+            initial: { key: "commits", direction: "desc" },
+            sort: sortContributors,
+            natural: naturalDirection,
+          },
+          rowLimit: { rows: 100, noun: "contributors" },
         }),
     ...(limited === null ? [] : [h("p", "note", limited)]),
   );

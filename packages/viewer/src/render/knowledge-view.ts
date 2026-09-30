@@ -5,10 +5,12 @@ import {
   coverageSentence,
   directoryBadges,
   expertLine,
+  soleExpertSummary,
   truckFactorPeople,
   truckFactorSentence,
 } from "../present/knowledge.js";
 import type { Badge, PersonLine } from "../present/knowledge.js";
+import type { RowLimit } from "../present/row-limit.js";
 import { h } from "./dom.js";
 import { section } from "./section.js";
 import { dataTable } from "./table.js";
@@ -45,27 +47,29 @@ const experts = ({ experts: list }: Directory): HTMLElement =>
     }),
   );
 
-const status = (directory: Directory): HTMLElement =>
-  h(
-    "div",
-    "status",
+const status =
+  (showReasons: boolean) =>
+  (directory: Directory): HTMLElement =>
     h(
       "div",
-      "badges",
-      ...directoryBadges(directory).map((flag) => badge(flag)),
-    ),
-    ...(directory.reasons.length === 0
-      ? []
-      : [
-          h(
-            "ul",
-            "plain reasons",
-            ...directory.reasons.map((reason) => h("li", "muted", reason)),
-          ),
-        ]),
-  );
+      "status",
+      h(
+        "div",
+        "badges",
+        ...directoryBadges(directory).map((flag) => badge(flag)),
+      ),
+      ...(!showReasons || directory.reasons.length === 0
+        ? []
+        : [
+            h(
+              "ul",
+              "plain reasons",
+              ...directory.reasons.map((reason) => h("li", "muted", reason)),
+            ),
+          ]),
+    );
 
-const columns: readonly Column<Directory>[] = [
+const columns = (showReasons: boolean): readonly Column<Directory>[] => [
   { label: "Directory", cell: ({ path }) => h("code", "", path) },
   { label: "Files", numeric: true, cell: ({ files }) => formatCount(files) },
   {
@@ -73,9 +77,24 @@ const columns: readonly Column<Directory>[] = [
     numeric: true,
     cell: ({ truckFactor }) => formatCount(truckFactor),
   },
-  { label: "Status", cell: status },
+  { label: "Status", cell: status(showReasons) },
   { label: "Experts", cell: experts },
 ];
+
+const ROW_LIMIT: RowLimit = { rows: 10, noun: "directories" };
+
+const directoryTable = (knowledge: Report["knowledge"]): HTMLElement[] => {
+  const summary = soleExpertSummary(knowledge);
+  return [
+    ...(summary === null ? [] : [h("p", "", summary)]),
+    dataTable(
+      "Directories by knowledge risk",
+      columns(summary === null),
+      knowledge.directories,
+      { rowLimit: ROW_LIMIT },
+    ),
+  ];
+};
 
 const truckFactorPanel = (knowledge: Report["knowledge"]): HTMLElement =>
   h(
@@ -106,13 +125,9 @@ export const renderKnowledge = (report: Report): HTMLElement => {
     ...(knowledge.truckFactor.people.length === 0
       ? []
       : [truckFactorPanel(knowledge)]),
-    knowledge.directories.length === 0
-      ? h("p", "empty", "No directory is large enough to report.")
-      : dataTable(
-          "Directories by knowledge risk",
-          columns,
-          knowledge.directories,
-        ),
+    ...(knowledge.directories.length === 0
+      ? [h("p", "empty", "No directory is large enough to report.")]
+      : directoryTable(knowledge)),
     ...(limited === null ? [] : [h("p", "note", limited)]),
     h(
       "p",

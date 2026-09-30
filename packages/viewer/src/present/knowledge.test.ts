@@ -5,6 +5,7 @@ import {
   coverageSentence,
   directoryBadges,
   expertLine,
+  soleExpertSummary,
   truckFactorPeople,
   truckFactorSentence,
 } from "./knowledge.js";
@@ -95,5 +96,45 @@ describe("truck factor", () => {
     expect(coverageSentence(knowledge)).toBe(
       "27 of 473 files have no expert; 81 have no active expert.",
     );
+  });
+});
+
+describe("soleExpertSummary", () => {
+  const [found] = directory("docs").experts;
+  if (found === undefined) {
+    throw new Error("the sample's docs directory has no expert");
+  }
+  const lena = found;
+  const alone = (path: string, experts: readonly (typeof lena)[] = [lena]) => ({
+    ...directory("docs"),
+    path,
+    experts,
+  });
+  const summary = (...directories: ReturnType<typeof alone>[]) =>
+    soleExpertSummary({ ...knowledge, directories });
+
+  it("names the one expert of every directory", () => {
+    const maya = { ...lena, name: "Maya Lindqvist", active: true };
+    const byMaya = (path: string) => alone(path, [maya]);
+
+    expect(summary(byMaya("a"), byMaya("b"), byMaya("c"))).toBe(
+      "Maya Lindqvist is the only expert in all 3 directories.",
+    );
+  });
+
+  it("words it for a single directory and says when the expert left", () => {
+    expect(summary(alone("a"))).toBe(
+      "Lena Fischer (inactive since 2025-11-14) is the only expert in this directory.",
+    );
+  });
+
+  it("stays silent once a second person or a missing expert appears", () => {
+    const other = { ...lena, email: "other@example.com" };
+
+    expect(soleExpertSummary(knowledge)).toBeNull();
+    expect(summary(alone("a"), alone("b", []))).toBeNull();
+    expect(summary(alone("a"), alone("b", [other]))).toBeNull();
+    expect(summary(alone("a", [lena, other]))).toBeNull();
+    expect(summary()).toBeNull();
   });
 });
