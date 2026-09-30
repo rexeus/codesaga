@@ -1,6 +1,7 @@
 import { NodeServices } from "@effect/platform-node";
 import { assert, describe, it, layer } from "@effect/vitest";
 import { Effect, FileSystem, Path } from "effect";
+import { TestClock } from "effect/testing";
 
 import { cacheStatus, loadCache, storeCache } from "./history-cache.js";
 import type { HistoryCache } from "./history-cache.js";
@@ -76,6 +77,46 @@ layer(NodeServices.layer)("the history cache file", (effectIt) => {
         yield* loadCache(path.join(directory, "missing.json")),
       );
     }),
+  );
+});
+
+layer(NodeServices.layer)("storing the history cache", (effectIt) => {
+  effectIt.effect(
+    "removes temporary files of dead runs older than an hour and keeps younger ones",
+    () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const directory = yield* fs.makeTempDirectoryScoped({
+          prefix: "codesaga-cache-",
+        });
+        const file = path.join(directory, "history-v1.json");
+        const now = Date.parse("2026-03-10T12:00:00Z");
+        yield* TestClock.setTime(now);
+        const hourAgo = now - 60 * 60 * 1000;
+        const write = (name: string, modified: number) =>
+          fs
+            .writeFileString(path.join(directory, name), "")
+            .pipe(
+              Effect.andThen(
+                fs.utimes(
+                  path.join(directory, name),
+                  new Date(modified),
+                  new Date(modified),
+                ),
+              ),
+            );
+        yield* write("history-v1.json.dead.tmp", hourAgo - 60_000);
+        yield* write("history-v1.json.running.tmp", hourAgo + 60_000);
+        yield* write("unrelated.tmp", hourAgo - 60_000);
+
+        yield* storeCache(file, cache);
+
+        assert.deepStrictEqual(
+          (yield* fs.readDirectory(directory)).toSorted(),
+          ["history-v1.json", "history-v1.json.running.tmp", "unrelated.tmp"],
+        );
+      }),
   );
 });
 

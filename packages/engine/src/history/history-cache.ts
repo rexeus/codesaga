@@ -1,6 +1,6 @@
 // Owns the history cache file: what it holds, where it lives, and whether it still applies.
 // The cache is an optimization only: reading or writing it never fails.
-import { Effect, FileSystem, Path, Schema } from "effect";
+import { Clock, Effect, FileSystem, Option, Path, Schema } from "effect";
 
 import { Git } from "../git/git.js";
 import type { Commit } from "./parse-log.js";
@@ -125,9 +125,41 @@ export const loadCache = (
     };
   }).pipe(Effect.orElseSucceed(() => undefined));
 
+/** A temporary file this old belongs to a run that died; a younger one may belong to a live run. */
+const STALE_TEMPORARY_MS = 60 * 60 * 1000;
+
+/** Removes the temporary files of `file` that a run which died left behind. */
+const removeStaleTemporaries = (
+  file: string,
+): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const now = yield* Clock.currentTimeMillis;
+    const directory = path.dirname(file);
+    const isTemporary = (name: string) =>
+      name.startsWith(`${path.basename(file)}.`) && name.endsWith(".tmp");
+    const removeIfStale = (name: string) =>
+      Effect.gen(function* () {
+        const { mtime } = yield* fs.stat(path.join(directory, name));
+        if (
+          Option.isSome(mtime) &&
+          now - mtime.value.getTime() > STALE_TEMPORARY_MS
+        ) {
+          yield* fs.remove(path.join(directory, name), { force: true });
+        }
+      }).pipe(Effect.ignore);
+    const names = yield* fs.readDirectory(directory);
+    yield* Effect.forEach(
+      names.filter((name) => isTemporary(name)),
+      removeIfStale,
+    );
+  }).pipe(Effect.ignore);
+
 /**
  * Replaces the cache in `file` atomically, so a concurrent run sees the old or
  * the new file, never a torn one. A failure leaves the old file in place.
+ * Temporary files of runs that died over an hour ago are removed on the way.
  */
 export const storeCache = (
   file: string,
@@ -143,6 +175,7 @@ export const storeCache = (
     });
     const temporary = `${file}.${crypto.randomUUID()}.tmp`;
     yield* fs.makeDirectory(path.dirname(file), { recursive: true });
+    yield* removeStaleTemporaries(file);
     yield* fs.writeFileString(temporary, text).pipe(
       Effect.andThen(fs.rename(temporary, file)),
       Effect.tapError(() =>
