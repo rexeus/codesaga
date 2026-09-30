@@ -10,6 +10,7 @@ const parse = (chunks: ReadonlyArray<string>) => {
 type Header = {
   readonly sha: string;
   readonly time?: number | string;
+  readonly committerTime?: number | string;
   readonly date?: string;
   readonly author?: readonly [string, string];
   readonly committer?: readonly [string, string];
@@ -21,13 +22,14 @@ type Header = {
 const header = ({
   sha,
   time = 100,
+  committerTime = time,
   date = "1970-01-01T00:01:40+00:00",
   author = ["Ada", "ada@example.com"],
   committer = author,
   trailers = [],
   body = "subject\n",
 }: Header) =>
-  `\u0001${sha}\0${time}\0${date}\0${author.join("\0")}\0${committer.join("\0")}\0` +
+  `\u0001${sha}\0${time}\0${committerTime}\0${date}\0${author.join("\0")}\0${committer.join("\0")}\0` +
   `${trailers.join("\u001F")}\0${body}\0\0`;
 
 describe("LogParser time", () => {
@@ -37,6 +39,17 @@ describe("LogParser time", () => {
     ]);
 
     expect(commit?.time).toBeNaN();
+  });
+
+  it("reads the committer time apart from the author time, NaN when git cannot read it", () => {
+    const [dated, undated] = parse([
+      header({ sha: "aaa", time: 100, committerTime: 700 }) + "\n1\t0\ta.ts\0",
+      header({ sha: "bbb", time: 100, committerTime: "" }) + "\n1\t0\ta.ts\0",
+    ]);
+
+    expect(dated).toMatchObject({ time: 100, committerTime: 700 });
+    expect(undated?.time).toBe(100);
+    expect(undated?.committerTime).toBeNaN();
   });
 });
 

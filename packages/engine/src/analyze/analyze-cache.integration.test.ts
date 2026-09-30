@@ -29,6 +29,36 @@ const analyzeBothWays = (repo: TempRepository) =>
     return cached;
   });
 
+/**
+ * The cache is written at the head of main; a branch forked before it and
+ * dated between its commits, which renames a file main edits later, is then
+ * merged, so the commits since the cached head are older than the cached ones.
+ */
+const commitMainThenMergeOlderBranch = (repo: TempRepository) =>
+  Effect.gen(function* () {
+    const ada = { name: "Ada", email: "ada@example.com" };
+    const bob = { name: "Bob", email: "bob@example.com" };
+    yield* repo.commit("2026-03-01T12:00:00Z", { "x.ts": tenLines });
+    yield* repo.commit(
+      "2026-03-05T12:00:00Z",
+      { "x.ts": `${tenLines}main\n` },
+      { author: ada },
+    );
+    yield* analyzeBothWays(repo);
+
+    yield* repo.git("switch", "--create", "feature", "HEAD~1");
+    yield* repo.git("mv", "x.ts", "y.ts");
+    yield* repo.commit("2026-03-02T12:00:00Z", {}, { author: bob });
+    yield* repo.commit(
+      "2026-03-03T12:00:00Z",
+      { "y.ts": `feature\n${tenLines}` },
+      { author: bob },
+    );
+    yield* repo.git("switch", "-");
+    yield* repo.git("merge", "--no-ff", "--no-edit", "feature");
+    yield* analyzeBothWays(repo);
+  });
+
 layer(NodeServices.layer)("analyze with the history cache", (it) => {
   it.effect(
     "reports what an uncached run reports after the history grew, was rewritten, or the mailmap changed",
@@ -67,6 +97,15 @@ layer(NodeServices.layer)("analyze with the history cache", (it) => {
           report.contributors.map(({ name }) => name),
           ["Mapped Name"],
         );
+      }),
+  );
+
+  it.effect(
+    "reports what an uncached run reports when a branch forked before the cached head is merged after it",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitMainThenMergeOlderBranch(repo);
       }),
   );
 

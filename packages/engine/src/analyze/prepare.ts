@@ -69,7 +69,10 @@ export type Analysis = {
   /** The scoped commits inside `window`. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   readonly window: TimeRange;
-  /** Time of the HEAD commit in seconds; 0 without commits. */
+  /**
+   * Author time in seconds of the newest commit by committer time, the HEAD
+   * commit unless HEAD is a merge; 0 without commits.
+   */
   readonly headTime: number;
   /** ISO timestamps of the oldest and newest scoped commit; null without commits. */
   readonly firstCommitAt: string | null;

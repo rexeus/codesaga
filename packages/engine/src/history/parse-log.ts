@@ -2,8 +2,8 @@
 //
 // The log is requested with the format in `LOG_FORMAT_ARGS`. Each commit then
 // arrives as NUL-terminated tokens:
-//   \u0001<sha> NUL <8 header fields, NUL-terminated> [\n]<raw entries><numstat entries>
-// The header fields are author time, author date with offset, author and
+//   \u0001<sha> NUL <9 header fields, NUL-terminated> [\n]<raw entries><numstat entries>
+// The header fields are author time, committer time, author date with offset, author and
 // committer name and email, the unfolded trailers, and the message.
 // A raw entry is `:<modes> <ids> <status>` followed by one path token, or two
 // (old and new) for a rename or copy; it tells which files the commit deletes.
@@ -34,6 +34,8 @@ export type Commit = {
   readonly sha: string;
   /** Author time in seconds since the epoch; NaN when git cannot read the date (a negative or malformed one). */
   readonly time: number;
+  /** Committer time in seconds since the epoch; NaN when git cannot read the date. */
+  readonly committerTime: number;
   /** The author's UTC offset in minutes, as in the author date. */
   readonly offsetMinutes: number;
   readonly author: Person;
@@ -54,12 +56,12 @@ export const LOG_FORMAT_ARGS = [
   "-z",
   "--use-mailmap",
   "--no-show-signature",
-  "--format=%x01%H%x00%at%x00%aI%x00%aN%x00%aE%x00%cN%x00%cE%x00%(trailers:unfold,separator=%x1f)%x00%B%x00",
+  "--format=%x01%H%x00%at%x00%ct%x00%aI%x00%aN%x00%aE%x00%cN%x00%cE%x00%(trailers:unfold,separator=%x1f)%x00%B%x00",
 ] as const;
 
 const COMMIT_MARKER = "\u0001";
 const TRAILER_SEPARATOR = "\u001F";
-const HEADER_FIELDS = 8;
+const HEADER_FIELDS = 9;
 const GENERATED_WITH = /^\W*Generated with \[[^\]]+\]/iu;
 const OFFSET = /([+-])(\d{2}):(\d{2})$/u;
 const NUMSTAT = /^(\d+|-)\t(\d+|-)\t(.*)$/su;
@@ -68,6 +70,9 @@ const RAW_STATUS = /^:\d+ \d+ \w+ \w+ ([A-Z])\d*$/u;
 type Phase = "header" | "entry" | "rawPath" | "renamedFrom" | "renamedTo";
 
 type OpenCommit = Omit<Commit, "changes"> & { changes: Array<Change> };
+
+const secondsOf = (field: string | undefined): number =>
+  field === undefined || field === "" ? NaN : Number(field);
 
 const lineCount = (field: string | undefined): number =>
   field === undefined || field === "-" ? 0 : Number(field);
@@ -98,16 +103,24 @@ const parseMarkers = (message: string): ReadonlyArray<string> =>
     .filter((line) => GENERATED_WITH.test(line));
 
 const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
-  const [time, date, authorName, authorEmail, committerName, committerEmail] =
-    fields;
+  const [
+    time,
+    committerTime,
+    date,
+    authorName,
+    authorEmail,
+    committerName,
+    committerEmail,
+  ] = fields;
   return {
     sha,
-    time: time === undefined || time === "" ? NaN : Number(time),
+    time: secondsOf(time),
+    committerTime: secondsOf(committerTime),
     offsetMinutes: offsetMinutesOf(date ?? ""),
     author: { name: authorName ?? "", email: authorEmail ?? "" },
     committer: { name: committerName ?? "", email: committerEmail ?? "" },
-    trailers: parseTrailers(fields[6] ?? ""),
-    markers: parseMarkers(fields[7] ?? ""),
+    trailers: parseTrailers(fields[7] ?? ""),
+    markers: parseMarkers(fields[8] ?? ""),
     changes: [],
   };
 };

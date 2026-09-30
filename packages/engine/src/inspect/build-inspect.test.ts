@@ -14,6 +14,7 @@ const commitsTouchingA = (count: number): ReadonlyArray<HistoryCommit> =>
   Array.from({ length: count }, (_, index) => ({
     sha: String(index),
     time: newest - index * 60,
+    committerTime: newest - index * 60,
     offsetMinutes: 0,
     author: ada,
     committer: ada,

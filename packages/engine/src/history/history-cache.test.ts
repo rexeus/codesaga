@@ -9,6 +9,7 @@ import type { Commit } from "./parse-log.js";
 const commit: Commit = {
   sha: "a".repeat(40),
   time: 1_772_366_400,
+  committerTime: 1_772_366_500,
   offsetMinutes: -330,
   author: { name: "Ada Lovelace", email: "ada@example.com" },
   committer: { name: "GitHub", email: "noreply@github.com" },
@@ -27,7 +28,16 @@ const cache: HistoryCache = {
   head: commit.sha,
   fingerprint: "fingerprint",
   // Git prints a date it cannot read as nothing, which the parser reads as NaN.
-  commits: [commit, { ...commit, sha: "b".repeat(40), time: NaN, changes: [] }],
+  commits: [
+    commit,
+    {
+      ...commit,
+      sha: "b".repeat(40),
+      time: NaN,
+      committerTime: NaN,
+      changes: [],
+    },
+  ],
 };
 
 layer(NodeServices.layer)("the history cache file", (effectIt) => {

@@ -9,8 +9,9 @@ const Person = Schema.Struct({ name: Schema.String, email: Schema.String });
 
 const CachedCommit = Schema.Struct({
   sha: Schema.String,
-  /** Null for the NaN of a date git cannot read, which JSON cannot hold. */
+  /** Null for the NaN of a date git cannot read, which JSON cannot hold; likewise `committerTime`. */
   time: Schema.NullOr(Schema.Finite),
+  committerTime: Schema.NullOr(Schema.Finite),
   offsetMinutes: Schema.Finite,
   author: Person,
   committer: Person,
@@ -35,11 +36,11 @@ const CachedCommit = Schema.Struct({
  */
 const CachedHistory = Schema.Struct({
   version: Schema.Literal(1),
-  /** The commit `commits` was read from, newest first. */
+  /** The commit `commits` was read from. */
   head: Schema.String,
   /** Everything besides `head` that changes what git prints for the same commits. */
   fingerprint: Schema.String,
-  /** The commits exactly as `LogParser` yields them, before any resolution. */
+  /** The commits as `LogParser` yields them, in `inCanonicalOrder`, before any resolution. */
   commits: Schema.Array(CachedCommit),
 });
 
@@ -50,11 +51,15 @@ type CachedCommit = (typeof CachedCommit)["Type"];
 const toCached = (commit: Commit): CachedCommit => ({
   ...commit,
   time: Number.isNaN(commit.time) ? null : commit.time,
+  committerTime: Number.isNaN(commit.committerTime)
+    ? null
+    : commit.committerTime,
 });
 
 const fromCached = (commit: CachedCommit): Commit => ({
   ...commit,
   time: commit.time ?? NaN,
+  committerTime: commit.committerTime ?? NaN,
 });
 
 export type HistoryCache = {
