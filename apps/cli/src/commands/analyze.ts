@@ -39,7 +39,7 @@ export const analyzeCommand = Command.make(
     ),
     limit: Flag.Int("limit").pipe(
       Flag.withDescription(
-        `Contributors to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
+        `Contributors and knowledge directories to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
       ),
       Flag.withDefault(DEFAULT_LIMIT),
       Flag.filter(

@@ -12,6 +12,7 @@ import type { ClassifiedCommit } from "../automation/classify.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import { contributors } from "../contributors/contributors.js";
 import type { HistoryCommit } from "../history/history.js";
+import { KNOWLEDGE_THRESHOLDS, knowledge } from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import { buildIdentities } from "../people/identities.js";
 import type { Report } from "../report/report.js";
@@ -111,6 +112,14 @@ export const buildReport = (facts: ReportFacts): Report => {
   const from = toEpochSeconds(window.since);
   const to = toEpochSeconds(window.until);
   const commits = scoped.filter(({ time }) => time >= from && time <= to);
+  const headTime = facts.commits[0]?.time ?? 0;
+  const knowledgeSection = knowledge({
+    commits: scoped,
+    universe: facts.universe,
+    scope,
+    headTime,
+    now: facts.now,
+  });
   const people = contributors({
     commits,
     scope,
@@ -127,12 +136,16 @@ export const buildReport = (facts: ReportFacts): Report => {
       lastCommitAt: extent === undefined ? null : isoOf(extent.last),
     },
     window: { ...window, commits: commits.length },
-    thresholds: { activeDays: ACTIVE_DAYS },
-    totals: { contributors: people.length },
+    thresholds: { activeDays: ACTIVE_DAYS, ...KNOWLEDGE_THRESHOLDS },
+    totals: {
+      contributors: people.length,
+      directories: knowledgeSection.directories.length,
+    },
     overview: overview({ commits, universe: facts.universe, now: facts.now }),
     activity: activity({ commits, window, isCodePath: facts.isCodePath }),
     punchcard: punchcard(commits),
     contributors: people,
     automation: automation({ commits, window }),
+    knowledge: knowledgeSection,
   };
 };

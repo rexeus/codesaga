@@ -26,6 +26,7 @@ const SECTIONS = [
   "punchcard",
   "contributors",
   "automation",
+  "knowledge",
 ] as const;
 
 layer(NodeServices.layer)("Report", (it) => {
@@ -39,6 +40,12 @@ layer(NodeServices.layer)("Report", (it) => {
         assert.strictEqual(report.activity.weeks.length, 156);
         assert.strictEqual(report.contributors.length, 8);
         assert.strictEqual(report.automation.tools.length, 5);
+        assert.strictEqual(report.knowledge.files, report.overview.files);
+        assert.strictEqual(report.knowledge.truckFactor.value, 2);
+        assert.strictEqual(
+          report.totals.directories,
+          report.knowledge.directories.length,
+        );
       }),
   );
 });
@@ -100,5 +107,38 @@ layer(NodeServices.layer)("Report rejects", (it) => {
           decode({ ...sample, automation: { ...sample.automation, tools } });
         }, /kind/u);
       }),
+  );
+});
+
+layer(NodeServices.layer)("Report rejects a knowledge section with", (it) => {
+  it.effect("an expert whose share is outside 0 to 1", () =>
+    Effect.gen(function* () {
+      const { knowledge, ...rest } = decode(yield* readSample);
+      const [first, ...others] = knowledge.directories;
+      const [expert, ...experts] = first?.experts ?? [];
+
+      for (const share of [-0.1, 1.5]) {
+        const directories = [
+          { ...first, experts: [{ ...expert, share }, ...experts] },
+          ...others,
+        ];
+        assert.throws(() => {
+          decode({ ...rest, knowledge: { ...knowledge, directories } });
+        }, /share/u);
+      }
+    }),
+  );
+
+  it.effect("a directory of more than five experts", () =>
+    Effect.gen(function* () {
+      const { knowledge, ...rest } = decode(yield* readSample);
+      const [first, ...others] = knowledge.directories;
+      const experts = Array.from({ length: 6 }, () => first?.experts[0]);
+      const directories = [{ ...first, experts }, ...others];
+
+      assert.throws(() => {
+        decode({ ...rest, knowledge: { ...knowledge, directories } });
+      }, /experts/u);
+    }),
   );
 });
