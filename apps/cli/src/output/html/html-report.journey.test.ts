@@ -1,4 +1,6 @@
+import { execFileSync } from "node:child_process";
 import { chmodSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { Report } from "@codesaga/engine";
@@ -145,28 +147,38 @@ describe("codesaga analyze --html in the browser", () => {
       Effect.gen(function* () {
         const repo = yield* makeTeamProject;
         const bin = yield* makeTempDirectory;
-        const log = join(bin, "opener.log");
+        const started = join(bin, "started");
+        const release = join(bin, "release");
+        const finished = join(bin, "finished");
+        for (const fifo of [started, release, finished]) {
+          execFileSync("mkfifo", [fifo]);
+        }
         // A launcher that keeps the browser in the foreground, as xdg-open's $BROWSER path does.
+        // Each step blocks on a FIFO the test controls, so the launcher outlives the command
+        // for exactly as long as the test holds it, however slow the machine is.
         writeFileSync(
           join(bin, "xdg-open"),
-          `#!/bin/sh\necho "started $1" >> ${log}\nsleep 2\necho survived >> ${log}\n`,
+          `#!/bin/sh\necho "started $1" > ${started}\nread _ < ${release}\necho survived > ${finished}\n`,
         );
         chmodSync(join(bin, "xdg-open"), 0o755);
         yield* withPath(`${bin}:${process.env["PATH"] ?? ""}`);
 
-        const started = Date.now();
+        // A command that waited for the launcher would never return: it is blocked on `started`.
         const result = yield* journey({
           args: ["analyze", "--html"],
           cwd: repo.root,
         });
-        const elapsed = Date.now() - started;
-        yield* Effect.sleep("3 seconds");
+        const launched = yield* Effect.promise(() => readFile(started, "utf8"));
+        yield* Effect.promise(() => writeFile(release, "go\n"));
+        const survived = yield* Effect.promise(() =>
+          readFile(finished, "utf8"),
+        );
 
         expect(result.exitCode).toBe(0);
-        expect(elapsed).toBeLessThan(1900);
-        expect(readFileSync(log, "utf8")).toBe(
-          `started ${join(repo.root, "codesaga-report.html")}\nsurvived\n`,
+        expect(launched).toBe(
+          `started ${join(repo.root, "codesaga-report.html")}\n`,
         );
+        expect(survived).toBe("survived\n");
       }).pipe(Effect.scoped),
     10_000,
   );

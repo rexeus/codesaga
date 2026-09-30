@@ -17,7 +17,8 @@
     },
     "apps/cli": {
       "entry": ["src/bin.ts!"],
-      "project": ["src/**/*.ts!", "!src/testing/**!"]
+      "project": ["src/**/*.ts!", "!src/testing/**!"],
+      "ignoreBinaries": ["mkfifo"]
     },
     "packages/viewer": {
       "entry": ["src/main.ts!"],
