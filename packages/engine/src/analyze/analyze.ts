@@ -2,49 +2,25 @@
 // It composes inventory, history, classification, and the sections; callers never see git or parsers.
 // New signals join here as new Report fields, not as new entry points.
 
-import { Effect } from "effect";
-import type { FileSystem, Path } from "effect";
+import { DateTime, Effect, Path } from "effect";
+import type { FileSystem } from "effect";
 import type { ChildProcessSpawner } from "effect/process";
 
-import { activity } from "../activity/activity.js";
-import { punchcard } from "../activity/punchcard.js";
-import { automation } from "../automation/automation.js";
-import { classifyCommit } from "../automation/classify.js";
-import { contributors } from "../contributors/contributors.js";
 import type { GitError } from "../git/git-errors.js";
+import { Git } from "../git/git.js";
 import {
   locateRepository,
+  readBranch,
   readHead,
   readShallowBoundary,
   repositoryScope,
 } from "../git/repository.js";
 import { readHistory } from "../history/history.js";
-import { overview } from "../overview/overview.js";
-import { buildIdentities } from "../people/identities.js";
-import { roundReported } from "../report/precision.js";
 import type { Report } from "../report/report.js";
-import { inventory } from "../universe/inventory.js";
+import { inventory, namedAsCode } from "../universe/inventory.js";
 import { resolveTimeRange } from "./analysis-window.js";
 import type { InvalidSince } from "./analysis-window.js";
-
-// @scaffold links the owners analyze composes into the module graph; the body calls them once implemented.
-void [
-  activity,
-  automation,
-  buildIdentities,
-  classifyCommit,
-  contributors,
-  inventory,
-  locateRepository,
-  overview,
-  punchcard,
-  readHead,
-  readHistory,
-  readShallowBoundary,
-  repositoryScope,
-  resolveTimeRange,
-  roundReported,
-];
+import { buildReport } from "./build-report.js";
 
 /** Every expected failure of `analyze`. */
 export type AnalyzeError = GitError | InvalidSince;
@@ -70,6 +46,44 @@ export type AnalyzeOptions = {
   readonly toolVersion: string;
 };
 
+const gatherAndBuild = (
+  options: AnalyzeOptions,
+  root: string,
+  scope: string,
+  since: string | undefined,
+) =>
+  Effect.gen(function* () {
+    const path = yield* Path.Path;
+    const head = yield* readHead;
+    const branch = yield* readBranch;
+    const shallowBoundary = yield* readShallowBoundary(root);
+    const universe = yield* inventory({
+      root,
+      scope,
+      include: options.include,
+      exclude: options.exclude,
+    });
+    const commits =
+      head === null
+        ? []
+        : yield* readHistory({ skipCommits: shallowBoundary ?? new Set() });
+    return buildReport({
+      toolVersion: options.toolVersion,
+      now: yield* DateTime.now,
+      since,
+      repository: {
+        name: path.basename(root),
+        head,
+        branch,
+        scope,
+        shallow: shallowBoundary !== undefined,
+      },
+      commits,
+      universe,
+      isCodePath: namedAsCode(options),
+    });
+  });
+
 /**
  * Analyzes the git repository containing `options.cwd` from one pass over its
  * whole history, and reports every contributor and every week and month of
@@ -78,12 +92,27 @@ export type AnalyzeOptions = {
  * Fails with `NotAGitRepository`, `GitNotFound`, or `GitCommandFailed` when
  * git cannot answer, and with `InvalidSince` for a `since` that is neither
  * relative nor an ISO date in the past.
-
  */
 export const analyze = (
-  _options: AnalyzeOptions,
+  options: AnalyzeOptions,
 ): Effect.Effect<
   Report,
   AnalyzeError,
   ChildProcessSpawner.ChildProcessSpawner | FileSystem.FileSystem | Path.Path
-> => Effect.die("@scaffold not implemented");
+> =>
+  Effect.gen(function* () {
+    const since =
+      options.since === undefined
+        ? undefined
+        : (yield* resolveTimeRange(options.since)).since;
+    const root = yield* locateRepository(options.cwd).pipe(
+      Effect.provide(Git.layer(options.cwd)),
+    );
+    const scope =
+      options.scope === undefined
+        ? "."
+        : yield* repositoryScope(root, options.cwd, options.scope);
+    return yield* gatherAndBuild(options, root, scope, since).pipe(
+      Effect.provide(Git.layer(root)),
+    );
+  });

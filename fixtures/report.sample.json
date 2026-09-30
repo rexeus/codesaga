@@ -1698,13 +1698,13 @@
         "assisted": 0
       },
       {
-        "name": "Copilot cloud agent",
+        "name": "GitHub Copilot",
         "kind": "agent",
         "authored": 57,
         "assisted": 18
       },
       {
-        "name": "Cursor (cloud)",
+        "name": "Cursor",
         "kind": "agent",
         "authored": 13,
         "assisted": 30

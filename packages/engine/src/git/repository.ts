@@ -7,7 +7,7 @@ import { Git } from "./git.js";
 
 /** Git's exit code for "not a git repository" and other fatal usage errors. */
 const FATAL_EXIT_CODE = 128;
-/** Exit code of `rev-parse --verify --quiet` for a ref that does not resolve. */
+/** Exit code of `rev-parse --verify --quiet` and `symbolic-ref --quiet` for a ref that is not there. */
 const UNRESOLVED_EXIT_CODE = 1;
 
 const notARepository = (
@@ -94,6 +94,24 @@ export const readHead: Effect.Effect<string | null, GitError, Git> = Effect.gen(
     return output.trim() === "" ? null : output.trim();
   },
 );
+
+/** The checked-out branch, or null when `HEAD` is detached. Works before the first commit too. */
+export const readBranch: Effect.Effect<string | null, GitError, Git> =
+  Effect.gen(function* () {
+    const git = yield* Git;
+    const output = yield* git
+      .text(["symbolic-ref", "--quiet", "--short", "HEAD"])
+      .pipe(
+        Effect.catchTag(
+          "GitCommandFailed",
+          (failure): Effect.Effect<string, GitCommandFailed> =>
+            failure.exitCode === UNRESOLVED_EXIT_CODE
+              ? Effect.succeed("")
+              : Effect.fail(failure),
+        ),
+      );
+    return output.trim() === "" ? null : output.trim();
+  });
 
 const SHALLOW_FILE_ARGS = ["rev-parse", "--git-path", "shallow"];
 

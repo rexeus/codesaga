@@ -46,9 +46,13 @@ const inExcludedDirectory = (path: string): boolean =>
     .slice(0, -1)
     .some((directory) => EXCLUDED_DIRECTORIES.has(directory));
 
-/** Name-based rules; they need no file access, so they run first. */
-const namedAsCode = (
-  options: InventoryOptions,
+/**
+ * Name-based rules: default excluded directories, minified names, the
+ * language allow-list or `include`, then `exclude`. They need no file access,
+ * so they also judge paths of files that no longer exist.
+ */
+export const namedAsCode = (
+  options: Pick<InventoryOptions, "include" | "exclude">,
 ): ((path: string) => boolean) => {
   const included =
     options.include.length === 0

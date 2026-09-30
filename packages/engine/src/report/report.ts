@@ -101,7 +101,9 @@ const Activity = Schema.Struct({
 
 /**
  * Commits per weekday and hour in the author's local time: 7 rows (0 = Monday
- * to 6 = Sunday) of 24 columns (hour 0 to 23).
+ * to 6 = Sunday) of 24 columns (hour 0 to 23). Only human and agent-assisted
+ * commits count: the card describes people's rhythm, which a bot's schedule
+ * would distort.
  */
 const Punchcard = Schema.Array(
   Schema.Array(Count).check(Schema.isBetweenLength(24, 24)),
@@ -141,7 +143,11 @@ const Automation = Schema.Struct({
   /** Detected tools, most commits first. */
   tools: Schema.Array(
     Schema.Struct({
-      /** The matched signature's tool name, such as "Claude Code" or "Dependabot". */
+      /**
+       * The product name, with its variants merged: "Claude Code" covers the
+       * CLI, the cloud and the GitHub app. A bot outside the known tools is
+       * listed under its account name, such as "deploy-bot[bot]".
+       */
       name: Schema.String,
       kind: Schema.Literals(["agent", "bot"]),
       /** Commits the tool authored. */

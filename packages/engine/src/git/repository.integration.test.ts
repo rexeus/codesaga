@@ -7,6 +7,7 @@ import { NotAGitRepository } from "./git-errors.js";
 import { Git } from "./git.js";
 import {
   locateRepository,
+  readBranch,
   readHead,
   readShallowBoundary,
   repositoryScope,
@@ -147,6 +148,35 @@ layer(NodeServices.layer)("readHead", (it) => {
       );
 
       assert.strictEqual(head, expected);
+    }),
+  );
+});
+
+layer(NodeServices.layer)("readBranch", (it) => {
+  it.effect("reads the checked-out branch, also before the first commit", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTempRepository;
+      yield* repo.git("checkout", "--quiet", "-b", "feature/x");
+
+      const branch = yield* readBranch.pipe(
+        Effect.provide(Git.layer(repo.directory)),
+      );
+
+      assert.strictEqual(branch, "feature/x");
+    }),
+  );
+
+  it.effect("reads null when HEAD is detached", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTempRepository;
+      yield* repo.commit("2026-03-01T12:00:00Z", { "a.txt": "a\n" });
+      yield* repo.git("checkout", "--quiet", "--detach");
+
+      const branch = yield* readBranch.pipe(
+        Effect.provide(Git.layer(repo.directory)),
+      );
+
+      assert.isNull(branch);
     }),
   );
 });
