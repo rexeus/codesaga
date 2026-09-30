@@ -228,6 +228,21 @@ describe("viewer import boundary probes", () => {
     expect(result.stdout).toContain("viewer renders a Report");
   });
 
+  it.each([
+    ["innerHTML", "element.innerHTML = markup;"],
+    ["outerHTML", "element.outerHTML = markup;"],
+    ["insertAdjacentHTML", 'element.insertAdjacentHTML("beforeend", markup);'],
+  ])("rejects HTML string injection through %s", (property, statement) => {
+    const result = runPackageLint(
+      "packages/viewer/src",
+      `export const probe = (element: Record<string, never>, markup: string): void => {\n  ${statement}\n};\n`,
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain("eslint(no-restricted-properties)");
+    expect(result.stdout).toContain(`'${property}'`);
+  });
+
   it("allows a type import from the engine", () => {
     const result = runPackageLint(
       "packages/viewer/src",

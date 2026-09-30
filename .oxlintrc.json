@@ -220,6 +220,21 @@
               }
             ]
           }
+        ],
+        "no-restricted-properties": [
+          "error",
+          {
+            "property": "innerHTML",
+            "message": "viewer builds DOM nodes and sets textContent; HTML strings would turn repository data into markup."
+          },
+          {
+            "property": "outerHTML",
+            "message": "viewer builds DOM nodes and sets textContent; HTML strings would turn repository data into markup."
+          },
+          {
+            "property": "insertAdjacentHTML",
+            "message": "viewer builds DOM nodes and sets textContent; HTML strings would turn repository data into markup."
+          }
         ]
       }
     },
