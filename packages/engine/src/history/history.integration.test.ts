@@ -186,6 +186,74 @@ layer(NodeServices.layer)("readHistory lives of a path and renames", (it) => {
   );
 });
 
+layer(NodeServices.layer)(
+  "readHistory lives of a path by the name it had",
+  (it) => {
+    it.effect(
+      "keeps the creator of a file renamed onto the path of a file deleted earlier",
+      () =>
+        Effect.gen(function* () {
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-03-01T12:00:00Z", { "b.ts": tenLines });
+          yield* repo.commit("2026-03-02T12:00:00Z", { "a.ts": "other\n" });
+          yield* repo.git("rm", "a.ts");
+          yield* repo.commit("2026-03-03T12:00:00Z");
+          yield* repo.git("mv", "b.ts", "a.ts");
+          yield* repo.commit("2026-03-04T12:00:00Z");
+
+          assert.deepStrictEqual(lives(yield* history(repo)), [
+            [["a.ts", "current"]],
+            [["a.ts", "previous"]],
+            [["a.ts", "previous"]],
+            [["a.ts", "current"]],
+          ]);
+        }),
+    );
+
+    it.effect(
+      "puts a renamed file's history into the previous life when it was deleted under its new name",
+      () =>
+        Effect.gen(function* () {
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-03-01T12:00:00Z", { "q.ts": tenLines });
+          yield* repo.git("mv", "q.ts", "p.ts");
+          yield* repo.commit("2026-03-02T12:00:00Z");
+          yield* repo.git("rm", "p.ts");
+          yield* repo.commit("2026-03-03T12:00:00Z");
+          yield* repo.commit("2026-03-04T12:00:00Z", { "p.ts": "new\n" });
+
+          assert.deepStrictEqual(lives(yield* history(repo)), [
+            [["p.ts", "current"]],
+            [["p.ts", "previous"]],
+            [["p.ts", "previous"]],
+            [["p.ts", "previous"]],
+          ]);
+        }),
+    );
+
+    it.effect(
+      "keeps a recreated file's life when it is renamed after the recreation",
+      () =>
+        Effect.gen(function* () {
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-03-01T12:00:00Z", { "p.ts": "old\n" });
+          yield* repo.git("rm", "p.ts");
+          yield* repo.commit("2026-03-02T12:00:00Z");
+          yield* repo.commit("2026-03-03T12:00:00Z", { "p.ts": tenLines });
+          yield* repo.git("mv", "p.ts", "r.ts");
+          yield* repo.commit("2026-03-04T12:00:00Z");
+
+          assert.deepStrictEqual(lives(yield* history(repo)), [
+            [["r.ts", "current"]],
+            [["r.ts", "current"]],
+            [["r.ts", "previous"]],
+            [["r.ts", "previous"]],
+          ]);
+        }),
+    );
+  },
+);
+
 layer(NodeServices.layer)("readHistory people", (it) => {
   it.effect(
     "reports a mailmap-merged author under the canonical identity",

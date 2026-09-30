@@ -15,8 +15,8 @@ export type FileChange = {
   readonly deleted: number;
   /**
    * Set when the change belongs to an earlier life of the path: the commit
-   * deleted the file, or a later commit did and the path was used again.
-   * Absent for the life of the file that exists at the path today.
+   * deleted the file, or a newer commit deleted the file that had this name
+   * then. Absent for the life of the file that exists at the path today.
    */
   readonly previousLife?: true;
 };
@@ -35,33 +35,45 @@ export type HistoryOptions = {
 type Lineage = {
   /** Old path to the path its file has today. */
   readonly renamedTo: Map<string, string>;
-  /** Current paths whose deletion the walk has passed; everything older is a previous life. */
-  readonly deleted: Set<string>;
+  /**
+   * Names a deleted file had in the commits older than its deletion. They are
+   * names as each commit wrote them, not current paths: a file renamed onto
+   * the path of a deleted one is a different file.
+   */
+  readonly deletedNames: Set<string>;
 };
 
 /**
  * Renames the commit's changes to current paths and marks the ones of a
  * previous life; records the commit's own renames and deletions in `lineage`.
- * A rename's old path is not a deletion, and deleting and re-adding a path in
- * one commit is an edit, as the commit's diff shows it.
+ * A deletion ends the life of the file that had that name in the commit. A
+ * file renamed onto a name that is deleted later is that dead file, so its
+ * old name ends with it. A rename's old name is otherwise not a deletion, and
+ * deleting and re-adding a path in one commit is an edit, as the commit's
+ * diff shows it.
  */
 const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
-  const deletedHere: Array<string> = [];
+  const endedNames: Array<string> = [];
   const changes = commit.changes.map((change): FileChange => {
     const path = lineage.renamedTo.get(change.path) ?? change.path;
+    const isPrevious =
+      change.removed === true || lineage.deletedNames.has(change.path);
+    if (change.removed === true) {
+      endedNames.push(change.path);
+    }
     if (change.renamedFrom !== undefined) {
       lineage.renamedTo.set(change.renamedFrom, path);
-    }
-    if (change.removed === true) {
-      deletedHere.push(path);
+      if (isPrevious) {
+        endedNames.push(change.renamedFrom);
+      }
     }
     const { added, deleted } = change;
-    return change.removed === true || lineage.deleted.has(path)
+    return isPrevious
       ? { path, added, deleted, previousLife: true }
       : { path, added, deleted };
   });
-  for (const path of deletedHere) {
-    lineage.deleted.add(path);
+  for (const name of endedNames) {
+    lineage.deletedNames.add(name);
   }
   return { ...commit, changes };
 };
@@ -71,8 +83,9 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
  * committer after `.mailmap`. A rename makes every older commit that touched
  * the old path name the new one, so a file keeps its history under its
  * current name; deleted files keep the path they had when they were deleted.
- * A deletion ends a path's life: its own change and every older change to the
- * path are marked `previousLife`, so a file created there later starts fresh.
+ * A deletion ends the life of the file that had the deleted name: its own
+ * change and every older change to that file are marked `previousLife`, so a
+ * file created or renamed onto the path later starts fresh.
  *
  * The whole repository's log is read, never a path-limited one: a file moved
  * into the universe from outside keeps the history it had before the move.
@@ -84,7 +97,10 @@ export const readHistory = (
 ): Effect.Effect<ReadonlyArray<HistoryCommit>, GitError, Git> =>
   Effect.gen(function* () {
     const git = yield* Git;
-    const lineage: Lineage = { renamedTo: new Map(), deleted: new Set() };
+    const lineage: Lineage = {
+      renamedTo: new Map(),
+      deletedNames: new Set(),
+    };
     const commits: Array<HistoryCommit> = [];
 
     yield* git.stream(["log", ...LOG_FORMAT_ARGS]).pipe(
