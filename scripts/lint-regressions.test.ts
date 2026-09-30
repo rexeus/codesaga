@@ -196,3 +196,45 @@ describe("engine import boundary probes", () => {
     );
   });
 });
+
+describe("viewer import boundary probes", () => {
+  it("rejects an Effect import", () => {
+    const result = runPackageLint(
+      "packages/viewer/src",
+      'import { Effect } from "effect";\nexport const probe = Effect;\n',
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain("viewer is plain browser code");
+  });
+
+  it("rejects a runtime import of the engine", () => {
+    const result = runPackageLint(
+      "packages/viewer/src",
+      'import { analyze } from "@codesaga/engine";\nexport const probe = analyze;\n',
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain("viewer may import engine types only");
+  });
+
+  it("rejects an import of the CLI package", () => {
+    const result = runPackageLint(
+      "packages/viewer/src",
+      'import { cli } from "codesaga";\nexport const probe = cli;\n',
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain("viewer renders a Report");
+  });
+
+  it("allows a type import from the engine", () => {
+    const result = runPackageLint(
+      "packages/viewer/src",
+      'import type { Report } from "@codesaga/engine";\nexport type Probe = Report;\n',
+    );
+
+    expect(result.stdout).not.toContain("no-restricted-imports");
+    expect(result.status).toBe(0);
+  });
+});

@@ -18,6 +18,10 @@
     "apps/cli": {
       "entry": ["src/bin.ts!"],
       "project": ["src/**/*.ts!", "!src/testing/**!"]
+    },
+    "packages/viewer": {
+      "entry": ["src/main.ts!"],
+      "project": ["src/**/*.ts!", "!src/testing/**!"]
     }
   }
 }
