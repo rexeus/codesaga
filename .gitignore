@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*
+!.env.example
+.repos/
+.turbo/
+.cache/
+tmp/
+codesaga-report.html
+.claude/worktrees/
+apps/cli/README.md
+apps/cli/LICENSE

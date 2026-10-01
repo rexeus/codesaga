@@ -1,0 +1,55 @@
+// Owns the versioned `inspect` result that agents and the CLI read.
+// It reuses the report's shapes, so the two commands describe people and automation alike.
+// Additive fields keep schemaVersion 1; renaming or removing a field bumps it.
+import { Schema } from "effect";
+
+import { AutomationTotals } from "./automation-totals.js";
+import { Expert, LineOwners } from "./knowledge-report.js";
+import { ActivityWindow } from "./report.js";
+
+/** The answer for one `inspect` argument, aggregated over the files it matches. */
+const InspectEntry = Schema.Struct({
+  /** The argument as given. */
+  pattern: Schema.String,
+  /** Universe files the argument matches. */
+  files: Schema.Natural,
+  /** People who must leave before more than half of the matched files have no expert. */
+  truckFactor: Schema.Natural,
+  /** One person is the sole expert on at least `thresholds.islandShare` of the matched files. */
+  island: Schema.Boolean,
+  /** More than `thresholds.orphanedShare` of the matched files have no active expert. */
+  orphaned: Schema.Boolean,
+  /** The five people expert on the most matched files, most files first. */
+  experts: Schema.Array(Expert).check(Schema.isMaxLength(5)),
+  /** Present only when the analysis ran with `blame`: who wrote the matched files' lines at HEAD. */
+  lineOwners: Schema.optionalKey(LineOwners),
+  /** Commits to the matched files in the window. */
+  commits: Schema.Natural,
+  /** ISO timestamp of the newest commit to the matched files in the window; null without one. */
+  lastCommitAt: Schema.NullOr(Schema.String),
+  /** The window's commits to the matched files by class. */
+  automation: AutomationTotals,
+  /** Plain-language explanations of the flags and of notable automation. */
+  reasons: Schema.Array(Schema.String),
+});
+
+/**
+ * The full result of `inspect`: one entry per matching argument and the
+ * arguments that matched no universe file. Expertise covers the whole
+ * history; `commits`, `lastCommitAt` and `automation` cover `window`.
+ */
+export const InspectResult = Schema.Struct({
+  schemaVersion: Schema.Literal(1),
+  /**
+   * A shallow clone: history before its oldest fetched commit is missing, so
+   * expertise and counts undercount, and blame credits the lines of the cut
+   * history to the boundary commit's author. `git fetch --unshallow` completes it.
+   */
+  shallow: Schema.Boolean,
+  window: ActivityWindow,
+  matches: Schema.Array(InspectEntry),
+  unmatched: Schema.Array(Schema.String),
+  /** Present only when the analysis ran with `blame`: the line owners of the files all matches cover together, each file once. */
+  lineOwners: Schema.optionalKey(LineOwners),
+});
+export type InspectResult = typeof InspectResult.Type;

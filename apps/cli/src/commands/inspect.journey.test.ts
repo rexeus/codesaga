@@ -1,0 +1,260 @@
+import { existsSync } from "node:fs";
+
+import { InspectResult } from "@codesaga/engine";
+import { describe, expect, it } from "@effect/vitest";
+import { Effect, Schema } from "effect";
+
+import { breakBlameOf, makeShallowClone } from "../testing/git-repository.js";
+import { journey } from "../testing/journey-harness.js";
+import { makeTeamProject } from "../testing/projects.js";
+
+const decode = (stdout: string) =>
+  Schema.decodeUnknownEffect(InspectResult)(JSON.parse(stdout));
+
+const RELATIVE_TO_ROOT = "(patterns are relative to the repository root)";
+
+// Real clock: the analysis window is resolved against now, and the commits are dated relative to it.
+describe("codesaga inspect --json", () => {
+  it.live(
+    "aggregates a glob into one entry that decodes with the InspectResult schema",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+
+        const result = yield* journey({
+          args: ["inspect", "src/*.ts", "--json"],
+          cwd: repo.root,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe("");
+        const inspected = yield* decode(result.stdout);
+        expect(inspected.matches).toHaveLength(1);
+        expect(inspected.matches[0]).toMatchObject({
+          pattern: "src/*.ts",
+          files: 2,
+          commits: 4,
+          automation: { human: 3, agentAssisted: 1, agent: 0, bot: 0 },
+        });
+        expect(
+          inspected.matches[0]?.experts.map(({ name }) => name),
+        ).toStrictEqual(["Ada Lovelace", "Grace"]);
+        expect(inspected.unmatched).toStrictEqual([]);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("returns one entry per argument, in the order given", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src/b.ts", "src/a.ts", "--json"],
+        cwd: repo.root,
+      });
+
+      const inspected = yield* decode(result.stdout);
+      expect(
+        inspected.matches.map(({ pattern, files }) => [pattern, files]),
+      ).toStrictEqual([
+        ["src/b.ts", 1],
+        ["src/a.ts", 1],
+      ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.live("inspects from a subdirectory with repository-relative paths", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src/a.ts", "--json"],
+        cwd: `${repo.root}/src`,
+      });
+
+      const inspected = yield* decode(result.stdout);
+      expect(inspected.matches.map(({ pattern }) => pattern)).toStrictEqual([
+        "src/a.ts",
+      ]);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect the whole repository", () => {
+  it.live.each(["", "."])("answers %j for every file", (pattern) =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", pattern, "--json"],
+        cwd: repo.root,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe("");
+      const inspected = yield* decode(result.stdout);
+      expect(inspected.unmatched).toStrictEqual([]);
+      expect(
+        inspected.matches.map((entry) => [entry.pattern, entry.files]),
+      ).toStrictEqual([[pattern, 2]]);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect output", () => {
+  it.live("prints the terminal view without ANSI codes when piped", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src/a.ts"],
+        cwd: repo.root,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain("src/a.ts\n1 file · truck factor 1");
+      expect(result.stdout).toContain("Ada Lovelace");
+      expect(result.stdout).not.toContain("\u001B");
+    }).pipe(Effect.scoped),
+  );
+
+  it.live(
+    "reports an unmatched argument on stderr and still answers the others",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+
+        const result = yield* journey({
+          args: ["inspect", "src/a.ts", "nope/**", "--json"],
+          cwd: repo.root,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe(
+          `codesaga: no file matches "nope/**" ${RELATIVE_TO_ROOT}`,
+        );
+        const inspected = yield* decode(result.stdout);
+        expect(inspected.unmatched).toStrictEqual(["nope/**"]);
+        expect(inspected.matches).toHaveLength(1);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("exits 4 with nothing on stdout when no argument matches", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "nope/**", "gone.ts", "--json"],
+        cwd: repo.root,
+      });
+
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toBe(
+        `codesaga: no file matches "nope/**", "gone.ts" ${RELATIVE_TO_ROOT}`,
+      );
+      expect(result.exitCode).toBe(4);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect --no-cache", () => {
+  it.live("reads git every time and leaves no cache in the repository", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      const cacheFile = `${repo.root}/.git/codesaga/history-v1.json`;
+
+      const uncached = yield* journey({
+        args: ["inspect", "src/a.ts", "--json", "--no-cache"],
+        cwd: repo.root,
+      });
+      expect(uncached.exitCode).toBe(0);
+      expect(existsSync(cacheFile)).toBe(false);
+
+      const cached = yield* journey({
+        args: ["inspect", "src/a.ts", "--json"],
+        cwd: repo.root,
+      });
+      expect(cached.exitCode).toBe(0);
+      expect(existsSync(cacheFile)).toBe(true);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect --blame", () => {
+  it.live("adds the owners of the matched lines to the entry", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src", "--json", "--blame"],
+        cwd: repo.root,
+      });
+
+      expect(result.exitCode).toBe(0);
+      const inspected = yield* decode(result.stdout);
+      expect(
+        inspected.matches[0]?.lineOwners?.owners.map(
+          ({ name, lines, share }) => [name, lines, share],
+        ),
+      ).toStrictEqual([
+        ["Ada Lovelace", 3, 0.5],
+        ["Grace", 3, 0.5],
+      ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.live(
+    "warns once on stderr when git blame failed for a file, counting it once for overlapping arguments",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        breakBlameOf(repo, "src/a.ts");
+
+        const result = yield* journey({
+          args: ["inspect", "src/a.ts", "src", "--json", "--blame"],
+          cwd: repo.root,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe(
+          "codesaga: git blame failed for 1 file; line owners cover the rest",
+        );
+        const inspected = yield* decode(result.stdout);
+        expect(inspected.lineOwners?.skippedFiles).toBe(1);
+      }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect a shallow clone", () => {
+  it.live(
+    "warns on stderr, keeps stdout to the JSON and says so in the result",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        const clone = yield* makeShallowClone(repo, 1);
+
+        const result = yield* journey({
+          args: ["inspect", "src/a.ts", "--json"],
+          cwd: clone,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toContain("shallow clone");
+        const inspected = yield* decode(result.stdout);
+        expect(inspected.shallow).toBe(true);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("does not warn and reports a complete clone as not shallow", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src/a.ts", "--json"],
+        cwd: repo.root,
+      });
+
+      expect(result.stderr).toBe("");
+      expect((yield* decode(result.stdout)).shallow).toBe(false);
+    }).pipe(Effect.scoped),
+  );
+});

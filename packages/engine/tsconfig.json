@@ -1,0 +1,4 @@
+{
+  "extends": "@codesaga/tsconfig/node.json",
+  "include": ["src/**/*.ts"]
+}

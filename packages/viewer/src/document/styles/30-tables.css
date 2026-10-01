@@ -1,0 +1,190 @@
+.table-wrap {
+  overflow-x: auto;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+table.data th {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--baseline);
+  color: var(--text-2);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+table.data td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+table.data .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.show-all {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--wash);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.show-all:hover {
+  background: var(--hairline);
+}
+
+table.data th button.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+table.data th button.sort:hover {
+  color: var(--text);
+}
+
+table.data th .arrow {
+  min-width: 1em;
+  font-size: 9px;
+}
+
+.person {
+  display: grid;
+  min-width: 160px;
+}
+
+.person .muted {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--wash);
+  color: var(--text-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.badge.active {
+  color: var(--active-text);
+}
+
+.lang-bar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lang-segment {
+  flex-basis: 0;
+  min-width: 2px;
+  background: var(--mark);
+}
+
+.lang-segment:hover {
+  filter: brightness(1.1);
+}
+
+.plain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.person-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+
+.person-line.inactive strong {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.marker {
+  font-size: 10px;
+}
+
+.marker.active {
+  color: var(--good);
+}
+
+.marker.inactive {
+  color: var(--muted);
+}
+
+.truck-factor {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--wash);
+}
+
+.truck-factor .people {
+  display: grid;
+  gap: 4px;
+}
+
+.status {
+  display: grid;
+  gap: 4px;
+  min-width: 240px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.badge .symbol {
+  font-size: 11px;
+}
+
+.flag-orphaned .symbol {
+  color: var(--serious);
+}
+
+.flag-island .symbol {
+  color: var(--warning);
+}
+
+.reasons {
+  font-size: 12px;
+}
+
+td code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
