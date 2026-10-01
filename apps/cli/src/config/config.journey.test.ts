@@ -59,6 +59,21 @@ describe("codesaga defaults from a .codesaga.json", () => {
       }).pipe(Effect.scoped),
   );
 
+  it.live("lets --compare set the window instead of the config's since", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      // The first would give four commits, the second is no valid since at all.
+      for (const since of ["100d", "soon"]) {
+        writeConfig(repo, { since });
+
+        const report = yield* analyzeJson(repo, "--compare", "45d");
+
+        expect(report.window.commits).toBe(3);
+        expect(report.comparison?.previous.commits).toBe(1);
+      }
+    }).pipe(Effect.scoped),
+  );
+
   it.live("applies the config's limit to the JSON document", () =>
     Effect.gen(function* () {
       const repo = yield* makeTeamProject;

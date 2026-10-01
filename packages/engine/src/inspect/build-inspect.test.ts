@@ -29,6 +29,7 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
   toolVersion: "0.0.0",
   now: DateTime.makeUnsafe("2026-03-10T00:00:00Z"),
   since: undefined,
+  previous: undefined,
   repository: {
     name: "repo",
     head: "abc",

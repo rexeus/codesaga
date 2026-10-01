@@ -56,6 +56,34 @@ describe("codesaga exit codes", () => {
   );
 });
 
+describe("codesaga exit codes for --compare", () => {
+  it.live.each([
+    {
+      args: ["--compare", "soon"],
+      message:
+        'codesaga: invalid --compare "soon": use <n>d, <n>w, <n>m or <n>y',
+    },
+    {
+      args: ["--compare", "3m", "--since", "30d"],
+      message:
+        "codesaga: --compare cannot be combined with --since: it sets the window itself",
+    },
+  ])("exits 2 on $args", ({ args, message }) =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["analyze", ...args],
+        cwd: repo.root,
+      });
+
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toBe(message);
+      expect(result.exitCode).toBe(2);
+    }).pipe(Effect.scoped),
+  );
+});
+
 describe("codesaga exit codes on a broken host", () => {
   it.live("exits 3 without git on PATH", () =>
     Effect.gen(function* () {

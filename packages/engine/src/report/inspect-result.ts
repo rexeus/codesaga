@@ -3,7 +3,8 @@
 // Additive fields keep schemaVersion 1; renaming or removing a field bumps it.
 import { Schema } from "effect";
 
-import { ActivityWindow, AutomationTotals, Expert } from "./report.js";
+import { AutomationTotals } from "./automation-totals.js";
+import { ActivityWindow, Expert } from "./report.js";
 
 /** The answer for one `inspect` argument, aggregated over the files it matches. */
 const InspectEntry = Schema.Struct({

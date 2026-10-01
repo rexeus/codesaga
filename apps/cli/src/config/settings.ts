@@ -11,6 +11,8 @@ import { loadRepoConfig } from "./load-repo-config.js";
 /** What the command line says; empty and `None` mean "not given". */
 export type SettingFlags = {
   readonly since: Option.Option<string>;
+  /** `--compare` sets the window itself, so the config's `since` does not apply. */
+  readonly compare: Option.Option<string>;
   readonly include: ReadonlyArray<string>;
   readonly exclude: ReadonlyArray<string>;
   readonly limit: Option.Option<number>;
@@ -31,7 +33,9 @@ export type Settings = Pick<
 /**
  * Reads the config file in the root of the repository around `cwd` and merges
  * it with the flags. A flag always wins; a list flag such as `--exclude`
- * replaces the config's list instead of extending it.
+ * replaces the config's list instead of extending it. With `--compare` the
+ * config's `since` is dropped; a `--since` flag stays, so the engine reports
+ * the conflict.
  */
 export const resolveSettings = (
   cwd: string,
@@ -45,15 +49,21 @@ export const resolveSettings = (
     const { file, config } = yield* locateRepository(cwd).pipe(
       Effect.flatMap(loadRepoConfig),
     );
+    const sinceFromConfig =
+      Option.isNone(flags.since) &&
+      Option.isNone(flags.compare) &&
+      config.since !== undefined;
     return {
-      since: Option.getOrElse(flags.since, () => config.since),
+      since: sinceFromConfig
+        ? config.since
+        : Option.getOrUndefined(flags.since),
       include:
         flags.include.length > 0 ? flags.include : (config.include ?? []),
       exclude:
         flags.exclude.length > 0 ? flags.exclude : (config.exclude ?? []),
       signatures: config.signatures,
       limit: Option.getOrElse(flags.limit, () => config.limit),
-      sinceFromConfig: Option.isNone(flags.since) && config.since !== undefined,
+      sinceFromConfig,
       configFile: file,
     };
   });

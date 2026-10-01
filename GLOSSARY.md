@@ -4,6 +4,8 @@
 
 **Activity window** — the time range of history that the activity sections (overview, activity, punch card, contributors, automation) consider, from `--since` (default: the first commit) to now, resolved to absolute dates in the report. Knowledge ignores it and always uses the full history.
 
+**Previous window** — with `--compare <duration>`, the span of equal length right before the activity window: it ends where the window starts (the boundary instant belongs to the window). The report's `comparison` section sets the two windows' figures side by side; it is a difference, not a ranking.
+
 **Identity** — a person as the history sees them: the mailmap-normalized, lowercased author email. The display name is the most recent name used with that email. Identities are never merged by name; `.mailmap` joins two emails.
 
 **Contributor** — an identity with at least one human or agent-assisted commit. Bots and agents are not contributors; they appear under automation.

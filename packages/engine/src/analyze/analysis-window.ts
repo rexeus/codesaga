@@ -7,6 +7,18 @@ export class InvalidSince extends Schema.TaggedError<InvalidSince>()(
   { input: Schema.String },
 ) {}
 
+/**
+ * `compare` is not `<n>d|w|m|y`, reaches beyond the dates JavaScript can
+ * represent, or is combined with `since`; `reason` tells which.
+ */
+export class InvalidCompare extends Schema.TaggedError<InvalidCompare>()(
+  "InvalidCompare",
+  {
+    input: Schema.String,
+    reason: Schema.Literals(["duration", "withSince"]),
+  },
+) {}
+
 /** The time range of an analysis as ISO 8601 UTC timestamps. */
 export type TimeRange = { readonly since: string; readonly until: string };
 
@@ -68,6 +80,45 @@ export const resolveTimeRange = (
     return {
       since: DateTime.formatIso(start.value),
       until: DateTime.formatIso(now),
+    };
+  });
+
+/** Two consecutive ranges: `previous` ends where `current` starts. */
+export type ComparedRanges = {
+  readonly current: TimeRange;
+  readonly previous: TimeRange;
+};
+
+/**
+ * Resolves a `<n>d|w|m|y` duration to the last such span ending at the
+ * current `Clock` time and the span before it. `previous.until` equals
+ * `current.since` and belongs to `current`, so no instant is in both ranges.
+ * `previous` starts one duration before `current` does, counted in the same
+ * calendar units, so a month or year may differ by a few days in length.
+ */
+export const resolveComparedRanges = (
+  duration: string,
+): Effect.Effect<ComparedRanges, InvalidCompare> =>
+  Effect.gen(function* () {
+    const now = yield* DateTime.now;
+    const current = Option.filter(parseRelative(duration, now), (start) =>
+      isUsableStart(start, now),
+    );
+    const previous = Option.flatMap(current, (start) =>
+      Option.filter(parseRelative(duration, start), (before) =>
+        isUsableStart(before, start),
+      ),
+    );
+    if (Option.isNone(current) || Option.isNone(previous)) {
+      return yield* new InvalidCompare({ input: duration, reason: "duration" });
+    }
+    const since = DateTime.formatIso(current.value);
+    return {
+      current: { since, until: DateTime.formatIso(now) },
+      previous: {
+        since: DateTime.formatIso(previous.value),
+        until: since,
+      },
     };
   });
 

@@ -10,12 +10,18 @@ const summaryParts = ({
   repository,
   window,
   generatedAt,
+  comparison,
 }: Report): string[] => [
   ...(repository.branch === null ? [] : [repository.branch]),
   ...(repository.head === null
     ? []
     : [repository.head.slice(0, SHORT_SHA_LENGTH)]),
   `${formatDate(window.since)} → ${formatDate(window.until)}`,
+  ...(comparison === undefined
+    ? []
+    : [
+        `compared with ${formatDate(comparison.previous.since)} → ${formatDate(comparison.previous.until)}`,
+      ]),
   `generated ${formatDate(generatedAt)}`,
 ];
 
@@ -46,13 +52,14 @@ export const renderTiles = (report: Report): HTMLElement =>
   h(
     "ul",
     "tiles",
-    ...keyFigures(report).map(({ label, value, detail }) =>
+    ...keyFigures(report).map(({ label, value, detail, delta }) =>
       h(
         "li",
         "tile",
         h("span", "tile-label", label),
         h("strong", "tile-value", value),
         h("span", "tile-detail", detail),
+        ...(delta === undefined ? [] : [h("span", "tile-delta", delta)]),
       ),
     ),
   );

@@ -18,7 +18,8 @@ import type { AnalyzeError, AnalyzeOptions } from "./gather.js";
  *
  * Fails with `NotAGitRepository`, `GitNotFound`, or `GitCommandFailed` when
  * git cannot answer, and with `InvalidSince` for a `since` that is neither
- * relative nor an ISO date in the past.
+ * relative nor an ISO date in the past, and with `InvalidCompare` for a
+ * `compare` that is not a relative duration or comes with `since`.
  */
 export const analyze = (
   options: AnalyzeOptions,

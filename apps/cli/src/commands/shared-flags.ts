@@ -20,3 +20,10 @@ export const cacheFlag = Flag.Boolean("cache").pipe(
   ),
   Flag.withDefault(true),
 );
+
+export const compareFlag = Flag.String("compare").pipe(
+  Flag.withDescription(
+    "Compare the last <n>d, <n>w, <n>m or <n>y with the equally long span before it; cannot be combined with --since",
+  ),
+  Flag.optional,
+);

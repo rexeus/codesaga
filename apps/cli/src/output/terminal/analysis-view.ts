@@ -6,9 +6,13 @@ import { escapeForTerminal } from "../escape.js";
 import {
   ago,
   count,
+  day,
   daysBetween,
   plural,
   share,
+  signedCount,
+  signedPercent,
+  signedPoints,
   span,
   sparkline,
 } from "./format.js";
@@ -21,6 +25,8 @@ import {
 } from "./layout.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
+
+type Comparison = NonNullable<Report["comparison"]>;
 
 const ACTIVITY_MONTHS = 12;
 const TOP_CONTRIBUTORS = 5;
@@ -53,6 +59,25 @@ const summary = (report: Report): string => {
     `${plural(overview.loc, "line")} in ${plural(overview.languages.length, "language")}`,
   ].join(SEPARATOR);
 };
+
+/** A change in relative terms, or in counts when the previous span had none to relate to. */
+const relativeChange = ({
+  change,
+  ratio,
+}: {
+  readonly change: number;
+  readonly ratio: number | null;
+}): string => (ratio === null ? signedCount(change) : signedPercent(ratio));
+
+/** The deltas of a comparison on one line, named by the dates of the span they compare with. */
+const comparisonLine = ({ previous, delta }: Comparison): string =>
+  [
+    `vs ${day(previous.since)} – ${day(previous.until)}`,
+    `commits ${relativeChange(delta.commits)}`,
+    `contributors ${signedCount(delta.activeContributors.change)}`,
+    `lines added ${relativeChange(delta.added)}`,
+    `AI share ${signedPoints(delta.aiShare)}`,
+  ].join(SEPARATOR);
 
 const activitySection = (
   report: Report,
@@ -142,6 +167,9 @@ export const renderAnalysis = (report: Report, style: Style): string =>
   [
     style.bold(headline(report)),
     summary(report),
+    ...(report.comparison === undefined
+      ? []
+      : [comparisonLine(report.comparison)]),
     "",
     ...activitySection(report, style),
     ...contributorLines(report, style),

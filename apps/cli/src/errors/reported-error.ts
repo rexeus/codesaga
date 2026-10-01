@@ -55,6 +55,17 @@ const cliFailure = (error: CliError.CliError): Failure => {
   };
 };
 
+const invalidWindowMessage = (
+  error: Extract<AnalyzeError, { _tag: "InvalidSince" | "InvalidCompare" }>,
+): string => {
+  if (error._tag === "InvalidSince") {
+    return `invalid --since "${error.input}": use <n>d, <n>w, <n>m, <n>y or YYYY-MM-DD`;
+  }
+  return error.reason === "withSince"
+    ? "--compare cannot be combined with --since: it sets the window itself"
+    : `invalid --compare "${error.input}": use <n>d, <n>w, <n>m or <n>y`;
+};
+
 const engineFailure = (
   error:
     | AnalyzeError
@@ -63,11 +74,8 @@ const engineFailure = (
     | ConfigInvalid
     | HtmlWriteFailed,
 ): Failure => {
-  if (error._tag === "InvalidSince") {
-    return {
-      message: `invalid --since "${error.input}": use <n>d, <n>w, <n>m, <n>y or YYYY-MM-DD`,
-      exitCode: USAGE,
-    };
+  if (error._tag === "InvalidSince" || error._tag === "InvalidCompare") {
+    return { message: invalidWindowMessage(error), exitCode: USAGE };
   }
   if (error._tag === "PathNotFound") {
     return {
@@ -119,7 +127,7 @@ const reported = ({ message, exitCode }: Failure): CliReportedError =>
 
 /**
  * Words an expected failure and assigns its exit code: 2 for usage errors
- * (an invalid `--since`, a path that does not exist, an invalid config file), 3 for no git repository or no git,
+ * (an invalid `--since` or `--compare`, a path that does not exist, an invalid config file), 3 for no git repository or no git,
  * 4 when `inspect` matched nothing, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>

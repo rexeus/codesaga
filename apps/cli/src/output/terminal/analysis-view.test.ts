@@ -178,6 +178,47 @@ describe("renderAnalysis in a single-author repository", () => {
   });
 });
 
+describe("renderAnalysis comparison", () => {
+  const figures = {
+    commits: 100,
+    activeContributors: 4,
+    added: 0,
+    deleted: 0,
+    automation: { human: 100, agentAssisted: 0, agent: 0, bot: 0 },
+    aiShare: 0,
+  };
+  const comparison = {
+    previous: {
+      since: "2025-10-15T00:00:00.000Z",
+      until: "2026-01-15T00:00:00.000Z",
+      ...figures,
+    },
+    current: figures,
+    delta: {
+      commits: { change: 18, ratio: 0.183 },
+      activeContributors: { change: -1, ratio: -0.25 },
+      added: { change: 40, ratio: null },
+      deleted: { change: 0, ratio: null },
+      aiShare: 0.044,
+    },
+  };
+
+  it("puts the deltas on one line under the summary", () => {
+    const lines = renderAnalysis(
+      { ...sampleReport(), comparison },
+      plain,
+    ).split("\n");
+
+    expect(lines[2]).toBe(
+      "vs 2025-10-15 – 2026-01-15 · commits +18% · contributors -1 · lines added +40 · AI share +4 pts",
+    );
+  });
+
+  it("shows no comparison line without --compare", () => {
+    expect(renderAnalysis(sampleReport(), plain)).not.toContain("vs previous");
+  });
+});
+
 describe("renderAnalysis edge cases", () => {
   it("names a repository without commits and omits what it cannot know", () => {
     const report = sampleReport();

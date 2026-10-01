@@ -7,6 +7,25 @@ export const formatCount = (value: number): string => counts.format(value);
 export const formatPercent = (share: number): string =>
   `${Math.round(share * 100)}%`;
 
+const signed = (value: number, unit: string): string => {
+  if (value === 0) {
+    return `0${unit}`;
+  }
+  const magnitude = formatCount(Math.abs(value));
+  return `${value > 0 ? "+" : "\u2212"}${magnitude}${unit}`;
+};
+
+/** A difference of counts with its sign: `+2`, `−3`, `0`. */
+export const formatSignedCount = (value: number): string => signed(value, "");
+
+/** A relative change as a whole percent with its sign: `0.183 → "+18%"`. */
+export const formatSignedPercent = (ratio: number): string =>
+  signed(Math.round(ratio * 100), "%");
+
+/** A difference of two shares in whole percentage points: `0.044 → "+4 pts"`. */
+export const formatSignedPoints = (fraction: number): string =>
+  signed(Math.round(fraction * 100), " pts");
+
 /** The `YYYY-MM-DD` part of an ISO timestamp. */
 export const formatDate = (timestamp: string): string => timestamp.slice(0, 10);
 

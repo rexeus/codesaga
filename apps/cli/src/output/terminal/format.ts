@@ -17,6 +17,22 @@ export const share = (part: number, whole: number): string => {
   return percent > 0 && percent < 0.5 ? "<1%" : `${Math.round(percent)}%`;
 };
 
+const signed = (value: number, unit: string): string =>
+  value === 0
+    ? `0${unit}`
+    : `${value > 0 ? "+" : "-"}${count(Math.abs(value))}${unit}`;
+
+/** A difference of counts with its sign: `+2`, `-3`, `0`. */
+export const signedCount = (value: number): string => signed(value, "");
+
+/** A relative change as a whole percentage with its sign: `0.183` becomes `+18%`. */
+export const signedPercent = (ratio: number): string =>
+  signed(Math.round(ratio * 100), "%");
+
+/** A difference of two shares in whole percentage points: `0.04` becomes `+4 pts`. */
+export const signedPoints = (fraction: number): string =>
+  signed(Math.round(fraction * 100), " pts");
+
 /** Whole days from one ISO timestamp to a later one. */
 export const daysBetween = (from: string, to: string): number =>
   Math.max(0, Math.floor((Date.parse(to) - Date.parse(from)) / MS_PER_DAY));

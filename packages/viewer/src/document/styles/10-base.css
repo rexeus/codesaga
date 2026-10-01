@@ -90,6 +90,11 @@ p {
   font-size: 12px;
 }
 
+.tile-delta {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
 .card {
   display: grid;
   gap: 16px;

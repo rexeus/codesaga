@@ -81,6 +81,48 @@ describe("codesaga analyze --json", () => {
   );
 });
 
+describe("codesaga analyze --compare", () => {
+  it.live(
+    "carries both windows and the deltas in the JSON, decoding with the Report schema",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+
+        const result = yield* journey({
+          args: ["analyze", "--json", "--compare", "45d"],
+          cwd: repo.root,
+        });
+
+        expect(result.exitCode).toBe(0);
+        const { window, comparison } = yield* decode(result.stdout);
+        // 20, 10 and 5 days ago against 60 days ago
+        expect(window.commits).toBe(3);
+        expect(comparison?.previous.commits).toBe(1);
+        expect(comparison?.current.activeContributors).toBe(2);
+        expect(comparison?.delta.commits).toStrictEqual({
+          change: 2,
+          ratio: 2,
+        });
+        expect(comparison?.previous.until).toBe(window.since);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("adds the deltas to the terminal summary", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["analyze", "--compare", "45d"],
+        cwd: repo.root,
+      });
+
+      expect(result.stdout).toMatch(
+        /^vs \d{4}-\d{2}-\d{2} – \d{4}-\d{2}-\d{2} · commits \+200% · contributors \+1 · lines added \+300% · AI share \+33 pts$/mu,
+      );
+    }).pipe(Effect.scoped),
+  );
+});
+
 describe("codesaga analyze paths", () => {
   it.live("counts only commits under a path argument", () =>
     Effect.gen(function* () {

@@ -3,9 +3,9 @@
 // Cost is one pass over the commits plus one entry per week and month.
 
 import type { TimeRange } from "../analyze/analysis-window.js";
-import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { groupBy } from "../collections/group-by.js";
+import { countContributors } from "../contributors/count-contributors.js";
 import { countCodeLines } from "../history/history.js";
 import type { Report } from "../report/report.js";
 import { monthOf, monthsOf, weekStartOf, weeksOf } from "./buckets.js";
@@ -17,13 +17,6 @@ type ActivityInput = {
   /** Whether a changed path counts toward added and deleted lines. */
   readonly isCodePath: (path: string) => boolean;
 };
-
-const distinctContributors = (commits: ReadonlyArray<ClassifiedCommit>) =>
-  new Set(
-    commits
-      .filter((commit) => isContributorCommit(commit))
-      .map((commit) => commit.author.email),
-  ).size;
 
 /**
  * The `activity` section: every week and month of the window, empty ones
@@ -49,7 +42,7 @@ export const activity = ({
       return {
         month,
         commits: inMonth.length,
-        contributors: distinctContributors(inMonth),
+        contributors: countContributors(inMonth),
       };
     }),
   };

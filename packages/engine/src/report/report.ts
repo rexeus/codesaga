@@ -3,19 +3,10 @@
 // Additive fields keep schemaVersion 1; renaming or removing a field bumps it.
 import { Schema } from "effect";
 
-const Count = Schema.Natural;
+import { AutomationTotals } from "./automation-totals.js";
+import { Comparison } from "./comparison.js";
 
-/** Commits per class; the four classes partition the commits they count. */
-export const AutomationTotals = Schema.Struct({
-  /** Commits by a human with no agent detected. */
-  human: Count,
-  /** Commits by a human that carry an agent's trailer, marker or committer; each counts once. */
-  agentAssisted: Count,
-  /** Commits authored by an AI agent. */
-  agent: Count,
-  /** Commits authored by an automation account that is not an agent. */
-  bot: Count,
-});
+const Count = Schema.Natural;
 
 /** The repository the report describes. */
 const Repository = Schema.Struct({
@@ -259,5 +250,7 @@ export const Report = Schema.Struct({
   contributors: Schema.Array(Contributor),
   automation: Automation,
   knowledge: Knowledge,
+  /** Only with `--compare`: the window against the span before it. */
+  comparison: Schema.optionalKey(Comparison),
 });
 export type Report = typeof Report.Type;

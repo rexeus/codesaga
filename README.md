@@ -79,16 +79,17 @@ Each argument — a file, a directory, or a glob — gives one entry aggregated 
 
 ### `codesaga analyze [path]`
 
-| Flag                                  | Default          | Meaning                                                                                                                                          |
-| ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `[path]`                              | whole repository | A directory (or file) inside a repository; only changes under it count. Also works for a repository elsewhere: `codesaga analyze ../other-repo`. |
-| `--since <when>`                      | whole history    | Narrows the activity sections: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`. Knowledge always uses the full history.                          |
-| `--include <glob>`                    | language list    | Replaces the built-in list of source-code extensions. Repeatable.                                                                                |
-| `--exclude <glob>`                    | —                | Removes matching files. Repeatable.                                                                                                              |
-| `--limit <n>`                         | `25`             | Contributors and knowledge directories in `--json`; `0` for all. `totals` always tells the full size.                                            |
-| `--no-cache`                          | cache on         | Reads `git log` instead of the history cache, and leaves the cache alone. See _How the numbers work_.                                            |
-| `--json`                              | off              | One JSON document on stdout; everything else goes to stderr.                                                                                     |
-| `--html`, `--out <file>`, `--no-open` | off              | The dashboard, see above. It always embeds the full report.                                                                                      |
+| Flag                                  | Default          | Meaning                                                                                                                                                                                        |
+| ------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[path]`                              | whole repository | A directory (or file) inside a repository; only changes under it count. Also works for a repository elsewhere: `codesaga analyze ../other-repo`.                                               |
+| `--since <when>`                      | whole history    | Narrows the activity sections: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`. Knowledge always uses the full history.                                                                        |
+| `--compare <duration>`                | —                | `<n>d`, `<n>w`, `<n>m` or `<n>y`: the activity window becomes the last `<duration>`, and the report compares it with the equally long span right before it. Cannot be combined with `--since`. |
+| `--include <glob>`                    | language list    | Replaces the built-in list of source-code extensions. Repeatable.                                                                                                                              |
+| `--exclude <glob>`                    | —                | Removes matching files. Repeatable.                                                                                                                                                            |
+| `--limit <n>`                         | `25`             | Contributors and knowledge directories in `--json`; `0` for all. `totals` always tells the full size.                                                                                          |
+| `--no-cache`                          | cache on         | Reads `git log` instead of the history cache, and leaves the cache alone. See _How the numbers work_.                                                                                          |
+| `--json`                              | off              | One JSON document on stdout; everything else goes to stderr.                                                                                                                                   |
+| `--html`, `--out <file>`, `--no-open` | off              | The dashboard, see above. It always embeds the full report.                                                                                                                                    |
 
 ### `codesaga inspect <path-or-glob...>`
 
@@ -96,13 +97,13 @@ Repository-relative files, directories or globs (quote globs so the shell leaves
 
 ### Exit codes
 
-| Code | Meaning                                                                                                    |
-| ---- | ---------------------------------------------------------------------------------------------------------- |
-| 0    | Success                                                                                                    |
-| 1    | Unexpected failure (including a git command that failed, or an unwritable `--out`)                         |
-| 2    | Usage error, such as an unknown flag, an invalid `--since`, an invalid `.codesaga.json`, or a missing path |
-| 3    | Not inside a git repository, or `git` is not installed                                                     |
-| 4    | `inspect` matched no file                                                                                  |
+| Code | Meaning                                                                                                                                               |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Success                                                                                                                                               |
+| 1    | Unexpected failure (including a git command that failed, or an unwritable `--out`)                                                                    |
+| 2    | Usage error, such as an unknown flag, an invalid `--since` or `--compare`, `--compare` with `--since`, an invalid `.codesaga.json`, or a missing path |
+| 3    | Not inside a git repository, or `git` is not installed                                                                                                |
+| 4    | `inspect` matched no file                                                                                                                             |
 
 ## Configuration
 
@@ -135,7 +136,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspe
 | `limit`      | `--limit`   | A whole number, `0` for all. Only `analyze --json` uses it.                                                                                              |
 | `signatures` | — (no flag) | In-house bots and agents. Each has a `name`, reported as the tool, and `emails` and `names` that identify it: exact matches, ignoring case, no patterns. |
 
-- **Precedence** is flag, then config, then the built-in default. `--include` and `--exclude` replace the config's list; they do not add to it.
+- **Precedence** is flag, then config, then the built-in default. `--compare` sets the window itself, so it ignores the config's `since`; only a `--since` flag conflicts with it. `--include` and `--exclude` replace the config's list; they do not add to it.
 - **Signatures** extend the built-in table of [commit classes](#how-the-numbers-work) and never replace it: a person the table already knows keeps its built-in name. A `bots` entry makes the person's commits bot commits; an `agents` entry makes them agent commits, and a human commit with that person as co-author or committer agent-assisted. Matches go by author email, author name, and the emails and names in co-author trailers.
 - **The file is checked strictly.** Invalid JSON, an unknown key or a wrong value ends with exit code 2 and a message that names the file and the key, such as `invalid /repo/.codesaga.json: signatures.bots[0].name: Missing key`. A signature needs at least one non-empty entry in `emails` or `names`; entries are trimmed. A config that is a directory, a broken symbolic link, unreadable, or larger than 1 MiB is rejected the same way.
 - The file is read from the root of the analyzed repository, not from the directory you run codesaga in. The history cache is unaffected: it holds raw commits, and signatures classify them on every run.
@@ -145,7 +146,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspe
 - **One pass over the history.** codesaga reads `git log` of HEAD once, following renames. Merge commits are read to keep the commit graph connected but count as nothing. A file deleted and later recreated at the same path starts a new life: knowledge credits only the file that exists today, while the activity sections still count the earlier work. Every section is computed from that.
 - **History cache** — the parsed log is kept in `.git/codesaga/history-v1.json` (inside the git directory, so git never tracks it and every clone has its own). The next run reads only the commits made since; after a rebase, a force-push or a change to `.mailmap`, `mailmap.file`, `mailmap.blob`, `refs/replace/`, `info/grafts` or the shallow boundary it reads everything again. The results are the same either way. A cache that cannot be read or written is ignored. `--no-cache` skips it; `rm -rf .git/codesaga` clears it.
 - **Universe** — the files that count as code: tracked by git, not ignored, not marked `linguist-generated` or `linguist-vendored`, not in `vendor/`, `node_modules/`, `dist/`, `build/` or generated folders, not binary or minified, and matching the language list or `--include`. Lines added and deleted only count for such paths, so lockfiles and vendored code do not dominate the charts.
-- **Activity window** — `--since` until now; without `--since`, the whole history. Weeks start on Monday and, like months, are in UTC. The punch card uses each author's own time zone and counts only commits by people.
+- **Activity window** — `--since` until now; without `--since`, the whole history. With `--compare 3m` it is the last three months, and the **previous window** is the three months before: it starts one duration earlier in the same calendar units (so a month or year may differ by a few days) and ends where the window starts, which belongs to the window. The `comparison` section of the JSON gives both windows' commits, active contributors (people with a commit in the window), lines added and deleted, and automation counts and AI share, and their differences: `change` is window minus previous, `ratio` is `change` over the previous value, `null` when that was zero, and the AI share difference is a fraction (`0.05` is five percentage points). The terminal summary and the dashboard's key figures show the differences; they are context, not a verdict. Weeks start on Monday and, like months, are in UTC. The punch card uses each author's own time zone and counts only commits by people.
 - **Identities** — a person is their author email after `.mailmap`. Two emails of one person count as two people until `.mailmap` joins them; codesaga never merges by name, because names collide.
 - **Active** — a commit in the last 183 days.
 - **Commit classes**, first match wins:

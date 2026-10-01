@@ -22,8 +22,12 @@ import { readHistory } from "../history/history.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { inventory, namedAsCode } from "../universe/inventory.js";
-import { resolveTimeRange } from "./analysis-window.js";
-import type { InvalidSince } from "./analysis-window.js";
+import {
+  InvalidCompare,
+  resolveComparedRanges,
+  resolveTimeRange,
+} from "./analysis-window.js";
+import type { InvalidSince, TimeRange } from "./analysis-window.js";
 
 /** Everything `analyze` and `inspect` read; gathering it is this module's job. */
 export type RepositoryFacts = {
@@ -31,6 +35,8 @@ export type RepositoryFacts = {
   readonly now: DateTime.Utc;
   /** The resolved `--since` instant, or undefined for the first commit in scope. */
   readonly since: string | undefined;
+  /** The span right before the window, when comparing; it ends where the window starts. */
+  readonly previous: TimeRange | undefined;
   readonly repository: Omit<
     Report["repository"],
     "firstCommitAt" | "lastCommitAt"
@@ -47,7 +53,7 @@ export type RepositoryFacts = {
 };
 
 /** Every expected failure of `analyze`. */
-export type AnalyzeError = GitError | InvalidSince;
+export type AnalyzeError = GitError | InvalidSince | InvalidCompare;
 
 export type AnalyzeOptions = {
   /** A directory inside the repository; git locates the work tree from here. */
@@ -62,6 +68,12 @@ export type AnalyzeOptions = {
    * against `Clock`. Absent, the window starts at the first commit in scope.
    */
   readonly since?: string | undefined;
+  /**
+   * `<n>d`, `<n>w`, `<n>m` or `<n>y`: the window becomes the last such span
+   * and the report gains a `comparison` with the equally long span before it.
+   * Cannot be combined with `since`.
+   */
+  readonly compare?: string | undefined;
   /** Globs that replace the language allow-list when non-empty. */
   readonly include: ReadonlyArray<string>;
   /** Globs removed from the universe after `include`. */
@@ -82,11 +94,36 @@ export type AnalyzeOptions = {
   readonly cache?: boolean | undefined;
 };
 
+type Windows = Pick<RepositoryFacts, "since" | "previous">;
+
+const resolveWindows = (
+  options: AnalyzeOptions,
+): Effect.Effect<Windows, InvalidSince | InvalidCompare> =>
+  Effect.gen(function* () {
+    if (options.compare !== undefined) {
+      if (options.since !== undefined) {
+        return yield* new InvalidCompare({
+          input: options.compare,
+          reason: "withSince",
+        });
+      }
+      const { current, previous } = yield* resolveComparedRanges(
+        options.compare,
+      );
+      return { since: current.since, previous };
+    }
+    const since =
+      options.since === undefined
+        ? undefined
+        : (yield* resolveTimeRange(options.since)).since;
+    return { since, previous: undefined };
+  });
+
 const gatherInRepository = (
   options: AnalyzeOptions,
   root: string,
   scope: string,
-  since: string | undefined,
+  windows: Windows,
 ) =>
   Effect.gen(function* () {
     const path = yield* Path.Path;
@@ -111,7 +148,7 @@ const gatherInRepository = (
     return {
       toolVersion: options.toolVersion,
       now: yield* DateTime.now,
-      since,
+      ...windows,
       repository: {
         name: path.basename(root),
         head,
@@ -132,8 +169,9 @@ const gatherInRepository = (
  * over its whole history, the universe of the scope, and `Clock` time.
  *
  * Fails with `NotAGitRepository`, `GitNotFound`, or `GitCommandFailed` when
- * git cannot answer, and with `InvalidSince` for a `since` that is neither
- * relative nor an ISO date in the past.
+ * git cannot answer, with `InvalidSince` for a `since` that is neither
+ * relative nor an ISO date in the past, and with `InvalidCompare` for a
+ * `compare` that is not a relative duration or comes with `since`.
  */
 export const gatherFacts = (
   options: AnalyzeOptions,
@@ -143,16 +181,13 @@ export const gatherFacts = (
   ChildProcessSpawner.ChildProcessSpawner | FileSystem.FileSystem | Path.Path
 > =>
   Effect.gen(function* () {
-    const since =
-      options.since === undefined
-        ? undefined
-        : (yield* resolveTimeRange(options.since)).since;
+    const windows = yield* resolveWindows(options);
     const root = yield* locateRepository(options.cwd);
     const scope =
       options.scope === undefined
         ? "."
         : yield* repositoryScope(root, options.cwd, options.scope);
-    return yield* gatherInRepository(options, root, scope, since).pipe(
+    return yield* gatherInRepository(options, root, scope, windows).pipe(
       Effect.provide(Git.layer(root)),
     );
   });

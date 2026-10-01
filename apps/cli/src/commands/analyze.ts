@@ -15,7 +15,7 @@ import { renderAnalysis } from "../output/terminal/analysis-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
-import { cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
+import { cacheFlag, compareFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
 
 const DEFAULT_LIMIT = 25;
 const DEFAULT_HTML_FILE = "codesaga-report.html";
@@ -31,6 +31,7 @@ export const analyzeCommand = Command.make(
     ),
     json: jsonFlag,
     since: sinceFlag,
+    compare: compareFlag,
     cache: cacheFlag,
     include: Flag.String("include").pipe(
       Flag.withDescription(
@@ -74,7 +75,7 @@ export const analyzeCommand = Command.make(
     ),
   },
   Effect.fn(function* (flags) {
-    const { path, json, cache } = flags;
+    const { path, json, cache, compare } = flags;
     const cwd = yield* WorkingDirectory;
     // Fail on an unwritable --out before the slow analysis, not after it.
     const htmlTarget =
@@ -91,6 +92,7 @@ export const analyzeCommand = Command.make(
     const options: AnalyzeOptions = {
       ...target,
       since: settings.since,
+      compare: Option.getOrUndefined(compare),
       include: settings.include,
       exclude: settings.exclude,
       signatures: settings.signatures,
@@ -126,6 +128,10 @@ export const analyzeCommand = Command.make(
     {
       command: "codesaga analyze --html",
       description: "Write the dashboard to codesaga-report.html and open it",
+    },
+    {
+      command: "codesaga analyze --compare 3m",
+      description: "The last three months against the three months before",
     },
     {
       command: "codesaga analyze packages/api --since 6m",

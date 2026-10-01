@@ -70,6 +70,16 @@ export type Analysis = {
   /** The scoped commits inside `window`. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   readonly window: TimeRange;
+  /**
+   * The scoped commits in the span before `window`, when comparing; the span
+   * includes its `since` and excludes its `until`, which `window` owns.
+   */
+  readonly previous:
+    | {
+        readonly window: TimeRange;
+        readonly commits: ReadonlyArray<ClassifiedCommit>;
+      }
+    | undefined;
   /** Author time in seconds of the HEAD commit itself, even a merge; 0 on an unborn branch. */
   readonly headTime: number;
   /** ISO timestamps of the oldest and newest scoped commit; null without commits. */
@@ -81,9 +91,25 @@ export type Analysis = {
 const isPlaceable = (seconds: number, now: DateTime.Utc): boolean =>
   seconds >= 0 && seconds <= DateTime.toEpochMillis(now) / 1000;
 
+const previousOf = (
+  scoped: ReadonlyArray<ClassifiedCommit>,
+  window: TimeRange | undefined,
+): Analysis["previous"] => {
+  if (window === undefined) {
+    return undefined;
+  }
+  const from = toEpochSeconds(window.since);
+  const until = toEpochSeconds(window.until);
+  return {
+    window,
+    commits: scoped.filter(({ time }) => time >= from && time < until),
+  };
+};
+
 /**
  * Cuts the commits to the repository scope, classifies them, and resolves the
- * activity window: `since` or the first commit in scope, until now. Commits
+ * activity window: `since` or the first commit in scope, until now, and the
+ * span before it when comparing. Commits
  * dated before the epoch or after `now` count nowhere, not even in
  * `firstCommitAt` and `lastCommitAt`.
  */
@@ -107,6 +133,7 @@ export const prepareAnalysis = (facts: RepositoryFacts): Analysis => {
     scoped,
     commits: scoped.filter(({ time }) => time >= from && time <= to),
     window,
+    previous: previousOf(scoped, facts.previous),
     headTime: facts.headTime,
     firstCommitAt: extent === undefined ? null : isoOf(extent.first),
     lastCommitAt: extent === undefined ? null : isoOf(extent.last),

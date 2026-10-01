@@ -28,6 +28,7 @@ export const inspectCommand = Command.make(
     const cwd = yield* WorkingDirectory;
     const settings = yield* resolveSettings(cwd, {
       since,
+      compare: Option.none(),
       include: [],
       exclude: [],
       limit: Option.none(),

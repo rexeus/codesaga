@@ -5,6 +5,7 @@
 import { activity } from "../activity/activity.js";
 import { punchcard } from "../activity/punchcard.js";
 import { automation } from "../automation/automation.js";
+import { comparison } from "../compare/comparison.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import { contributors } from "../contributors/contributors.js";
 import { KNOWLEDGE_THRESHOLDS, knowledge } from "../knowledge/knowledge.js";
@@ -16,8 +17,15 @@ import { prepareAnalysis } from "./prepare.js";
 /** Builds the report from the facts, each section over the commits it covers. */
 export const buildReport = (facts: RepositoryFacts): Report => {
   const { scope } = facts.repository;
-  const { scoped, commits, window, headTime, firstCommitAt, lastCommitAt } =
-    prepareAnalysis(facts);
+  const {
+    scoped,
+    commits,
+    window,
+    previous,
+    headTime,
+    firstCommitAt,
+    lastCommitAt,
+  } = prepareAnalysis(facts);
   const knowledgeSection = knowledge({
     commits: scoped,
     universe: facts.universe,
@@ -48,5 +56,14 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     contributors: people,
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
+    ...(previous === undefined
+      ? {}
+      : {
+          comparison: comparison({
+            current: commits,
+            previous,
+            isCodePath: facts.isCodePath,
+          }),
+        }),
   };
 };
