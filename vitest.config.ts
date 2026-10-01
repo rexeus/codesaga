@@ -5,5 +5,8 @@ export default defineConfig({
   test: {
     include: ["scripts/**/*.test.ts"],
     passWithNoTests: true,
+    // The lint probes spawn type-aware oxlint per case, which takes seconds
+    // when turbo runs the package suites in parallel.
+    testTimeout: 30_000,
   },
 });
