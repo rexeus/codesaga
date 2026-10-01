@@ -1,12 +1,29 @@
 // Owns the two-column layout of the `analyze` view: a bold label on the left, its lines beside and below it.
+import { escapeForTerminal } from "../escape.js";
 import type { Style } from "./style.js";
 
 const LABEL_WIDTH = 27;
 export const MAX_NAME_WIDTH = 24;
 
-/** `text` cut to `width` characters, ending in an ellipsis when it was longer. */
-export const fit = (text: string, width: number): string =>
-  text.length > width ? `${text.slice(0, width - 1)}…` : text;
+/**
+ * `text` made terminal-safe and cut to `width` characters, ending in an
+ * ellipsis when it was longer. Each character is escaped before it is
+ * measured, so a cut never lands inside an escape sequence or a surrogate pair.
+ */
+export const fitEscaped = (text: string, width: number): string => {
+  const units = Array.from(text, escapeForTerminal);
+  if (units.join("").length <= width) {
+    return units.join("");
+  }
+  let kept = "";
+  for (const unit of units) {
+    if (kept.length + unit.length > width - 1) {
+      break;
+    }
+    kept += unit;
+  }
+  return `${kept}…`;
+};
 
 /** A labelled section: the label in the left column, its lines beside and below it. */
 export const section = (

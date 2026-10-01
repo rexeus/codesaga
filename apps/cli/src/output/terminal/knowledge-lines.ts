@@ -2,14 +2,19 @@
 // Every name and path that came from git passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
-import { escapeForTerminal } from "../escape.js";
 import { share } from "./format.js";
-import { fit, labelledTable, MAX_NAME_WIDTH, section } from "./layout.js";
+import {
+  fitEscaped,
+  labelledTable,
+  MAX_NAME_WIDTH,
+  section,
+} from "./layout.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 
 const TOP_DIRECTORIES = 5;
 const MAX_PATH_WIDTH = 24;
+const MAX_TRUCK_FACTOR_NAMES = 3;
 
 type Knowledge = Report["knowledge"];
 type Directory = Knowledge["directories"][number];
@@ -19,17 +24,23 @@ const INACTIVE = " (inactive)";
 
 /** A person's name, escaped and cut to the name column. */
 export const nameOf = (person: { name: string }): string =>
-  fit(escapeForTerminal(person.name), MAX_NAME_WIDTH);
+  fitEscaped(person.name, MAX_NAME_WIDTH);
 
 const inactiveMark = (person: { active: boolean }): string =>
   person.active ? "" : INACTIVE;
 
-const truckFactorLine = ({ truckFactor }: Knowledge): string =>
-  truckFactor.value === 0
-    ? "0 · most files have no expert"
-    : `${truckFactor.value} · ${truckFactor.people
-        .map((person) => `${nameOf(person)}${inactiveMark(person)}`)
-        .join(", ")}`;
+const truckFactorLine = ({ truckFactor }: Knowledge): string => {
+  if (truckFactor.value === 0) {
+    return "0 · most files have no expert";
+  }
+  const named = truckFactor.people
+    .slice(0, MAX_TRUCK_FACTOR_NAMES)
+    .map((person) => `${nameOf(person)}${inactiveMark(person)}`);
+  const more = truckFactor.people.length - named.length;
+  const people =
+    more > 0 ? `${named.join(", ")} and ${more} more` : named.join(", ");
+  return `${truckFactor.value} · ${people}`;
+};
 
 /** `orphaned, island`: the flags of a file set, riskiest first; empty for neither. */
 export const badgesOf = ({
@@ -55,9 +66,7 @@ const directoryLines = (
   const top = directories.slice(0, TOP_DIRECTORIES);
   return labelledTable(
     "Knowledge risks",
-    top.map((directory) =>
-      fit(escapeForTerminal(directory.path), MAX_PATH_WIDTH),
-    ),
+    top.map((directory) => fitEscaped(directory.path, MAX_PATH_WIDTH)),
     renderTable(
       [
         { header: "files", align: "right" },

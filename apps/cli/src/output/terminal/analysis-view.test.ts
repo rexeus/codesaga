@@ -90,6 +90,53 @@ describe("renderAnalysis knowledge", () => {
   });
 });
 
+describe("renderAnalysis truck factor", () => {
+  it("lists a large truck factor as three names and a count", () => {
+    const report = sampleReport();
+    const [first] = report.knowledge.truckFactor.people;
+    const people = Array.from({ length: 20 }, (_, index) =>
+      Object.assign({}, first, { name: `Person ${index + 1}` }),
+    );
+    const lines = renderAnalysis(
+      {
+        ...report,
+        knowledge: {
+          ...report.knowledge,
+          truckFactor: { value: 20, people },
+        },
+      },
+      plain,
+    ).split("\n");
+
+    expect(lines).toContain(
+      "Truck factor               20 · Person 1, Person 2, Person 3 and 17 more",
+    );
+  });
+
+  it("cuts a long name with control characters on whole escapes", () => {
+    const report = sampleReport();
+    const [first] = report.knowledge.truckFactor.people;
+    const name = `${"a".repeat(21)}\u001B[31mred`;
+    const lines = renderAnalysis(
+      {
+        ...report,
+        knowledge: {
+          ...report.knowledge,
+          truckFactor: {
+            value: 1,
+            people: [Object.assign({}, first, { name })],
+          },
+        },
+      },
+      plain,
+    ).split("\n");
+
+    expect(lines).toContain(
+      `Truck factor               1 · ${"a".repeat(21)}…`,
+    );
+  });
+});
+
 describe("renderAnalysis edge cases", () => {
   it("names a repository without commits and omits what it cannot know", () => {
     const report = sampleReport();

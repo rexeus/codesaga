@@ -13,7 +13,12 @@ import {
   sparkline,
 } from "./format.js";
 import { knowledgeLines } from "./knowledge-lines.js";
-import { fit, labelledTable, MAX_NAME_WIDTH, section } from "./layout.js";
+import {
+  fitEscaped,
+  labelledTable,
+  MAX_NAME_WIDTH,
+  section,
+} from "./layout.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 
@@ -87,7 +92,7 @@ const contributorLines = (
   );
   return labelledTable(
     "Contributors",
-    top.map((person) => fit(escapeForTerminal(person.name), MAX_NAME_WIDTH)),
+    top.map((person) => fitEscaped(person.name, MAX_NAME_WIDTH)),
     table,
     style,
   );
