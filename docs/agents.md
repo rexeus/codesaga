@@ -31,6 +31,8 @@ The first call in a clone reads the whole history (seconds on a repository with 
 
 `--compare <duration>` (such as `3m`) makes the window the last duration and adds a `comparison` section: the figures of the window and of the span of the same length before it, and their differences. `delta.aiShare` is `null` when either span has no commits, and `previous.partial` is `true` when the previous span starts before the first commit, so it covers less history than the window.
 
+`codesaga check --json` is for gates, not for exploration: it answers whether the repository meets limits such as `--min-truck-factor 2`, with `passed` and one `reason` per gate, and exits 5 when a gate fails. Use it in CI or before a release, and `analyze` or `inspect` to learn why a gate failed.
+
 ## Contract
 
-Stdout carries exactly one JSON document in `--json` mode; diagnostics go to stderr. The documents are versioned by `schemaVersion`: fields may be added in version 1, never renamed or removed. Exit codes: 0 success, 2 usage error (including an invalid `.codesaga.json`), 3 not a git repository or no git, 4 `inspect` matched nothing, 1 anything else. The shapes are defined in [`packages/engine/src/report/`](../packages/engine/src/report/).
+Stdout carries exactly one JSON document in `--json` mode; diagnostics go to stderr. The documents are versioned by `schemaVersion`: fields may be added in version 1, never renamed or removed. Exit codes: 0 success, 2 usage error (including an invalid `.codesaga.json` and `check` without gates), 3 not a git repository or no git, 4 `inspect` matched nothing, 5 a `check` gate failed, 1 anything else. The shapes are defined in [`packages/engine/src/report/`](../packages/engine/src/report/) and, for `check`, in [`apps/cli/src/check/check-result.ts`](../apps/cli/src/check/check-result.ts).

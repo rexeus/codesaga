@@ -6,6 +6,8 @@ import { CliError } from "effect/cli";
 import { escapeForTerminal } from "../output/escape.js";
 import type { HtmlWriteFailed } from "../output/html/html-write-failed.js";
 import type { ConfigInvalid } from "./config-invalid.js";
+import type { GatesFailed } from "./gates-failed.js";
+import type { NoGatesConfigured } from "./no-gates-configured.js";
 import { noFileMatches } from "./nothing-matched.js";
 import type { NothingMatched } from "./nothing-matched.js";
 import type { PathNotFound } from "./path-not-found.js";
@@ -14,6 +16,7 @@ const UNEXPECTED = 1;
 const USAGE = 2;
 const NOT_A_REPOSITORY = 3;
 const NOTHING_MATCHED = 4;
+const GATES_FAILED = 5;
 
 /**
  * A failure that is already worded for the user. Its message is escaped and
@@ -25,6 +28,8 @@ export class CliReportedError extends Schema.TaggedError<CliReportedError>()(
   {
     message: Schema.String,
     exitCode: Schema.Int,
+    /** The command printed a complete result to stdout before it failed; the run must keep it there. */
+    resultPrinted: Schema.Boolean,
   },
 ) {
   override readonly [Runtime.errorExitCode] = this.exitCode;
@@ -37,10 +42,16 @@ export type KnownFailure =
   | NothingMatched
   | PathNotFound
   | ConfigInvalid
+  | NoGatesConfigured
+  | GatesFailed
   | HtmlWriteFailed
   | CliError.CliError;
 
-type Failure = { readonly message: string; readonly exitCode: number };
+type Failure = {
+  readonly message: string;
+  readonly exitCode: number;
+  readonly resultPrinted?: boolean;
+};
 
 const cliFailure = (error: CliError.CliError): Failure => {
   if (error._tag === "ShowHelp") {
@@ -64,6 +75,21 @@ const invalidWindowMessage = (
   return error.reason === "withSince"
     ? "--compare cannot be combined with --since: it sets the window itself"
     : `invalid --compare "${error.input}": use <n>d, <n>w, <n>m or <n>y`;
+};
+
+const checkFailure = (error: NoGatesConfigured | GatesFailed): Failure => {
+  if (error._tag === "NoGatesConfigured") {
+    return {
+      message:
+        'no gates configured: pass a gate flag such as --min-truck-factor, or set "gates" in .codesaga.json',
+      exitCode: USAGE,
+    };
+  }
+  return {
+    message: `${error.failed} of ${error.total} ${error.total === 1 ? "gate" : "gates"} failed`,
+    exitCode: GATES_FAILED,
+    resultPrinted: true,
+  };
 };
 
 const engineFailure = (
@@ -119,16 +145,31 @@ const engineFailure = (
   };
 };
 
-const describe = (error: KnownFailure): Failure =>
-  CliError.isCliError(error) ? cliFailure(error) : engineFailure(error);
+const describe = (error: KnownFailure): Failure => {
+  if (CliError.isCliError(error)) {
+    return cliFailure(error);
+  }
+  return error._tag === "NoGatesConfigured" || error._tag === "GatesFailed"
+    ? checkFailure(error)
+    : engineFailure(error);
+};
 
-const reported = ({ message, exitCode }: Failure): CliReportedError =>
-  new CliReportedError({ message: escapeForTerminal(message), exitCode });
+const reported = ({
+  message,
+  exitCode,
+  resultPrinted = false,
+}: Failure): CliReportedError =>
+  new CliReportedError({
+    message: escapeForTerminal(message),
+    exitCode,
+    resultPrinted,
+  });
 
 /**
  * Words an expected failure and assigns its exit code: 2 for usage errors
- * (an invalid `--since` or `--compare`, a path that does not exist, an invalid config file), 3 for no git repository or no git,
- * 4 when `inspect` matched nothing, 1 for the rest.
+ * (an invalid `--since` or `--compare`, a path that does not exist, an invalid
+ * config file, `check` without gates), 3 for no git repository or no git, 4
+ * when `inspect` matched nothing, 5 when a `check` gate failed, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>
   reported(describe(error));

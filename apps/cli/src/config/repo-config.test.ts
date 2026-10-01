@@ -20,6 +20,13 @@ describe("decodeRepoConfig", () => {
       exclude: ["**/*.gen.ts"],
       since: "6m",
       limit: 10,
+      gates: {
+        minTruckFactor: 2,
+        maxOrphanedDirectories: 0,
+        maxIslandDirectories: 3,
+        maxAgentShare: 0.5,
+        minActiveContributors: 1,
+      },
       signatures: {
         bots: [{ name: "Acme CI", emails: ["ci@acme.example"] }],
         agents: [{ name: "Acme Pilot", names: ["pilot"], emails: [] }],
@@ -99,6 +106,20 @@ describe("decodeRepoConfig signatures", () => {
   ])("rejects a signature that matches nothing: %s", (text) => {
     expect(problemsOf(text)).toStrictEqual([
       "signatures.bots[0]: Expected at least one entry in emails or names",
+    ]);
+  });
+});
+
+describe("decodeRepoConfig gates", () => {
+  it("names a gate that is unknown or out of range", () => {
+    expect(
+      problemsOf(
+        '{"gates":{"minTruckFactors":2,"maxAgentShare":1.5,"minActiveContributors":-1}}',
+      ),
+    ).toStrictEqual([
+      "gates.minTruckFactors: unknown key",
+      "gates.maxAgentShare: Expected a value between 0 and 1",
+      "gates.minActiveContributors: Expected a value greater than or equal to 0",
     ]);
   });
 });

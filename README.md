@@ -9,6 +9,7 @@ npx codesaga analyze                      # the story in the terminal
 npx codesaga analyze --html               # the dashboard in the browser
 npx codesaga analyze --json               # the full report for agents and scripts
 npx codesaga inspect packages/billing     # who knows this code, and are they still here?
+npx codesaga check --min-truck-factor 2   # fail CI when knowledge risk crosses a threshold
 ```
 
 Requires Node.js 22 or newer and `git` on your PATH. Works for any language.
@@ -95,6 +96,51 @@ Each argument — a file, a directory, or a glob — gives one entry aggregated 
 
 Repository-relative files, directories or globs (quote globs so the shell leaves them alone). Takes `--json`, `--since` and `--no-cache`. Arguments that match nothing are listed under `unmatched`.
 
+### `codesaga check [path]`
+
+Runs the analysis and compares it with limits you set, so CI can fail when knowledge risk crosses a threshold. `[path]`, `--since`, `--include`, `--exclude`, `--json` and `--no-cache` work as in `analyze`. At least one gate is needed; a gate is evaluated only when you set it.
+
+| Flag                            | Config key               | Fails when                                                                                                     |
+| ------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `--min-truck-factor <n>`        | `minTruckFactor`         | the repository's truck factor is below `n`                                                                     |
+| `--max-orphaned <n>`            | `maxOrphanedDirectories` | more than `n` reported directories are orphaned                                                                |
+| `--max-islands <n>`             | `maxIslandDirectories`   | more than `n` reported directories are knowledge islands                                                       |
+| `--max-agent-share <ratio>`     | `maxAgentShare`          | agent and agent-assisted commits are more than `ratio` (0 to 1) of the window's commits, rounded to 4 decimals |
+| `--min-active-contributors <n>` | `minActiveContributors`  | fewer than `n` contributors committed in the 90 days before now                                                |
+
+The agent share is a lower bound (see _How the numbers work_), so the gate catches the agents codesaga can see. The orphaned and island counts cover the directories the report lists: those with at least 3 files, below the path. Without gates, `check` exits 2 with `no gates configured`.
+
+```bash
+npx codesaga check --min-truck-factor 2 --max-orphaned 0
+```
+
+```
+✗ truck factor: 1, below the minimum of 2
+✓ orphaned directories: 0, within the maximum of 0
+
+1 of 2 gates failed
+```
+
+`--json` prints one document, versioned by `schemaVersion`, whether or not the gates passed. Each gate has a `reason` sentence; `gates` holds only the configured gates, in the order of the table:
+
+```json
+{
+  "schemaVersion": 1,
+  "passed": false,
+  "gates": [
+    {
+      "name": "minTruckFactor",
+      "threshold": 2,
+      "actual": 1,
+      "passed": false,
+      "reason": "truck factor: 1, below the minimum of 2"
+    }
+  ]
+}
+```
+
+Its shape is defined in [`apps/cli/src/check/check-result.ts`](apps/cli/src/check/check-result.ts).
+
 ### Exit codes
 
 | Code | Meaning                                                                                                                                               |
@@ -104,10 +150,11 @@ Repository-relative files, directories or globs (quote globs so the shell leaves
 | 2    | Usage error, such as an unknown flag, an invalid `--since` or `--compare`, `--compare` with `--since`, an invalid `.codesaga.json`, or a missing path |
 | 3    | Not inside a git repository, or `git` is not installed                                                                                                |
 | 4    | `inspect` matched no file                                                                                                                             |
+| 5    | `check`: at least one gate failed                                                                                                                     |
 
 ## Configuration
 
-A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspect`, so a team does not repeat flags. The file is optional, and a flag always wins over it.
+A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect` and `check`, so a team does not repeat flags. The file is optional, and a flag always wins over it.
 
 ```json
 {
@@ -115,6 +162,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspe
   "exclude": ["**/*.generated.ts"],
   "since": "12m",
   "limit": 50,
+  "gates": { "minTruckFactor": 2, "maxOrphanedDirectories": 0 },
   "signatures": {
     "bots": [{ "name": "Acme CI", "emails": ["ci@acme.example"] }],
     "agents": [
@@ -134,12 +182,36 @@ A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspe
 | `exclude`    | `--exclude` | Globs relative to the repository root.                                                                                                                   |
 | `since`      | `--since`   | Same syntax: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`.                                                                                            |
 | `limit`      | `--limit`   | A whole number, `0` for all. Only `analyze --json` uses it.                                                                                              |
+| `gates`      | gate flags  | Limits for `check`, see _Gates in CI_. A flag overrides the config's limit for the same gate; other gates stay.                                          |
 | `signatures` | — (no flag) | In-house bots and agents. Each has a `name`, reported as the tool, and `emails` and `names` that identify it: exact matches, ignoring case, no patterns. |
 
 - **Precedence** is flag, then config, then the built-in default. `--compare` sets the window itself, so it ignores the config's `since`; only a `--since` flag conflicts with it. `--include` and `--exclude` replace the config's list; they do not add to it.
 - **Signatures** extend the built-in table of [commit classes](#how-the-numbers-work) and never replace it: a person the table already knows keeps its built-in name. A `bots` entry makes the person's commits bot commits; an `agents` entry makes them agent commits, and a human commit with that person as co-author or committer agent-assisted. Matches go by author email, author name, and the emails and names in co-author trailers.
 - **The file is checked strictly.** Invalid JSON, an unknown key or a wrong value ends with exit code 2 and a message that names the file and the key, such as `invalid /repo/.codesaga.json: signatures.bots[0].name: Missing key`. A signature needs at least one non-empty entry in `emails` or `names`; entries are trimmed. A config that is a directory, a broken symbolic link, unreadable, or larger than 1 MiB is rejected the same way.
 - The file is read from the root of the analyzed repository, not from the directory you run codesaga in. The history cache is unaffected: it holds raw commits, and signatures classify them on every run.
+
+## Gates in CI
+
+`codesaga check` turns the truck factor and its neighbours into a build check. Commit the limits to `.codesaga.json` so reviewers see them change, or pass flags. The history must be complete, because codesaga reads it all: `fetch-depth: 0` is required, and a shallow clone makes `check` warn on stderr that its numbers undercount.
+
+```yaml
+# .github/workflows/knowledge.yml
+name: Knowledge
+on: pull_request
+jobs:
+  knowledge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npx codesaga check --min-truck-factor 2
+```
+
+A failed gate ends the step with exit code 5 and prints the reasons to the job log. `--json` gives the same verdict to a script.
 
 ## How the numbers work
 

@@ -7,6 +7,7 @@ import type { ChildProcessSpawner } from "effect/process";
 
 import { ConfigInvalid } from "../errors/config-invalid.js";
 import { loadRepoConfig } from "./load-repo-config.js";
+import type { RepoConfig } from "./repo-config.js";
 
 /** What the command line says; empty and `None` mean "not given". */
 export type SettingFlags = {
@@ -25,6 +26,8 @@ export type Settings = Pick<
 > & {
   /** Contributors and directories in `--json`; undefined when neither flag nor config sets it. */
   readonly limit: number | undefined;
+  /** The config file's `gates`, for `check` to merge with its flags. */
+  readonly gates: RepoConfig["gates"];
   /** Whether `since` came from the config file, so that a bad value can name it. */
   readonly sinceFromConfig: boolean;
   readonly configFile: string;
@@ -63,6 +66,7 @@ export const resolveSettings = (
         flags.exclude.length > 0 ? flags.exclude : (config.exclude ?? []),
       signatures: config.signatures,
       limit: Option.getOrElse(flags.limit, () => config.limit),
+      gates: config.gates,
       sinceFromConfig,
       configFile: file,
     };

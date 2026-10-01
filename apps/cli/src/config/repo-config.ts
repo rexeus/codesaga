@@ -2,6 +2,8 @@
 // A new key is one more field of `RepoConfig`; the decoder rejects every key it does not list.
 import { Result, Schema, SchemaIssue } from "effect";
 
+import { GateLimitsConfig } from "../check/gate-limits.js";
+
 const Matcher = Schema.Trim.check(Schema.isNonEmpty());
 
 /**
@@ -32,6 +34,7 @@ const RepoConfig = Schema.Struct({
       agents: Schema.optionalKey(Schema.Array(Signature)),
     }),
   ),
+  gates: Schema.optionalKey(GateLimitsConfig),
 });
 
 /** The defaults a repository sets for its analyses; every key is optional. */

@@ -2,6 +2,7 @@ import { Cause, Console, Effect, Exit } from "effect";
 import { CliError, Command } from "effect/cli";
 
 import { analyzeCommand } from "./commands/analyze.js";
+import { checkCommand } from "./commands/check.js";
 import { inspectCommand } from "./commands/inspect.js";
 import {
   CliReportedError,
@@ -14,7 +15,7 @@ const root = Command.make("codesaga").pipe(
   Command.withDescription(
     "The story of a git repository: activity, people, knowledge and AI agents.",
   ),
-  Command.withSubcommands([analyzeCommand, inspectCommand]),
+  Command.withSubcommands([analyzeCommand, inspectCommand, checkCommand]),
 );
 
 const isHelpRequest = (error: unknown): boolean =>
@@ -42,7 +43,9 @@ const toReported = (args: ReadonlyArray<string>) =>
  *
  * Stdout stays clean on failure: the framework prints usage help through
  * `Console.log` before it fails, so the run's `Console.log` lines are held
- * back and go to stderr when the run failed, to stdout when it did not.
+ * back and go to stderr when the run failed, to stdout when it did not. The
+ * exception is a failure that marks its result as printed, such as a failed
+ * `check` gate: its lines are the answer and stay on stdout.
  */
 export const runCli = (args: ReadonlyArray<string>) =>
   Effect.gen(function* () {
@@ -61,7 +64,7 @@ export const runCli = (args: ReadonlyArray<string>) =>
     const reported = failure instanceof CliReportedError ? failure : undefined;
     yield* Effect.sync(() => {
       for (const line of held) {
-        if (reported === undefined) {
+        if (reported === undefined || reported.resultPrinted) {
           real.log(line);
         } else {
           real.error(line);
