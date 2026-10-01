@@ -107,12 +107,13 @@ describe("classifyCommit matching", () => {
     expect(classifyCommit(signals)).toStrictEqual(assisted("GitHub Copilot"));
   });
 
-  it("keeps a body that only names an agent human, with or without a co-author line", () => {
+  it("keeps a body human that only names an agent, or whose co-author line holds a second address", () => {
     const signals = commit({
       markers: [
         "Co-authored-by: Claude",
         "Co-authored-by: Jane Doe <jane@example.com>",
         "Co-authored-by: Claude (aider) <jane@example.com>",
+        "Co-authored-by: Bob <bob@example.com> (was <cursoragent@cursor.com>)",
       ],
     });
 

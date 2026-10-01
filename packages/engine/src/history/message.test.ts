@@ -32,4 +32,13 @@ describe("parseMarkers co-author lines", () => {
 
     expect(parseMarkers(body, [])).toStrictEqual([]);
   });
+
+  it("ignores a co-author line that names more than one address or trails text after it", () => {
+    const body =
+      "Co-authored-by: Bob <bob@example.com> (was <cursoragent@cursor.com>)\n" +
+      "Co-authored-by: Bob <bob@example.com> and Eve <eve@example.com>\n" +
+      "Co-authored-by: Bob <bob@example.com> thanks\n";
+
+    expect(parseMarkers(body, [])).toStrictEqual([]);
+  });
 });

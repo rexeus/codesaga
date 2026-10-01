@@ -44,7 +44,7 @@ const GITHUB_NOREPLY = /^(\d+)\+.+@users\.noreply\.github\.com$/iu;
 const BOT_NAME = /\[bot\]$/iu;
 const NOREPLY_BOT = /^(?:\d+\+)?(.+\[bot\])@users\.noreply\.github\.com$/iu;
 const PERSON_WITH_EMAIL = /^(.*?)\s*<([^>]*)>$/u;
-const BODY_CO_AUTHOR = /^co-authored-by:.*<([^>]+)>/iu;
+const BODY_CO_AUTHOR = /^co-authored-by:\s*[^<>]*<([^<>]+)>\s*$/iu;
 
 const githubIdOf = (email: string): number | undefined => {
   const id = GITHUB_NOREPLY.exec(email)?.[1];

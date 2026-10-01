@@ -3,7 +3,7 @@
 
 const TRAILER_SEPARATOR = "\u001F";
 const GENERATED_WITH = /^\W*Generated with \[[^\]]+\]/iu;
-const CO_AUTHOR_LINE = /^co-authored-by:(.*<[^>]*>.*)$/iu;
+const CO_AUTHOR_LINE = /^co-authored-by:\s*([^<>]*<[^<>]+>)\s*$/iu;
 
 /** One `Key: value` line of a commit's trailer block. */
 export type Trailer = { readonly key: string; readonly value: string };
