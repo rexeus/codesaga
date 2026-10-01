@@ -1,6 +1,7 @@
 // Proves the packed `codesaga` package works the way `npx codesaga` will run it:
 // one bundled file, no runtime dependencies, installable with npm and pnpm, and
-// able to analyze a real git repository. Run after `pnpm --filter codesaga build`.
+// able to analyze and inspect a real git repository, with `--json` documents that
+// decode with the engine's schemas. Run after `pnpm --filter codesaga build`.
 import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -13,6 +14,8 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+
+import { makeRepository } from "./make-package-fixture.mjs";
 
 const repository = resolve(import.meta.dirname, "..");
 
@@ -40,6 +43,7 @@ if (typeof expectedVersion !== "string") {
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const binName = process.platform === "win32" ? "codesaga.cmd" : "codesaga";
+const decoder = join(repository, "scripts", "decode-cli-json.ts");
 const temporary = mkdtempSync(join(tmpdir(), "codesaga-package-"));
 
 /**
@@ -131,34 +135,32 @@ const expectBundledArtifact = (tarball) => {
   }
 };
 
-/** A tiny repository with three commits by one author. */
-const makeRepository = () => {
-  const root = join(temporary, "repository");
-  mkdirSync(root);
-  const env = {
-    ...process.env,
-    GIT_CONFIG_GLOBAL: "/dev/null",
-    GIT_CONFIG_NOSYSTEM: "1",
-  };
-  /** @param {string[]} args */
-  const git = (...args) =>
-    execFileSync("git", ["-C", root, ...args], { env, stdio: "ignore" });
-  git("init", "--quiet");
-  for (const round of [1, 2, 3]) {
-    writeFileSync(join(root, "a.ts"), `run(${round});\n`);
-    git("add", "--all");
-    git(
-      "-c",
-      "user.name=Pack",
-      "-c",
-      "user.email=pack@example.invalid",
-      "commit",
-      "--quiet",
-      "-m",
-      `round ${round}`,
+/**
+ * Runs a packed command with `--json` and decodes its output with the engine
+ * schema from the workspace source, which the bundle itself does not ship.
+ * @param {string} bin
+ * @param {"analyze" | "inspect"} command
+ * @param {string} repositoryRoot
+ * @param {string} installer
+ * @returns {string} the document
+ */
+const decodedJson = (bin, command, repositoryRoot, installer) => {
+  const args = command === "inspect" ? [command, "a.ts"] : [command];
+  const output = spawnSync(bin, [...args, "--json"], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+  });
+  const decoded = spawnSync(
+    pnpm,
+    ["--filter", "codesaga", "exec", "tsx", decoder, command],
+    { input: output.stdout, encoding: "utf8" },
+  );
+  if (output.status !== 0 || decoded.status !== 0) {
+    throw new Error(
+      `codesaga ${command} --json from ${installer} is not a valid document:\n${output.stdout}${output.stderr}${decoded.stderr}`,
     );
   }
-  return root;
+  return output.stdout;
 };
 
 /**
@@ -179,27 +181,22 @@ const expectWorkingInstall = (applicationRoot, installer, repositoryRoot) => {
       `codesaga from ${installer} reports:\n${version.stdout}${version.stderr}`,
     );
   }
-  const analysis = spawnSync(bin, ["analyze", "--json"], {
-    cwd: repositoryRoot,
-    encoding: "utf8",
-  });
-  const json = analysis.status === 0 ? analysis.stdout : "{}";
-  const contributors = fieldOf(json, "contributors");
-  if (
-    fieldOf(json, "schemaVersion") !== 1 ||
-    !Array.isArray(contributors) ||
-    contributors.length !== 1
-  ) {
+  const contributors = fieldOf(
+    decodedJson(bin, "analyze", repositoryRoot, installer),
+    "contributors",
+  );
+  if (!Array.isArray(contributors) || contributors.length !== 1) {
     throw new Error(
-      `codesaga from ${installer} did not analyze the repository:\n${analysis.stdout}${analysis.stderr}`,
+      `codesaga from ${installer} did not analyze the repository.`,
     );
   }
+  decodedJson(bin, "inspect", repositoryRoot, installer);
 };
 
 try {
   const tarball = pack();
   expectBundledArtifact(tarball);
-  const repositoryRoot = makeRepository();
+  const repositoryRoot = makeRepository(join(temporary, "repository"));
 
   const pnpmApplication = join(temporary, "application-pnpm");
   mkdirSync(pnpmApplication);

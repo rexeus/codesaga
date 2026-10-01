@@ -44,7 +44,7 @@ pnpm format          # oxfmt
 pnpm lint            # barrel check + oxlint (strict + Effect preset) + knip
 pnpm typecheck       # tsc over scripts/, then every package via turbo
 pnpm test            # scripts/ tests, then every package's vitest suite via turbo
-pnpm check:package   # build, pack, and install the CLI with npm and pnpm
+pnpm check:package   # build, pack, install the CLI with npm and pnpm, decode its JSON with the engine schemas
 pnpm --filter <pkg> exec vitest run src/<file>.test.ts   # one file
 pnpm --filter codesaga dev <args>                        # run the CLI from source
 ```

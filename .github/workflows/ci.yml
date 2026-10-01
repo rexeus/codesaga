@@ -62,4 +62,6 @@ jobs:
           node --version
           node apps/cli/dist/codesaga.js --version
           node apps/cli/dist/codesaga.js analyze --json --limit 3 > /tmp/report.json
-          node -e 'const r = JSON.parse(require("node:fs").readFileSync("/tmp/report.json", "utf8")); if (r.schemaVersion !== 1) process.exit(1)'
+          node apps/cli/dist/codesaga.js inspect "apps/**" --json > /tmp/inspect.json
+          pnpm --filter codesaga exec tsx ../../scripts/decode-cli-json.ts analyze < /tmp/report.json
+          pnpm --filter codesaga exec tsx ../../scripts/decode-cli-json.ts inspect < /tmp/inspect.json
