@@ -137,7 +137,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspe
 
 - **Precedence** is flag, then config, then the built-in default. `--include` and `--exclude` replace the config's list; they do not add to it.
 - **Signatures** extend the built-in table of [commit classes](#how-the-numbers-work) and never replace it: a person the table already knows keeps its built-in name. A `bots` entry makes the person's commits bot commits; an `agents` entry makes them agent commits, and a human commit with that person as co-author or committer agent-assisted. Matches go by author email, author name, and the emails and names in co-author trailers.
-- **The file is checked strictly.** Invalid JSON, an unknown key or a wrong value ends with exit code 2 and a message that names the file and the key, such as `invalid /repo/.codesaga.json: signatures.bots[0].name: Missing key`.
+- **The file is checked strictly.** Invalid JSON, an unknown key or a wrong value ends with exit code 2 and a message that names the file and the key, such as `invalid /repo/.codesaga.json: signatures.bots[0].name: Missing key`. A signature needs at least one non-empty entry in `emails` or `names`; entries are trimmed. A config that is a directory, a broken symbolic link, unreadable, or larger than 1 MiB is rejected the same way.
 - The file is read from the root of the analyzed repository, not from the directory you run codesaga in. The history cache is unaffected: it holds raw commits, and signatures classify them on every run.
 
 ## How the numbers work

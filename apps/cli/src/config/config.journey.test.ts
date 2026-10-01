@@ -1,5 +1,5 @@
-import { writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, symlinkSync, writeFileSync } from "node:fs";
+import { join, relative } from "node:path";
 
 import { Report } from "@codesaga/engine";
 import { describe, expect, it } from "@effect/vitest";
@@ -12,9 +12,11 @@ import { makeTeamProject } from "../testing/projects.js";
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
 
+const configPath = (repo: GitRepository) => join(repo.root, ".codesaga.json");
+
 const writeConfig = (repo: GitRepository, config: unknown) => {
   writeFileSync(
-    join(repo.root, ".codesaga.json"),
+    configPath(repo),
     typeof config === "string" ? config : JSON.stringify(config),
   );
 };
@@ -66,6 +68,40 @@ describe("codesaga defaults from a .codesaga.json", () => {
 
       expect(report.contributors).toHaveLength(1);
       expect(report.totals.contributors).toBe(2);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga finds the .codesaga.json of the repository it analyzes", () => {
+  it.live("reads the root's config when run from a subdirectory", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      writeConfig(repo, { since: "30d" });
+
+      const result = yield* journey({
+        args: ["analyze", "--json"],
+        cwd: join(repo.root, "src"),
+      });
+
+      expect((yield* decode(result.stdout)).window.commits).toBe(3);
+    }).pipe(Effect.scoped),
+  );
+
+  it.live("reads the other repository's config for a path argument", () =>
+    Effect.gen(function* () {
+      const here = yield* makeTeamProject;
+      const other = yield* makeTeamProject;
+      writeConfig(here, { since: "30d" });
+      writeConfig(other, { limit: 1 });
+
+      const result = yield* journey({
+        args: ["analyze", "--json", relative(here.root, other.root)],
+        cwd: here.root,
+      });
+      const report = yield* decode(result.stdout);
+
+      expect(report.window.commits).toBe(5);
+      expect(report.contributors).toHaveLength(1);
     }).pipe(Effect.scoped),
   );
 });
@@ -137,6 +173,12 @@ describe("codesaga with an invalid .codesaga.json", () => {
       problem: "Expected a valid JSON string",
     },
     {
+      name: "a signature with an empty email, which would match any author without one",
+      config: '{"signatures":{"bots":[{"name":"x","emails":[""]}]}}',
+      problem:
+        "signatures.bots[0].emails[0]: Expected a value with a length of at least 1",
+    },
+    {
       name: "a since the flag syntax rejects",
       config: '{"since":"soon"}',
       problem:
@@ -175,5 +217,56 @@ describe("codesaga with an invalid .codesaga.json", () => {
 
       expect(report.window.commits).toBe(3);
     }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga with a .codesaga.json it cannot read", () => {
+  it.live.each([
+    {
+      name: "a directory",
+      arrange: (repo: GitRepository) => {
+        mkdirSync(configPath(repo));
+      },
+      reason: "is not a regular file",
+    },
+    {
+      name: "a symbolic link to a missing file",
+      arrange: (repo: GitRepository) => {
+        symlinkSync("missing.json", configPath(repo));
+      },
+      reason: "is a symbolic link to a missing file",
+    },
+    {
+      name: "a symbolic link that points to itself",
+      arrange: (repo: GitRepository) => {
+        symlinkSync(".codesaga.json", configPath(repo));
+      },
+      reason: "cannot be read (BadResource)",
+    },
+    {
+      name: "a file over 1 MiB",
+      arrange: (repo: GitRepository) => {
+        writeConfig(repo, " ".repeat(1024 * 1024 + 1));
+      },
+      reason: "is larger than 1 MiB",
+    },
+  ])(
+    "exits 2 for $name, naming the file and the reason",
+    ({ arrange, reason }) =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        arrange(repo);
+
+        const result = yield* journey({
+          args: ["analyze", "--json"],
+          cwd: repo.root,
+        });
+
+        expect(result.stdout).toBe("");
+        expect(result.stderr).toBe(
+          `codesaga: invalid ${repo.root}/.codesaga.json: ${reason}`,
+        );
+        expect(result.exitCode).toBe(2);
+      }).pipe(Effect.scoped),
   );
 });
