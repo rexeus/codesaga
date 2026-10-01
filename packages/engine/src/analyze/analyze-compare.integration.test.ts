@@ -79,6 +79,7 @@ const expectedComparison = {
   previous: {
     since: "2026-01-09T00:00:00.000Z",
     until: "2026-02-08T00:00:00.000Z",
+    partial: false,
     commits: 3,
     activeContributors: 2,
     added: 7,
@@ -123,6 +124,24 @@ layer(NodeServices.layer)("analyze --compare", (it) => {
           commits: 3,
         });
         assert.deepStrictEqual(report.comparison, expectedComparison);
+      }),
+  );
+
+  it.effect(
+    "marks a previous span that starts before the first commit as partial",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* commitAroundTheBoundary(repo);
+
+        // 60d: the window starts 2026-01-09, the previous span 2025-11-10, before the first commit on 2026-01-05
+        const report = yield* analyze(
+          analyzeOptionsFor(repo, { compare: "60d" }),
+        );
+
+        assert.strictEqual(report.comparison?.previous.partial, true);
+        assert.strictEqual(report.comparison?.previous.commits, 1);
       }),
   );
 

@@ -69,15 +69,22 @@ const relativeChange = ({
   readonly ratio: number | null;
 }): string => (ratio === null ? signedCount(change) : signedPercent(ratio));
 
-/** The deltas of a comparison on one line, named by the dates of the span they compare with. */
-const comparisonLine = ({ previous, delta }: Comparison): string =>
-  [
+/**
+ * The deltas of a comparison on one line, named by the dates of the span they
+ * compare with. A share of no commits is not a number, so its change reads n/a.
+ */
+const comparisonLine = ({ previous, delta }: Comparison): string => {
+  const deltas = [
     `vs ${day(previous.since)} – ${day(previous.until)}`,
     `commits ${relativeChange(delta.commits)}`,
     `contributors ${signedCount(delta.activeContributors.change)}`,
     `lines added ${relativeChange(delta.added)}`,
-    `AI share ${signedPoints(delta.aiShare)}`,
+    `AI share ${delta.aiShare === null ? "n/a" : signedPoints(delta.aiShare)}`,
   ].join(SEPARATOR);
+  return previous.partial
+    ? `${deltas} (previous period partly before the first commit)`
+    : deltas;
+};
 
 const activitySection = (
   report: Report,

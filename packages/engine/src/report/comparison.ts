@@ -40,6 +40,8 @@ export const Comparison = Schema.Struct({
   previous: Schema.Struct({
     since: Schema.String,
     until: Schema.String,
+    /** True when the span starts before the first commit in scope, so it covers less history than the window does. */
+    partial: Schema.Boolean,
     ...ComparedFigures.fields,
   }),
   current: ComparedFigures,
@@ -49,7 +51,10 @@ export const Comparison = Schema.Struct({
     activeContributors: Change,
     added: Change,
     deleted: Change,
-    /** Difference of the two `aiShare` values as a fraction, not a ratio: 0.05 is five percentage points. */
-    aiShare: Schema.Finite,
+    /**
+     * Difference of the two `aiShare` values as a fraction, not a ratio: 0.05 is five percentage points.
+     * Null when either span has no commits, because a share of nothing is not 0.
+     */
+    aiShare: Schema.NullOr(Schema.Finite),
   }),
 });

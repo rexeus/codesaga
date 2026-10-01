@@ -32,6 +32,21 @@ export const totalsOf = (commits: ReadonlyArray<ClassifiedCommit>): Totals => ({
   bot: countOf(commits, "bot"),
 });
 
+/**
+ * The AI share: agent-authored plus agent-assisted commits as a fraction of
+ * all commits of every class, unrounded; 0 without commits. Every consumer of
+ * the share, in the engine and in the CLI, counts it through this function.
+ */
+export const aiShareOf = ({
+  human,
+  agentAssisted,
+  agent,
+  bot,
+}: Totals): number => {
+  const all = human + agentAssisted + agent + bot;
+  return all === 0 ? 0 : (agent + agentAssisted) / all;
+};
+
 const byCommitsThenName = Order.combine(
   Order.flip(
     Order.mapInput(Order.Number, (tool: Tool) => tool.authored + tool.assisted),

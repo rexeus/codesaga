@@ -77,6 +77,8 @@ export type Analysis = {
   readonly previous:
     | {
         readonly window: TimeRange;
+        /** Whether `window` starts before the first scoped commit. */
+        readonly partial: boolean;
         readonly commits: ReadonlyArray<ClassifiedCommit>;
       }
     | undefined;
@@ -94,6 +96,7 @@ const isPlaceable = (seconds: number, now: DateTime.Utc): boolean =>
 const previousOf = (
   scoped: ReadonlyArray<ClassifiedCommit>,
   window: TimeRange | undefined,
+  firstCommit: number | undefined,
 ): Analysis["previous"] => {
   if (window === undefined) {
     return undefined;
@@ -102,6 +105,7 @@ const previousOf = (
   const until = toEpochSeconds(window.until);
   return {
     window,
+    partial: firstCommit !== undefined && from < firstCommit,
     commits: scoped.filter(({ time }) => time >= from && time < until),
   };
 };
@@ -133,7 +137,7 @@ export const prepareAnalysis = (facts: RepositoryFacts): Analysis => {
     scoped,
     commits: scoped.filter(({ time }) => time >= from && time <= to),
     window,
-    previous: previousOf(scoped, facts.previous),
+    previous: previousOf(scoped, facts.previous, extent?.first),
     headTime: facts.headTime,
     firstCommitAt: extent === undefined ? null : isoOf(extent.first),
     lastCommitAt: extent === undefined ? null : isoOf(extent.last),

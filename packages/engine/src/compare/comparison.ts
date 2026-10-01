@@ -2,7 +2,7 @@
 // A pure function over the two spans' classified commits, so no test needs git.
 
 import type { TimeRange } from "../analyze/analysis-window.js";
-import { totalsOf } from "../automation/automation.js";
+import { aiShareOf, totalsOf } from "../automation/automation.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { countContributors } from "../contributors/count-contributors.js";
 import { countCodeLines } from "../history/history.js";
@@ -11,7 +11,6 @@ import type { Report } from "../report/report.js";
 
 type Comparison = NonNullable<Report["comparison"]>;
 type Figures = Comparison["current"];
-type Totals = Figures["automation"];
 type Change = Comparison["delta"]["commits"];
 
 type ComparisonInput = {
@@ -20,16 +19,12 @@ type ComparisonInput = {
   /** The commits of the span before the window, and that span. */
   readonly previous: {
     readonly window: TimeRange;
+    /** Whether the span starts before the repository's first commit in scope. */
+    readonly partial: boolean;
     readonly commits: ReadonlyArray<ClassifiedCommit>;
   };
   /** Whether a changed path counts toward added and deleted lines. */
   readonly isCodePath: (path: string) => boolean;
-};
-
-/** Agent-authored and agent-assisted commits as a share of all commits; 0 without commits. */
-const aiShareOf = ({ human, agentAssisted, agent, bot }: Totals): number => {
-  const all = human + agentAssisted + agent + bot;
-  return all === 0 ? 0 : (agent + agentAssisted) / all;
 };
 
 const figuresOf = (
@@ -66,7 +61,7 @@ export const comparison = ({
   const now = figuresOf(current, isCodePath);
   const before = figuresOf(previous.commits, isCodePath);
   return {
-    previous: { ...previous.window, ...before },
+    previous: { ...previous.window, partial: previous.partial, ...before },
     current: now,
     delta: {
       commits: changeOf(now.commits, before.commits),
@@ -76,9 +71,12 @@ export const comparison = ({
       ),
       added: changeOf(now.added, before.added),
       deleted: changeOf(now.deleted, before.deleted),
-      aiShare: roundReported(
-        aiShareOf(now.automation) - aiShareOf(before.automation),
-      ),
+      aiShare:
+        now.commits === 0 || before.commits === 0
+          ? null
+          : roundReported(
+              aiShareOf(now.automation) - aiShareOf(before.automation),
+            ),
     },
   };
 };

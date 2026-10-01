@@ -23,7 +23,7 @@ export const cacheFlag = Flag.Boolean("cache").pipe(
 
 export const compareFlag = Flag.String("compare").pipe(
   Flag.withDescription(
-    "Compare the last <n>d, <n>w, <n>m or <n>y with the equally long span before it; cannot be combined with --since",
+    "Compare the last <n>d, <n>w, <n>m or <n>y with the span of exactly the same length before it; cannot be combined with --since",
   ),
   Flag.optional,
 );

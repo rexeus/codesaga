@@ -1,5 +1,6 @@
 import type { Report } from "@codesaga/engine";
 
+import { describeComparison } from "../present/comparison-note.js";
 import { formatDate } from "../present/format.js";
 import { keyFigures } from "../present/key-figures.js";
 import { h } from "./dom.js";
@@ -19,9 +20,7 @@ const summaryParts = ({
   `${formatDate(window.since)} → ${formatDate(window.until)}`,
   ...(comparison === undefined
     ? []
-    : [
-        `compared with ${formatDate(comparison.previous.since)} → ${formatDate(comparison.previous.until)}`,
-      ]),
+    : [describeComparison(comparison.previous)]),
   `generated ${formatDate(generatedAt)}`,
 ];
 

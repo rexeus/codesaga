@@ -93,8 +93,9 @@ export type ComparedRanges = {
  * Resolves a `<n>d|w|m|y` duration to the last such span ending at the
  * current `Clock` time and the span before it. `previous.until` equals
  * `current.since` and belongs to `current`, so no instant is in both ranges.
- * `previous` starts one duration before `current` does, counted in the same
- * calendar units, so a month or year may differ by a few days in length.
+ * `current` starts a calendar unit count back from now, and `previous` is
+ * exactly as long as `current` in milliseconds, so the two compare like for
+ * like even where months and years differ in length.
  */
 export const resolveComparedRanges = (
   duration: string,
@@ -105,8 +106,8 @@ export const resolveComparedRanges = (
       isUsableStart(start, now),
     );
     const previous = Option.flatMap(current, (start) =>
-      Option.filter(parseRelative(duration, start), (before) =>
-        isUsableStart(before, start),
+      DateTime.make(
+        2 * DateTime.toEpochMillis(start) - DateTime.toEpochMillis(now),
       ),
     );
     if (Option.isNone(current) || Option.isNone(previous)) {

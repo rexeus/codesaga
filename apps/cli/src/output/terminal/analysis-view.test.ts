@@ -191,6 +191,7 @@ describe("renderAnalysis comparison", () => {
     previous: {
       since: "2025-10-15T00:00:00.000Z",
       until: "2026-01-15T00:00:00.000Z",
+      partial: false,
       ...figures,
     },
     current: figures,
@@ -211,6 +212,32 @@ describe("renderAnalysis comparison", () => {
 
     expect(lines[2]).toBe(
       "vs 2025-10-15 – 2026-01-15 · commits +18% · contributors -1 · lines added +40 · AI share +4 pts",
+    );
+  });
+
+  it("says n/a for an AI share change that has no commits to compare", () => {
+    const noShare = {
+      ...comparison,
+      delta: { ...comparison.delta, aiShare: null },
+    };
+
+    expect(
+      renderAnalysis({ ...sampleReport(), comparison: noShare }, plain),
+    ).toContain("lines added +40 · AI share n/a");
+  });
+
+  it("notes a previous period that starts before the first commit", () => {
+    const partial = {
+      ...comparison,
+      previous: { ...comparison.previous, partial: true },
+    };
+
+    expect(
+      renderAnalysis({ ...sampleReport(), comparison: partial }, plain).split(
+        "\n",
+      )[2],
+    ).toBe(
+      "vs 2025-10-15 – 2026-01-15 · commits +18% · contributors -1 · lines added +40 · AI share +4 pts (previous period partly before the first commit)",
     );
   });
 

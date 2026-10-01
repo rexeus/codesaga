@@ -43,7 +43,11 @@ const age = ({ repository, generatedAt }: Report): KeyFigure => ({
   delta: undefined,
 });
 
-/** AI share of the window's commits: agent-authored plus agent-assisted. */
+/**
+ * AI share of the window's commits: agent-authored plus agent-assisted, over
+ * all commits. The engine's `aiShareOf` (automation/automation.ts) defines the
+ * same ratio; this file may only import engine types, so it restates it.
+ */
 const aiShare = ({ automation, window, comparison }: Report): KeyFigure => {
   const { agent, agentAssisted } = automation.totals;
   const aiCommits = agent + agentAssisted;
@@ -57,7 +61,11 @@ const aiShare = ({ automation, window, comparison }: Report): KeyFigure => {
     delta:
       comparison === undefined
         ? undefined
-        : against(formatSignedPoints(comparison.delta.aiShare)),
+        : against(
+            comparison.delta.aiShare === null
+              ? "n/a"
+              : formatSignedPoints(comparison.delta.aiShare),
+          ),
   };
 };
 
@@ -83,12 +91,12 @@ export const keyFigures = (report: Report): KeyFigure[] => {
       label: "Active contributors",
       value: formatCount(overview.contributors.active90),
       detail: `in 90 days, of ${formatCount(overview.contributors.total)}`,
+      // The tile counts 90 days and the comparison counts the window, so the
+      // delta states both window counts instead of a change next to the 90-day value.
       delta:
         comparison === undefined
           ? undefined
-          : against(
-              `${formatSignedCount(comparison.delta.activeContributors.change)} contributors in window`,
-            ),
+          : `${formatCount(comparison.current.activeContributors)} in window (previous ${formatCount(comparison.previous.activeContributors)})`,
     },
     {
       label: "Truck factor",

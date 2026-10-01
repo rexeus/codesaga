@@ -62,13 +62,14 @@ describe("comparison", () => {
   it("reports both spans and what changed from the previous one", () => {
     const result = comparison({
       current: after,
-      previous: { window: previousWindow, commits: before },
+      previous: { window: previousWindow, partial: false, commits: before },
       isCodePath,
     });
 
     expect(result).toStrictEqual({
       previous: {
         ...previousWindow,
+        partial: false,
         commits: 4,
         activeContributors: 2,
         added: 15,
@@ -98,12 +99,12 @@ describe("comparison", () => {
   it("reports a decrease as negative and a missing previous value without a ratio", () => {
     const shrunk = comparison({
       current: before,
-      previous: { window: previousWindow, commits: after },
+      previous: { window: previousWindow, partial: false, commits: after },
       isCodePath,
     });
     const fromNothing = comparison({
       current: before,
-      previous: { window: previousWindow, commits: [] },
+      previous: { window: previousWindow, partial: false, commits: [] },
       isCodePath,
     });
 
@@ -115,6 +116,24 @@ describe("comparison", () => {
       aiShare: -0.5,
     });
     expect(fromNothing.delta.commits).toStrictEqual({ change: 4, ratio: null });
-    expect(fromNothing.previous.aiShare).toBe(0);
+  });
+});
+
+describe("comparison without commits to compare", () => {
+  it("reports no AI share change when either span has no commits", () => {
+    const noPrevious = comparison({
+      current: after,
+      previous: { window: previousWindow, partial: true, commits: [] },
+      isCodePath,
+    });
+    const noCurrent = comparison({
+      current: [],
+      previous: { window: previousWindow, partial: false, commits: after },
+      isCodePath,
+    });
+
+    expect(noPrevious.delta.aiShare).toBeNull();
+    expect(noPrevious.previous.partial).toBe(true);
+    expect(noCurrent.delta.aiShare).toBeNull();
   });
 });

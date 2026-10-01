@@ -58,6 +58,7 @@ describe("resolveTimeRange", () => {
   );
 });
 
+// `previous` is as long as `current`, in milliseconds, even where months and years differ in length.
 const comparedCases = [
   {
     now: "2026-06-15T10:30:00Z",
@@ -69,22 +70,23 @@ const comparedCases = [
     duration: "2w",
     previous: ["2026-05-18T10:30:00.000Z", "2026-06-01T10:30:00.000Z"],
   },
+  // March 15 to June 15 is 92 days, so the previous span starts 92 days before March 15
   {
     now: "2026-06-15T10:30:00Z",
     duration: "3m",
-    previous: ["2025-12-15T10:30:00.000Z", "2026-03-15T10:30:00.000Z"],
+    previous: ["2025-12-13T10:30:00.000Z", "2026-03-15T10:30:00.000Z"],
   },
-  // February has no 31st: both months end on the last day they have
+  // February 2026 has 28 days, so the previous span is 28 days too
   {
-    now: "2026-03-31T00:00:00Z",
+    now: "2026-03-01T00:00:00Z",
     duration: "1m",
-    previous: ["2026-01-28T00:00:00.000Z", "2026-02-28T00:00:00.000Z"],
+    previous: ["2026-01-04T00:00:00.000Z", "2026-02-01T00:00:00.000Z"],
   },
-  // the leap day lies in the current year, so it is one day longer than the year before
+  // 2027-02-28 to the leap day 2028-02-29 is 366 days
   {
-    now: "2028-06-15T00:00:00Z",
+    now: "2028-02-29T00:00:00Z",
     duration: "1y",
-    previous: ["2026-06-15T00:00:00.000Z", "2027-06-15T00:00:00.000Z"],
+    previous: ["2026-02-27T00:00:00.000Z", "2027-02-28T00:00:00.000Z"],
   },
 ];
 
@@ -101,6 +103,10 @@ describe("resolveComparedRanges", () => {
           current: { since: previous[1], until: new Date(now).toISOString() },
           previous: { since: previous[0], until: previous[1] },
         });
+        assert.strictEqual(
+          Date.parse(ranges.previous.until) - Date.parse(ranges.previous.since),
+          Date.parse(ranges.current.until) - Date.parse(ranges.current.since),
+        );
       }),
   );
 
@@ -112,9 +118,11 @@ describe("resolveComparedRanges", () => {
     "-3d",
     // a date is not a duration
     "2026-01-31",
-    // the previous span would start before the earliest date JavaScript can represent
+    // the span would start before the earliest date JavaScript can represent
     "999999999y",
     "999999999m",
+    // the current span is representable, the previous one twice as far back is not
+    "200000y",
   ])("rejects %j", (duration) =>
     Effect.gen(function* () {
       yield* setNow;
