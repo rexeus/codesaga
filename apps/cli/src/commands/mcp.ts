@@ -1,4 +1,4 @@
-import { Effect, Fiber, Layer } from "effect";
+import { Cause, Effect, Exit, Fiber, Layer } from "effect";
 import { Command } from "effect/cli";
 
 import { McpServerLive } from "../mcp/server.js";
@@ -9,7 +9,11 @@ export const mcpCommand = Command.make(
   Effect.fn(function* () {
     // The server interrupts its own fiber when stdin closes, so it runs in a child.
     const server = yield* Layer.launch(McpServerLive).pipe(Effect.forkChild);
-    yield* Fiber.await(server);
+    const exit = yield* Fiber.await(server);
+    // Closing stdin is the normal end; anything else is a server that broke.
+    return yield* Exit.isFailure(exit) && !Cause.hasInterruptsOnly(exit.cause)
+      ? Effect.die(Cause.squash(exit.cause))
+      : Effect.void;
   }),
 ).pipe(
   Command.withDescription(

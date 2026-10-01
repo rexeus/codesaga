@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { realpathSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { InspectResult, Report } from "@codesaga/engine";
@@ -190,6 +190,62 @@ describe("codesaga mcp tool errors", () => {
           'no file matches "nope.ts" (patterns are relative to the repository root)',
         ],
       ]);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga mcp path", () => {
+  it.live("analyzes a directory inside the server's repository", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      const session = yield* startMcpSession(repo.root);
+
+      const result = yield* session.callTool("analyze", { path: "src" });
+
+      expect(result.isError).toBe(false);
+      const report = yield* Schema.decodeUnknownEffect(Report)(
+        result.structuredContent,
+      );
+      expect(report.repository.scope).toBe("src");
+    }).pipe(Effect.scoped),
+  );
+
+  it.live("rejects a path in a sibling repository, for analyze and check", () =>
+    Effect.gen(function* () {
+      const server = yield* makeTeamProject;
+      const other = yield* makeTeamProject;
+      const session = yield* startMcpSession(server.root);
+
+      const analyzed = yield* session.callTool("analyze", { path: other.root });
+      const checked = yield* session.callTool("check", {
+        path: other.root,
+        minTruckFactor: 1,
+      });
+
+      const message = `path must be inside ${realpathSync(server.root)}; start the server in the other repository to analyze it`;
+      expect(
+        [analyzed, checked].map(({ isError, content }) => [
+          isError,
+          content[0]?.text,
+        ]),
+      ).toStrictEqual([
+        [true, message],
+        [true, message],
+      ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.live("rejects a symlink that leads into another repository", () =>
+    Effect.gen(function* () {
+      const server = yield* makeTeamProject;
+      const other = yield* makeTeamProject;
+      symlinkSync(other.root, join(server.root, "elsewhere"));
+      const session = yield* startMcpSession(server.root);
+
+      const result = yield* session.callTool("analyze", { path: "elsewhere" });
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0]?.text).toContain("path must be inside ");
     }).pipe(Effect.scoped),
   );
 });

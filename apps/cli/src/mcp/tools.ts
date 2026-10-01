@@ -28,7 +28,7 @@ const blame = optional(
 );
 const path = optional(
   Schema.String,
-  "Directory or file inside the repository; only commits that change files under it count (default: the whole repository around the server's working directory)",
+  "Directory or file inside the repository; only commits that change files under it count (default: the whole repository around the server's working directory); it must lie inside that repository",
 );
 const include = optional(
   Schema.Array(Schema.String),

@@ -21,6 +21,11 @@ import type { KnownFailure } from "../errors/reported-error.js";
 import { ShallowClone } from "../errors/shallow-clone.js";
 import { DEFAULT_LIMIT, limitReport } from "../output/limit-report.js";
 import { WorkingDirectory } from "../working-directory.js";
+import {
+  confineToServerRepository,
+  outsideServerMessage,
+} from "./confine-path.js";
+import type { PathOutsideServer } from "./confine-path.js";
 import { CodesagaToolkit, ToolFailed } from "./tools.js";
 
 type Services =
@@ -47,6 +52,9 @@ const resolveAnalysis = (params: Params) =>
       cwd,
       Option.fromNullishOr(params.path),
     );
+    if (params.path !== undefined) {
+      yield* confineToServerRepository(cwd, target.cwd);
+    }
     const settings = yield* resolveSettings(target.cwd, {
       since: Option.fromNullishOr(params.since),
       compare: Option.fromNullishOr(params.compare),
@@ -150,10 +158,17 @@ const checkGates = (
     return evaluateGates(report, limits);
   });
 
-const asToolError = <A, R>(effect: Effect.Effect<A, KnownFailure, R>) =>
+const failureMessage = (error: KnownFailure | PathOutsideServer): string =>
+  error._tag === "PathOutsideServer"
+    ? outsideServerMessage(error)
+    : toReportedError(error).message;
+
+const asToolError = <A, R>(
+  effect: Effect.Effect<A, KnownFailure | PathOutsideServer, R>,
+) =>
   Effect.mapError(
     effect,
-    (error) => new ToolFailed({ message: toReportedError(error).message }),
+    (error) => new ToolFailed({ message: failureMessage(error) }),
   );
 
 /**
