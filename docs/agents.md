@@ -35,6 +35,34 @@ The first call in a clone reads the whole history (seconds on a repository with 
 
 `codesaga check --json` is for gates, not for exploration: it answers whether the repository meets limits such as `--min-truck-factor 2`, with `passed` and one `reason` per gate, and exits 5 when a gate fails. Use it in CI or before a release, and `analyze` or `inspect` to learn why a gate failed.
 
+## MCP
+
+`codesaga mcp` serves the same analyses as typed tools over the [Model Context Protocol](https://modelcontextprotocol.io), so an agent host lists them instead of shelling out. The server speaks stdio: the host starts it and ends it by closing stdin. It analyzes the repository around the directory the host starts it in.
+
+Claude Code:
+
+```bash
+claude mcp add codesaga -- npx codesaga mcp
+```
+
+Any other host takes the same command in its MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "codesaga": { "command": "npx", "args": ["codesaga", "mcp"] }
+  }
+}
+```
+
+| Tool      | Parameters                                                                                                                                          | Returns                       |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `analyze` | `path`, `since`, `include`, `exclude`, `limit` (default 25), `compare`, `blame`, `github`                                                           | The `analyze --json` document |
+| `inspect` | `patterns` (required), `since`, `blame`                                                                                                             | The `inspect --json` document |
+| `check`   | `path`, `since`, `include`, `exclude`, `minTruckFactor`, `maxOrphanedDirectories`, `maxIslandDirectories`, `maxAgentShare`, `minActiveContributors` | The `check --json` document   |
+
+The parameters are the flags of the same name, and the documents are the `--json` documents, as `structuredContent` and as JSON text. The rules of the command line carry over: a `.codesaga.json` in the repository supplies defaults, the history cache makes repeated calls fast, and a failure such as an invalid `since`, a pattern that matches nothing or `check` without gates becomes a tool error with the message the command line would print. `blame` follows `--blame`: omitted, `.codesaga.json` decides, and `false` overrides a config that turns it on. `github` is off unless the call sets `github: true`, the equivalent of `--github`; no config file can turn it on. It sends the repository name and your token to GitHub and uses the same token sources as the command line (an `origin` other than github.com also needs `GH_HOST=<host>` in the server's environment), so a host may ask before it runs `analyze` with it. `check` reads neither. A failed gate is not an error: `check` returns `passed: false` with the reasons. Stdout carries protocol messages only; diagnostics go to stderr.
+
 ## Contract
 
 Stdout carries exactly one JSON document in `--json` mode; diagnostics go to stderr. The documents are versioned by `schemaVersion`: fields may be added in version 1, never renamed or removed. Exit codes: 0 success, 2 usage error (including an invalid `.codesaga.json`, `check` without gates or in a shallow clone, and `--github` without a token, with a rejected token, without a GitHub `origin`, or with an `origin` host that `GH_HOST` does not name), 3 not a git repository or no git, 4 `inspect` matched nothing, 5 a `check` gate failed, 1 anything else. The shapes are defined in [`packages/engine/src/report/`](../packages/engine/src/report/) and, for `check`, in [`apps/cli/src/check/check-result.ts`](../apps/cli/src/check/check-result.ts).

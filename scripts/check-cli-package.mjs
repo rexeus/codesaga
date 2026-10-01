@@ -1,7 +1,8 @@
 // Proves the packed `codesaga` package works the way `npx codesaga` will run it:
 // one bundled file, no runtime dependencies, installable with npm and pnpm, and
 // able to analyze and inspect a real git repository, with `--json` documents that
-// decode with the engine's schemas. Run after `pnpm --filter codesaga build`.
+// decode with the engine's schemas, and to list its MCP tools over `codesaga mcp`.
+// Run after `pnpm --filter codesaga build`.
 import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -16,6 +17,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 import { makeRepository } from "./make-package-fixture.mjs";
+import { mcpToolsList } from "./mcp-tools-list.mjs";
 
 const repository = resolve(import.meta.dirname, "..");
 
@@ -168,7 +170,11 @@ const decodedJson = (bin, command, repositoryRoot, installer) => {
  * @param {string} installer
  * @param {string} repositoryRoot
  */
-const expectWorkingInstall = (applicationRoot, installer, repositoryRoot) => {
+const expectWorkingInstall = async (
+  applicationRoot,
+  installer,
+  repositoryRoot,
+) => {
   const bin = join(applicationRoot, "node_modules", ".bin", binName);
   if (!existsSync(bin)) {
     throw new Error(
@@ -191,6 +197,14 @@ const expectWorkingInstall = (applicationRoot, installer, repositoryRoot) => {
     );
   }
   decodedJson(bin, "inspect", repositoryRoot, installer);
+  const served = await mcpToolsList(bin, repositoryRoot);
+  for (const tool of ["analyze", "inspect", "check"]) {
+    if (!served.includes(`"name":"${tool}"`)) {
+      throw new Error(
+        `codesaga mcp from ${installer} does not list the ${tool} tool:\n${served}`,
+      );
+    }
+  }
 };
 
 try {
@@ -205,7 +219,7 @@ try {
     JSON.stringify({ name: "consumer", private: true }),
   );
   run(pnpm, ["add", "--ignore-scripts", tarball], pnpmApplication);
-  expectWorkingInstall(pnpmApplication, "pnpm", repositoryRoot);
+  await expectWorkingInstall(pnpmApplication, "pnpm", repositoryRoot);
 
   // npm (and therefore npx) resolves dependencies differently from pnpm.
   const npmApplication = join(temporary, "application-npm");
@@ -222,7 +236,7 @@ try {
   if (existsSync(join(npmApplication, "node_modules", "effect"))) {
     throw new Error("npm installed effect; the bundle must not need it.");
   }
-  expectWorkingInstall(npmApplication, "npm", repositoryRoot);
+  await expectWorkingInstall(npmApplication, "npm", repositoryRoot);
 
   console.log(
     `Package verified: codesaga v${expectedVersion} installs and runs with pnpm and npm.`,

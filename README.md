@@ -143,6 +143,10 @@ npx codesaga check --min-truck-factor 2 --max-orphaned 0
 
 Its shape is defined in [`apps/cli/src/check/check-result.ts`](apps/cli/src/check/check-result.ts).
 
+### `codesaga mcp`
+
+Serves `analyze`, `inspect` and `check` as MCP tools over stdio until stdin closes, for agent hosts that discover tools instead of running commands; see [docs/agents.md](docs/agents.md#mcp).
+
 ### Exit codes
 
 | Code | Meaning                                                                                                                                                                                                                                                                                                                      |

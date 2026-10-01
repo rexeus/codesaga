@@ -4,6 +4,7 @@ import { CliError, Command } from "effect/cli";
 import { analyzeCommand } from "./commands/analyze.js";
 import { checkCommand } from "./commands/check.js";
 import { inspectCommand } from "./commands/inspect.js";
+import { mcpCommand } from "./commands/mcp.js";
 import {
   CliReportedError,
   toReportedError,
@@ -15,7 +16,12 @@ const root = Command.make("codesaga").pipe(
   Command.withDescription(
     "The story of a git repository: activity, people, knowledge and AI agents.",
   ),
-  Command.withSubcommands([analyzeCommand, inspectCommand, checkCommand]),
+  Command.withSubcommands([
+    analyzeCommand,
+    inspectCommand,
+    checkCommand,
+    mcpCommand,
+  ]),
 );
 
 const isHelpRequest = (error: unknown): boolean =>
