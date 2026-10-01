@@ -89,6 +89,36 @@ describe("classifyCommit matching", () => {
     );
   });
 
+  it("recognizes a known agent's co-author line from the body by its address", () => {
+    const signals = commit({
+      markers: ["Co-Authored-By: Claude <noreply@anthropic.com>"],
+    });
+
+    expect(classifyCommit(signals)).toStrictEqual(assisted("Claude Code"));
+  });
+
+  it("recognizes a known agent's GitHub ID in a co-author line of the body", () => {
+    const signals = commit({
+      markers: [
+        "Co-authored-by: Copilot <198982749+Copilot@users.noreply.github.com>",
+      ],
+    });
+
+    expect(classifyCommit(signals)).toStrictEqual(assisted("GitHub Copilot"));
+  });
+
+  it("keeps a body that only names an agent human, with or without a co-author line", () => {
+    const signals = commit({
+      markers: [
+        "Co-authored-by: Claude",
+        "Co-authored-by: Jane Doe <jane@example.com>",
+        "Co-authored-by: Claude (aider) <jane@example.com>",
+      ],
+    });
+
+    expect(classifyCommit(signals).class).toBe("human");
+  });
+
   it("does not treat GitHub as the committer of a web merge as a bot or an agent", () => {
     const committer = { name: "GitHub", email: "noreply@github.com" };
 

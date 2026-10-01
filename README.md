@@ -115,7 +115,7 @@ Repository-relative files, directories or globs (quote globs so the shell leaves
 - **Commit classes**, first match wins:
   1. **agent** — the author is an AI agent account;
   2. **bot** — the author is a known bot or any other `[bot]` account;
-  3. **agent-assisted** — a human commit that carries an agent's co-author trailer, marker trailer or message line;
+  3. **agent-assisted** — a human commit that carries an agent's co-author trailer, marker trailer or message line (a `Co-authored-by:` line in the body counts too, indented or not, when its address belongs to a known agent);
   4. **human** — everything else.
 
   Recognized agents: Claude Code, GitHub Copilot, Cursor, Codex, Jules, Devin, Aider, Amp, OpenHands, Factory, Kiro, Junie, Cline, and review suggestions accepted from Gemini Code Assist and Windsurf. Recognized bots: Dependabot, Renovate, GitHub Actions, pre-commit.ci, Sweep, and any `[bot]` account under its own name. Matching goes by email and GitHub account ID first, so a person named Claude stays a person.
@@ -139,7 +139,6 @@ The report states every threshold under `thresholds`, and the JSON contract is v
 ## Known limits
 
 - **Expertise is an estimate from history, not a fact.** The model's constants were fitted on other projects; `git blame` line ownership is not used.
-- **Indented `Co-Authored-By:` lines** inside a squashed commit body are not git trailers and are not detected.
 - **Scope follows current paths.** A file moved out of `analyze <path>` takes its history with it; a file moved in brings its history along.
 - **Shallow clones lack history.** codesaga warns and ignores the boundary commit; run `git fetch --unshallow` for full results. Partial clones (`--filter=blob:none`) make git fetch every blob during the run; use a full clone.
 - **Commits dated before 1970 or in the future** are left out.

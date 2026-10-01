@@ -11,6 +11,9 @@
 // path after the counts and is followed by two more tokens, the old and the
 // new path. Binary files show `-` for counts.
 
+import { parseMarkers, parseTrailers } from "./message.js";
+import type { Trailer } from "./message.js";
+
 /** One file touched by a commit. */
 type Change = {
   /** Path after the commit (the new path of a rename). */
@@ -27,9 +30,6 @@ type Change = {
 /** A name and email as git prints them, after `.mailmap`. */
 type Person = { readonly name: string; readonly email: string };
 
-/** One `Key: value` line of a commit's trailer block. */
-type Trailer = { readonly key: string; readonly value: string };
-
 export type Commit = {
   readonly sha: string;
   /** The parents as git shows them: none for a root or a shallow boundary, several for a merge. */
@@ -44,13 +44,17 @@ export type Commit = {
   readonly committer: Person;
   /** Every trailer in message order, with whitespace collapsed. */
   readonly trailers: ReadonlyArray<Trailer>;
-  /** Lines of the message that name a tool, such as "Generated with [Claude Code](...)". */
+  /**
+   * Trimmed lines of the message that name a tool, such as "Generated with
+   * [Claude Code](...)", and `Co-authored-by: Name <email>` lines that git did
+   * not parse as trailers (a squash merge indents them or buries them in the body).
+   */
   readonly markers: ReadonlyArray<string>;
   readonly changes: ReadonlyArray<Change>;
 };
 
 /** Bump on any change to how commits, trailers, markers, renames or removals are parsed. */
-export const PARSER_VERSION = 1;
+export const PARSER_VERSION = 2;
 
 /**
  * Arguments that make `git log` print what `LogParser` reads. Merge commits
@@ -68,9 +72,7 @@ export const LOG_FORMAT_ARGS = [
 ] as const;
 
 const COMMIT_MARKER = "\u0001";
-const TRAILER_SEPARATOR = "\u001F";
 const HEADER_FIELDS = 10;
-const GENERATED_WITH = /^\W*Generated with \[[^\]]+\]/iu;
 const OFFSET = /([+-])(\d{2}):(\d{2})$/u;
 const NUMSTAT = /^(\d+|-)\t(\d+|-)\t(.*)$/su;
 const RAW_STATUS = /^:\d+ \d+ \w+ \w+ ([A-Z])\d*$/u;
@@ -91,25 +93,6 @@ const offsetMinutesOf = (date: string): number => {
   return sign === "-" ? -total : total;
 };
 
-const parseTrailers = (field: string): ReadonlyArray<Trailer> =>
-  field
-    .split(TRAILER_SEPARATOR)
-    .map((line) => [line.indexOf(":"), line] as const)
-    .filter(([colon]) => colon > 0)
-    .map(([colon, line]) => ({
-      key: line.slice(0, colon).trim(),
-      value: line
-        .slice(colon + 1)
-        .replaceAll(/\s+/gu, " ")
-        .trim(),
-    }));
-
-const parseMarkers = (message: string): ReadonlyArray<string> =>
-  message
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => GENERATED_WITH.test(line));
-
 const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
   const [
     parents,
@@ -123,6 +106,7 @@ const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
     trailers,
     message,
   ] = fields;
+  const parsedTrailers = parseTrailers(trailers ?? "");
   return {
     sha,
     parents: (parents ?? "").split(" ").filter((parent) => parent !== ""),
@@ -131,8 +115,8 @@ const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
     offsetMinutes: offsetMinutesOf(date ?? ""),
     author: { name: authorName ?? "", email: authorEmail ?? "" },
     committer: { name: committerName ?? "", email: committerEmail ?? "" },
-    trailers: parseTrailers(trailers ?? ""),
-    markers: parseMarkers(message ?? ""),
+    trailers: parsedTrailers,
+    markers: parseMarkers(message ?? "", parsedTrailers),
     changes: [],
   };
 };

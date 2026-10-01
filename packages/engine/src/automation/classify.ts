@@ -44,6 +44,7 @@ const GITHUB_NOREPLY = /^(\d+)\+.+@users\.noreply\.github\.com$/iu;
 const BOT_NAME = /\[bot\]$/iu;
 const NOREPLY_BOT = /^(?:\d+\+)?(.+\[bot\])@users\.noreply\.github\.com$/iu;
 const PERSON_WITH_EMAIL = /^(.*?)\s*<([^>]*)>$/u;
+const BODY_CO_AUTHOR = /^co-authored-by:.*<([^>]+)>/iu;
 
 const githubIdOf = (email: string): number | undefined => {
   const id = GITHUB_NOREPLY.exec(email)?.[1];
@@ -74,6 +75,17 @@ const coAuthorsOf = (signals: CommitSignals): ReadonlyArray<Person> =>
       return { name, email };
     });
 
+/**
+ * Co-author lines in the body that git did not parse as trailers, as people
+ * known by address only: the squash-merge fallback matches an agent's email or
+ * GitHub ID, never a name that a sentence could mention.
+ */
+const bodyCoAuthorsOf = (signals: CommitSignals): ReadonlyArray<Person> =>
+  signals.markers.flatMap((line) => {
+    const email = BODY_CO_AUTHOR.exec(line)?.[1];
+    return email === undefined ? [] : [{ name: "", email }];
+  });
+
 const hasMarkerTrailer = (
   signature: Signature,
   signals: CommitSignals,
@@ -93,7 +105,11 @@ const hasMarkerLine = (signature: Signature, signals: CommitSignals): boolean =>
 
 /** Every agent that committed, co-authored or marked a commit that a human authored. */
 const assistingAgentsOf = (signals: CommitSignals): ReadonlyArray<string> => {
-  const helpers = [signals.committer, ...coAuthorsOf(signals)];
+  const helpers = [
+    signals.committer,
+    ...coAuthorsOf(signals),
+    ...bodyCoAuthorsOf(signals),
+  ];
   const names = SIGNATURES.filter(
     (signature) =>
       signature.kind === "agent" &&

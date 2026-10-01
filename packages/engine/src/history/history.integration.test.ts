@@ -338,3 +338,28 @@ layer(NodeServices.layer)("readHistory messages and dates", (it) => {
       }),
   );
 });
+
+layer(NodeServices.layer)("readHistory squash-merge bodies", (it) => {
+  it.effect(
+    "keeps an indented co-author line of a squash body as a marker",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* repo.commit(
+          "2026-03-01T12:00:00Z",
+          { "a.ts": "a\n" },
+          {
+            message:
+              "Squash (#1)\n\n* add a\n\n  Co-Authored-By: Claude <noreply@anthropic.com>\n\n* more text\n",
+          },
+        );
+
+        const [commit] = yield* history(repo);
+
+        assert.deepStrictEqual(commit?.trailers, []);
+        assert.deepStrictEqual(commit?.markers, [
+          "Co-Authored-By: Claude <noreply@anthropic.com>",
+        ]);
+      }),
+  );
+});
