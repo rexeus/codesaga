@@ -285,3 +285,24 @@ describe("codesaga with a .codesaga.json it cannot read", () => {
       }).pipe(Effect.scoped),
   );
 });
+
+describe("codesaga blame from a .codesaga.json", () => {
+  it.live(
+    "turns line owners on with the config's blame, and --no-blame off",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        // A third file brings src into the report's directories.
+        repo.commit(1, { "src/c.ts": "c1\n" });
+        writeConfig(repo, { blame: true });
+
+        const fromConfig = yield* analyzeJson(repo);
+        const fromFlag = yield* analyzeJson(repo, "--no-blame");
+
+        expect(fromConfig.knowledge.directories[0]?.lineOwners?.lines).toBe(7);
+        expect(fromFlag.knowledge.directories[0]).not.toHaveProperty(
+          "lineOwners",
+        );
+      }).pipe(Effect.scoped),
+  );
+});

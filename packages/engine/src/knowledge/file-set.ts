@@ -3,6 +3,8 @@
 
 import { Order } from "effect";
 
+import { lineOwnersOf } from "../blame/line-owners.js";
+import type { LineOwners } from "../blame/line-owners.js";
 import { groupBy } from "../collections/group-by.js";
 import { roundReported } from "../report/precision.js";
 import type { Report } from "../report/report.js";
@@ -33,6 +35,8 @@ export type FileSetKnowledge = {
   readonly experts: ReadonlyArray<Expert>;
   /** Explanations of `island` and `orphaned`. */
   readonly reasons: ReadonlyArray<string>;
+  /** Who wrote the lines; undefined when the model has no blame. */
+  readonly lineOwners: LineOwners | undefined;
 };
 
 const byCommitsThenName = Order.combine(
@@ -136,5 +140,9 @@ export const describeFileSet = (
           ]),
       ...(orphaned ? [orphanedReason(withoutActive, files, model)] : []),
     ],
+    lineOwners:
+      model.ownership === undefined
+        ? undefined
+        : lineOwnersOf(paths, model.ownership),
   };
 };

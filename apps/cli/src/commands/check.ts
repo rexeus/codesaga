@@ -84,6 +84,7 @@ export const checkCommand = Command.make(
       ...flags,
       compare: Option.none(),
       limit: Option.none(),
+      blame: Option.none(),
     });
     const limits = resolveGateLimits(settings.gates, flags);
     // Without a gate there is nothing to decide: fail before the slow analysis.

@@ -5,6 +5,7 @@ import { formatCount, formatDate, formatPercent } from "./format.js";
 type Knowledge = Report["knowledge"];
 type Directory = Knowledge["directories"][number];
 type Expert = Directory["experts"][number];
+type LineOwner = NonNullable<Directory["lineOwners"]>["owners"][number];
 
 /** A flag on a directory; `symbol` keeps the meaning readable without color. */
 export type Badge = {
@@ -49,6 +50,25 @@ export const expertLine = (expert: Expert): ExpertLine => ({
   ...personLine(expert),
   detail: `${formatCount(expert.files)} ${expert.files === 1 ? "file" : "files"} (${formatPercent(expert.share)})`,
 });
+
+/** An owner of lines with their reach: `detail` reads `412 lines (62%)`; `mark` names a bot or agent. */
+export type LineOwnerLine = {
+  readonly name: string;
+  readonly detail: string;
+  /** `bot` or `agent`; empty for a person. */
+  readonly mark: string;
+};
+
+/** How a directory's line owner is listed. */
+export const lineOwnerLine = (owner: LineOwner): LineOwnerLine => ({
+  name: owner.name,
+  detail: `${formatCount(owner.lines)} ${owner.lines === 1 ? "line" : "lines"} (${formatPercent(owner.share)})`,
+  mark: owner.kind === "human" ? "" : owner.kind,
+});
+
+/** Whether the report ran with blame, which adds a column to the directory table. */
+export const hasLineOwners = ({ directories }: Knowledge): boolean =>
+  directories.some(({ lineOwners }) => lineOwners !== undefined);
 
 /** The people whose departure the truck factor counts, in removal order. */
 export const truckFactorPeople = ({ truckFactor }: Knowledge): PersonLine[] =>

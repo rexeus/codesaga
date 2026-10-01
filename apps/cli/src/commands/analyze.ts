@@ -15,7 +15,13 @@ import { renderAnalysis } from "../output/terminal/analysis-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
-import { cacheFlag, compareFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
+import {
+  blameFlag,
+  cacheFlag,
+  compareFlag,
+  jsonFlag,
+  sinceFlag,
+} from "./shared-flags.js";
 
 const DEFAULT_LIMIT = 25;
 const DEFAULT_HTML_FILE = "codesaga-report.html";
@@ -33,6 +39,7 @@ export const analyzeCommand = Command.make(
     since: sinceFlag,
     compare: compareFlag,
     cache: cacheFlag,
+    blame: blameFlag,
     include: Flag.String("include").pipe(
       Flag.withDescription(
         "Glob of files that count as code instead of the language list; repeatable",
@@ -98,6 +105,7 @@ export const analyzeCommand = Command.make(
       signatures: settings.signatures,
       toolVersion: version,
       cache,
+      blame: settings.blame,
     };
     const report = yield* analyze(options).pipe(blameConfigSince(settings));
     yield* warnIfShallow(report);
@@ -124,6 +132,10 @@ export const analyzeCommand = Command.make(
     {
       command: "codesaga analyze --json --limit 10",
       description: "The full report as JSON for an agent, with 10 contributors",
+    },
+    {
+      command: "codesaga analyze --blame",
+      description: "Also show who wrote most of today's lines per directory",
     },
     {
       command: "codesaga analyze --html",

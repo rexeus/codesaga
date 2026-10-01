@@ -249,3 +249,75 @@ describe("codesaga analyze --no-cache", () => {
     }).pipe(Effect.scoped),
   );
 });
+
+// The team project's src has two files; a third brings the directory into the report.
+// Ada wrote a.ts (3 lines), Grace b.ts and c.ts (3 + 2 lines).
+describe("codesaga analyze --blame", () => {
+  const grace = { name: "Grace", email: "grace@example.com" };
+
+  it.live("adds the line owners of each directory to the JSON report", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      repo.commit(1, { "src/c.ts": "c1\nc2\n" }, { author: grace });
+
+      const result = yield* journey({
+        args: ["analyze", "--json", "--blame"],
+        cwd: repo.root,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr).toBe("");
+      const report = yield* decode(result.stdout);
+      expect(report.knowledge.directories[0]?.lineOwners).toStrictEqual({
+        lines: 8,
+        owners: [
+          {
+            name: "Grace",
+            email: "grace@example.com",
+            lines: 5,
+            share: 0.625,
+            kind: "human",
+          },
+          {
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            lines: 3,
+            share: 0.375,
+            kind: "human",
+          },
+        ],
+      });
+    }).pipe(Effect.scoped),
+  );
+
+  it.live(
+    "shows the leading line owner next to the expert in the summary",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        repo.commit(1, { "src/c.ts": "c1\nc2\n" }, { author: grace });
+
+        const result = yield* journey({
+          args: ["analyze", "--blame"],
+          cwd: repo.root,
+        });
+
+        expect(result.stdout).toContain("leading line owner");
+        expect(result.stdout).toContain("Grace 63%");
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("leaves the JSON without line owners when not asked", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      repo.commit(1, { "src/c.ts": "c1\nc2\n" }, { author: grace });
+
+      const result = yield* journey({
+        args: ["analyze", "--json"],
+        cwd: repo.root,
+      });
+
+      expect(result.stdout).not.toContain("lineOwners");
+    }).pipe(Effect.scoped),
+  );
+});

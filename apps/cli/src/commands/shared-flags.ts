@@ -14,6 +14,13 @@ export const sinceFlag = Flag.String("since").pipe(
   Flag.optional,
 );
 
+export const blameFlag = Flag.Boolean("blame").pipe(
+  Flag.withDescription(
+    "Also show who wrote the lines that exist today, from git blame; runs git once per file, so it is slow on large repositories",
+  ),
+  Flag.optional,
+);
+
 export const cacheFlag = Flag.Boolean("cache").pipe(
   Flag.withDescription(
     "Reuse the parsed history cached in the git directory; --no-cache reads git every time and leaves the cache alone",

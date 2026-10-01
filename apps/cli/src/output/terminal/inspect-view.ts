@@ -4,7 +4,7 @@ import type { InspectResult } from "@codesaga/engine";
 
 import { escapeForTerminal } from "../escape.js";
 import { ago, count, day, plural, share } from "./format.js";
-import { badgesOf, nameOf } from "./knowledge-lines.js";
+import { badgesOf, nameOf, ownerLabel } from "./knowledge-lines.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 
@@ -46,6 +46,31 @@ const expertLines = (
         style,
       );
 
+const lineOwnerLines = (
+  { lineOwners }: Entry,
+  style: Style,
+): ReadonlyArray<string> => {
+  if (lineOwners === undefined) {
+    return [];
+  }
+  if (lineOwners.owners.length === 0) {
+    return ["No line owner found."];
+  }
+  return renderTable(
+    [
+      { header: "line owner", align: "left" },
+      { header: "lines", align: "right" },
+      { header: "share", align: "right" },
+    ],
+    lineOwners.owners.map((owner) => [
+      plain(ownerLabel(owner)),
+      plain(count(owner.lines)),
+      plain(share(owner.lines, lineOwners.lines)),
+    ]),
+    style,
+  );
+};
+
 const automationLine = (entry: Entry): string => {
   const { human, agentAssisted, agent, bot } = entry.automation;
   const classes = Object.entries({
@@ -75,6 +100,7 @@ const entryLines = (
   style.bold(escapeForTerminal(entry.pattern)),
   headline(entry),
   ...expertLines(entry, now, style),
+  ...lineOwnerLines(entry, style),
   ...windowLines(entry, now),
   ...entry.reasons.map((reason) => `- ${escapeForTerminal(reason)}`),
 ];

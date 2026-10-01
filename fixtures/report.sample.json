@@ -1767,7 +1767,33 @@
         "reasons": [
           "Lena Fischer is the only expert on 12 of 14 files",
           "no active expert for 12 of 14 files (last expert commit 2025-11-14)"
-        ]
+        ],
+        "lineOwners": {
+          "lines": 3420,
+          "owners": [
+            {
+              "name": "Lena Fischer",
+              "email": "lena.fischer@aurora.example",
+              "lines": 2950,
+              "share": 0.8626,
+              "kind": "human"
+            },
+            {
+              "name": "Maya Lindqvist",
+              "email": "maya.lindqvist@aurora.example",
+              "lines": 380,
+              "share": 0.1111,
+              "kind": "human"
+            },
+            {
+              "name": "Claude Code",
+              "email": "noreply@anthropic.com",
+              "lines": 90,
+              "share": 0.0263,
+              "kind": "agent"
+            }
+          ]
+        }
       },
       {
         "path": "packages/db",
@@ -1806,7 +1832,33 @@
         ],
         "reasons": [
           "no active expert for 30 of 52 files (last expert commit 2024-12-03)"
-        ]
+        ],
+        "lineOwners": {
+          "lines": 6180,
+          "owners": [
+            {
+              "name": "Dmitri Volkov",
+              "email": "dmitri.volkov@aurora.example",
+              "lines": 4120,
+              "share": 0.6667,
+              "kind": "human"
+            },
+            {
+              "name": "Maya Lindqvist",
+              "email": "maya.lindqvist@aurora.example",
+              "lines": 1500,
+              "share": 0.2427,
+              "kind": "human"
+            },
+            {
+              "name": "dependabot[bot]",
+              "email": "49699333+dependabot[bot]@users.noreply.github.com",
+              "lines": 560,
+              "share": 0.0906,
+              "kind": "bot"
+            }
+          ]
+        }
       },
       {
         "path": "packages/auth",

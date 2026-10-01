@@ -32,6 +32,8 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     scope,
     headTime,
     now: facts.now,
+    blame: facts.blame,
+    signatures: facts.signatures,
   });
   const people = contributors({
     commits,

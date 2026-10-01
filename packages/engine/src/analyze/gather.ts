@@ -8,6 +8,8 @@ import type { ChildProcessSpawner } from "effect/process";
 import { withCustomSignatures } from "../automation/custom-signatures.js";
 import type { CustomSignatures } from "../automation/custom-signatures.js";
 import type { Signature } from "../automation/signatures.js";
+import type { LineAuthors } from "../blame/parse-blame.js";
+import { readBlame } from "../blame/read-blame.js";
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import {
@@ -46,6 +48,8 @@ export type RepositoryFacts = {
   /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
   readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
+  /** `git blame` of the universe files at HEAD, by path; undefined unless `blame` was requested. */
+  readonly blame: ReadonlyMap<string, LineAuthors> | undefined;
   /** Whether a path counts as code, for files that no longer exist too. */
   readonly isCodePath: (path: string) => boolean;
   /** The table that classifies commits: the built-in rows, then the custom ones. */
@@ -92,6 +96,12 @@ export type AnalyzeOptions = {
    * Absent, the cache is used. Results are identical either way.
    */
   readonly cache?: boolean | undefined;
+  /**
+   * Also read `git blame` for every universe file, which reports who wrote
+   * the lines that exist today. It starts one git process per file, so it is
+   * slow on large repositories; absent or `false`, no blame runs.
+   */
+  readonly blame?: boolean | undefined;
 };
 
 type Windows = Pick<RepositoryFacts, "since" | "previous">;
@@ -145,6 +155,10 @@ const gatherInRepository = (
             shallowBoundary: shallowBoundary ?? new Set(),
             useCache: options.cache ?? true,
           });
+    const blame =
+      options.blame === true
+        ? yield* readBlame(universe.map((file) => file.path))
+        : undefined;
     return {
       toolVersion: options.toolVersion,
       now: yield* DateTime.now,
@@ -159,6 +173,7 @@ const gatherInRepository = (
       commits,
       headTime,
       universe,
+      blame,
       isCodePath: namedAsCode(options),
       signatures: withCustomSignatures(options.signatures),
     } satisfies RepositoryFacts;

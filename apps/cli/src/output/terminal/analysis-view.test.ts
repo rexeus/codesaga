@@ -27,9 +27,9 @@ describe("renderAnalysis", () => {
       "  Jonas Weber                  205          175  3 months ago",
       "  Aiko Tanaka                  135          120  4 months ago",
       "Truck factor               2 · Maya Lindqvist, Tomás Herrera",
-      "Knowledge risks            files  flags             leading expert",
-      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)",
-      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)",
+      "Knowledge risks            files  flags             leading expert                leading line owner",
+      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Lena Fischer 86%",
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  Dmitri Volkov 67%",
       "  packages/auth               19  island            Jonas Weber 95%",
       "  apps/admin                  58                    Aiko Tanaka 72%",
       "  infra                       27                    Tomás Herrera 78%",
@@ -243,6 +243,55 @@ describe("renderAnalysis comparison", () => {
 
   it("shows no comparison line without --compare", () => {
     expect(renderAnalysis(sampleReport(), plain)).not.toContain("vs previous");
+  });
+});
+
+describe("renderAnalysis line owners", () => {
+  it("shows the leading line owner per directory, marking a bot", () => {
+    const report = sampleReport();
+    const [docs, db, ...rest] = report.knowledge.directories;
+    const owner = { email: "a@example.com", kind: "human" } as const;
+    const lines = renderAnalysis(
+      {
+        ...report,
+        knowledge: {
+          ...report.knowledge,
+          directories: [
+            Object.assign({}, docs, {
+              lineOwners: {
+                lines: 200,
+                owners: [{ ...owner, name: "Ada", lines: 150, share: 0.75 }],
+              },
+            }),
+            Object.assign({}, db, {
+              lineOwners: {
+                lines: 3,
+                owners: [
+                  {
+                    ...owner,
+                    name: "dependabot[bot]",
+                    kind: "bot",
+                    lines: 1,
+                    share: 0.3333,
+                  },
+                ],
+              },
+            }),
+            ...rest,
+          ],
+        },
+      },
+      plain,
+    ).split("\n");
+    expect(lines).toContain(
+      "Knowledge risks            files  flags             leading expert                leading line owner",
+    );
+    expect(lines).toContain(
+      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Ada 75%",
+    );
+    expect(lines).toContain(
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  dependabot[bot] (bot) 33%",
+    );
   });
 });
 

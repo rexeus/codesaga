@@ -89,12 +89,13 @@ Each argument — a file, a directory, or a glob — gives one entry aggregated 
 | `--exclude <glob>`                    | —                | Removes matching files. Repeatable.                                                                                                                                                                          |
 | `--limit <n>`                         | `25`             | Contributors and knowledge directories in `--json`; `0` for all. `totals` always tells the full size.                                                                                                        |
 | `--no-cache`                          | cache on         | Reads `git log` instead of the history cache, and leaves the cache alone. See _How the numbers work_.                                                                                                        |
+| `--blame`                             | off              | Also reports who wrote the lines that exist today, per directory, from `git blame`. Slower, see _Line ownership_. `--no-blame` overrides a config that turns it on.                                          |
 | `--json`                              | off              | One JSON document on stdout; everything else goes to stderr.                                                                                                                                                 |
 | `--html`, `--out <file>`, `--no-open` | off              | The dashboard, see above. It always embeds the full report.                                                                                                                                                  |
 
 ### `codesaga inspect <path-or-glob...>`
 
-Repository-relative files, directories or globs (quote globs so the shell leaves them alone). Takes `--json`, `--since` and `--no-cache`. Arguments that match nothing are listed under `unmatched`.
+Repository-relative files, directories or globs (quote globs so the shell leaves them alone). Takes `--json`, `--since`, `--no-cache` and `--blame`. Arguments that match nothing are listed under `unmatched`.
 
 ### `codesaga check [path]`
 
@@ -182,6 +183,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect`
 | `exclude`    | `--exclude` | Globs relative to the repository root.                                                                                                                   |
 | `since`      | `--since`   | Same syntax: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`.                                                                                            |
 | `limit`      | `--limit`   | A whole number, `0` for all. Only `analyze --json` uses it.                                                                                              |
+| `blame`      | `--blame`   | `true` turns line ownership on for `analyze` and `inspect`; `--no-blame` turns it off again.                                                             |
 | `gates`      | gate flags  | Limits for `check`, see _Gates in CI_. A flag overrides the config's limit for the same gate; other gates stay.                                          |
 | `signatures` | — (no flag) | In-house bots and agents. Each has a `name`, reported as the tool, and `emails` and `names` that identify it: exact matches, ignoring case, no patterns. |
 
@@ -240,6 +242,12 @@ A failed gate ends the step with exit code 5 and prints the reasons to the job l
 
   Days count back from the HEAD commit, so a report is reproducible for a commit. A person is an **expert** on a file when they added lines to it and their DOE is at least 0.7 of the highest DOE on it. Only people can be experts: commits by bots and agents never count, and an agent-assisted commit counts for the person who made it.
 
+- **Line ownership (`--blame`)** — a second signal, off by default. It runs `git blame --line-porcelain -w HEAD` on every universe file, eight at a time, and counts the non-blank lines at HEAD per author, with `.mailmap` applied and whitespace-only changes ignored. Each reported directory (and each `inspect` entry) then carries `lineOwners`: the lines blamed in total and the five authors with the most, each with `lines`, `share` and `kind`. `kind` is `human`, `agent` or `bot`; unlike experts, bots and agents own lines, and the `kind` says so. A file that git cannot blame is left out. The terminal adds a "leading line owner" column and the dashboard a "Line owners" column.
+
+  **Which signal when.** Expertise (DOE) answers "who knows this code?" from the whole history: it credits lines added over time, first authorship and recency, so it also remembers people whose lines were since replaced. Line ownership answers "who wrote the lines that exist today?", which is what many people mean by "who owns this". It forgets everyone whose lines are gone, and a mass rename, a code generator or a squash merge hands lines to whoever ran it; it says nothing about who understood them. Use DOE for risk (truck factor, islands, orphaned code) and for choosing reviewers, and `--blame` to check or explain it. Where the two disagree, look at that directory.
+
+  **Cost.** DOE comes from the one cached `git log` pass. Blame is one `git` process per file, never cached, and each walks that file's history, so the time grows with files times history depth. On a repository with 435 code files and 4,300 commits it took about 2.5 seconds on top of a 0.6 second cached run; without `--blame` nothing runs and the run is as fast as before.
+
 - **Truck factor** — Avelino et al.'s algorithm (ICPC 2016): remove the person who is expert on the most files, again and again, until more than half of the files have no expert. The number removed is the truck factor; the report names them.
 - **Directories** — every directory with at least 3 files gets its own truck factor. A **knowledge island** has one person as the only expert on at least 80 % of its files. **Orphaned knowledge** means more than half of its files have no active expert. Directories are listed by risk: orphaned first, then islands, then by truck factor.
 
@@ -247,7 +255,7 @@ The report states every threshold under `thresholds`, and the JSON contract is v
 
 ## Known limits
 
-- **Expertise is an estimate from history, not a fact.** The model's constants were fitted on other projects; `git blame` line ownership is not used.
+- **Expertise is an estimate from history, not a fact.** The model's constants were fitted on other projects. `--blame` adds line ownership as a second view, not as a correction.
 - **Scope follows current paths.** A file moved out of `analyze <path>` takes its history with it; a file moved in brings its history along.
 - **Shallow clones lack history.** codesaga warns and ignores the boundary commit; run `git fetch --unshallow` for full results. Partial clones (`--filter=blob:none`) make git fetch every blob during the run; use a full clone.
 - **Commits dated before 1970 or in the future** are left out.

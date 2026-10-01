@@ -125,6 +125,23 @@ const assistingAgentsOf = (
   return [...new Set(names)];
 };
 
+/** The agent or bot an author account belongs to, or undefined for a person. */
+const automatedAuthorOf = (
+  author: Person,
+  signatures: ReadonlyArray<Signature>,
+): (Classification & { readonly class: "agent" | "bot" }) | undefined => {
+  const signature = signatures.find((candidate) =>
+    isSignedBy(candidate, author),
+  );
+  if (signature !== undefined) {
+    return { class: signature.kind, tools: [signature.name] };
+  }
+  const botAccount = botAccountOf(author);
+  return botAccount === undefined
+    ? undefined
+    : { class: "bot", tools: [botAccount] };
+};
+
 /**
  * Assigns the commit its class and tools. An agent author wins over the bot
  * rule; a bot author over a co-author; a human author with an agent trailer,
@@ -138,21 +155,26 @@ export const classifyCommit = (
   signals: CommitSignals,
   signatures: ReadonlyArray<Signature> = SIGNATURES,
 ): Classification => {
-  const authorSignature = signatures.find((signature) =>
-    isSignedBy(signature, signals.author),
-  );
-  if (authorSignature !== undefined) {
-    return { class: authorSignature.kind, tools: [authorSignature.name] };
-  }
-  const botAccount = botAccountOf(signals.author);
-  if (botAccount !== undefined) {
-    return { class: "bot", tools: [botAccount] };
+  const automated = automatedAuthorOf(signals.author, signatures);
+  if (automated !== undefined) {
+    return automated;
   }
   const assistants = assistingAgentsOf(signals, signatures);
   return assistants.length === 0
     ? { class: "human", tools: [] }
     : { class: "agent-assisted", tools: assistants };
 };
+
+/**
+ * Whether an author account is an agent, a bot, or a person. Only the account
+ * is judged, with the rules of `classifyCommit` for authors: trailers and
+ * markers belong to a commit, not to the lines it left behind.
+ */
+export const authorKind = (
+  author: Person,
+  signatures: ReadonlyArray<Signature> = SIGNATURES,
+): "agent" | "bot" | "human" =>
+  automatedAuthorOf(author, signatures)?.class ?? "human";
 
 /** Whether the commit counts for a person: a human wrote it, possibly with an agent's help. */
 export const isContributorCommit = ({ class: commitClass }: Classification) =>

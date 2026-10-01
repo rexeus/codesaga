@@ -17,6 +17,8 @@ export type SettingFlags = {
   readonly include: ReadonlyArray<string>;
   readonly exclude: ReadonlyArray<string>;
   readonly limit: Option.Option<number>;
+  /** `--blame` or `--no-blame`; `None` leaves the config in charge. */
+  readonly blame: Option.Option<boolean>;
 };
 
 /** The analysis settings after flags and config are merged. */
@@ -24,6 +26,8 @@ export type Settings = Pick<
   AnalyzeOptions,
   "since" | "include" | "exclude" | "signatures"
 > & {
+  /** Whether to read `git blame` for line owners; off unless a flag or the config turns it on. */
+  readonly blame: boolean;
   /** Contributors and directories in `--json`; undefined when neither flag nor config sets it. */
   readonly limit: number | undefined;
   /** The config file's `gates`, for `check` to merge with its flags. */
@@ -66,6 +70,7 @@ export const resolveSettings = (
         flags.exclude.length > 0 ? flags.exclude : (config.exclude ?? []),
       signatures: config.signatures,
       limit: Option.getOrElse(flags.limit, () => config.limit),
+      blame: Option.getOrElse(flags.blame, () => config.blame ?? false),
       gates: config.gates,
       sinceFromConfig,
       configFile: file,

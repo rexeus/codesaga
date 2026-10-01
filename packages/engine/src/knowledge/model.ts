@@ -4,6 +4,10 @@
 import { DateTime } from "effect";
 
 import type { ClassifiedCommit } from "../automation/classify.js";
+import { SIGNATURES } from "../automation/signatures.js";
+import type { Signature } from "../automation/signatures.js";
+import type { Ownership } from "../blame/line-owners.js";
+import type { LineAuthors } from "../blame/parse-blame.js";
 import { ACTIVE_DAYS, isActiveWithin } from "../contributors/activeness.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
@@ -15,6 +19,8 @@ export type KnowledgeModel = {
   readonly now: DateTime.Utc;
   /** The experts of every universe file, empty for a file without one. */
   readonly experts: ReadonlyMap<string, ReadonlyArray<Human>>;
+  /** Who wrote the universe's lines; undefined when the analysis ran without blame. */
+  readonly ownership: Ownership | undefined;
 };
 
 export type Person = Report["knowledge"]["truckFactor"]["people"][number];
@@ -26,6 +32,10 @@ export type KnowledgeInput = {
   /** Time of the HEAD commit in seconds; recency is measured back from it. */
   readonly headTime: number;
   readonly now: DateTime.Utc;
+  /** `git blame` of the universe files, by path; absent without `--blame`. */
+  readonly blame?: ReadonlyMap<string, LineAuthors> | undefined;
+  /** The signature table that tells a bot or an agent from a person among the line owners; the built-in one by default. */
+  readonly signatures?: ReadonlyArray<Signature> | undefined;
 };
 
 /** Finds the experts of every universe file. */
@@ -34,6 +44,8 @@ export const knowledgeModel = ({
   universe,
   headTime,
   now,
+  blame,
+  signatures = SIGNATURES,
 }: KnowledgeInput): KnowledgeModel => {
   const humans = humansOf(commits);
   const contributions = contributionsByFile(
@@ -42,6 +54,16 @@ export const knowledgeModel = ({
   );
   return {
     now,
+    ownership:
+      blame === undefined
+        ? undefined
+        : {
+            files: blame,
+            signatures,
+            identities: new Map(
+              commits.map(({ author }) => [author.email, author]),
+            ),
+          },
     experts: new Map(
       universe.map(({ path, loc }) => [
         path,

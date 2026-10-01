@@ -3,6 +3,7 @@
 
 import { Order } from "effect";
 
+import { lineOwnersField } from "../blame/line-owners.js";
 import { groupBy } from "../collections/group-by.js";
 import type { Report } from "../report/report.js";
 import { ancestorsOf } from "../universe/ancestors.js";
@@ -64,15 +65,18 @@ export const directoryKnowledge = (
         files.map((file) => file.path),
         model,
       );
-      return {
-        path,
-        files: set.files,
-        truckFactor: set.truckFactor.length,
-        island: set.island,
-        orphaned: set.orphaned,
-        experts: set.experts,
-        reasons: set.reasons,
-      };
+      return Object.assign(
+        {
+          path,
+          files: set.files,
+          truckFactor: set.truckFactor.length,
+          island: set.island,
+          orphaned: set.orphaned,
+          experts: set.experts,
+          reasons: set.reasons,
+        },
+        lineOwnersField(set.lineOwners),
+      );
     })
     .toSorted(byRisk);
 };

@@ -22,6 +22,8 @@
 
 **Expert (DOE)** — a human whose Degree of Expertise for a file is at least 0.7 times the highest DOE among the file's authors, with at least one added line. DOE weighs lines added, first authorship, days since the last commit to the file (measured from the HEAD commit) and file size. Bot and agent commits never make an expert; agent-assisted commits credit their human author.
 
+**Line owner** — an identity that `git blame` credits with lines of a set of files at HEAD, counted in non-blank lines with whitespace-only changes ignored and `.mailmap` applied. Only with `--blame`. Unlike an expert, a line owner may be a bot or an agent; the report marks its kind. Expertise says who knows a file from its history, line ownership who wrote what remains.
+
 **Truck factor** — the number of people who must leave before more than half of a file set has no expert, found by removing, greedily, the person who is expert on the most still-covered files. The report names the removed people in order.
 
 **Knowledge island** — a directory where one person is the sole expert on at least 80% of the files.

@@ -5,6 +5,8 @@ import {
   coverageSentence,
   directoryBadges,
   expertLine,
+  hasLineOwners,
+  lineOwnerLine,
   soleExpertSummary,
   truckFactorPeople,
   truckFactorSentence,
@@ -59,6 +61,39 @@ describe("expertLine", () => {
     const one = first && expertLine({ ...first, files: 1 });
 
     expect(one?.detail).toMatch(/^1 file \(/u);
+  });
+});
+
+describe("line owners", () => {
+  const person = { name: "Maya Lindqvist", email: "maya@example.com" };
+
+  it("words an owner's reach and marks only bots and agents", () => {
+    expect(
+      lineOwnerLine({
+        ...person,
+        lines: 1_240,
+        share: 0.6234,
+        kind: "human",
+      }),
+    ).toEqual({
+      name: "Maya Lindqvist",
+      detail: "1,240 lines (62%)",
+      mark: "",
+    });
+    expect(
+      lineOwnerLine({ ...person, lines: 1, share: 0.0123, kind: "agent" }),
+    ).toEqual({ name: "Maya Lindqvist", detail: "1 line (1%)", mark: "agent" });
+  });
+
+  it("is on only when a directory carries line owners", () => {
+    const withoutOwners = knowledge.directories.map(
+      ({ lineOwners: _owners, ...rest }) => rest,
+    );
+
+    expect(hasLineOwners(knowledge)).toBe(true);
+    expect(hasLineOwners({ ...knowledge, directories: withoutOwners })).toBe(
+      false,
+    );
   });
 });
 

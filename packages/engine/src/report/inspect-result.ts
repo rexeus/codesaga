@@ -4,7 +4,8 @@
 import { Schema } from "effect";
 
 import { AutomationTotals } from "./automation-totals.js";
-import { ActivityWindow, Expert } from "./report.js";
+import { Expert, LineOwners } from "./knowledge-report.js";
+import { ActivityWindow } from "./report.js";
 
 /** The answer for one `inspect` argument, aggregated over the files it matches. */
 const InspectEntry = Schema.Struct({
@@ -20,6 +21,8 @@ const InspectEntry = Schema.Struct({
   orphaned: Schema.Boolean,
   /** The five people expert on the most matched files, most files first. */
   experts: Schema.Array(Expert).check(Schema.isMaxLength(5)),
+  /** Present only when the analysis ran with `blame`: who wrote the matched files' lines at HEAD. */
+  lineOwners: Schema.optionalKey(LineOwners),
   /** Commits to the matched files in the window. */
   commits: Schema.Natural,
   /** ISO timestamp of the newest commit to the matched files in the window; null without one. */

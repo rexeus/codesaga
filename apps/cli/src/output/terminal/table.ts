@@ -23,7 +23,7 @@ const padCell = (
 
 /**
  * Renders a dimmed header row and one line per row, columns separated by two
- * spaces. The last column is never padded, so lines carry no trailing blanks.
+ * spaces. The last column is never padded and an empty one leaves no separator behind, so lines carry no trailing blanks.
  */
 export const renderTable = (
   columns: ReadonlyArray<Column>,
@@ -46,7 +46,8 @@ export const renderTable = (
         const padded = padCell(cell.text, width, column.align);
         return cell.paint === undefined ? padded : cell.paint(padded);
       })
-      .join("  ");
+      .join("  ")
+      .trimEnd();
   const header = line(
     columns.map((column) => ({ text: column.header, paint: style.dim })),
   );

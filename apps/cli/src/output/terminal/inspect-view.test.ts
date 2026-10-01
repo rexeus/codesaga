@@ -105,3 +105,39 @@ describe("renderInspect", () => {
     expect(text).toContain("\\u001b[2Jevil");
   });
 });
+
+describe("renderInspect line owners", () => {
+  it("lists the line owners under the experts, marking an agent", () => {
+    const [db] = result.matches;
+    const owner = { email: "a@example.com", kind: "human" } as const;
+    const blamed: InspectResult = {
+      ...result,
+      matches: [
+        Object.assign({}, db, {
+          lineOwners: {
+            lines: 400,
+            owners: [
+              { ...owner, name: "Maya Lindqvist", lines: 300, share: 0.75 },
+              {
+                ...owner,
+                name: "Claude",
+                kind: "agent",
+                lines: 100,
+                share: 0.25,
+              },
+            ],
+          },
+        }),
+      ],
+    };
+
+    expect(renderInspect(blamed, plain).split("\n").slice(7, 11)).toStrictEqual(
+      [
+        "line owner      lines  share",
+        "Maya Lindqvist    300    75%",
+        "Claude (agent)    100    25%",
+        "32 commits in the window, last 2 days ago",
+      ],
+    );
+  });
+});

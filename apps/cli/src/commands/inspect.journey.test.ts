@@ -177,3 +177,27 @@ describe("codesaga inspect --no-cache", () => {
     }).pipe(Effect.scoped),
   );
 });
+
+describe("codesaga inspect --blame", () => {
+  it.live("adds the owners of the matched lines to the entry", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src", "--json", "--blame"],
+        cwd: repo.root,
+      });
+
+      expect(result.exitCode).toBe(0);
+      const inspected = yield* decode(result.stdout);
+      expect(
+        inspected.matches[0]?.lineOwners?.owners.map(
+          ({ name, lines, share }) => [name, lines, share],
+        ),
+      ).toStrictEqual([
+        ["Ada Lovelace", 3, 0.5],
+        ["Grace", 3, 0.5],
+      ]);
+    }).pipe(Effect.scoped),
+  );
+});

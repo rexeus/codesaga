@@ -9,7 +9,7 @@ import { printResult } from "../output/print-result.js";
 import { renderInspect } from "../output/terminal/inspect-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
-import { cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
+import { blameFlag, cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
 
 export const inspectCommand = Command.make(
   "inspect",
@@ -23,12 +23,14 @@ export const inspectCommand = Command.make(
     json: jsonFlag,
     since: sinceFlag,
     cache: cacheFlag,
+    blame: blameFlag,
   },
-  Effect.fn(function* ({ patterns, json, since, cache }) {
+  Effect.fn(function* ({ patterns, json, since, cache, blame }) {
     const cwd = yield* WorkingDirectory;
     const settings = yield* resolveSettings(cwd, {
       since,
       compare: Option.none(),
+      blame,
       include: [],
       exclude: [],
       limit: Option.none(),
@@ -41,6 +43,7 @@ export const inspectCommand = Command.make(
       signatures: settings.signatures,
       toolVersion: version,
       cache,
+      blame: settings.blame,
       patterns,
     }).pipe(blameConfigSince(settings));
     if (result.matches.length === 0) {
@@ -65,6 +68,10 @@ export const inspectCommand = Command.make(
     {
       command: 'codesaga inspect "packages/*/src/index.ts" --json',
       description: "The experts and agent share of the public barrels",
+    },
+    {
+      command: "codesaga inspect packages/billing --blame",
+      description: "Also show who wrote the lines that exist today",
     },
     {
       command: "codesaga inspect packages/engine apps/cli --since 3m",

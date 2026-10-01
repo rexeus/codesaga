@@ -19,13 +19,14 @@ Run `npx codesaga inspect <path> --json` (a file, a directory, or a quoted glob)
 
 ## Choosing the call
 
-| Question                                        | Call                                                  | Cost                                      |
-| ----------------------------------------------- | ----------------------------------------------------- | ----------------------------------------- |
-| "Who knows this code, and are they still here?" | `codesaga inspect <path> --json`                      | One entry per argument, ≤ 5 experts       |
-| "Where does knowledge sit in this repository?"  | `codesaga analyze --json`                             | 25 contributors + 25 directories, default |
-| "How much of this package did agents write?"    | `codesaga inspect packages/billing --since 3m --json` | One entry, `automation` counts            |
-| "Did activity or agent use change lately?"      | `codesaga analyze --compare 3m --json`                | Full report plus a `comparison` section   |
-| "Everything, for a dashboard or a script"       | `codesaga analyze --json --limit 0`                   | Full report                               |
+| Question                                        | Call                                                  | Cost                                        |
+| ----------------------------------------------- | ----------------------------------------------------- | ------------------------------------------- |
+| "Who knows this code, and are they still here?" | `codesaga inspect <path> --json`                      | One entry per argument, ≤ 5 experts         |
+| "Where does knowledge sit in this repository?"  | `codesaga analyze --json`                             | 25 contributors + 25 directories, default   |
+| "How much of this package did agents write?"    | `codesaga inspect packages/billing --since 3m --json` | One entry, `automation` counts              |
+| "Did activity or agent use change lately?"      | `codesaga analyze --compare 3m --json`                | Full report plus a `comparison` section     |
+| "Who wrote the lines that exist today?"         | `codesaga inspect <path> --json --blame`              | Adds `lineOwners`; one `git blame` per file |
+| "Everything, for a dashboard or a script"       | `codesaga analyze --json --limit 0`                   | Full report                                 |
 
 The first call in a clone reads the whole history (seconds on a repository with a few thousand commits) and caches it in `.git/codesaga`; later calls read only the commits made since and take well under a second. Call `analyze` once per task, and `inspect` per area you are about to change. `--no-cache` skips the cache. A `.codesaga.json` in the repository root supplies defaults for `--since`, `--include`, `--exclude` and `--limit` and can name in-house bots and agents; flags override it (see the README's Configuration section).
 

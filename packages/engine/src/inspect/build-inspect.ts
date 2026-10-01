@@ -9,6 +9,7 @@ import { prepareAnalysis } from "../analyze/prepare.js";
 import type { Analysis } from "../analyze/prepare.js";
 import { totalsOf } from "../automation/automation.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
+import { lineOwnersField } from "../blame/line-owners.js";
 import { describeFileSet } from "../knowledge/file-set.js";
 import { knowledgeModel } from "../knowledge/model.js";
 import type { KnowledgeModel } from "../knowledge/model.js";
@@ -63,6 +64,7 @@ const entryOf = (
     island: set.island,
     orphaned: set.orphaned,
     experts: set.experts,
+    ...lineOwnersField(set.lineOwners),
     commits: touching.length,
     lastCommitAt: touching.length === 0 ? null : isoOf(last),
     automation: totalsOf(touching),
@@ -95,6 +97,8 @@ export const buildInspectResult = (
     universe: facts.universe,
     headTime: analysis.headTime,
     now: facts.now,
+    blame: facts.blame,
+    signatures: facts.signatures,
   });
   const paths = facts.universe.map(({ path }) => path);
   return resultOf(

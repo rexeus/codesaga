@@ -5,6 +5,8 @@ import {
   coverageSentence,
   directoryBadges,
   expertLine,
+  hasLineOwners,
+  lineOwnerLine,
   soleExpertSummary,
   truckFactorPeople,
   truckFactorSentence,
@@ -47,6 +49,24 @@ const experts = ({ experts: list }: Directory): HTMLElement =>
     }),
   );
 
+const lineOwners = ({ lineOwners: owned }: Directory): HTMLElement | string =>
+  owned === undefined
+    ? ""
+    : h(
+        "ul",
+        "plain",
+        ...owned.owners.map((owner) => {
+          const line = lineOwnerLine(owner);
+          return h(
+            "li",
+            "person-line",
+            h("strong", "", line.name),
+            h("span", "", line.detail),
+            ...(line.mark === "" ? [] : [h("span", "muted", line.mark)]),
+          );
+        }),
+      );
+
 const status =
   (showReasons: boolean) =>
   (directory: Directory): HTMLElement =>
@@ -69,7 +89,10 @@ const status =
           ]),
     );
 
-const columns = (showReasons: boolean): readonly Column<Directory>[] => [
+const columns = (
+  showReasons: boolean,
+  blamed: boolean,
+): readonly Column<Directory>[] => [
   { label: "Directory", cell: ({ path }) => h("code", "", path) },
   { label: "Files", numeric: true, cell: ({ files }) => formatCount(files) },
   {
@@ -79,6 +102,7 @@ const columns = (showReasons: boolean): readonly Column<Directory>[] => [
   },
   { label: "Status", cell: status(showReasons) },
   { label: "Experts", cell: experts },
+  ...(blamed ? [{ label: "Line owners", cell: lineOwners }] : []),
 ];
 
 const ROW_LIMIT: RowLimit = { rows: 10, noun: "directories" };
@@ -89,7 +113,7 @@ const directoryTable = (knowledge: Report["knowledge"]): HTMLElement[] => {
     ...(summary === null ? [] : [h("p", "", summary)]),
     dataTable(
       "Directories by knowledge risk",
-      columns(summary === null),
+      columns(summary === null, hasLineOwners(knowledge)),
       knowledge.directories,
       { rowLimit: ROW_LIMIT },
     ),
@@ -129,6 +153,15 @@ export const renderKnowledge = (report: Report): HTMLElement => {
       ? [h("p", "empty", "No directory is large enough to report.")]
       : directoryTable(knowledge)),
     ...(limited === null ? [] : [h("p", "note", limited)]),
+    ...(hasLineOwners(knowledge)
+      ? [
+          h(
+            "p",
+            "note",
+            "Line owners count the lines at HEAD that git blame attributes to each author. Unlike experts, bots and agents own lines too.",
+          ),
+        ]
+      : []),
     h(
       "p",
       "note",
