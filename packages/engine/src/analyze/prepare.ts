@@ -38,11 +38,11 @@ const classify = (
     commits.map(({ author, time }) => ({ ...author, time })),
   );
   return commits.map((commit) => {
-    const { class: commitClass, tool } = classifyCommit(commit);
+    const { class: commitClass, tools } = classifyCommit(commit);
     const email = commit.author.email.toLowerCase();
     return {
       class: commitClass,
-      tool,
+      tools,
       time: commit.time,
       offsetMinutes: commit.offsetMinutes,
       author: identities.get(email) ?? { email, name: commit.author.name },

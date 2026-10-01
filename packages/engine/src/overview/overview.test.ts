@@ -24,8 +24,8 @@ describe("overview", () => {
   it("counts the commits of every class in the window", () => {
     const result = run([
       classifiedCommit(),
-      classifiedCommit({ class: "bot", tool: "Dependabot" }),
-      classifiedCommit({ class: "agent", tool: "Jules" }),
+      classifiedCommit({ class: "bot", tools: ["Dependabot"] }),
+      classifiedCommit({ class: "agent", tools: ["Jules"] }),
     ]);
 
     expect(result.commits).toBe(3);
@@ -39,12 +39,12 @@ describe("overview contributors", () => {
       classifiedCommit(),
       classifiedCommit({
         class: "agent-assisted",
-        tool: "Claude Code",
+        tools: ["Claude Code"],
         author: grace,
       }),
       classifiedCommit({
         class: "bot",
-        tool: "Dependabot",
+        tools: ["Dependabot"],
         author: { name: "d", email: "d@example.com" },
       }),
     ]);

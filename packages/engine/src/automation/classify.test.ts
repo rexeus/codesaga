@@ -75,12 +75,26 @@ describe("classifyCommit matching", () => {
     expect(classifyCommit(signals)).toStrictEqual(assisted("Claude Code"));
   });
 
+  it("credits every agent that co-authored a commit, each once", () => {
+    const signals = commit({
+      trailers: [
+        coAuthor("Claude Opus 4.8 <noreply@anthropic.com>"),
+        trailer("Claude-Session", "https://claude.ai/code/s"),
+        trailer("Made-with", "Cursor"),
+      ],
+    });
+
+    expect(classifyCommit(signals)).toStrictEqual(
+      assisted("Claude Code", "Cursor"),
+    );
+  });
+
   it("does not treat GitHub as the committer of a web merge as a bot or an agent", () => {
     const committer = { name: "GitHub", email: "noreply@github.com" };
 
     expect(classifyCommit(commit({ committer }))).toStrictEqual({
       class: "human",
-      tool: undefined,
+      tools: [],
     });
   });
 
@@ -106,7 +120,7 @@ describe("classifyCommit human commits", () => {
   it("classifies a human with no trailer as human", () => {
     expect(classifyCommit(commit())).toStrictEqual({
       class: "human",
-      tool: undefined,
+      tools: [],
     });
   });
 });
@@ -117,7 +131,7 @@ describe("isContributorCommit", () => {
 
     expect(
       classes.map((commitClass) =>
-        isContributorCommit({ class: commitClass, tool: undefined }),
+        isContributorCommit({ class: commitClass, tools: [] }),
       ),
     ).toStrictEqual([true, true, false, false]);
   });

@@ -11,9 +11,14 @@ const percent = (part: number, whole: number): string => {
   return value < 0.5 ? "<1%" : `${Math.round(value)}%`;
 };
 
-/** The tools of `commits`, most commits first, then by name. */
+/** The tools of `commits`, most commits first, then by name; a commit counts for each of its tools. */
 const toolsOf = (commits: ReadonlyArray<ClassifiedCommit>): string =>
-  [...groupBy(commits, ({ tool }) => tool ?? "an AI agent")]
+  [
+    ...groupBy(
+      commits.flatMap(({ tools }) => tools),
+      (tool) => tool,
+    ),
+  ]
     .toSorted(
       ([a, own], [b, other]) => other.length - own.length || a.localeCompare(b),
     )

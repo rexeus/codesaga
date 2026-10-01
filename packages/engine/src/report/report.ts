@@ -9,7 +9,7 @@ const Count = Schema.Natural;
 export const AutomationTotals = Schema.Struct({
   /** Commits by a human with no agent detected. */
   human: Count,
-  /** Commits by a human that carry an agent's trailer, marker or committer. */
+  /** Commits by a human that carry an agent's trailer, marker or committer; each counts once. */
   agentAssisted: Count,
   /** Commits authored by an AI agent. */
   agent: Count,
@@ -160,7 +160,7 @@ const Automation = Schema.Struct({
       kind: Schema.Literals(["agent", "bot"]),
       /** Commits the tool authored. */
       authored: Count,
-      /** Human commits that carry the tool's trailer, marker or committer. */
+      /** Human commits that carry the tool's trailer, marker or committer; one with several agents counts for each. */
       assisted: Count,
     }),
   ),

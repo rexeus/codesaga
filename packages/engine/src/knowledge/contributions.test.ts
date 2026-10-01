@@ -40,7 +40,7 @@ describe("contributionsByFile", () => {
       touching("2026-01-01T00:00:00Z", 10, {
         author: dependabot,
         class: "bot",
-        tool: "dependabot[bot]",
+        tools: ["dependabot[bot]"],
       }),
     ]);
 
@@ -53,7 +53,7 @@ describe("contributionsByFile", () => {
       touching("2026-01-01T00:00:00Z", 10, {
         author: ada,
         class: "agent",
-        tool: "Devin",
+        tools: ["Devin"],
       }),
     ]);
 

@@ -25,7 +25,7 @@ describe("contributors", () => {
   it("counts commits and agent-assisted commits per identity", () => {
     const result = run([
       classifiedCommit(),
-      classifiedCommit({ class: "agent-assisted", tool: "Claude Code" }),
+      classifiedCommit({ class: "agent-assisted", tools: ["Claude Code"] }),
       classifiedCommit({ author: grace }),
     ]);
 
@@ -43,8 +43,8 @@ describe("contributors", () => {
 
   it("leaves bot and agent authors out", () => {
     const result = run([
-      classifiedCommit({ class: "bot", tool: "Dependabot" }),
-      classifiedCommit({ class: "agent", tool: "Jules", author: grace }),
+      classifiedCommit({ class: "bot", tools: ["Dependabot"] }),
+      classifiedCommit({ class: "agent", tools: ["Jules"], author: grace }),
     ]);
 
     expect(result).toStrictEqual([]);

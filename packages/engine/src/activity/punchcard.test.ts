@@ -41,9 +41,13 @@ describe("punchcard", () => {
     const time = at("2026-03-04T10:15:00Z");
     const card = punchcard([
       classifiedCommit({ time }),
-      classifiedCommit({ time, class: "agent-assisted", tool: "Claude Code" }),
-      classifiedCommit({ time, class: "bot", tool: "Dependabot" }),
-      classifiedCommit({ time, class: "agent", tool: "Jules" }),
+      classifiedCommit({
+        time,
+        class: "agent-assisted",
+        tools: ["Claude Code"],
+      }),
+      classifiedCommit({ time, class: "bot", tools: ["Dependabot"] }),
+      classifiedCommit({ time, class: "agent", tools: ["Jules"] }),
     ]);
 
     // Wednesday is row 2

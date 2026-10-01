@@ -184,7 +184,7 @@ layer(NodeServices.layer)("inspect window and agents", (it) => {
     }),
   );
 
-  it.effect("names the agent behind co-authored commits in the reasons", () =>
+  it.effect("names every agent behind co-authored commits in the reasons", () =>
     Effect.gen(function* () {
       yield* setNow;
       const repo = yield* makeTempRepository;
@@ -195,7 +195,7 @@ layer(NodeServices.layer)("inspect window and agents", (it) => {
         {
           author: grace,
           message:
-            "Tweak y\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>",
+            "Tweak y\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\nMade-with: Cursor",
         },
       );
 
@@ -206,7 +206,7 @@ layer(NodeServices.layer)("inspect window and agents", (it) => {
 
       assert.strictEqual(matches[0]?.automation.agentAssisted, 1);
       assert.deepStrictEqual(matches[0]?.reasons, [
-        "50% of 2 commits in the window were co-authored by Claude Code",
+        "50% of 2 commits in the window were co-authored by Claude Code, Cursor",
       ]);
     }),
   );

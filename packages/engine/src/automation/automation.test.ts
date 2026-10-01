@@ -9,11 +9,11 @@ const window = {
 };
 
 const agentAuthored = (tool: string, time = "2026-01-15T00:00:00Z") =>
-  classifiedCommit({ class: "agent", tool, time: at(time) });
+  classifiedCommit({ class: "agent", tools: [tool], time: at(time) });
 const botAuthored = (tool: string, time = "2026-01-15T00:00:00Z") =>
-  classifiedCommit({ class: "bot", tool, time: at(time) });
+  classifiedCommit({ class: "bot", tools: [tool], time: at(time) });
 const assistedBy = (tool: string, time = "2026-01-15T00:00:00Z") =>
-  classifiedCommit({ class: "agent-assisted", tool, time: at(time) });
+  classifiedCommit({ class: "agent-assisted", tools: [tool], time: at(time) });
 
 describe("automation", () => {
   it("totals the four classes per window and per month", () => {
@@ -100,6 +100,28 @@ describe("automation tools", () => {
     });
     expect(result.months).toHaveLength(3);
     expect(result.tools).toStrictEqual([]);
+  });
+});
+
+describe("automation commits with several agents", () => {
+  it("credits every agent of a commit while the class totals count the commit once", () => {
+    const result = automation({
+      window,
+      commits: [
+        classifiedCommit({
+          class: "agent-assisted",
+          tools: ["Claude Code", "Cursor"],
+          time: at("2026-01-15T00:00:00Z"),
+        }),
+        assistedBy("Cursor"),
+      ],
+    });
+
+    expect(result.tools).toStrictEqual([
+      { name: "Cursor", kind: "agent", authored: 0, assisted: 2 },
+      { name: "Claude Code", kind: "agent", authored: 0, assisted: 1 },
+    ]);
+    expect(result.totals.agentAssisted).toBe(2);
   });
 });
 

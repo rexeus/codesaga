@@ -139,7 +139,6 @@ The report states every threshold under `thresholds`, and the JSON contract is v
 ## Known limits
 
 - **Expertise is an estimate from history, not a fact.** The model's constants were fitted on other projects; `git blame` line ownership is not used.
-- **A commit with several agents counts for one of them** in the per-tool list.
 - **Indented `Co-Authored-By:` lines** inside a squashed commit body are not git trailers and are not detected.
 - **Scope follows current paths.** A file moved out of `analyze <path>` takes its history with it; a file moved in brings its history along.
 - **Shallow clones lack history.** codesaga warns and ignores the boundary commit; run `git fetch --unshallow` for full results. Partial clones (`--filter=blob:none`) make git fetch every blob during the run; use a full clone.

@@ -76,19 +76,19 @@ describe("activity contributors and lines", () => {
         classifiedCommit({
           time,
           class: "agent-assisted",
-          tool: "Claude Code",
+          tools: ["Claude Code"],
           author: { name: "Grace", email: "grace@example.com" },
         }),
         classifiedCommit({
           time,
           class: "bot",
-          tool: "Dependabot",
+          tools: ["Dependabot"],
           author: { name: "dependabot[bot]", email: "bot@example.com" },
         }),
         classifiedCommit({
           time,
           class: "agent",
-          tool: "Jules",
+          tools: ["Jules"],
           author: { name: "jules", email: "jules@example.com" },
         }),
         classifiedCommit({ time }),

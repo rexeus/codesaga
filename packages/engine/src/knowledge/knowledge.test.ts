@@ -64,7 +64,7 @@ describe("knowledge", () => {
         touching("2025-12-01T00:00:00Z", ["bot.ts"], {
           author: dependabot,
           class: "bot",
-          tool: "dependabot[bot]",
+          tools: ["dependabot[bot]"],
         }),
         touching("2025-06-01T00:00:00Z", ["gone.ts"], { author: grace }),
         touching("2026-02-20T00:00:00Z", ["here.ts"], { author: ada }),
@@ -85,12 +85,12 @@ describe("knowledge", () => {
         touching("2026-01-03T00:00:00Z", srcFiles, {
           author: dependabot,
           class: "bot",
-          tool: "dependabot[bot]",
+          tools: ["dependabot[bot]"],
         }),
         touching("2026-01-02T00:00:00Z", srcFiles, {
           author: { name: "Claude", email: "claude@example.com" },
           class: "agent",
-          tool: "Claude Code",
+          tools: ["Claude Code"],
         }),
         touching("2026-01-01T00:00:00Z", srcFiles, { author: ada }),
       ],
@@ -109,7 +109,7 @@ describe("knowledge of humans and agents", () => {
       [
         touching("2026-01-01T00:00:00Z", srcFiles, {
           class: "agent-assisted",
-          tool: "Claude Code",
+          tools: ["Claude Code"],
         }),
       ],
       srcFiles,

@@ -1,4 +1,4 @@
-// Owns deciding which class a commit has, and which tool made it.
+// Owns deciding which class a commit has, and which tools made it.
 // First match wins: agent, bot, agent-assisted, human; signatures come from signatures.ts.
 // A missing marker means "not detected", so it classifies as human.
 
@@ -22,10 +22,11 @@ type CommitSignals = Pick<
 type Classification = {
   readonly class: CommitClass;
   /**
-   * The matched signature's name, or the account name of a bot that only the
-   * generic `[bot]` rule matched; undefined for a human commit.
+   * The matched signatures' names, or the account name of a bot that only the
+   * generic `[bot]` rule matched; empty for a human commit. An agent-assisted
+   * commit lists every agent it carries, once each, in table order.
    */
-  readonly tool: string | undefined;
+  readonly tools: ReadonlyArray<string>;
 };
 
 /** A commit with its author identity and class: the input of every activity section. */
@@ -90,38 +91,40 @@ const hasMarkerLine = (signature: Signature, signals: CommitSignals): boolean =>
     (signature.messageLines ?? []).some((pattern) => pattern.test(line)),
   );
 
-/** The first agent that committed, co-authored or marked a commit that a human authored. */
-const assistingAgentOf = (signals: CommitSignals): Signature | undefined => {
+/** Every agent that committed, co-authored or marked a commit that a human authored. */
+const assistingAgentsOf = (signals: CommitSignals): ReadonlyArray<string> => {
   const helpers = [signals.committer, ...coAuthorsOf(signals)];
-  return SIGNATURES.find(
+  const names = SIGNATURES.filter(
     (signature) =>
       signature.kind === "agent" &&
       (helpers.some((person) => isSignedBy(signature, person)) ||
         hasMarkerTrailer(signature, signals) ||
         hasMarkerLine(signature, signals)),
-  );
+  ).map(({ name }) => name);
+  return [...new Set(names)];
 };
 
 /**
- * Assigns the commit its class and tool. An agent author wins over the bot
+ * Assigns the commit its class and tools. An agent author wins over the bot
  * rule; a bot author over a co-author; a human author with an agent trailer,
- * marker or committer is agent-assisted; everything else is human.
+ * marker or committer is agent-assisted by every agent it carries; everything
+ * else is human.
  */
 export const classifyCommit = (signals: CommitSignals): Classification => {
   const authorSignature = SIGNATURES.find((signature) =>
     isSignedBy(signature, signals.author),
   );
   if (authorSignature !== undefined) {
-    return { class: authorSignature.kind, tool: authorSignature.name };
+    return { class: authorSignature.kind, tools: [authorSignature.name] };
   }
   const botAccount = botAccountOf(signals.author);
   if (botAccount !== undefined) {
-    return { class: "bot", tool: botAccount };
+    return { class: "bot", tools: [botAccount] };
   }
-  const assistant = assistingAgentOf(signals);
-  return assistant === undefined
-    ? { class: "human", tool: undefined }
-    : { class: "agent-assisted", tool: assistant.name };
+  const assistants = assistingAgentsOf(signals);
+  return assistants.length === 0
+    ? { class: "human", tools: [] }
+    : { class: "agent-assisted", tools: assistants };
 };
 
 /** Whether the commit counts for a person: a human wrote it, possibly with an agent's help. */

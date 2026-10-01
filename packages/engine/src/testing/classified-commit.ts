@@ -12,7 +12,7 @@ export const classifiedCommit = (
   overrides: Partial<ClassifiedCommit> = {},
 ): ClassifiedCommit => ({
   class: "human",
-  tool: undefined,
+  tools: [],
   time: at("2026-01-01T00:00:00Z"),
   offsetMinutes: 0,
   author: { name: "Ada", email: "ada@example.com" },

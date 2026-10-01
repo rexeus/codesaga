@@ -27,6 +27,9 @@ export const commit = (overrides: Partial<Signals> = {}): Signals => ({
   ...overrides,
 });
 
-export const agent = (tool: string) => ({ class: "agent", tool });
-export const assisted = (tool: string) => ({ class: "agent-assisted", tool });
-export const bot = (tool: string) => ({ class: "bot", tool });
+export const agent = (tool: string) => ({ class: "agent", tools: [tool] });
+export const assisted = (...tools: ReadonlyArray<string>) => ({
+  class: "agent-assisted",
+  tools,
+});
+export const bot = (tool: string) => ({ class: "bot", tools: [tool] });

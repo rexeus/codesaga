@@ -1,6 +1,7 @@
 // Owns the automation section: how many commits humans, agents and bots made, per month and per tool.
 // It counts what classification found; "not detected" stays in the human numbers.
-// One entry per tool and per month of the window.
+// One entry per tool and per month of the window. A commit counts once in the class
+// totals and once for each of its tools, so per-tool counts can add up to more than the totals.
 
 import { Order } from "effect";
 
@@ -52,7 +53,7 @@ const toolsOf = (
   [
     ...groupBy(
       commits.flatMap((commit) =>
-        commit.tool === undefined ? [] : [{ ...commit, tool: commit.tool }],
+        commit.tools.map((tool) => ({ ...commit, tool })),
       ),
       (commit) => commit.tool.toLowerCase(),
     ).values(),
@@ -68,7 +69,8 @@ const toolsOf = (
 /**
  * The `automation` section: totals and per-month counts by class (every month
  * of the window, empty ones with zeros), and per tool the commits it authored
- * and the human commits it assisted, most commits first. A bot matched only
+ * and the human commits it assisted, most commits first. A commit that several
+ * agents assisted counts once in the totals and once for each of them. A bot matched only
  * by the generic `[bot]` rule is listed under its account name, which matches
  * case-insensitively and shows the newest spelling.
  */
