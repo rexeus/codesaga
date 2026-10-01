@@ -54,6 +54,22 @@ export const pullRequestFigures = ({
   },
 ];
 
+/** A sentence for each of the authors and reviewers lists the report cut short with `--limit`. */
+export const listLimitNotes = ({
+  authors,
+  reviewers,
+  totals,
+}: PullRequests): string[] =>
+  [
+    { noun: "authors", shown: authors.length, all: totals.authors },
+    { noun: "reviewers", shown: reviewers.length, all: totals.reviewers },
+  ]
+    .filter(({ shown, all }) => all > shown)
+    .map(
+      ({ noun, shown, all }) =>
+        `Showing ${formatCount(shown)} of ${formatCount(all)} ${noun}: the report was limited.`,
+    );
+
 /** The caveats of the section's numbers, each a sentence. */
 export const pullRequestNotes = ({
   host,

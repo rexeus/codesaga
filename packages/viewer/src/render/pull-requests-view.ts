@@ -6,6 +6,7 @@ import type { PullRequestsLayout } from "../layout/pull-requests.js";
 import { emptyWindowNotice } from "../present/empty-window.js";
 import { formatCount } from "../present/format.js";
 import {
+  listLimitNotes,
   pullRequestFigures,
   pullRequestNotes,
 } from "../present/pull-requests.js";
@@ -105,6 +106,25 @@ const figures = (pullRequests: PullRequests): HTMLElement =>
     ),
   );
 
+const authorsTable = ({ authors }: PullRequests): HTMLElement =>
+  dataTable(
+    "Pull requests opened and merged by author",
+    [
+      { label: "Author", cell: ({ login }) => login },
+      {
+        label: "Opened",
+        numeric: true,
+        cell: ({ opened }) => formatCount(opened),
+      },
+      {
+        label: "Merged",
+        numeric: true,
+        cell: ({ merged }) => formatCount(merged),
+      },
+    ],
+    authors,
+  );
+
 const reviewersTable = ({ reviewers }: PullRequests): HTMLElement =>
   dataTable(
     "Reviews given in the window",
@@ -143,16 +163,9 @@ const monthTable = ({ months }: PullRequests): HTMLElement =>
     months,
   );
 
-const reviewersTruncation = ({ reviewers, totals }: PullRequests): string[] =>
-  totals.reviewers > reviewers.length
-    ? [
-        `Showing ${formatCount(reviewers.length)} of ${formatCount(totals.reviewers)} reviewers: the report was limited.`,
-      ]
-    : [];
-
 /**
  * Pull requests opened and merged per month, the median times to merge and to
- * first review, and the reviews given, from GitHub. Nothing for a report made
+ * first review, who opened them and the reviews given, from GitHub. Nothing for a report made
  * without `--github`.
  */
 export const renderPullRequests = (report: Report): HTMLElement | null => {
@@ -177,13 +190,15 @@ export const renderPullRequests = (report: Report): HTMLElement | null => {
     description,
     figures(pullRequests),
     monthlyChart(pullRequests.months),
+    pullRequests.authors.length === 0
+      ? h("p", "empty", "No pull requests by people in the window.")
+      : authorsTable(pullRequests),
     pullRequests.reviewers.length === 0
       ? h("p", "empty", "No reviews by others in the window.")
       : reviewersTable(pullRequests),
-    ...[
-      ...reviewersTruncation(pullRequests),
-      ...pullRequestNotes(pullRequests),
-    ].map((note) => h("p", "note", note)),
+    ...[...listLimitNotes(pullRequests), ...pullRequestNotes(pullRequests)].map(
+      (note) => h("p", "note", note),
+    ),
     tableView(() => [monthTable(pullRequests)]),
   );
 };
