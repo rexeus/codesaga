@@ -3,17 +3,20 @@ import type { AnalyzeOptions } from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import { Argument, Command, Flag } from "effect/cli";
 
-import { blameConfigSince, resolveSettings } from "../config/settings.js";
+import {
+  blameConfigSince,
+  engineOptions,
+  resolveSettings,
+} from "../config/settings.js";
 import { warnIfBlameSkipped } from "../output/blame-warning.js";
 import {
   prepareHtmlTarget,
   writeHtmlReport,
 } from "../output/html/write-html-report.js";
-import { limitReport } from "../output/limit-report.js";
+import { DEFAULT_LIMIT, limitReport } from "../output/limit-report.js";
 import { printResult } from "../output/print-result.js";
 import { warnIfShallow } from "../output/shallow-warning.js";
 import { renderAnalysis } from "../output/terminal/analysis-view.js";
-import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
 import {
@@ -24,7 +27,6 @@ import {
   sinceFlag,
 } from "./shared-flags.js";
 
-const DEFAULT_LIMIT = 25;
 const DEFAULT_HTML_FILE = "codesaga-report.html";
 
 export const analyzeCommand = Command.make(
@@ -105,12 +107,8 @@ export const analyzeCommand = Command.make(
     const settings = yield* resolveSettings(target.cwd, flags);
     const options: AnalyzeOptions = {
       ...target,
-      since: settings.since,
+      ...engineOptions(settings),
       compare: Option.getOrUndefined(compare),
-      include: settings.include,
-      exclude: settings.exclude,
-      signatures: settings.signatures,
-      toolVersion: version,
       cache,
       blame: settings.blame,
     };

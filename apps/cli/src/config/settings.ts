@@ -10,6 +10,7 @@ import type { FileSystem, Path } from "effect";
 import type { ChildProcessSpawner } from "effect/process";
 
 import { ConfigInvalid } from "../errors/config-invalid.js";
+import { version } from "../version.js";
 import { loadRepoConfig } from "./load-repo-config.js";
 import type { RepoConfig } from "./repo-config.js";
 
@@ -80,6 +81,23 @@ export const resolveSettings = (
       configFile: file,
     };
   });
+
+/**
+ * The engine options every analysis takes from the settings. A caller adds
+ * what only it knows: the target, `cache`, `compare`, `blame` and `patterns`.
+ */
+export const engineOptions = (
+  settings: Settings,
+): Pick<
+  AnalyzeOptions,
+  "since" | "include" | "exclude" | "signatures" | "toolVersion"
+> => ({
+  since: settings.since,
+  include: settings.include,
+  exclude: settings.exclude,
+  signatures: settings.signatures,
+  toolVersion: version,
+});
 
 /** Turns an invalid `since` that came from the config file into a config error naming the key. */
 export const blameConfigSince =

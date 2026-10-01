@@ -1,5 +1,8 @@
 import type { Report } from "@codesaga/engine";
 
+/** The contributors and knowledge directories `analyze` reports in JSON when nothing sets a limit. */
+export const DEFAULT_LIMIT = 25;
+
 /**
  * Applies `--limit` to a report: `contributors` is cut to its first `limit`
  * entries and so are the knowledge `directories` (already ordered by risk),

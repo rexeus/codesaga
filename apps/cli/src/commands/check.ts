@@ -5,13 +5,16 @@ import { Argument, Command, Flag } from "effect/cli";
 
 import { evaluateGates } from "../check/evaluate-gates.js";
 import { hasGates, resolveGateLimits } from "../check/gate-limits.js";
-import { blameConfigSince, resolveSettings } from "../config/settings.js";
+import {
+  blameConfigSince,
+  engineOptions,
+  resolveSettings,
+} from "../config/settings.js";
 import { GatesFailed } from "../errors/gates-failed.js";
 import { NoGatesConfigured } from "../errors/no-gates-configured.js";
 import { ShallowClone } from "../errors/shallow-clone.js";
 import { printResult } from "../output/print-result.js";
 import { renderCheck } from "../output/terminal/check-view.js";
-import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
 import { cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
@@ -93,11 +96,7 @@ export const checkCommand = Command.make(
     }
     const options: AnalyzeOptions = {
       ...target,
-      since: settings.since,
-      include: settings.include,
-      exclude: settings.exclude,
-      signatures: settings.signatures,
-      toolVersion: version,
+      ...engineOptions(settings),
       cache: flags.cache,
     };
     const report = yield* analyze(options).pipe(blameConfigSince(settings));

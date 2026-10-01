@@ -2,14 +2,17 @@ import { inspect } from "@codesaga/engine";
 import { Console, Effect, Option } from "effect";
 import { Argument, Command } from "effect/cli";
 
-import { blameConfigSince, resolveSettings } from "../config/settings.js";
+import {
+  blameConfigSince,
+  engineOptions,
+  resolveSettings,
+} from "../config/settings.js";
 import { NothingMatched, noFileMatches } from "../errors/nothing-matched.js";
 import { warnIfBlameSkipped } from "../output/blame-warning.js";
 import { escapeForTerminal } from "../output/escape.js";
 import { printResult } from "../output/print-result.js";
 import { warnIfShallow } from "../output/shallow-warning.js";
 import { renderInspect } from "../output/terminal/inspect-view.js";
-import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { blameFlag, cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
 
@@ -39,11 +42,7 @@ export const inspectCommand = Command.make(
     });
     const result = yield* inspect({
       cwd,
-      since: settings.since,
-      include: settings.include,
-      exclude: settings.exclude,
-      signatures: settings.signatures,
-      toolVersion: version,
+      ...engineOptions(settings),
       cache,
       blame: settings.blame,
       patterns,
