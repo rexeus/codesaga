@@ -1,4 +1,5 @@
 // Owns what each gate measures in a report and how a measurement meets its limit.
+import { aiShareOf } from "@codesaga/engine";
 import type { Report } from "@codesaga/engine";
 
 import type { CheckResult } from "./check-result.js";
@@ -24,11 +25,8 @@ const directoriesWhere =
   (report: Report): number =>
     report.knowledge.directories.filter((directory) => directory[flag]).length;
 
-const agentShare = ({ automation }: Report): number => {
-  const { human, agentAssisted, agent, bot } = automation.totals;
-  const commits = human + agentAssisted + agent + bot;
-  return commits === 0 ? 0 : roundedRatio((agent + agentAssisted) / commits);
-};
+const agentShare = ({ automation }: Report): number =>
+  roundedRatio(aiShareOf(automation.totals));
 
 const GATES: Readonly<Record<GateName, Gate>> = {
   minTruckFactor: {
