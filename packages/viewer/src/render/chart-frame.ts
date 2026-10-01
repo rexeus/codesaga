@@ -1,7 +1,7 @@
 import { PLOT_ORIGIN } from "../layout/plot.js";
 import type { Size, Tick } from "../layout/plot.js";
 import { h, s } from "./dom.js";
-import { makeReachable } from "./keyboard.js";
+import { makeReachable, resumeAt, visitedCell } from "./keyboard.js";
 import type { Stops } from "./keyboard.js";
 
 /** The horizontal gridlines and left-hand labels of a value axis. */
@@ -90,7 +90,7 @@ export const chartSvg = (
 /**
  * Draws a chart into `host` and redraws it whenever the host's width changes,
  * so the layout always matches the pixels it has. A chart that had the
- * keyboard focus gets it back.
+ * keyboard focus gets it back, on the point it had visited.
  */
 export const responsiveChart = (
   host: HTMLElement,
@@ -104,9 +104,14 @@ export const responsiveChart = (
     }
     drawnWidth = width;
     const hadFocus = host.contains(document.activeElement);
-    host.replaceChildren(draw(width));
-    if (hadFocus && host.firstElementChild instanceof SVGElement) {
-      host.firstElementChild.focus();
+    const visited = host.firstElementChild
+      ? visitedCell(host.firstElementChild)
+      : null;
+    const chart = draw(width);
+    resumeAt(chart, visited);
+    host.replaceChildren(chart);
+    if (hadFocus) {
+      chart.focus();
     }
   };
   new ResizeObserver(render).observe(host);

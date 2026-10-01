@@ -1,4 +1,8 @@
-import { describeReading, moveFocus } from "../present/chart-focus.js";
+import {
+  describeReading,
+  moveFocus,
+  resumeCell,
+} from "../present/chart-focus.js";
 import type { Grid } from "../present/chart-focus.js";
 import { byId } from "./dom.js";
 import { hideTooltip, showTooltip } from "./tooltip.js";
@@ -15,6 +19,23 @@ export type Stops = {
   readonly mark?: (index: number | null) => void;
 };
 
+/** What a redrawn chart needs from the one it replaces: where the keyboard had been, and a way to go back. */
+type Visit = {
+  readonly cell: () => number | null;
+  readonly resume: (cell: number | null) => void;
+};
+
+const visits = new WeakMap<Element, Visit>();
+
+/** The cell the keyboard last visited in `chart`, or null when it never did. */
+export const visitedCell = (chart: Element): number | null =>
+  visits.get(chart)?.cell() ?? null;
+
+/** Makes the next focus of `chart` start on `cell` (kept within its cells) instead of its own start. */
+export const resumeAt = (chart: Element, cell: number | null): void => {
+  visits.get(chart)?.resume(cell);
+};
+
 const announce = (text: string): void => {
   byId("chart-status", HTMLElement).textContent = text;
 };
@@ -27,6 +48,7 @@ const announce = (text: string): void => {
 export const makeReachable = (svg: SVGElement, stops: Stops): void => {
   const { areas, mark } = stops;
   let current = stops.start;
+  let visited = false;
 
   const clear = (): void => {
     areas[current]?.classList.remove("active");
@@ -41,6 +63,7 @@ export const makeReachable = (svg: SVGElement, stops: Stops): void => {
     }
     areas[current]?.classList.remove("active");
     current = index;
+    visited = true;
     area.classList.add("active");
     mark?.(index);
     const box = area.getBoundingClientRect();
@@ -52,6 +75,13 @@ export const makeReachable = (svg: SVGElement, stops: Stops): void => {
     announce(describeReading(content));
   };
 
+  visits.set(svg, {
+    cell: () => (visited ? current : null),
+    resume: (cell) => {
+      current = resumeCell(cell, areas.length, stops.start);
+      visited = cell !== null;
+    },
+  });
   svg.tabIndex = 0;
   svg.addEventListener("focus", () => {
     if (svg.matches(":focus-visible")) {
