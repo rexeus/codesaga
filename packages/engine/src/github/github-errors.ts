@@ -32,9 +32,15 @@ export class GithubRateLimited extends Schema.TaggedError<GithubRateLimited>()(
   { resetAt: Schema.NullOr(Schema.String) },
 ) {}
 
+/** `host` answered 401: the token is wrong, expired or revoked. */
+export class GithubTokenRejected extends Schema.TaggedError<GithubTokenRejected>()(
+  "GithubTokenRejected",
+  { host: Schema.String },
+) {}
+
 /**
  * GitHub did not answer with pull requests: an unreachable host (`status` is
- * null), a rejected token, missing permissions, or an unreadable response.
+ * null), missing permissions, or an unreadable response.
  */
 export class GithubRequestFailed extends Schema.TaggedError<GithubRequestFailed>()(
   "GithubRequestFailed",
@@ -43,6 +49,7 @@ export class GithubRequestFailed extends Schema.TaggedError<GithubRequestFailed>
 
 export type GithubError =
   | GithubTokenMissing
+  | GithubTokenRejected
   | GithubHostUnconfirmed
   | NotAGithubRemote
   | GithubRateLimited

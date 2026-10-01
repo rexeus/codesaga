@@ -42,7 +42,7 @@ export const analyzeWithGithub = (
       yield* locateRepository(options.cwd),
     );
     const report = yield* analyze(options);
-    const { pulls, truncated } = yield* searchPullRequests(
+    const { pulls, truncated, reviewsTruncated } = yield* searchPullRequests(
       source,
       report.window.since,
     );
@@ -53,6 +53,7 @@ export const analyzeWithGithub = (
         repository: source.repository,
         pulls,
         truncated,
+        reviewsTruncated,
         window: report.window,
         months: report.activity.months.map(({ month }) => month),
       }),

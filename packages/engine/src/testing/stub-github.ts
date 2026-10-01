@@ -27,14 +27,19 @@ export type StubReply =
       readonly body?: unknown;
     };
 
-/** The shape of a GraphQL search result page that `nodes` and `next` describe. */
+/**
+ * The shape of a GraphQL search result page that `nodes` and `next` describe;
+ * `issueCount` is how many pull requests the whole search matched.
+ */
 export const searchPage = (
   nodes: ReadonlyArray<unknown>,
   next: string | null = null,
+  issueCount: number = nodes.length,
 ): StubReply => ({
   body: {
     data: {
       search: {
+        issueCount,
         pageInfo: { hasNextPage: next !== null, endCursor: next },
         nodes,
       },

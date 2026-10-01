@@ -7,7 +7,8 @@ import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import { GithubHostUnconfirmed, GithubTokenMissing } from "./github-errors.js";
 import type { NotAGithubRemote } from "./github-errors.js";
-import { readOrigin } from "./remote.js";
+import { DOTCOM, readOrigin } from "./remote.js";
+import type { GithubRepository } from "./remote.js";
 
 /** A GitHub repository with the endpoint and token to query it. */
 export type GithubSource = {
@@ -19,7 +20,7 @@ export type GithubSource = {
   readonly token: Redacted.Redacted;
 };
 
-const DOTCOM = "github.com";
+const DATA_RESIDENCY_SUFFIX = ".ghe.com";
 
 /** The variables `gh` itself reads for a host; a github.com token is never sent to another host. */
 const tokenVariables = (host: string): ReadonlyArray<string> =>
@@ -27,10 +28,16 @@ const tokenVariables = (host: string): ReadonlyArray<string> =>
     ? ["GH_TOKEN", "GITHUB_TOKEN"]
     : ["GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"];
 
-const endpointOf = (host: string): string =>
-  host === DOTCOM
-    ? "https://api.github.com/graphql"
-    : `https://${host}/api/graphql`;
+/** The GraphQL endpoint: always https, on the remote's port when it had an http(s) one. */
+const endpointOf = ({ host, port }: GithubRepository): string => {
+  if (host === DOTCOM) {
+    return "https://api.github.com/graphql";
+  }
+  if (host.endsWith(DATA_RESIDENCY_SUFFIX)) {
+    return `https://api.${host}/graphql`;
+  }
+  return `https://${host}${port === null ? "" : `:${port}`}/api/graphql`;
+};
 
 const fromEnvironment = (
   name: string,
@@ -118,7 +125,9 @@ const resolveToken = (
  * token for its host: `GH_TOKEN`, then `GITHUB_TOKEN`, then `gh auth token`
  * for github.com; `GH_ENTERPRISE_TOKEN`, `GITHUB_ENTERPRISE_TOKEN`, then
  * `gh auth token --hostname` for any other host, which must be named in
- * `GH_HOST` and whose API is then assumed at `https://<host>/api/graphql`.
+ * `GH_HOST`. Its API is then assumed at `https://<host>[:port]/api/graphql`
+ * (the port is the remote's, when it is an http(s) one), or at
+ * `https://api.<host>/graphql` for a `*.ghe.com` host.
  *
  * Fails with `NotAGithubRemote`, `GithubHostUnconfirmed` or
  * `GithubTokenMissing`, before any request is made.
@@ -131,12 +140,12 @@ export const resolveGithubSource = (
   ChildProcessSpawner.ChildProcessSpawner
 > =>
   Effect.gen(function* () {
-    const { host, owner, name } = yield* readOrigin;
-    yield* requireNamedHost(host);
+    const origin = yield* readOrigin;
+    yield* requireNamedHost(origin.host);
     return {
-      host,
-      repository: `${owner}/${name}`,
-      endpoint: endpointOf(host),
-      token: yield* resolveToken(host),
+      host: origin.host,
+      repository: `${origin.owner}/${origin.name}`,
+      endpoint: endpointOf(origin),
+      token: yield* resolveToken(origin.host),
     };
   }).pipe(Effect.provide(Git.layer(root)));

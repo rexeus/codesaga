@@ -9,6 +9,7 @@ import {
 } from "../github/github-errors.js";
 import { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { fieldsOf } from "../testing/error-fields.js";
 import { installFakeGh } from "../testing/fake-gh.js";
 import { searchPage, stubGithub } from "../testing/stub-github.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
@@ -26,7 +27,7 @@ const user = (login: string) => ({ kind: "User", login });
 const pull = (fields: Record<string, unknown>) => ({
   mergedAt: null,
   closedAt: null,
-  reviews: { nodes: [] },
+  reviews: { totalCount: 0, nodes: [] },
   ...fields,
 });
 
@@ -38,6 +39,7 @@ const created = [
     closedAt: "2026-02-10T12:00:00Z",
     author: user("ada"),
     reviews: {
+      totalCount: 1,
       nodes: [
         {
           state: "APPROVED",
@@ -52,6 +54,7 @@ const created = [
     createdAt: "2026-03-02T00:00:00Z",
     author: user("grace"),
     reviews: {
+      totalCount: 1,
       nodes: [
         {
           state: "COMMENTED",
@@ -110,6 +113,7 @@ layer(NodeServices.layer)("analyzeWithGithub", (it) => {
         repository: "acme/web",
         fetched: 3,
         truncated: false,
+        reviewsTruncated: false,
         opened: 2,
         merged: 2,
         closedUnmerged: 0,
@@ -172,12 +176,12 @@ layer(NodeServices.layer)("analyzeWithGithub failures", (it) => {
         const missingRemote = yield* run(noRemote);
 
         assert.deepStrictEqual(
-          missingToken,
-          new GithubTokenMissing({ host: "github.com" }),
+          fieldsOf(missingToken),
+          fieldsOf(new GithubTokenMissing({ host: "github.com" })),
         );
         assert.deepStrictEqual(
-          missingRemote,
-          new NotAGithubRemote({ remote: null }),
+          fieldsOf(missingRemote),
+          fieldsOf(new NotAGithubRemote({ remote: null })),
         );
         assert.strictEqual(stub.requests.length, 0);
       }),

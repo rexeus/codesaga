@@ -30,6 +30,8 @@ export type PullRequestsInput = {
   readonly pulls: ReadonlyArray<PullRequestRecord>;
   /** More pull requests matched than `pulls` holds. */
   readonly truncated: boolean;
+  /** Some pull request has more reviews than `pulls` holds. */
+  readonly reviewsTruncated: boolean;
   /** The activity window; pull requests and reviews outside it do not count. */
   readonly window: TimeRange;
   /** The window's calendar months as `YYYY-MM`, oldest first. */
@@ -39,7 +41,16 @@ export type PullRequestsInput = {
 const SECONDS_PER_HOUR = 3600;
 const MONTH_LENGTH = "YYYY-MM".length;
 
+const GHOST = "ghost";
+
 const isBot = (login: string): boolean => login.endsWith("[bot]");
+
+/** Bots and deleted accounts are counted but never named: `ghost` stands for every deleted account at once. */
+const isNamed = (login: string): boolean => !isBot(login) && login !== GHOST;
+
+/** A review by the pull request's author; `ghost` never reviews itself, as it may be two people. */
+const isSelfReview = (pull: PullRequestRecord, author: string): boolean =>
+  author === pull.author && author !== GHOST;
 
 const compareText = (left: string, right: string): number =>
   left < right ? -1 : Number(left > right);
@@ -77,13 +88,13 @@ const tally = (
   const mergedBy = new Map<string, number>();
   const reviewsBy = new Map<string, number>();
   const approvalsBy = new Map<string, number>();
-  for (const pull of opened.filter(({ author }) => !isBot(author))) {
+  for (const pull of opened.filter(({ author }) => isNamed(author))) {
     increment(openedBy, pull.author);
   }
-  for (const pull of merged.filter(({ author }) => !isBot(author))) {
+  for (const pull of merged.filter(({ author }) => isNamed(author))) {
     increment(mergedBy, pull.author);
   }
-  for (const review of reviews.filter(({ author }) => !isBot(author))) {
+  for (const review of reviews.filter(({ author }) => isNamed(author))) {
     increment(reviewsBy, review.author);
     if (review.state === "APPROVED") {
       increment(approvalsBy, review.author);
@@ -121,7 +132,7 @@ const tally = (
 /** Hours from opening to the first review by a person other than the author; null when none came. */
 const hoursToFirstReview = (pull: PullRequestRecord): number | null => {
   const first = pull.reviews
-    .filter(({ author }) => author !== pull.author && !isBot(author))
+    .filter(({ author }) => !isSelfReview(pull, author) && !isBot(author))
     .map(({ submittedAt }) => toEpochSeconds(submittedAt))
     .reduce<number | null>(
       (earliest, time) => (earliest === null ? time : Math.min(earliest, time)),
@@ -142,14 +153,15 @@ const countInMonth = (
  * Builds the section from the pull requests fetched for the window. A pull
  * request counts as opened when it was created in the window and as merged
  * or closed when that happened in it; a review counts when it was submitted in
- * it, by someone other than the pull request's author. Bots are counted in
- * the totals but named in neither list.
+ * it, by someone other than the pull request's author. Bots and deleted
+ * accounts (`ghost`) are counted in the totals but named in neither list.
  */
 export const pullRequestsSection = ({
   host,
   repository,
   pulls,
   truncated,
+  reviewsTruncated,
   window,
   months,
 }: PullRequestsInput): PullRequests => {
@@ -162,7 +174,7 @@ export const pullRequestsSection = ({
   const reviews = pulls.flatMap((pull) =>
     pull.reviews.filter(
       ({ author, submittedAt }) =>
-        author !== pull.author && within(submittedAt),
+        !isSelfReview(pull, author) && within(submittedAt),
     ),
   );
   const people = tally(opened, merged, reviews);
@@ -171,6 +183,7 @@ export const pullRequestsSection = ({
     repository,
     fetched: pulls.length,
     truncated,
+    reviewsTruncated,
     opened: opened.length,
     merged: merged.length,
     closedUnmerged: pulls.filter(

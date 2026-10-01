@@ -31,7 +31,11 @@ export type GithubReply = {
 export const searchResult = (nodes: ReadonlyArray<unknown>): GithubReply => ({
   body: {
     data: {
-      search: { pageInfo: { hasNextPage: false, endCursor: null }, nodes },
+      search: {
+        issueCount: nodes.length,
+        pageInfo: { hasNextPage: false, endCursor: null },
+        nodes,
+      },
     },
   },
 });

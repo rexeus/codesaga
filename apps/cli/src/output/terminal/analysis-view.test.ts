@@ -60,6 +60,22 @@ describe("renderAnalysis pull requests", () => {
   });
 });
 
+describe("renderAnalysis incomplete pull requests", () => {
+  it("says when some pull requests have more reviews than were fetched", () => {
+    const lines = renderAnalysis(
+      {
+        ...sampleReport(),
+        pullRequests: { ...samplePullRequests(), reviewsTruncated: true },
+      },
+      plain,
+    ).split("\n");
+
+    expect(lines).toContain(
+      "                           incomplete: some pull requests have more reviews than were fetched",
+    );
+  });
+});
+
 describe("renderAnalysis comparison", () => {
   const figures = {
     commits: 100,

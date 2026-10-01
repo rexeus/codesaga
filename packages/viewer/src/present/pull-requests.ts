@@ -76,11 +76,17 @@ export const pullRequestNotes = ({
   repository,
   fetched,
   truncated,
+  reviewsTruncated,
 }: PullRequests): string[] => [
   `Read from ${host}/${repository}. GitHub logins are not matched to git identities, so a person can appear here and under Contributors with different names.`,
   ...(truncated
     ? [
         `Only ${formatCount(fetched)} pull requests were fetched, so every figure here undercounts.`,
+      ]
+    : []),
+  ...(reviewsTruncated
+    ? [
+        "Some pull requests have more reviews than were fetched, so the review figures undercount.",
       ]
     : []),
 ];

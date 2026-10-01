@@ -128,11 +128,6 @@ describe("codesaga analyze --github GitHub failures", () => {
 
   it.live.each([
     {
-      name: "a rejected token",
-      reply: { status: 401, body: { message: "Bad credentials" } },
-      message: "codesaga: GitHub request failed (401): Bad credentials",
-    },
-    {
       name: "a GraphQL error",
       reply: {
         body: { errors: [{ type: "FORBIDDEN", message: "SAML enforcement" }] },
@@ -153,6 +148,27 @@ describe("codesaga analyze --github GitHub failures", () => {
       expect(result.stdout).toBe("");
       expect(result.stderr).toBe(message);
       expect(result.exitCode).toBe(1);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga analyze --github rejected token", () => {
+  it.live("exits 2 naming the host, unlike an outage", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeGithubProject;
+
+      const result = yield* journey({
+        args: ["analyze", "--json", "--github"],
+        cwd: repo.root,
+        env: { GH_TOKEN: "test-token" },
+        github: () => ({ status: 401, body: { message: "Bad credentials" } }),
+      });
+
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toBe(
+        "codesaga: GitHub rejected the token for github.com (401)",
+      );
+      expect(result.exitCode).toBe(2);
     }).pipe(Effect.scoped),
   );
 });

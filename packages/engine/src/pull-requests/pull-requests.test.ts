@@ -34,6 +34,7 @@ const sectionOf = (pulls: ReadonlyArray<PullRequestRecord>) =>
     repository: "acme/web",
     pulls,
     truncated: false,
+    reviewsTruncated: false,
     window,
     months,
   });
@@ -78,6 +79,7 @@ describe("pullRequestsSection counts", () => {
       repository: "acme/web",
       host: "github.com",
       truncated: false,
+      reviewsTruncated: false,
     });
   });
 
@@ -184,5 +186,63 @@ describe("pullRequestsSection people", () => {
       { login: "linus", reviews: 1, approvals: 1 },
     ]);
     expect(section.totals.reviewers).toBe(2);
+  });
+});
+
+describe("pullRequestsSection deleted accounts", () => {
+  it("lists a deleted account like a bot, in no list but in the counts", () => {
+    const section = sectionOf([
+      pull(1, { author: "ghost", mergedAt: "2026-02-12T00:00:00Z" }),
+      pull(2, {
+        author: "ada",
+        reviews: [
+          review("ghost", "APPROVED", "2026-02-11T00:00:00Z"),
+          review("grace", "COMMENTED", "2026-02-11T00:00:00Z"),
+        ],
+      }),
+    ]);
+
+    expect(section.authors).toStrictEqual([
+      { login: "ada", opened: 1, merged: 0 },
+    ]);
+    expect(section.reviewers).toStrictEqual([
+      { login: "grace", reviews: 1, approvals: 0 },
+    ]);
+    expect([section.opened, section.merged]).toStrictEqual([2, 1]);
+  });
+
+  it("does not take a deleted reviewer for the deleted author reviewing their own pull request", () => {
+    const section = sectionOf([
+      pull(1, {
+        author: "ghost",
+        createdAt: "2026-03-01T00:00:00Z",
+        reviews: [review("ghost", "APPROVED", "2026-03-01T05:00:00Z")],
+      }),
+      // a named author's own review is still no review
+      pull(2, {
+        author: "ada",
+        createdAt: "2026-03-01T00:00:00Z",
+        reviews: [review("ada", "COMMENTED", "2026-03-01T01:00:00Z")],
+      }),
+    ]);
+
+    // pull request 1 waited 5 h for a review by someone; pull request 2 got none
+    expect(section.medianHoursToFirstReview).toBe(5);
+  });
+});
+
+describe("pullRequestsSection reviewsTruncated", () => {
+  it("passes on that some pull requests have more reviews than were fetched", () => {
+    const section = pullRequestsSection({
+      host: "github.com",
+      repository: "acme/web",
+      pulls: [],
+      truncated: false,
+      reviewsTruncated: true,
+      window,
+      months,
+    });
+
+    expect(section.reviewsTruncated).toBe(true);
   });
 });

@@ -2,10 +2,15 @@ import { assert, describe, it } from "@effect/vitest";
 import { Effect, Fiber } from "effect";
 import { TestClock } from "effect/testing";
 
+import { fieldsOf } from "../testing/error-fields.js";
 import { search } from "../testing/github-search.js";
 import { searchPage } from "../testing/stub-github.js";
 import type { StubReply } from "../testing/stub-github.js";
-import { GithubRateLimited, GithubRequestFailed } from "./github-errors.js";
+import {
+  GithubRateLimited,
+  GithubRequestFailed,
+  GithubTokenRejected,
+} from "./github-errors.js";
 
 type RateLimitCase = {
   readonly name: string;
@@ -19,7 +24,7 @@ const rateLimits: ReadonlyArray<RateLimitCase> = [
   {
     name: "a 429 with a reset header",
     reply: { status: 429, headers: RESET },
-    resetAt: "2026-07-01T09:20:00.000Z",
+    resetAt: "2026-07-01T10:00:00.000Z",
   },
   {
     name: "a 403 with an empty quota",
@@ -28,7 +33,7 @@ const rateLimits: ReadonlyArray<RateLimitCase> = [
       headers: { ...RESET, "x-ratelimit-remaining": "0" },
       body: { message: "API rate limit exceeded" },
     },
-    resetAt: "2026-07-01T09:20:00.000Z",
+    resetAt: "2026-07-01T10:00:00.000Z",
   },
   // the test clock starts at the epoch
   {
@@ -44,7 +49,13 @@ const rateLimits: ReadonlyArray<RateLimitCase> = [
         errors: [{ type: "RATE_LIMITED", message: "API rate limit exceeded" }],
       },
     },
-    resetAt: "2026-07-01T09:20:00.000Z",
+    resetAt: "2026-07-01T10:00:00.000Z",
+  },
+  // a secondary limit: the reset header may name the end of the whole hour
+  {
+    name: "a 403 with both retry-after and a reset header, which retry-after wins",
+    reply: { status: 403, headers: { ...RESET, "retry-after": "60" } },
+    resetAt: "1970-01-01T00:01:00.000Z",
   },
   {
     name: "a limit without a reset time",
@@ -60,7 +71,10 @@ describe("searchPullRequests rate limits", () => {
       Effect.gen(function* () {
         const failure = yield* Effect.flip(search(() => reply).run);
 
-        assert.deepStrictEqual(failure, new GithubRateLimited({ resetAt }));
+        assert.deepStrictEqual(
+          fieldsOf(failure),
+          fieldsOf(new GithubRateLimited({ resetAt })),
+        );
       }),
   );
 });
@@ -72,14 +86,6 @@ type FailureCase = {
 };
 
 const failures: ReadonlyArray<FailureCase> = [
-  {
-    name: "a rejected token",
-    reply: { status: 401, body: { message: "Bad credentials" } },
-    expected: new GithubRequestFailed({
-      status: 401,
-      message: "Bad credentials",
-    }),
-  },
   {
     name: "missing permissions",
     reply: {
@@ -123,8 +129,22 @@ describe("searchPullRequests failures", () => {
       Effect.gen(function* () {
         const failure = yield* Effect.flip(search(() => reply).run);
 
-        assert.deepStrictEqual(failure, expected);
+        assert.deepStrictEqual(fieldsOf(failure), fieldsOf(expected));
       }),
+  );
+
+  it.effect("fails with GithubTokenRejected, naming the host, for a 401", () =>
+    Effect.gen(function* () {
+      const failure = yield* Effect.flip(
+        search(() => ({ status: 401, body: { message: "Bad credentials" } }))
+          .run,
+      );
+
+      assert.deepStrictEqual(
+        fieldsOf(failure),
+        fieldsOf(new GithubTokenRejected({ host: "github.com" })),
+      );
+    }),
   );
 
   it.effect(
@@ -166,8 +186,10 @@ describe("searchPullRequests gateway failures", () => {
       const failure = yield* Fiber.join(fiber);
 
       assert.deepStrictEqual(
-        failure,
-        new GithubRequestFailed({ status: 502, message: "Bad Gateway" }),
+        fieldsOf(failure),
+        fieldsOf(
+          new GithubRequestFailed({ status: 502, message: "Bad Gateway" }),
+        ),
       );
       assert.strictEqual(failing.requests.length, 2);
     }),

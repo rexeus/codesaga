@@ -68,6 +68,9 @@ export const pullRequestLines = (
             `incomplete: only ${plural(pullRequests.fetched, "pull request")} fetched`,
           ]
         : []),
+      ...(pullRequests.reviewsTruncated
+        ? ["incomplete: some pull requests have more reviews than were fetched"]
+        : []),
     ],
     style,
   );

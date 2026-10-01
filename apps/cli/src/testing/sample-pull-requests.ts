@@ -7,6 +7,7 @@ export const samplePullRequests = (): NonNullable<Report["pullRequests"]> => ({
   repository: "aurora/aurora-web",
   fetched: 212,
   truncated: false,
+  reviewsTruncated: false,
   opened: 48,
   merged: 41,
   closedUnmerged: 3,

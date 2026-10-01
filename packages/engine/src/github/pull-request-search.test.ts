@@ -13,7 +13,7 @@ const node = (
   mergedAt: null,
   closedAt: null,
   author: { kind: "User", login: "ada" },
-  reviews: { nodes: [] },
+  reviews: { totalCount: 0, nodes: [] },
   ...fields,
 });
 
@@ -85,6 +85,7 @@ const merged = {
   author: { kind: "Bot", login: "dependabot" },
 };
 const reviews = {
+  totalCount: 4,
   nodes: [
     {
       state: "APPROVED",
@@ -173,6 +174,108 @@ describe("searchPullRequests cap", () => {
 
       assert.strictEqual(pulls.length, 1000);
       assert.isFalse(truncated);
+    }),
+  );
+});
+
+const pages = (from: number, count: number) =>
+  Array.from({ length: count / 100 }, (_, page) =>
+    numbers(from + page * 100, from + page * 100 + 99),
+  );
+
+const given = (state: string) => ({
+  state,
+  submittedAt: "2026-03-01T05:00:00Z",
+  author: { kind: "User", login: "grace" },
+});
+
+describe("searchPullRequests truncation", () => {
+  it.effect(
+    "marks the result truncated when a search matched more than it returned",
+    () =>
+      Effect.gen(function* () {
+        // GitHub matched 1,500 but returns at most 1,000: the last page ends the search early
+        const { pulls, truncated } = yield* search(() =>
+          searchPage(numbers(1, 3), null, 1500),
+        ).run;
+
+        assert.strictEqual(pulls.length, 3);
+        assert.isTrue(truncated);
+      }),
+  );
+
+  it.effect("checks the second search on its own", () =>
+    Effect.gen(function* () {
+      const { truncated } = yield* search((index) =>
+        index === 0
+          ? searchPage(numbers(1, 3))
+          : searchPage(numbers(4, 5), null, 1200),
+      ).run;
+
+      assert.isTrue(truncated);
+    }),
+  );
+
+  it.effect(
+    "marks the merged result truncated when two complete searches together exceed the cap",
+    () =>
+      Effect.gen(function* () {
+        // the created search returns 600 of 600, the closed one 500 other pull requests of 500: 1,100 in all
+        const replies = [
+          ...pages(1, 600).map((nodes, page, all) =>
+            searchPage(nodes, page < all.length - 1 ? "more" : null, 600),
+          ),
+          ...pages(601, 500).map((nodes, page, all) =>
+            searchPage(nodes, page < all.length - 1 ? "more" : null, 500),
+          ),
+        ];
+
+        const { pulls, truncated } = yield* search(
+          (index) => replies[index] ?? searchPage([]),
+        ).run;
+
+        assert.strictEqual(pulls.length, 1000);
+        assert.isTrue(truncated);
+      }),
+  );
+});
+
+describe("searchPullRequests reviews", () => {
+  it.effect(
+    "reports reviewsTruncated when a pull request has more reviews than were fetched",
+    () =>
+      Effect.gen(function* () {
+        const { run } = search((index) =>
+          index === 0
+            ? searchPage([
+                node(1, {
+                  reviews: { totalCount: 130, nodes: [given("APPROVED")] },
+                }),
+                node(2),
+              ])
+            : searchPage([]),
+        );
+
+        const result = yield* run;
+
+        assert.isTrue(result.reviewsTruncated);
+        assert.isFalse(result.truncated);
+      }),
+  );
+
+  it.effect("is not reviewsTruncated when every review was fetched", () =>
+    Effect.gen(function* () {
+      const { reviewsTruncated } = yield* search((index) =>
+        index === 0
+          ? searchPage([
+              node(1, {
+                reviews: { totalCount: 1, nodes: [given("APPROVED")] },
+              }),
+            ])
+          : searchPage([]),
+      ).run;
+
+      assert.isFalse(reviewsTruncated);
     }),
   );
 });

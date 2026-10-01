@@ -11,6 +11,7 @@ const section = {
   repository: "acme/web",
   fetched: 212,
   truncated: false,
+  reviewsTruncated: false,
   opened: 48,
   merged: 41,
   closedUnmerged: 3,
@@ -66,6 +67,12 @@ describe("pullRequestNotes", () => {
       pullRequestNotes({ ...section, truncated: true, fetched: 1000 }),
     ).toContain(
       "Only 1,000 pull requests were fetched, so every figure here undercounts.",
+    );
+  });
+
+  it("warns that review figures undercount when some pull request has more reviews than were fetched", () => {
+    expect(pullRequestNotes({ ...section, reviewsTruncated: true })).toContain(
+      "Some pull requests have more reviews than were fetched, so the review figures undercount.",
     );
   });
 });

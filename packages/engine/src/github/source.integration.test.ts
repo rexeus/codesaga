@@ -2,6 +2,7 @@ import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { ConfigProvider, Effect, Redacted } from "effect";
 
+import { fieldsOf } from "../testing/error-fields.js";
 import { installFakeGh } from "../testing/fake-gh.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import {
@@ -85,7 +86,55 @@ layer(NodeServices.layer)("resolveGithubSource tokens", (it) => {
   );
 });
 
-layer(NodeServices.layer)("resolveGithubSource failures", (it) => {
+const endpoints = [
+  {
+    name: "github.com, whatever port the remote names",
+    origin: "ssh://git@ssh.github.com:443/acme/web.git",
+    host: "github.com",
+    endpoint: "https://api.github.com/graphql",
+  },
+  {
+    name: "an Enterprise host over ssh, whose port is not the API port",
+    origin: "ssh://git@ghe.corp:2222/acme/web.git",
+    host: "ghe.corp",
+    endpoint: "https://ghe.corp/api/graphql",
+  },
+  {
+    name: "an Enterprise host over https, keeping its port",
+    origin: "https://ghe.corp:8443/acme/web.git",
+    host: "ghe.corp",
+    endpoint: "https://ghe.corp:8443/api/graphql",
+  },
+  {
+    name: "a data residency host",
+    origin: "git@octocorp.ghe.com:acme/web.git",
+    host: "octocorp.ghe.com",
+    endpoint: "https://api.octocorp.ghe.com/graphql",
+  },
+];
+
+layer(NodeServices.layer)("resolveGithubSource endpoints", (it) => {
+  it.effect.each(endpoints)(
+    "posts to the GraphQL endpoint of $name",
+    ({ origin, host, endpoint }) =>
+      Effect.gen(function* () {
+        const repo = yield* setup(origin, "logged-out");
+
+        const source = yield* resolveWith(repo.directory, {
+          GH_HOST: host,
+          GH_TOKEN: "dotcom-token",
+          GH_ENTERPRISE_TOKEN: "enterprise-token",
+        });
+
+        assert.deepStrictEqual(
+          [source.host, source.endpoint],
+          [host, endpoint],
+        );
+      }).pipe(Effect.scoped),
+  );
+});
+
+layer(NodeServices.layer)("resolveGithubSource hosts", (it) => {
   it.effect.each([
     { name: "GH_HOST is unset", env: {} },
     { name: "GH_HOST names another host", env: { GH_HOST: "github.com" } },
@@ -102,12 +151,14 @@ layer(NodeServices.layer)("resolveGithubSource failures", (it) => {
       );
 
       assert.deepStrictEqual(
-        failure,
-        new GithubHostUnconfirmed({ host: "evil.example" }),
+        fieldsOf(failure),
+        fieldsOf(new GithubHostUnconfirmed({ host: "evil.example" })),
       );
     }).pipe(Effect.scoped),
   );
+});
 
+layer(NodeServices.layer)("resolveGithubSource failures", (it) => {
   it.effect(
     "fails with GithubTokenMissing when neither environment nor gh has a token",
     () =>
@@ -117,8 +168,8 @@ layer(NodeServices.layer)("resolveGithubSource failures", (it) => {
         const failure = yield* Effect.flip(resolveWith(repo.directory, {}));
 
         assert.deepStrictEqual(
-          failure,
-          new GithubTokenMissing({ host: "github.com" }),
+          fieldsOf(failure),
+          fieldsOf(new GithubTokenMissing({ host: "github.com" })),
         );
       }).pipe(Effect.scoped),
   );
@@ -142,12 +193,16 @@ layer(NodeServices.layer)("resolveGithubSource failures", (it) => {
         );
 
         assert.deepStrictEqual(
-          localFailure,
-          new NotAGithubRemote({ remote: "https://host.example/not/a/repo/" }),
+          fieldsOf(localFailure),
+          fieldsOf(
+            new NotAGithubRemote({
+              remote: "https://host.example/not/a/repo/",
+            }),
+          ),
         );
         assert.deepStrictEqual(
-          noneFailure,
-          new NotAGithubRemote({ remote: null }),
+          fieldsOf(noneFailure),
+          fieldsOf(new NotAGithubRemote({ remote: null })),
         );
       }).pipe(Effect.scoped),
   );

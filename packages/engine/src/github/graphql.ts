@@ -5,7 +5,11 @@ import type { Redacted } from "effect";
 import { HttpClient, HttpClientRequest } from "effect/http";
 import type { HttpClientResponse } from "effect/http";
 
-import { GithubRateLimited, GithubRequestFailed } from "./github-errors.js";
+import {
+  GithubRateLimited,
+  GithubRequestFailed,
+  GithubTokenRejected,
+} from "./github-errors.js";
 
 const GraphqlErrors = Schema.Array(
   Schema.Struct({
@@ -23,6 +27,7 @@ const RETRY_DELAY = "1 second";
 
 /** Where and as whom a request goes. */
 type Endpoint = {
+  readonly host: string;
   readonly url: string;
   readonly token: Redacted.Redacted;
 };
@@ -32,18 +37,22 @@ const header = (
   name: string,
 ): string | undefined => response.headers[name];
 
-/** When the limit lifts: the reset header (epoch seconds), else `retry-after` seconds from now; null if neither says. */
+/**
+ * When the limit lifts: `retry-after` seconds from now, which GitHub sends for
+ * a secondary limit whose reset header names the primary one; else the reset
+ * header (epoch seconds); null if neither says.
+ */
 const resetAt = (
   response: HttpClientResponse.HttpClientResponse,
   now: DateTime.Utc,
 ): string | null => {
-  const reset = Number(header(response, "x-ratelimit-reset"));
   const wait = Number(header(response, "retry-after"));
-  if (Number.isFinite(reset) && reset > 0) {
-    return DateTime.formatIso(DateTime.makeUnsafe(reset * 1000));
+  const reset = Number(header(response, "x-ratelimit-reset"));
+  if (Number.isFinite(wait) && wait > 0) {
+    return DateTime.formatIso(DateTime.add(now, { seconds: wait }));
   }
-  return Number.isFinite(wait) && wait > 0
-    ? DateTime.formatIso(DateTime.add(now, { seconds: wait }))
+  return Number.isFinite(reset) && reset > 0
+    ? DateTime.formatIso(DateTime.makeUnsafe(reset * 1000))
     : null;
 };
 
@@ -69,15 +78,24 @@ const messageOf = (
     Effect.orElseSucceed(() => `HTTP ${response.status}`),
   );
 
+type GithubFailure =
+  | GithubRateLimited
+  | GithubRequestFailed
+  | GithubTokenRejected;
+
 /** The decoded `data` of a successful response. */
 const readData = <A>(
   response: HttpClientResponse.HttpClientResponse,
   Data: Schema.Decoder<A>,
-): Effect.Effect<A, GithubRateLimited | GithubRequestFailed> =>
+  host: string,
+): Effect.Effect<A, GithubFailure> =>
   Effect.gen(function* () {
     const now = yield* DateTime.now;
     if (isRateLimited(response)) {
       return yield* new GithubRateLimited({ resetAt: resetAt(response, now) });
+    }
+    if (response.status === 401) {
+      return yield* new GithubTokenRejected({ host });
     }
     if (response.status !== 200) {
       return yield* new GithubRequestFailed({
@@ -118,7 +136,7 @@ const readData = <A>(
     );
   });
 
-const gatewayFailure = (error: GithubRateLimited | GithubRequestFailed) =>
+const gatewayFailure = (error: GithubFailure) =>
   error._tag === "GithubRequestFailed" &&
   error.status !== null &&
   GATEWAY_FAILURES.has(error.status);
@@ -127,20 +145,17 @@ const gatewayFailure = (error: GithubRateLimited | GithubRequestFailed) =>
  * Posts `query` with `variables` to `endpoint` and decodes the response's
  * `data` with `Data`. A 502 or 503 is tried once more after a second.
  *
- * Fails with `GithubRateLimited` when GitHub refuses until a reset time, and
- * with `GithubRequestFailed` for an unreachable host, a rejected token,
- * missing permissions, GraphQL errors, or a response of another shape.
+ * Fails with `GithubRateLimited` when GitHub refuses until a reset time, with
+ * `GithubTokenRejected` when it answers 401, and with `GithubRequestFailed`
+ * for an unreachable host, missing permissions, GraphQL errors, or a response
+ * of another shape.
  */
 export const graphql = <A>(
   endpoint: Endpoint,
   query: string,
   variables: Readonly<Record<string, string | null>>,
   Data: Schema.Decoder<A>,
-): Effect.Effect<
-  A,
-  GithubRateLimited | GithubRequestFailed,
-  HttpClient.HttpClient
-> =>
+): Effect.Effect<A, GithubFailure, HttpClient.HttpClient> =>
   Effect.gen(function* () {
     const client = yield* HttpClient.HttpClient;
     const response = yield* HttpClientRequest.post(endpoint.url).pipe(
@@ -154,7 +169,7 @@ export const graphql = <A>(
           new GithubRequestFailed({ status: null, message: error.message }),
       ),
     );
-    return yield* readData(response, Data);
+    return yield* readData(response, Data, endpoint.host);
   }).pipe(
     Effect.retry({
       while: gatewayFailure,

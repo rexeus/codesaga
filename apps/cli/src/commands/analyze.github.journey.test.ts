@@ -29,6 +29,7 @@ const pullRequests = [
     closedAt: daysAgo(9),
     author: user("ada"),
     reviews: {
+      totalCount: 1,
       nodes: [
         {
           state: "APPROVED",
@@ -45,6 +46,7 @@ const pullRequests = [
     closedAt: null,
     author: user("grace"),
     reviews: {
+      totalCount: 1,
       nodes: [
         {
           state: "COMMENTED",
@@ -125,6 +127,7 @@ describe("codesaga analyze --github report", () => {
           repository: "acme/web",
           fetched: 2,
           truncated: false,
+          reviewsTruncated: false,
           opened: 2,
           merged: 1,
           closedUnmerged: 0,
