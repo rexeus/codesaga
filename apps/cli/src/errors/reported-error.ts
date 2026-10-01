@@ -11,6 +11,7 @@ import type { NoGatesConfigured } from "./no-gates-configured.js";
 import { noFileMatches } from "./nothing-matched.js";
 import type { NothingMatched } from "./nothing-matched.js";
 import type { PathNotFound } from "./path-not-found.js";
+import type { ShallowClone } from "./shallow-clone.js";
 
 const UNEXPECTED = 1;
 const USAGE = 2;
@@ -43,6 +44,7 @@ export type KnownFailure =
   | PathNotFound
   | ConfigInvalid
   | NoGatesConfigured
+  | ShallowClone
   | GatesFailed
   | HtmlWriteFailed
   | CliError.CliError;
@@ -77,11 +79,20 @@ const invalidWindowMessage = (
     : `invalid --compare "${error.input}": use <n>d, <n>w, <n>m or <n>y`;
 };
 
-const checkFailure = (error: NoGatesConfigured | GatesFailed): Failure => {
+const checkFailure = (
+  error: NoGatesConfigured | ShallowClone | GatesFailed,
+): Failure => {
   if (error._tag === "NoGatesConfigured") {
     return {
       message:
         'no gates configured: pass a gate flag such as --min-truck-factor, or set "gates" in .codesaga.json',
+      exitCode: USAGE,
+    };
+  }
+  if (error._tag === "ShallowClone") {
+    return {
+      message:
+        "check needs the full history: this is a shallow clone (run git fetch --unshallow, or use fetch-depth: 0 in actions/checkout)",
       exitCode: USAGE,
     };
   }
@@ -149,7 +160,9 @@ const describe = (error: KnownFailure): Failure => {
   if (CliError.isCliError(error)) {
     return cliFailure(error);
   }
-  return error._tag === "NoGatesConfigured" || error._tag === "GatesFailed"
+  return error._tag === "NoGatesConfigured" ||
+    error._tag === "ShallowClone" ||
+    error._tag === "GatesFailed"
     ? checkFailure(error)
     : engineFailure(error);
 };
@@ -168,7 +181,7 @@ const reported = ({
 /**
  * Words an expected failure and assigns its exit code: 2 for usage errors
  * (an invalid `--since` or `--compare`, a path that does not exist, an invalid
- * config file, `check` without gates), 3 for no git repository or no git, 4
+ * config file, `check` without gates or in a shallow clone), 3 for no git repository or no git, 4
  * when `inspect` matched nothing, 5 when a `check` gate failed, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>

@@ -8,8 +8,8 @@ import { hasGates, resolveGateLimits } from "../check/gate-limits.js";
 import { blameConfigSince, resolveSettings } from "../config/settings.js";
 import { GatesFailed } from "../errors/gates-failed.js";
 import { NoGatesConfigured } from "../errors/no-gates-configured.js";
+import { ShallowClone } from "../errors/shallow-clone.js";
 import { printResult } from "../output/print-result.js";
-import { warnIfShallow } from "../output/shallow-warning.js";
 import { renderCheck } from "../output/terminal/check-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
@@ -100,7 +100,10 @@ export const checkCommand = Command.make(
       cache: flags.cache,
     };
     const report = yield* analyze(options).pipe(blameConfigSince(settings));
-    yield* warnIfShallow(report);
+    // Missing history makes the truck factor and expertise numbers wrong in either direction.
+    if (report.repository.shallow) {
+      return yield* new ShallowClone();
+    }
     const result = evaluateGates(report, limits);
     yield* printResult(result, flags.json, renderCheck);
     const failed = result.gates.filter((gate) => !gate.passed).length;
@@ -110,7 +113,7 @@ export const checkCommand = Command.make(
   }),
 ).pipe(
   Command.withDescription(
-    "Fail with exit code 5 when knowledge risk crosses a threshold, for CI. Needs at least one gate, by flag or in .codesaga.json.",
+    "Fail with exit code 5 when knowledge risk crosses a threshold, for CI. Needs at least one gate, by flag or in .codesaga.json, and the full history: a shallow clone exits 2.",
   ),
   Command.withExamples([
     {

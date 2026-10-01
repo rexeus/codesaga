@@ -5,6 +5,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 
 import { CheckResult } from "../check/check-result.js";
+import { makeShallowClone } from "../testing/git-repository.js";
 import type { GitRepository } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
 import { makeTeamProject } from "../testing/projects.js";
@@ -185,6 +186,29 @@ describe("codesaga check without usable gates", () => {
       });
 
       expect(result.stdout).toBe("");
+      expect(result.exitCode).toBe(2);
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga check in a shallow clone", () => {
+  it.live.each([
+    { output: "text", flags: [] },
+    { output: "JSON", flags: ["--json"] },
+  ])("exits 2 without evaluating any gate in $output output", ({ flags }) =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+      const clone = yield* makeShallowClone(repo, 2);
+
+      const result = yield* journey({
+        args: ["check", "--min-truck-factor", "1", ...flags],
+        cwd: clone,
+      });
+
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toBe(
+        "codesaga: check needs the full history: this is a shallow clone (run git fetch --unshallow, or use fetch-depth: 0 in actions/checkout)",
+      );
       expect(result.exitCode).toBe(2);
     }).pipe(Effect.scoped),
   );

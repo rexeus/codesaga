@@ -27,3 +27,5 @@
 **Knowledge island** — a directory where one person is the sole expert on at least 80% of the files.
 
 **Orphaned knowledge** — a directory where more than 50% of the files have no active expert.
+
+**Gate** — a limit that `codesaga check` holds the repository to: a minimum or maximum on one measure (truck factor, orphaned directories, knowledge islands, agent and agent-assisted share of commits, or contributors active in 90 days). A measurement exactly at its limit passes. `check` exits 5 when any gate fails and evaluates none in a shallow clone.

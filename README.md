@@ -143,14 +143,14 @@ Its shape is defined in [`apps/cli/src/check/check-result.ts`](apps/cli/src/chec
 
 ### Exit codes
 
-| Code | Meaning                                                                                                                                               |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0    | Success                                                                                                                                               |
-| 1    | Unexpected failure (including a git command that failed, or an unwritable `--out`)                                                                    |
-| 2    | Usage error, such as an unknown flag, an invalid `--since` or `--compare`, `--compare` with `--since`, an invalid `.codesaga.json`, or a missing path |
-| 3    | Not inside a git repository, or `git` is not installed                                                                                                |
-| 4    | `inspect` matched no file                                                                                                                             |
-| 5    | `check`: at least one gate failed                                                                                                                     |
+| Code | Meaning                                                                                                                                                                           |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Success                                                                                                                                                                           |
+| 1    | Unexpected failure (including a git command that failed, or an unwritable `--out`)                                                                                                |
+| 2    | Usage error, such as an unknown flag, an invalid `--since` or `--compare`, `--compare` with `--since`, an invalid `.codesaga.json`, a missing path, or `check` in a shallow clone |
+| 3    | Not inside a git repository, or `git` is not installed                                                                                                                            |
+| 4    | `inspect` matched no file                                                                                                                                                         |
+| 5    | `check`: at least one gate failed                                                                                                                                                 |
 
 ## Configuration
 
@@ -192,7 +192,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect`
 
 ## Gates in CI
 
-`codesaga check` turns the truck factor and its neighbours into a build check. Commit the limits to `.codesaga.json` so reviewers see them change, or pass flags. The history must be complete, because codesaga reads it all: `fetch-depth: 0` is required, and a shallow clone makes `check` warn on stderr that its numbers undercount.
+`codesaga check` turns the truck factor and its neighbours into a build check. Commit the limits to `.codesaga.json` so reviewers see them change, or pass flags. The history must be complete, because codesaga reads it all: `fetch-depth: 0` is required: in a shallow clone `check` evaluates no gate and exits with code 2, because the missing history would make the numbers wrong in either direction.
 
 ```yaml
 # .github/workflows/knowledge.yml
