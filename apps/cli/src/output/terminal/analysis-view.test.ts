@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { samplePullRequests } from "../../testing/sample-pull-requests.js";
 import { sampleReport } from "../../testing/sample-report.js";
 import { renderAnalysis } from "./analysis-view.js";
 import { makeStyle } from "./style.js";
@@ -38,6 +39,23 @@ describe("renderAnalysis", () => {
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
       "",
       "--html for the dashboard, --json for agents",
+    ]);
+  });
+});
+
+describe("renderAnalysis pull requests", () => {
+  it("adds the pull request block between automation and languages", () => {
+    const lines = renderAnalysis(
+      { ...sampleReport(), pullRequests: samplePullRequests() },
+      plain,
+    ).split("\n");
+
+    const automation = lines.findIndex((line) => line.startsWith("Automation"));
+    expect(lines.slice(automation + 2, automation + 6)).toStrictEqual([
+      "Pull requests              48 opened · 41 merged · 3 closed unmerged",
+      "                           median 8.5 h to merge · 1.5 h to first review",
+      "                           reviews by tomas 31 · maya 22 · priya 15",
+      expect.stringMatching(/^Languages /u),
     ]);
   });
 });

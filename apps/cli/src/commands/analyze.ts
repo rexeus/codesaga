@@ -1,4 +1,4 @@
-import { analyze } from "@codesaga/engine";
+import { analyze, analyzeWithGithub } from "@codesaga/engine";
 import type { AnalyzeOptions } from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import { Argument, Command, Flag } from "effect/cli";
@@ -52,6 +52,12 @@ export const analyzeCommand = Command.make(
         "Glob of files that do not count as code; repeatable",
       ),
       Flag.atLeast(0),
+    ),
+    github: Flag.Boolean("github").pipe(
+      Flag.withDescription(
+        "Also read pull requests and reviews from GitHub; sends the repository name and your token to GitHub (token: GH_TOKEN, GITHUB_TOKEN or gh auth token); --no-github overrides the config",
+      ),
+      Flag.optional,
     ),
     html: Flag.Boolean("html").pipe(
       Flag.withDescription(
@@ -108,7 +114,9 @@ export const analyzeCommand = Command.make(
       cache,
       blame: settings.blame,
     };
-    const report = yield* analyze(options).pipe(blameConfigSince(settings));
+    const report = yield* (
+      settings.github ? analyzeWithGithub(options) : analyze(options)
+    ).pipe(blameConfigSince(settings));
     yield* warnIfShallow(report.repository.shallow);
     yield* warnIfBlameSkipped(report.knowledge.lineOwners);
     // The dashboard embeds the whole report: --limit bounds only the JSON document.
@@ -146,6 +154,10 @@ export const analyzeCommand = Command.make(
     {
       command: "codesaga analyze --compare 3m",
       description: "The last three months against the three months before",
+    },
+    {
+      command: "codesaga analyze --github --since 3m",
+      description: "Add pull requests and reviews from GitHub",
     },
     {
       command: "codesaga analyze packages/api --since 6m",

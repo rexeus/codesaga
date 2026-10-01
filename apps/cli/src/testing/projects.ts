@@ -1,7 +1,10 @@
 // Repository shapes and host conditions shared by the CLI journeys.
+import { chmodSync, existsSync, symlinkSync, writeFileSync } from "node:fs";
+import { delimiter, join } from "node:path";
+
 import { Effect } from "effect";
 
-import { makeGitRepository } from "./git-repository.js";
+import { makeGitRepository, makeTempDirectory } from "./git-repository.js";
 
 const ada = { name: "Ada Lovelace", email: "ada@example.com" };
 const grace = { name: "Grace", email: "grace@example.com" };
@@ -53,3 +56,37 @@ export const withPath = (value: string) =>
 
 /** Empties PATH for the scope, so spawning git fails as on a machine without it. */
 export const withoutGitOnPath = withPath("");
+
+/** Where `git` is on the real PATH. */
+const findGit = (): string => {
+  const directory = (process.env["PATH"] ?? "")
+    .split(delimiter)
+    .find((entry) => existsSync(join(entry, "git")));
+  if (directory === undefined) {
+    throw new Error("git is not on PATH");
+  }
+  return join(directory, "git");
+};
+
+/** PATH with `git` and no `gh`, as on a machine that never installed the GitHub CLI. */
+export const withoutGhOnPath = Effect.flatMap(makeTempDirectory, (bin) => {
+  symlinkSync(findGit(), join(bin, "git"));
+  return withPath(bin);
+});
+
+/**
+ * Puts a fake `gh` first on PATH. Logged in, `gh auth token --hostname <host>`
+ * prints `gh-token-for-<host>`; logged out, it fails like the real one.
+ */
+export const withFakeGh = (state: "logged-in" | "logged-out") =>
+  Effect.flatMap(makeTempDirectory, (bin) => {
+    const script = join(bin, "gh");
+    writeFileSync(
+      script,
+      state === "logged-in"
+        ? '#!/bin/sh\n[ "$1 $2 $3" = "auth token --hostname" ] && echo "gh-token-for-$4"\n'
+        : "#!/bin/sh\nexit 1\n",
+    );
+    chmodSync(script, 0o755);
+    return withPath(`${bin}${delimiter}${process.env["PATH"] ?? ""}`);
+  });

@@ -19,14 +19,15 @@ Run `npx codesaga inspect <path> --json` (a file, a directory, or a quoted glob)
 
 ## Choosing the call
 
-| Question                                        | Call                                                  | Cost                                        |
-| ----------------------------------------------- | ----------------------------------------------------- | ------------------------------------------- |
-| "Who knows this code, and are they still here?" | `codesaga inspect <path> --json`                      | One entry per argument, ≤ 5 experts         |
-| "Where does knowledge sit in this repository?"  | `codesaga analyze --json`                             | 25 contributors + 25 directories, default   |
-| "How much of this package did agents write?"    | `codesaga inspect packages/billing --since 3m --json` | One entry, `automation` counts              |
-| "Did activity or agent use change lately?"      | `codesaga analyze --compare 3m --json`                | Full report plus a `comparison` section     |
-| "Who wrote the lines that exist today?"         | `codesaga inspect <path> --json --blame`              | Adds `lineOwners`; one `git blame` per file |
-| "Everything, for a dashboard or a script"       | `codesaga analyze --json --limit 0`                   | Full report                                 |
+| Question                                        | Call                                                  | Cost                                               |
+| ----------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------- |
+| "Who knows this code, and are they still here?" | `codesaga inspect <path> --json`                      | One entry per argument, ≤ 5 experts                |
+| "Where does knowledge sit in this repository?"  | `codesaga analyze --json`                             | 25 contributors + 25 directories, default          |
+| "How much of this package did agents write?"    | `codesaga inspect packages/billing --since 3m --json` | One entry, `automation` counts                     |
+| "Did activity or agent use change lately?"      | `codesaga analyze --compare 3m --json`                | Full report plus a `comparison` section            |
+| "Who wrote the lines that exist today?"         | `codesaga inspect <path> --json --blame`              | Adds `lineOwners`; one `git blame` per file        |
+| "How fast do pull requests merge, who reviews?" | `codesaga analyze --github --json`                    | Adds `pullRequests`; needs a token, see the README |
+| "Everything, for a dashboard or a script"       | `codesaga analyze --json --limit 0`                   | Full report                                        |
 
 The first call in a clone reads the whole history (seconds on a repository with a few thousand commits) and caches it in `.git/codesaga`; later calls read only the commits made since and take well under a second. Call `analyze` once per task, and `inspect` per area you are about to change. `--no-cache` skips the cache. A `.codesaga.json` in the repository root supplies defaults for `--since`, `--include`, `--exclude` and `--limit` and can name in-house bots and agents; flags override it (see the README's Configuration section).
 
@@ -36,4 +37,4 @@ The first call in a clone reads the whole history (seconds on a repository with 
 
 ## Contract
 
-Stdout carries exactly one JSON document in `--json` mode; diagnostics go to stderr. The documents are versioned by `schemaVersion`: fields may be added in version 1, never renamed or removed. Exit codes: 0 success, 2 usage error (including an invalid `.codesaga.json`, and `check` without gates or in a shallow clone), 3 not a git repository or no git, 4 `inspect` matched nothing, 5 a `check` gate failed, 1 anything else. The shapes are defined in [`packages/engine/src/report/`](../packages/engine/src/report/) and, for `check`, in [`apps/cli/src/check/check-result.ts`](../apps/cli/src/check/check-result.ts).
+Stdout carries exactly one JSON document in `--json` mode; diagnostics go to stderr. The documents are versioned by `schemaVersion`: fields may be added in version 1, never renamed or removed. Exit codes: 0 success, 2 usage error (including an invalid `.codesaga.json`, `check` without gates or in a shallow clone, and `--github` without a token or a GitHub `origin`), 3 not a git repository or no git, 4 `inspect` matched nothing, 5 a `check` gate failed, 1 anything else. The shapes are defined in [`packages/engine/src/report/`](../packages/engine/src/report/) and, for `check`, in [`apps/cli/src/check/check-result.ts`](../apps/cli/src/check/check-result.ts).

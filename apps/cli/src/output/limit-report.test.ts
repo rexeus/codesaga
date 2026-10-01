@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { samplePullRequests } from "../testing/sample-pull-requests.js";
 import { sampleReport } from "../testing/sample-report.js";
 import { limitReport } from "./limit-report.js";
 
@@ -37,5 +38,24 @@ describe("limitReport", () => {
 
     expect(limitReport(report, 0)).toStrictEqual(report);
     expect(limitReport(report, 100)).toStrictEqual(report);
+  });
+
+  it("cuts the pull request authors and reviewers to the limit and keeps their sizes", () => {
+    const pullRequests = samplePullRequests();
+    const report = { ...sampleReport(), pullRequests };
+
+    const limited = limitReport(report, 2);
+
+    expect(limited.pullRequests?.authors).toStrictEqual(
+      pullRequests.authors.slice(0, 2),
+    );
+    expect(limited.pullRequests?.reviewers).toStrictEqual(
+      pullRequests.reviewers.slice(0, 2),
+    );
+    expect(limited.pullRequests?.totals).toStrictEqual({
+      authors: 6,
+      reviewers: 6,
+    });
+    expect(limited.pullRequests?.months).toStrictEqual(pullRequests.months);
   });
 });

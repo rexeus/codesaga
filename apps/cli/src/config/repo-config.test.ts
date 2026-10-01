@@ -27,6 +27,7 @@ describe("decodeRepoConfig", () => {
         maxAgentShare: 0.5,
         minActiveContributors: 1,
       },
+      github: true,
       signatures: {
         bots: [{ name: "Acme CI", emails: ["ci@acme.example"] }],
         agents: [{ name: "Acme Pilot", names: ["pilot"], emails: [] }],
@@ -55,11 +56,12 @@ describe("decodeRepoConfig", () => {
 
   it("names the key path of a value of the wrong type", () => {
     expect(
-      problemsOf('{"include":["a",1],"limit":-1,"since":6}'),
+      problemsOf('{"include":["a",1],"limit":-1,"since":6,"github":"yes"}'),
     ).toStrictEqual([
       "include[1]: Expected string",
       "since: Expected string",
       "limit: Expected a value greater than or equal to 0",
+      "github: Expected boolean",
     ]);
   });
 

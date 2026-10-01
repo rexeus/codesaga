@@ -34,6 +34,8 @@ type CommitOptions = {
 
 export type GitRepository = {
   readonly root: string;
+  /** Adds the `origin` remote; nothing is fetched. */
+  readonly addOrigin: (url: string) => void;
   /** Writes `files` and commits them at `daysAgo` days before now. */
   readonly commit: (
     daysAgo: number,
@@ -66,6 +68,9 @@ export const makeGitRepository = Effect.map(
     git(["config", "user.email", "journey@example.invalid"], now);
     return {
       root,
+      addOrigin: (url) => {
+        git(["remote", "add", "origin", url], now);
+      },
       commit: (daysAgo, files, options = {}) => {
         const date = new Date(Date.now() - daysAgo * 86_400_000).toISOString();
         for (const [path, content] of Object.entries(files)) {

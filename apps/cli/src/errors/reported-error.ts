@@ -1,23 +1,26 @@
 // Owns how a failure ends the process: one terminal-safe line and an exit code.
-import type { AnalyzeError } from "@codesaga/engine";
+import type { AnalyzeError, GithubError } from "@codesaga/engine";
 import { Runtime, Schema } from "effect";
 import { CliError } from "effect/cli";
 
 import { escapeForTerminal } from "../output/escape.js";
 import type { HtmlWriteFailed } from "../output/html/html-write-failed.js";
 import type { ConfigInvalid } from "./config-invalid.js";
+import {
+  GATES_FAILED,
+  NOT_A_REPOSITORY,
+  NOTHING_MATCHED,
+  UNEXPECTED,
+  USAGE,
+} from "./failure.js";
+import type { Failure } from "./failure.js";
 import type { GatesFailed } from "./gates-failed.js";
+import { githubFailure, isGithubError } from "./github-failure.js";
 import type { NoGatesConfigured } from "./no-gates-configured.js";
 import { noFileMatches } from "./nothing-matched.js";
 import type { NothingMatched } from "./nothing-matched.js";
 import type { PathNotFound } from "./path-not-found.js";
 import type { ShallowClone } from "./shallow-clone.js";
-
-const UNEXPECTED = 1;
-const USAGE = 2;
-const NOT_A_REPOSITORY = 3;
-const NOTHING_MATCHED = 4;
-const GATES_FAILED = 5;
 
 /**
  * A failure that is already worded for the user. Its message is escaped and
@@ -47,13 +50,8 @@ export type KnownFailure =
   | ShallowClone
   | GatesFailed
   | HtmlWriteFailed
+  | GithubError
   | CliError.CliError;
-
-type Failure = {
-  readonly message: string;
-  readonly exitCode: number;
-  readonly resultPrinted?: boolean;
-};
 
 const cliFailure = (error: CliError.CliError): Failure => {
   if (error._tag === "ShowHelp") {
@@ -109,8 +107,12 @@ const engineFailure = (
     | NothingMatched
     | PathNotFound
     | ConfigInvalid
-    | HtmlWriteFailed,
+    | HtmlWriteFailed
+    | GithubError,
 ): Failure => {
+  if (isGithubError(error)) {
+    return githubFailure(error);
+  }
   if (error._tag === "InvalidSince" || error._tag === "InvalidCompare") {
     return { message: invalidWindowMessage(error), exitCode: USAGE };
   }
@@ -181,8 +183,9 @@ const reported = ({
 /**
  * Words an expected failure and assigns its exit code: 2 for usage errors
  * (an invalid `--since` or `--compare`, a path that does not exist, an invalid
- * config file, `check` without gates or in a shallow clone), 3 for no git repository or no git, 4
- * when `inspect` matched nothing, 5 when a `check` gate failed, 1 for the rest.
+ * config file, `check` without gates or in a shallow clone, `--github` without
+ * a token or a GitHub `origin`), 3 for no git repository or no git, 4 when
+ * `inspect` matched nothing, 5 when a `check` gate failed, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>
   reported(describe(error));

@@ -61,6 +61,7 @@
 /* Entity colors: a mark, a legend swatch and a tooltip key share one class. */
 .c-commits,
 .c-human,
+.c-opened,
 .slot-1 {
   --mark: var(--s1);
 }
@@ -81,6 +82,7 @@
   --mark: var(--s5);
 }
 .c-people,
+.c-merged,
 .slot-6 {
   --mark: var(--s6);
 }

@@ -4,6 +4,8 @@ import { ConfigProvider, Console, Effect, Layer, Runtime, Stdio } from "effect";
 
 import { runCli } from "../cli.js";
 import { WorkingDirectory } from "../working-directory.js";
+import { stubGithub, unscripted } from "./stub-github.js";
+import type { GithubReply, GithubRequest } from "./stub-github.js";
 
 export type JourneyOptions = {
   /** The command line without the node and script path. */
@@ -12,6 +14,8 @@ export type JourneyOptions = {
   readonly cwd?: string;
   /** The environment the run sees; defaults to empty so the host's never leaks in. */
   readonly env?: Record<string, string>;
+  /** What GitHub answers; defaults to an error for every request. No journey reaches a real network. */
+  readonly github?: (request: GithubRequest) => GithubReply;
   /** Whether standard output looks like a terminal; defaults to false. */
   readonly stdoutIsTerminal?: boolean;
 };
@@ -23,6 +27,8 @@ export type JourneyResult = {
   readonly stderr: string;
   /** The exit code the process would end with. */
   readonly exitCode: number;
+  /** Every request sent to GitHub, in order. */
+  readonly githubRequests: ReadonlyArray<GithubRequest>;
 };
 
 /** Runs `runCli` against real platform services and reports what a shell would see. */
@@ -41,8 +47,10 @@ export const journey = (
         stderr.push(values.map(String).join(" "));
       },
     };
+    const github = stubGithub(options.github ?? (() => unscripted));
     const environment = Layer.mergeAll(
       NodeServices.layer,
+      github.layer,
       Stdio.layerTest({
         stdoutIsTerminal: Effect.succeed(options.stdoutIsTerminal ?? false),
       }),
@@ -61,5 +69,10 @@ export const journey = (
     Runtime.defaultTeardown(exit, (code) => {
       exitCode = code;
     });
-    return { stdout: stdout.join("\n"), stderr: stderr.join("\n"), exitCode };
+    return {
+      stdout: stdout.join("\n"),
+      stderr: stderr.join("\n"),
+      exitCode,
+      githubRequests: github.requests,
+    };
   });

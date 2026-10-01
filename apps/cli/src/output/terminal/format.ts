@@ -69,3 +69,17 @@ export const sparkline = (values: ReadonlyArray<number>): string => {
 
 /** The date part of an ISO timestamp: `2026-03-10`. */
 export const day = (timestamp: string): string => timestamp.slice(0, 10);
+
+const HOURS_PER_DAY = 24;
+const MINUTES_PER_HOUR = 60;
+const MAX_HOURS_SHOWN = 48;
+
+/** A time given in hours, in the unit that reads best: `45 min`, `8.5 h`, `3.2 days`. */
+export const duration = (hours: number): string => {
+  if (hours < 1) {
+    return `${Math.round(hours * MINUTES_PER_HOUR)} min`;
+  }
+  return hours < MAX_HOURS_SHOWN
+    ? `${Number(hours.toFixed(1))} h`
+    : `${Number((hours / HOURS_PER_DAY).toFixed(1))} days`;
+};

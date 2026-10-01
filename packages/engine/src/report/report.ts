@@ -6,6 +6,7 @@ import { Schema } from "effect";
 import { AutomationTotals } from "./automation-totals.js";
 import { Comparison } from "./comparison.js";
 import { Knowledge } from "./knowledge-report.js";
+import { PullRequests } from "./pull-requests.js";
 
 const Count = Schema.Natural;
 
@@ -187,5 +188,7 @@ export const Report = Schema.Struct({
   knowledge: Knowledge,
   /** Only with `--compare`: the window against the span before it. */
   comparison: Schema.optionalKey(Comparison),
+  /** Only with `--github`: pull requests and reviews read from GitHub. */
+  pullRequests: Schema.optionalKey(PullRequests),
 });
 export type Report = typeof Report.Type;

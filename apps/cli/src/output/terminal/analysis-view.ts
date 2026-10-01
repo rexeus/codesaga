@@ -23,6 +23,7 @@ import {
   MAX_NAME_WIDTH,
   section,
 } from "./layout.js";
+import { pullRequestLines } from "./pull-request-lines.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 
@@ -182,6 +183,9 @@ export const renderAnalysis = (report: Report, style: Style): string =>
     ...contributorLines(report, style),
     ...knowledgeLines(report, style),
     ...section("Automation", automationLines(report), style),
+    ...(report.pullRequests === undefined
+      ? []
+      : pullRequestLines(report.pullRequests, style)),
     ...section("Languages", [languageLine(report)], style),
     "",
     style.dim("--html for the dashboard, --json for agents"),

@@ -1,6 +1,10 @@
 // Owns the precedence of an analysis setting: flag, then `.codesaga.json`, then the built-in default.
 import { locateRepository } from "@codesaga/engine";
-import type { AnalyzeError, AnalyzeOptions } from "@codesaga/engine";
+import type {
+  AnalyzeError,
+  AnalyzeOptions,
+  GithubError,
+} from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import type { FileSystem, Path } from "effect";
 import type { ChildProcessSpawner } from "effect/process";
@@ -19,6 +23,7 @@ export type SettingFlags = {
   readonly limit: Option.Option<number>;
   /** `--blame` or `--no-blame`; `None` leaves the config in charge. */
   readonly blame: Option.Option<boolean>;
+  readonly github: Option.Option<boolean>;
 };
 
 /** The analysis settings after flags and config are merged. */
@@ -32,6 +37,8 @@ export type Settings = Pick<
   readonly limit: number | undefined;
   /** The config file's `gates`, for `check` to merge with its flags. */
   readonly gates: RepoConfig["gates"];
+  /** Whether to read pull requests from GitHub; off unless the flag or the config asks. */
+  readonly github: boolean;
   /** Whether `since` came from the config file, so that a bad value can name it. */
   readonly sinceFromConfig: boolean;
   readonly configFile: string;
@@ -72,6 +79,7 @@ export const resolveSettings = (
       limit: Option.getOrElse(flags.limit, () => config.limit),
       blame: Option.getOrElse(flags.blame, () => config.blame ?? false),
       gates: config.gates,
+      github: Option.getOrElse(flags.github, () => config.github ?? false),
       sinceFromConfig,
       configFile: file,
     };
@@ -80,9 +88,9 @@ export const resolveSettings = (
 /** Turns an invalid `since` that came from the config file into a config error naming the key. */
 export const blameConfigSince =
   (settings: Settings) =>
-  <A, R>(
-    analysis: Effect.Effect<A, AnalyzeError, R>,
-  ): Effect.Effect<A, AnalyzeError | ConfigInvalid, R> =>
+  <A, E extends AnalyzeError | GithubError, R>(
+    analysis: Effect.Effect<A, E, R>,
+  ): Effect.Effect<A, E | ConfigInvalid, R> =>
     Effect.mapError(analysis, (error) =>
       error._tag === "InvalidSince" && settings.sinceFromConfig
         ? new ConfigInvalid({
