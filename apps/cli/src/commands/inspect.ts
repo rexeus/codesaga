@@ -2,6 +2,7 @@ import { inspect } from "@codesaga/engine";
 import { Console, Effect, Option } from "effect";
 import { Argument, Command } from "effect/cli";
 
+import { blameConfigSince, resolveSettings } from "../config/settings.js";
 import { NothingMatched, noFileMatches } from "../errors/nothing-matched.js";
 import { escapeForTerminal } from "../output/escape.js";
 import { printResult } from "../output/print-result.js";
@@ -24,15 +25,23 @@ export const inspectCommand = Command.make(
     cache: cacheFlag,
   },
   Effect.fn(function* ({ patterns, json, since, cache }) {
-    const result = yield* inspect({
-      cwd: yield* WorkingDirectory,
-      since: Option.getOrUndefined(since),
+    const cwd = yield* WorkingDirectory;
+    const settings = yield* resolveSettings(cwd, {
+      since,
       include: [],
       exclude: [],
+      limit: Option.none(),
+    });
+    const result = yield* inspect({
+      cwd,
+      since: settings.since,
+      include: settings.include,
+      exclude: settings.exclude,
+      signatures: settings.signatures,
       toolVersion: version,
       cache,
       patterns,
-    });
+    }).pipe(blameConfigSince(settings));
     if (result.matches.length === 0) {
       return yield* new NothingMatched({ patterns: result.unmatched });
     }

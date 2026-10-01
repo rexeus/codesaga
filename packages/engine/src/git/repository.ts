@@ -1,5 +1,6 @@
 // Owns locating the repository an analysis belongs to and the part of it in scope.
 import { Effect, FileSystem, Path } from "effect";
+import type { ChildProcessSpawner } from "effect/process";
 
 import { GitCommandFailed, NotAGitRepository } from "./git-errors.js";
 import type { GitError } from "./git-errors.js";
@@ -20,12 +21,7 @@ const notARepository = (
     ? new NotAGitRepository({ path: directory })
     : failure;
 
-/**
- * The absolute root of the work tree containing `directory`.
- *
- * Runs git inside `directory`, so the `Git` service must be built for it.
- */
-export const locateRepository = (
+const rootOf = (
   directory: string,
 ): Effect.Effect<string, GitError, Git | FileSystem.FileSystem> =>
   Effect.gen(function* () {
@@ -46,6 +42,20 @@ export const locateRepository = (
       );
     return output.trim();
   });
+
+/**
+ * The absolute root of the work tree containing `directory`, for callers that
+ * need the repository before analyzing it, such as one reading a file from its root.
+ *
+ * Fails with `NotAGitRepository`, `GitNotFound`, or `GitCommandFailed`.
+ */
+export const locateRepository = (
+  directory: string,
+): Effect.Effect<
+  string,
+  GitError,
+  ChildProcessSpawner.ChildProcessSpawner | FileSystem.FileSystem
+> => rootOf(directory).pipe(Effect.provide(Git.layer(directory)));
 
 /**
  * The repository-relative POSIX path of `scope`, which is absolute or

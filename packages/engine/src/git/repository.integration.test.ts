@@ -24,9 +24,7 @@ layer(NodeServices.layer)("locateRepository", (it) => {
       });
       const subdirectory = path.join(repo.directory, "packages", "a");
 
-      const root = yield* locateRepository(subdirectory).pipe(
-        Effect.provide(Git.layer(subdirectory)),
-      );
+      const root = yield* locateRepository(subdirectory);
 
       assert.strictEqual(root, yield* fs.realPath(repo.directory));
     }),
@@ -39,11 +37,7 @@ layer(NodeServices.layer)("locateRepository", (it) => {
         const fs = yield* FileSystem.FileSystem;
         const directory = yield* fs.makeTempDirectoryScoped();
 
-        const failure = yield* Effect.flip(
-          locateRepository(directory).pipe(
-            Effect.provide(Git.layer(directory)),
-          ),
-        );
+        const failure = yield* Effect.flip(locateRepository(directory));
 
         assert.deepStrictEqual(
           failure,
@@ -58,9 +52,7 @@ layer(NodeServices.layer)("locateRepository", (it) => {
       Effect.gen(function* () {
         const missing = "/nonexistent/codesaga-test";
 
-        const failure = yield* Effect.flip(
-          locateRepository(missing).pipe(Effect.provide(Git.layer(missing))),
-        );
+        const failure = yield* Effect.flip(locateRepository(missing));
 
         assert.deepStrictEqual(
           failure,
@@ -85,11 +77,7 @@ layer(NodeServices.layer)(
             "[broken\n",
           );
 
-          const failure = yield* Effect.flip(
-            locateRepository(repo.directory).pipe(
-              Effect.provide(Git.layer(repo.directory)),
-            ),
-          );
+          const failure = yield* Effect.flip(locateRepository(repo.directory));
 
           assert.instanceOf(failure, GitCommandFailed);
           assert.strictEqual(failure.exitCode, 128);

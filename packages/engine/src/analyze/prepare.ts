@@ -33,12 +33,13 @@ const inScope = (
 
 const classify = (
   commits: ReadonlyArray<HistoryCommit>,
+  signatures: RepositoryFacts["signatures"],
 ): ReadonlyArray<ClassifiedCommit> => {
   const identities = buildIdentities(
     commits.map(({ author, time }) => ({ ...author, time })),
   );
   return commits.map((commit) => {
-    const { class: commitClass, tools } = classifyCommit(commit);
+    const { class: commitClass, tools } = classifyCommit(commit, signatures);
     const email = commit.author.email.toLowerCase();
     return {
       class: commitClass,
@@ -90,7 +91,10 @@ export const prepareAnalysis = (facts: RepositoryFacts): Analysis => {
   const placeable = facts.commits.filter(({ time }) =>
     isPlaceable(time, facts.now),
   );
-  const scoped = classify(inScope(placeable, facts.repository.scope));
+  const scoped = classify(
+    inScope(placeable, facts.repository.scope),
+    facts.signatures,
+  );
   const extent = timeExtent(scoped);
   const until = DateTime.formatIso(facts.now);
   const window = {

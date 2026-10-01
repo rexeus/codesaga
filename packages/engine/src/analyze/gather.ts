@@ -5,6 +5,9 @@ import { DateTime, Effect, Path } from "effect";
 import type { FileSystem } from "effect";
 import type { ChildProcessSpawner } from "effect/process";
 
+import { withCustomSignatures } from "../automation/custom-signatures.js";
+import type { CustomSignatures } from "../automation/custom-signatures.js";
+import type { Signature } from "../automation/signatures.js";
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import {
@@ -39,6 +42,8 @@ export type RepositoryFacts = {
   readonly universe: ReadonlyArray<InventoryFile>;
   /** Whether a path counts as code, for files that no longer exist too. */
   readonly isCodePath: (path: string) => boolean;
+  /** The table that classifies commits: the built-in rows, then the custom ones. */
+  readonly signatures: ReadonlyArray<Signature>;
 };
 
 /** Every expected failure of `analyze`. */
@@ -61,6 +66,12 @@ export type AnalyzeOptions = {
   readonly include: ReadonlyArray<string>;
   /** Globs removed from the universe after `include`. */
   readonly exclude: ReadonlyArray<string>;
+  /**
+   * In-house bots and agents to recognize besides the built-in ones. They are
+   * matched after the built-in table, on the commits read from git or from
+   * the history cache, which holds no classification.
+   */
+  readonly signatures?: CustomSignatures | undefined;
   /** Written to `Report.tool.version`. */
   readonly toolVersion: string;
   /**
@@ -112,6 +123,7 @@ const gatherInRepository = (
       headTime,
       universe,
       isCodePath: namedAsCode(options),
+      signatures: withCustomSignatures(options.signatures),
     } satisfies RepositoryFacts;
   });
 
@@ -135,9 +147,7 @@ export const gatherFacts = (
       options.since === undefined
         ? undefined
         : (yield* resolveTimeRange(options.since)).since;
-    const root = yield* locateRepository(options.cwd).pipe(
-      Effect.provide(Git.layer(options.cwd)),
-    );
+    const root = yield* locateRepository(options.cwd);
     const scope =
       options.scope === undefined
         ? "."

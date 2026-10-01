@@ -3,6 +3,7 @@ import type { AnalyzeOptions } from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import { Argument, Command, Flag } from "effect/cli";
 
+import { blameConfigSince, resolveSettings } from "../config/settings.js";
 import {
   prepareHtmlTarget,
   writeHtmlReport,
@@ -65,15 +66,15 @@ export const analyzeCommand = Command.make(
       Flag.withDescription(
         `Contributors and knowledge directories to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
       ),
-      Flag.withDefault(DEFAULT_LIMIT),
       Flag.filter(
         (limit) => limit >= 0,
         (limit) => `--limit must be 0 or greater, got ${limit}`,
       ),
+      Flag.optional,
     ),
   },
   Effect.fn(function* (flags) {
-    const { path, json, since, cache, include, exclude, limit } = flags;
+    const { path, json, cache } = flags;
     const cwd = yield* WorkingDirectory;
     // Fail on an unwritable --out before the slow analysis, not after it.
     const htmlTarget =
@@ -86,15 +87,17 @@ export const analyzeCommand = Command.make(
     // A path argument both locates the repository and narrows the scope,
     // so `codesaga analyze ../other-repo` works from anywhere.
     const target = yield* resolveAnalysisTarget(cwd, path);
+    const settings = yield* resolveSettings(target.cwd, flags);
     const options: AnalyzeOptions = {
       ...target,
-      since: Option.getOrUndefined(since),
-      include,
-      exclude,
+      since: settings.since,
+      include: settings.include,
+      exclude: settings.exclude,
+      signatures: settings.signatures,
       toolVersion: version,
       cache,
     };
-    const report = yield* analyze(options);
+    const report = yield* analyze(options).pipe(blameConfigSince(settings));
     yield* warnIfShallow(report);
     // The dashboard embeds the whole report: --limit bounds only the JSON document.
     if (htmlTarget !== undefined) {
@@ -102,7 +105,7 @@ export const analyzeCommand = Command.make(
     }
     // --limit bounds the JSON document; the terminal view picks its own top entries.
     return yield* printResult(
-      json ? limitReport(report, limit) : report,
+      json ? limitReport(report, settings.limit ?? DEFAULT_LIMIT) : report,
       json,
       renderAnalysis,
     );

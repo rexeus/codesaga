@@ -2,6 +2,7 @@ import { DateTime } from "effect";
 import { describe, expect, it } from "vitest";
 
 import type { RepositoryFacts } from "../analyze/gather.js";
+import { SIGNATURES } from "../automation/signatures.js";
 import type { HistoryCommit } from "../history/history.js";
 import { at } from "../testing/classified-commit.js";
 import { buildInspectResult } from "./build-inspect.js";
@@ -39,6 +40,7 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
   headTime: commits[0]?.time ?? 0,
   universe: [{ path: "src/a.ts", loc: 10 }],
   isCodePath: () => true,
+  signatures: SIGNATURES,
 });
 
 describe("buildInspectResult", () => {

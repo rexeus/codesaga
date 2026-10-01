@@ -96,13 +96,49 @@ Repository-relative files, directories or globs (quote globs so the shell leaves
 
 ### Exit codes
 
-| Code | Meaning                                                                            |
-| ---- | ---------------------------------------------------------------------------------- |
-| 0    | Success                                                                            |
-| 1    | Unexpected failure (including a git command that failed, or an unwritable `--out`) |
-| 2    | Usage error, such as an unknown flag, an invalid `--since`, or a missing path      |
-| 3    | Not inside a git repository, or `git` is not installed                             |
-| 4    | `inspect` matched no file                                                          |
+| Code | Meaning                                                                                                    |
+| ---- | ---------------------------------------------------------------------------------------------------------- |
+| 0    | Success                                                                                                    |
+| 1    | Unexpected failure (including a git command that failed, or an unwritable `--out`)                         |
+| 2    | Usage error, such as an unknown flag, an invalid `--since`, an invalid `.codesaga.json`, or a missing path |
+| 3    | Not inside a git repository, or `git` is not installed                                                     |
+| 4    | `inspect` matched no file                                                                                  |
+
+## Configuration
+
+A `.codesaga.json` in the repository root sets defaults for `analyze` and `inspect`, so a team does not repeat flags. The file is optional, and a flag always wins over it.
+
+```json
+{
+  "include": ["src/**", "packages/*/src/**"],
+  "exclude": ["**/*.generated.ts"],
+  "since": "12m",
+  "limit": 50,
+  "signatures": {
+    "bots": [{ "name": "Acme CI", "emails": ["ci@acme.example"] }],
+    "agents": [
+      {
+        "name": "Acme Pilot",
+        "names": ["acme-pilot"],
+        "emails": ["pilot@acme.example"]
+      }
+    ]
+  }
+}
+```
+
+| Key          | Same as     | Notes                                                                                                                                                    |
+| ------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `include`    | `--include` | Globs relative to the repository root.                                                                                                                   |
+| `exclude`    | `--exclude` | Globs relative to the repository root.                                                                                                                   |
+| `since`      | `--since`   | Same syntax: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`.                                                                                            |
+| `limit`      | `--limit`   | A whole number, `0` for all. Only `analyze --json` uses it.                                                                                              |
+| `signatures` | — (no flag) | In-house bots and agents. Each has a `name`, reported as the tool, and `emails` and `names` that identify it: exact matches, ignoring case, no patterns. |
+
+- **Precedence** is flag, then config, then the built-in default. `--include` and `--exclude` replace the config's list; they do not add to it.
+- **Signatures** extend the built-in table of [commit classes](#how-the-numbers-work) and never replace it: a person the table already knows keeps its built-in name. A `bots` entry makes the person's commits bot commits; an `agents` entry makes them agent commits, and a human commit with that person as co-author or committer agent-assisted. Matches go by author email, author name, and the emails and names in co-author trailers.
+- **The file is checked strictly.** Invalid JSON, an unknown key or a wrong value ends with exit code 2 and a message that names the file and the key, such as `invalid /repo/.codesaga.json: signatures.bots[0].name: Missing key`.
+- The file is read from the root of the analyzed repository, not from the directory you run codesaga in. The history cache is unaffected: it holds raw commits, and signatures classify them on every run.
 
 ## How the numbers work
 

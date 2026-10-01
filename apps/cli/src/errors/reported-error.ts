@@ -5,6 +5,7 @@ import { CliError } from "effect/cli";
 
 import { escapeForTerminal } from "../output/escape.js";
 import type { HtmlWriteFailed } from "../output/html/html-write-failed.js";
+import type { ConfigInvalid } from "./config-invalid.js";
 import { noFileMatches } from "./nothing-matched.js";
 import type { NothingMatched } from "./nothing-matched.js";
 import type { PathNotFound } from "./path-not-found.js";
@@ -35,6 +36,7 @@ export type KnownFailure =
   | AnalyzeError
   | NothingMatched
   | PathNotFound
+  | ConfigInvalid
   | HtmlWriteFailed
   | CliError.CliError;
 
@@ -54,7 +56,12 @@ const cliFailure = (error: CliError.CliError): Failure => {
 };
 
 const engineFailure = (
-  error: AnalyzeError | NothingMatched | PathNotFound | HtmlWriteFailed,
+  error:
+    | AnalyzeError
+    | NothingMatched
+    | PathNotFound
+    | ConfigInvalid
+    | HtmlWriteFailed,
 ): Failure => {
   if (error._tag === "InvalidSince") {
     return {
@@ -65,6 +72,12 @@ const engineFailure = (
   if (error._tag === "PathNotFound") {
     return {
       message: `no such file or directory: ${error.path}`,
+      exitCode: USAGE,
+    };
+  }
+  if (error._tag === "ConfigInvalid") {
+    return {
+      message: `invalid ${error.file}: ${error.problems.join("; ")}`,
       exitCode: USAGE,
     };
   }
@@ -106,7 +119,7 @@ const reported = ({ message, exitCode }: Failure): CliReportedError =>
 
 /**
  * Words an expected failure and assigns its exit code: 2 for usage errors
- * (an invalid `--since`, a path that does not exist), 3 for no git repository or no git,
+ * (an invalid `--since`, a path that does not exist, an invalid config file), 3 for no git repository or no git,
  * 4 when `inspect` matched nothing, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>

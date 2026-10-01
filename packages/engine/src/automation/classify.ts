@@ -104,19 +104,24 @@ const hasMarkerLine = (signature: Signature, signals: CommitSignals): boolean =>
   );
 
 /** Every agent that committed, co-authored or marked a commit that a human authored. */
-const assistingAgentsOf = (signals: CommitSignals): ReadonlyArray<string> => {
+const assistingAgentsOf = (
+  signals: CommitSignals,
+  signatures: ReadonlyArray<Signature>,
+): ReadonlyArray<string> => {
   const helpers = [
     signals.committer,
     ...coAuthorsOf(signals),
     ...bodyCoAuthorsOf(signals),
   ];
-  const names = SIGNATURES.filter(
-    (signature) =>
-      signature.kind === "agent" &&
-      (helpers.some((person) => isSignedBy(signature, person)) ||
-        hasMarkerTrailer(signature, signals) ||
-        hasMarkerLine(signature, signals)),
-  ).map(({ name }) => name);
+  const names = signatures
+    .filter(
+      (signature) =>
+        signature.kind === "agent" &&
+        (helpers.some((person) => isSignedBy(signature, person)) ||
+          hasMarkerTrailer(signature, signals) ||
+          hasMarkerLine(signature, signals)),
+    )
+    .map(({ name }) => name);
   return [...new Set(names)];
 };
 
@@ -125,9 +130,15 @@ const assistingAgentsOf = (signals: CommitSignals): ReadonlyArray<string> => {
  * rule; a bot author over a co-author; a human author with an agent trailer,
  * marker or committer is agent-assisted by every agent it carries; everything
  * else is human.
+ *
+ * `signatures` is the table to match against, the built-in one by default; for
+ * the author, the first matching row wins.
  */
-export const classifyCommit = (signals: CommitSignals): Classification => {
-  const authorSignature = SIGNATURES.find((signature) =>
+export const classifyCommit = (
+  signals: CommitSignals,
+  signatures: ReadonlyArray<Signature> = SIGNATURES,
+): Classification => {
+  const authorSignature = signatures.find((signature) =>
     isSignedBy(signature, signals.author),
   );
   if (authorSignature !== undefined) {
@@ -137,7 +148,7 @@ export const classifyCommit = (signals: CommitSignals): Classification => {
   if (botAccount !== undefined) {
     return { class: "bot", tools: [botAccount] };
   }
-  const assistants = assistingAgentsOf(signals);
+  const assistants = assistingAgentsOf(signals, signatures);
   return assistants.length === 0
     ? { class: "human", tools: [] }
     : { class: "agent-assisted", tools: assistants };
