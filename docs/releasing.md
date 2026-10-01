@@ -11,7 +11,3 @@
 ## Package files
 
 npm packs only `apps/cli`, so `pnpm --filter codesaga build` writes the package's `LICENSE` (a copy of the repository's MIT license) and its `README.md` (the repository README with repository-relative links made absolute) next to the bundle. Both are ignored by git and cached by turbo as build outputs. `scripts/check-cli-package.mjs` fails when either is missing, the LICENSE differs from the repository's, or the README keeps a relative link.
-
-## Before the first release
-
-The owner configures the npm trusted publisher for `codesaga` on npmjs.com (repository `rexeus/codesaga`, workflow `release.yml`). Provenance requires a public repository; while the repository is private, publishing needs `"provenance": false` in `apps/cli/package.json`.
