@@ -4,7 +4,11 @@ import { ConfigProvider, Effect, Redacted } from "effect";
 
 import { installFakeGh } from "../testing/fake-gh.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
-import { GithubTokenMissing, NotAGithubRemote } from "./github-errors.js";
+import {
+  GithubHostUnconfirmed,
+  GithubTokenMissing,
+  NotAGithubRemote,
+} from "./github-errors.js";
 import { resolveGithubSource } from "./source.js";
 
 /** A repository whose `origin` is `remote`, with a fake `gh` that is `gh` state. */
@@ -51,7 +55,7 @@ layer(NodeServices.layer)("resolveGithubSource tokens", (it) => {
     }).pipe(Effect.scoped),
   );
 
-  it.effect("keeps a github.com token away from another host", () =>
+  it.effect("keeps a github.com token away from a host named in GH_HOST", () =>
     Effect.gen(function* () {
       const repo = yield* setup(
         "git@git.acme.example:platform/web.git",
@@ -59,10 +63,12 @@ layer(NodeServices.layer)("resolveGithubSource tokens", (it) => {
       );
 
       const source = yield* resolveWith(repo.directory, {
+        GH_HOST: "Git.Acme.Example",
         GH_TOKEN: "dotcom-token",
         GH_ENTERPRISE_TOKEN: "enterprise-token",
       });
       const viaCli = yield* resolveWith(repo.directory, {
+        GH_HOST: "git.acme.example",
         GH_TOKEN: "dotcom-token",
       });
 
@@ -80,6 +86,28 @@ layer(NodeServices.layer)("resolveGithubSource tokens", (it) => {
 });
 
 layer(NodeServices.layer)("resolveGithubSource failures", (it) => {
+  it.effect.each([
+    { name: "GH_HOST is unset", env: {} },
+    { name: "GH_HOST names another host", env: { GH_HOST: "github.com" } },
+  ])("sends no token to an origin host when $name", ({ env }) =>
+    Effect.gen(function* () {
+      const repo = yield* setup("git@evil.example:acme/web.git", "logged-in");
+
+      const failure = yield* Effect.flip(
+        resolveWith(repo.directory, {
+          ...env,
+          GH_TOKEN: "dotcom-token",
+          GH_ENTERPRISE_TOKEN: "enterprise-token",
+        }),
+      );
+
+      assert.deepStrictEqual(
+        failure,
+        new GithubHostUnconfirmed({ host: "evil.example" }),
+      );
+    }).pipe(Effect.scoped),
+  );
+
   it.effect(
     "fails with GithubTokenMissing when neither environment nor gh has a token",
     () =>

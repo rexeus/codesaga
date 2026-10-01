@@ -184,7 +184,7 @@ const reported = ({
  * Words an expected failure and assigns its exit code: 2 for usage errors
  * (an invalid `--since` or `--compare`, a path that does not exist, an invalid
  * config file, `check` without gates or in a shallow clone, `--github` without
- * a token or a GitHub `origin`), 3 for no git repository or no git, 4 when
+ * a token, a GitHub `origin` or an `origin` host not named in `GH_HOST`), 3 for no git repository or no git, 4 when
  * `inspect` matched nothing, 5 when a `check` gate failed, 1 for the rest.
  */
 export const toReportedError = (error: KnownFailure): CliReportedError =>

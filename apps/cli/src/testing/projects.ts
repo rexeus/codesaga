@@ -40,6 +40,12 @@ export const makeTeamProject = Effect.map(makeGitRepository, (repo) => {
   return repo;
 });
 
+/** The team project with an `origin` on github.com, as `--github` needs. */
+export const makeGithubProject = Effect.map(makeTeamProject, (repo) => {
+  repo.addOrigin("git@github.com:acme/web.git");
+  return repo;
+});
+
 /** Sets PATH for the scope and restores it afterwards; spawned programs resolve against it. */
 export const withPath = (value: string) =>
   Effect.acquireRelease(

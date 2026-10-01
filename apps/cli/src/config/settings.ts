@@ -23,7 +23,6 @@ export type SettingFlags = {
   readonly limit: Option.Option<number>;
   /** `--blame` or `--no-blame`; `None` leaves the config in charge. */
   readonly blame: Option.Option<boolean>;
-  readonly github: Option.Option<boolean>;
 };
 
 /** The analysis settings after flags and config are merged. */
@@ -37,8 +36,6 @@ export type Settings = Pick<
   readonly limit: number | undefined;
   /** The config file's `gates`, for `check` to merge with its flags. */
   readonly gates: RepoConfig["gates"];
-  /** Whether to read pull requests from GitHub; off unless the flag or the config asks. */
-  readonly github: boolean;
   /** Whether `since` came from the config file, so that a bad value can name it. */
   readonly sinceFromConfig: boolean;
   readonly configFile: string;
@@ -79,7 +76,6 @@ export const resolveSettings = (
       limit: Option.getOrElse(flags.limit, () => config.limit),
       blame: Option.getOrElse(flags.blame, () => config.blame ?? false),
       gates: config.gates,
-      github: Option.getOrElse(flags.github, () => config.github ?? false),
       sinceFromConfig,
       configFile: file,
     };

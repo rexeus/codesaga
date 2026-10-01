@@ -9,6 +9,15 @@ export class GithubTokenMissing extends Schema.TaggedError<GithubTokenMissing>()
 ) {}
 
 /**
+ * `origin` points to a host other than github.com that the user did not name
+ * in `GH_HOST`; no token is sent there.
+ */
+export class GithubHostUnconfirmed extends Schema.TaggedError<GithubHostUnconfirmed>()(
+  "GithubHostUnconfirmed",
+  { host: Schema.String },
+) {}
+
+/**
  * The `origin` remote is missing or does not name a GitHub repository.
  * `remote` is its URL without credentials, or null without an `origin`.
  */
@@ -34,6 +43,7 @@ export class GithubRequestFailed extends Schema.TaggedError<GithubRequestFailed>
 
 export type GithubError =
   | GithubTokenMissing
+  | GithubHostUnconfirmed
   | NotAGithubRemote
   | GithubRateLimited
   | GithubRequestFailed;

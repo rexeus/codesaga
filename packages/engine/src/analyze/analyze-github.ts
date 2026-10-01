@@ -24,7 +24,8 @@ import type { AnalyzeError, AnalyzeOptions } from "./gather.js";
  *
  * The remote and the token are checked before git's history is read. Fails
  * with everything `analyze` does and with `NotAGithubRemote`,
- * `GithubTokenMissing`, `GithubRateLimited` and `GithubRequestFailed`.
+ * `GithubHostUnconfirmed`, `GithubTokenMissing`, `GithubRateLimited` and
+ * `GithubRequestFailed`.
  */
 export const analyzeWithGithub = (
   options: AnalyzeOptions,

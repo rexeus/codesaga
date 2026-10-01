@@ -9,6 +9,7 @@ export const isGithubError = (error: {
   readonly _tag: string;
 }): error is GithubError =>
   error._tag === "GithubTokenMissing" ||
+  error._tag === "GithubHostUnconfirmed" ||
   error._tag === "NotAGithubRemote" ||
   error._tag === "GithubRateLimited" ||
   error._tag === "GithubRequestFailed";
@@ -19,7 +20,7 @@ const tokenHint = (host: string): string =>
     : `set GH_ENTERPRISE_TOKEN or GITHUB_ENTERPRISE_TOKEN, or run \`gh auth login --hostname ${host}\``;
 
 /**
- * Words a GitHub failure. A missing token or remote is a usage error (2): the
+ * Words a GitHub failure. A missing token, an unconfirmed host or a missing remote is a usage error (2): the
  * user can fix it by flag or setup. A rate limit or a failed request ends
  * with 1, naming when to try again where GitHub said so.
  */
@@ -27,6 +28,12 @@ export const githubFailure = (error: GithubError): Failure => {
   if (error._tag === "GithubTokenMissing") {
     return {
       message: `--github needs a GitHub token for ${error.host}: ${tokenHint(error.host)}`,
+      exitCode: USAGE,
+    };
+  }
+  if (error._tag === "GithubHostUnconfirmed") {
+    return {
+      message: `origin points to ${error.host}; set GH_HOST=${error.host} to use GitHub Enterprise there`,
       exitCode: USAGE,
     };
   }

@@ -5,7 +5,7 @@ import { ChildProcess, ChildProcessSpawner } from "effect/process";
 
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
-import { GithubTokenMissing } from "./github-errors.js";
+import { GithubHostUnconfirmed, GithubTokenMissing } from "./github-errors.js";
 import type { NotAGithubRemote } from "./github-errors.js";
 import { readOrigin } from "./remote.js";
 
@@ -74,6 +74,25 @@ const fromGhCli = (
     Effect.catchDefect(() => Effect.succeed(Option.none<Redacted.Redacted>())),
   );
 
+/**
+ * A host other than github.com gets the token only when the user names it in
+ * `GH_HOST`, as `gh` does: a cloned repository chooses its `origin`, so the
+ * remote alone must not decide where a credential goes.
+ */
+const requireNamedHost = (
+  host: string,
+): Effect.Effect<void, GithubHostUnconfirmed> =>
+  host === DOTCOM
+    ? Effect.void
+    : Config.String("GH_HOST").pipe(
+        Effect.orElseSucceed(() => ""),
+        Effect.filterOrFail(
+          (named) => named.trim().toLowerCase() === host,
+          () => new GithubHostUnconfirmed({ host }),
+        ),
+        Effect.asVoid,
+      );
+
 const resolveToken = (
   host: string,
 ): Effect.Effect<
@@ -98,21 +117,22 @@ const resolveToken = (
  * The GitHub repository `origin` of the repository at `root` names, with the
  * token for its host: `GH_TOKEN`, then `GITHUB_TOKEN`, then `gh auth token`
  * for github.com; `GH_ENTERPRISE_TOKEN`, `GITHUB_ENTERPRISE_TOKEN`, then
- * `gh auth token --hostname` for any other host, whose API is then assumed
- * at `https://<host>/api/graphql`.
+ * `gh auth token --hostname` for any other host, which must be named in
+ * `GH_HOST` and whose API is then assumed at `https://<host>/api/graphql`.
  *
- * Fails with `NotAGithubRemote` or `GithubTokenMissing`, before any request
- * is made.
+ * Fails with `NotAGithubRemote`, `GithubHostUnconfirmed` or
+ * `GithubTokenMissing`, before any request is made.
  */
 export const resolveGithubSource = (
   root: string,
 ): Effect.Effect<
   GithubSource,
-  GithubTokenMissing | NotAGithubRemote | GitError,
+  GithubTokenMissing | GithubHostUnconfirmed | NotAGithubRemote | GitError,
   ChildProcessSpawner.ChildProcessSpawner
 > =>
   Effect.gen(function* () {
     const { host, owner, name } = yield* readOrigin;
+    yield* requireNamedHost(host);
     return {
       host,
       repository: `${owner}/${name}`,

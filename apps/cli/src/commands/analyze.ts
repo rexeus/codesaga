@@ -55,9 +55,9 @@ export const analyzeCommand = Command.make(
     ),
     github: Flag.Boolean("github").pipe(
       Flag.withDescription(
-        "Also read pull requests and reviews from GitHub; sends the repository name and your token to GitHub (token: GH_TOKEN, GITHUB_TOKEN or gh auth token); --no-github overrides the config",
+        "Also read pull requests and reviews from GitHub; sends the repository name and your token to GitHub (token: GH_TOKEN, GITHUB_TOKEN or gh auth token)",
       ),
-      Flag.optional,
+      Flag.withDefault(false),
     ),
     html: Flag.Boolean("html").pipe(
       Flag.withDescription(
@@ -115,7 +115,7 @@ export const analyzeCommand = Command.make(
       blame: settings.blame,
     };
     const report = yield* (
-      settings.github ? analyzeWithGithub(options) : analyze(options)
+      flags.github ? analyzeWithGithub(options) : analyze(options)
     ).pipe(blameConfigSince(settings));
     yield* warnIfShallow(report.repository.shallow);
     yield* warnIfBlameSkipped(report.knowledge.lineOwners);

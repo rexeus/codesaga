@@ -85,7 +85,7 @@ Each argument — a file, a directory, or a glob — gives one entry aggregated 
 | `[path]`                              | whole repository | A directory (or file) inside a repository; only changes under it count. Also works for a repository elsewhere: `codesaga analyze ../other-repo`.                                                             |
 | `--since <when>`                      | whole history    | Narrows the activity sections: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`. Knowledge always uses the full history.                                                                                      |
 | `--compare <duration>`                | —                | `<n>d`, `<n>w`, `<n>m` or `<n>y`: the activity window becomes the last `<duration>`, and the report compares it with the span of exactly the same length right before it. Cannot be combined with `--since`. |
-| `--github`                            | off              | Also reads pull requests and reviews from GitHub. See _Pull requests and reviews from GitHub_. `--no-github` overrides the config.                                                                           |
+| `--github`                            | off              | Also reads pull requests and reviews from GitHub. See _Pull requests and reviews from GitHub_. Only this flag turns it on; `.codesaga.json` cannot.                                                          |
 | `--include <glob>`                    | language list    | Replaces the built-in list of source-code extensions. Repeatable.                                                                                                                                            |
 | `--exclude <glob>`                    | —                | Removes matching files. Repeatable.                                                                                                                                                                          |
 | `--limit <n>`                         | `25`             | Contributors and knowledge directories in `--json`; `0` for all. `totals` always tells the full size.                                                                                                        |
@@ -145,14 +145,14 @@ Its shape is defined in [`apps/cli/src/check/check-result.ts`](apps/cli/src/chec
 
 ### Exit codes
 
-| Code | Meaning                                                                                                                                                                                                                            |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0    | Success                                                                                                                                                                                                                            |
-| 1    | Unexpected failure (including a git command that failed, an unwritable `--out`, or a GitHub rate limit or error)                                                                                                                   |
-| 2    | Usage error, such as an unknown flag, an invalid `--since` or `--compare`, `--compare` with `--since`, an invalid `.codesaga.json`, a missing path, `check` in a shallow clone, or `--github` without a token or a GitHub `origin` |
-| 3    | Not inside a git repository, or `git` is not installed                                                                                                                                                                             |
-| 4    | `inspect` matched no file                                                                                                                                                                                                          |
-| 5    | `check`: at least one gate failed                                                                                                                                                                                                  |
+| Code | Meaning                                                                                                                                                                                                                                                                                         |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Success                                                                                                                                                                                                                                                                                         |
+| 1    | Unexpected failure (including a git command that failed, an unwritable `--out`, or a GitHub rate limit or error)                                                                                                                                                                                |
+| 2    | Usage error, such as an unknown flag, an invalid `--since` or `--compare`, `--compare` with `--since`, an invalid `.codesaga.json`, a missing path, `check` in a shallow clone, or `--github` without a token, without a GitHub `origin`, or with an `origin` host that `GH_HOST` does not name |
+| 3    | Not inside a git repository, or `git` is not installed                                                                                                                                                                                                                                          |
+| 4    | `inspect` matched no file                                                                                                                                                                                                                                                                       |
+| 5    | `check`: at least one gate failed                                                                                                                                                                                                                                                               |
 
 ## Configuration
 
@@ -165,7 +165,6 @@ A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect`
   "since": "12m",
   "limit": 50,
   "gates": { "minTruckFactor": 2, "maxOrphanedDirectories": 0 },
-  "github": true,
   "signatures": {
     "bots": [{ "name": "Acme CI", "emails": ["ci@acme.example"] }],
     "agents": [
@@ -187,7 +186,6 @@ A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect`
 | `limit`      | `--limit`   | A whole number, `0` for all. Only `analyze --json` uses it.                                                                                              |
 | `blame`      | `--blame`   | `true` turns line ownership on for `analyze` and `inspect`; `--no-blame` turns it off again.                                                             |
 | `gates`      | gate flags  | Limits for `check`, see _Gates in CI_. A flag overrides the config's limit for the same gate; other gates stay.                                          |
-| `github`     | `--github`  | `true` reads pull requests from GitHub on every `analyze`; `--no-github` turns it off for one run.                                                       |
 | `signatures` | — (no flag) | In-house bots and agents. Each has a `name`, reported as the tool, and `emails` and `names` that identify it: exact matches, ignoring case, no patterns. |
 
 - **Precedence** is flag, then config, then the built-in default. `--compare` sets the window itself, so it ignores the config's `since`; only a `--since` flag conflicts with it. `--include` and `--exclude` replace the config's list; they do not add to it.
@@ -220,13 +218,13 @@ A failed gate ends the step with exit code 5 and prints the reasons to the job l
 
 ## Pull requests and reviews from GitHub
 
-Git does not record pull requests. With `--github` (or `"github": true` in `.codesaga.json`), `analyze` also asks GitHub for the pull requests of the activity window. Without it, codesaga makes no network request at all.
+Git does not record pull requests. With `--github`, `analyze` also asks GitHub for the pull requests of the activity window. Without it, codesaga makes no network request at all. Only the flag turns it on, never `.codesaga.json`: a cloned repository is untrusted, and it must not decide that your token leaves your machine.
 
 ```bash
 codesaga analyze --github --since 3m
 ```
 
-- **What it sends.** The `owner/name` of the repository, taken from the `origin` remote, and your token, to `api.github.com` (for a GitHub Enterprise `origin` host, to `https://<host>/api/graphql`). Nothing else leaves your machine: no commits, paths, names or file contents.
+- **What it sends.** The `owner/name` of the repository, taken from the `origin` remote, and your token, to `api.github.com`. For a GitHub Enterprise `origin` host it goes to `https://<host>/api/graphql`, but only when you name that host in `GH_HOST` (the variable `gh` itself reads); otherwise `analyze --github` exits with code 2 and no token is sent to a host the repository chose. Nothing else leaves your machine: no commits, paths, names or file contents.
 - **The token** comes from `GH_TOKEN`, then `GITHUB_TOKEN`, then `gh auth token`. For an Enterprise host the variables are `GH_ENTERPRISE_TOKEN` and `GITHUB_ENTERPRISE_TOKEN`, then `gh auth token --hostname <host>`, so a github.com token never goes to another host. Read access to the repository's pull requests is enough. Without a token, or when `origin` is missing or not `owner/name` on a host, `analyze --github` exits with code 2 before reading any history.
 - **What it reads.** Pull requests created since the window started and pull requests closed since then (merged or not), at most 1,000, 100 per request, with their first 100 reviews. The report's `pullRequests` section says if it hit the cap (`truncated: true`); every figure then undercounts.
 - **The section** (`schemaVersion` stays 1): `opened` (created in the window), `merged` and `closedUnmerged` (in the window, whenever they were opened), `medianHoursToMerge` (opening to merge, over the merged ones), `medianHoursToFirstReview` (opening to the first review by someone else, over pull requests opened in the window that got one), `months` (opened and merged per month, matching `activity.months`), `authors` (`opened`, `merged`) and `reviewers` (`reviews`, `approvals`). Reviews count when submitted in the window and by someone other than the author. `--limit` cuts `authors` and `reviewers`; `pullRequests.totals` gives their full size. Pull requests are not narrowed to a `[path]` scope.
