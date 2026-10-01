@@ -8,6 +8,8 @@ const Count = Schema.Natural;
 export const LineOwners = Schema.Struct({
   /** Non-blank lines at HEAD that blame attributed, to anyone. */
   lines: Schema.Natural,
+  /** Files of the set whose `git blame` failed for a reason other than being absent from HEAD; their lines are not in `lines`. */
+  skippedFiles: Schema.Natural,
   /** The five authors with the most lines, most lines first. */
   owners: Schema.Array(
     Schema.Struct({
@@ -91,4 +93,6 @@ export const Knowledge = Schema.Struct({
    * more files, then path; possibly truncated (see `totals.directories`).
    */
   directories: Schema.Array(DirectoryKnowledge),
+  /** Present only when the analysis ran with `blame`: the line owners of all `files` together, which no sum over `directories` gives. */
+  lineOwners: Schema.optionalKey(LineOwners),
 });

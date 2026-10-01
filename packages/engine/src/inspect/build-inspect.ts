@@ -9,7 +9,8 @@ import { prepareAnalysis } from "../analyze/prepare.js";
 import type { Analysis } from "../analyze/prepare.js";
 import { totalsOf } from "../automation/automation.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
-import { lineOwnersField } from "../blame/line-owners.js";
+import { lineOwnersField, lineOwnersOf } from "../blame/line-owners.js";
+import type { LineOwners } from "../blame/line-owners.js";
 import { describeFileSet } from "../knowledge/file-set.js";
 import { knowledgeModel } from "../knowledge/model.js";
 import type { KnowledgeModel } from "../knowledge/model.js";
@@ -74,12 +75,16 @@ const entryOf = (
 
 const resultOf = (
   analysis: Analysis,
+  shallow: boolean,
   entries: ReadonlyArray<Entry | string>,
+  lineOwners: LineOwners | undefined,
 ): InspectResult => ({
   schemaVersion: 1,
+  shallow,
   window: { ...analysis.window, commits: analysis.commits.length },
   matches: entries.filter((entry) => typeof entry !== "string"),
   unmatched: entries.filter((entry) => typeof entry === "string"),
+  ...lineOwnersField(lineOwners),
 });
 
 /**
@@ -101,13 +106,21 @@ export const buildInspectResult = (
     signatures: facts.signatures,
   });
   const paths = facts.universe.map(({ path }) => path);
+  const matches = patterns.map((pattern) => ({
+    pattern,
+    paths: pathsMatching(pattern, paths),
+  }));
+  const matchedPaths = [...new Set(matches.flatMap((match) => match.paths))];
   return resultOf(
     analysis,
-    patterns.map((pattern) => {
-      const matched = pathsMatching(pattern, paths);
-      return matched.length === 0
+    facts.repository.shallow,
+    matches.map(({ pattern, paths: matched }) =>
+      matched.length === 0
         ? pattern
-        : entryOf(pattern, matched, model, analysis.commits);
-    }),
+        : entryOf(pattern, matched, model, analysis.commits),
+    ),
+    model.ownership === undefined || matchedPaths.length === 0
+      ? undefined
+      : lineOwnersOf(matchedPaths, model.ownership),
   );
 };

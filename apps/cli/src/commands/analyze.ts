@@ -4,6 +4,7 @@ import { Effect, Option } from "effect";
 import { Argument, Command, Flag } from "effect/cli";
 
 import { blameConfigSince, resolveSettings } from "../config/settings.js";
+import { warnIfBlameSkipped } from "../output/blame-warning.js";
 import {
   prepareHtmlTarget,
   writeHtmlReport,
@@ -108,7 +109,8 @@ export const analyzeCommand = Command.make(
       blame: settings.blame,
     };
     const report = yield* analyze(options).pipe(blameConfigSince(settings));
-    yield* warnIfShallow(report);
+    yield* warnIfShallow(report.repository.shallow);
+    yield* warnIfBlameSkipped(report.knowledge.lineOwners);
     // The dashboard embeds the whole report: --limit bounds only the JSON document.
     if (htmlTarget !== undefined) {
       yield* writeHtmlReport({ report, target: htmlTarget, open: flags.open });

@@ -7,7 +7,7 @@ import type { ClassifiedCommit } from "../automation/classify.js";
 import { SIGNATURES } from "../automation/signatures.js";
 import type { Signature } from "../automation/signatures.js";
 import type { Ownership } from "../blame/line-owners.js";
-import type { LineAuthors } from "../blame/parse-blame.js";
+import type { Blame } from "../blame/read-blame.js";
 import { ACTIVE_DAYS, isActiveWithin } from "../contributors/activeness.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
@@ -32,8 +32,8 @@ export type KnowledgeInput = {
   /** Time of the HEAD commit in seconds; recency is measured back from it. */
   readonly headTime: number;
   readonly now: DateTime.Utc;
-  /** `git blame` of the universe files, by path; absent without `--blame`. */
-  readonly blame?: ReadonlyMap<string, LineAuthors> | undefined;
+  /** `git blame` of the universe files; absent without `--blame`. */
+  readonly blame?: Blame | undefined;
   /** The signature table that tells a bot or an agent from a person among the line owners; the built-in one by default. */
   readonly signatures?: ReadonlyArray<Signature> | undefined;
 };
@@ -58,7 +58,7 @@ export const knowledgeModel = ({
       blame === undefined
         ? undefined
         : {
-            files: blame,
+            ...blame,
             signatures,
             identities: new Map(
               commits.map(({ author }) => [author.email, author]),

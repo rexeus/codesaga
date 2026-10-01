@@ -22,6 +22,8 @@ const MAX_OWNERS = 5;
 export type Ownership = {
   /** The authors of every blamed universe file, by path. */
   readonly files: ReadonlyMap<string, LineAuthors>;
+  /** The universe files whose blame failed. */
+  readonly failed: ReadonlySet<string>;
   /** The identities of the history, by email, which name an author as the rest of the report does. */
   readonly signatures: ReadonlyArray<Signature>;
   readonly identities: ReadonlyMap<string, { readonly name: string }>;
@@ -38,14 +40,14 @@ const byLinesThenName = Order.combine(
 );
 
 /**
- * The five authors with the most lines among `paths`, and the lines of all
- * authors together. A path without blame (not a universe file, or one git
- * could not blame) adds no lines. A name comes from the history when the
+ * The five authors with the most lines among `paths`, the lines of all
+ * authors together, and how many of the paths git failed to blame. A path
+ * without blame adds no lines. A name comes from the history when the
  * email appears there, from blame otherwise.
  */
 export const lineOwnersOf = (
   paths: ReadonlyArray<string>,
-  { files, identities, signatures }: Ownership,
+  { files, failed, identities, signatures }: Ownership,
 ): LineOwners => {
   const byEmail = new Map<string, { name: string; lines: number }>();
   let lines = 0;
@@ -73,7 +75,11 @@ export const lineOwnersOf = (
         kind: authorKind(owner, signatures),
       }),
     );
-  return { lines, owners };
+  return {
+    skippedFiles: paths.filter((path) => failed.has(path)).length,
+    lines,
+    owners,
+  };
 };
 
 /** `{ lineOwners }` when there are owners, nothing otherwise: the key is absent without `--blame`. */

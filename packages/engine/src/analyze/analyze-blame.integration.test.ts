@@ -1,6 +1,6 @@
 import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
-import { Effect } from "effect";
+import { Effect, FileSystem, Path } from "effect";
 import { TestClock } from "effect/testing";
 
 import { inspect } from "../inspect/inspect.js";
@@ -76,6 +76,20 @@ const dependabotOwner = {
   kind: "bot",
 } as const;
 
+// A textconv filter that exits non-zero makes `git blame` fail for the files
+// the attributes route to it, while `git log` never runs it. A missing blob
+// would not do: git then reports the path as absent from HEAD, the benign case.
+const makeBlameFailFor = (repo: TempRepository, file: string) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    yield* repo.git("config", "diff.broken.textconv", "false");
+    yield* fs.writeFileString(
+      path.join(repo.directory, ".git", "info", "attributes"),
+      `${file} diff=broken\n`,
+    );
+  });
+
 layer(NodeServices.layer)("analyze --blame", (it) => {
   it.effect(
     "gives each directory the shares of the lines that exist today, by mailmapped identity",
@@ -88,6 +102,7 @@ layer(NodeServices.layer)("analyze --blame", (it) => {
         const report = yield* analyze(analyzeOptionsFor(repo, { blame: true }));
 
         assert.deepStrictEqual(report.knowledge.directories[0]?.lineOwners, {
+          skippedFiles: 0,
           lines: 12,
           owners: [
             { ...graceOwner, lines: 6, share: 0.5 },
@@ -110,7 +125,9 @@ layer(NodeServices.layer)("analyze --blame", (it) => {
       assert.notProperty(report.knowledge.directories[0] ?? {}, "lineOwners");
     }),
   );
+});
 
+layer(NodeServices.layer)("analyze --blame files git cannot blame", (it) => {
   it.effect("skips a file that git cannot blame instead of failing", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -122,12 +139,35 @@ layer(NodeServices.layer)("analyze --blame", (it) => {
       const report = yield* analyze(analyzeOptionsFor(repo, { blame: true }));
 
       assert.deepStrictEqual(report.knowledge.directories[0]?.lineOwners, {
+        skippedFiles: 0,
         lines: 9,
         owners: [
           { ...graceOwner, lines: 5, share: 0.5556 },
           { ...ada, lines: 4, share: 0.4444 },
         ],
       });
+    }),
+  );
+
+  it.effect("counts a file whose blame failed for another reason", () =>
+    Effect.gen(function* () {
+      yield* setNow;
+      const repo = yield* makeTempRepository;
+      yield* commitHistory(repo);
+      yield* makeBlameFailFor(repo, "src/b.ts");
+
+      const report = yield* analyze(analyzeOptionsFor(repo, { blame: true }));
+
+      assert.deepStrictEqual(report.knowledge.directories[0]?.lineOwners, {
+        skippedFiles: 1,
+        lines: 7,
+        owners: [
+          { ...ada, lines: 3, share: 0.4286 },
+          { ...graceOwner, lines: 3, share: 0.4286 },
+          { ...dependabotOwner, lines: 1, share: 0.1429 },
+        ],
+      });
+      assert.strictEqual(report.knowledge.lineOwners?.skippedFiles, 1);
     }),
   );
 });
@@ -145,6 +185,7 @@ layer(NodeServices.layer)("inspect --blame", (it) => {
       });
 
       assert.deepStrictEqual(result.matches[0]?.lineOwners, {
+        skippedFiles: 0,
         lines: 4,
         owners: [
           { ...ada, lines: 2, share: 0.5 },
@@ -152,5 +193,55 @@ layer(NodeServices.layer)("inspect --blame", (it) => {
         ],
       });
     }),
+  );
+});
+
+layer(NodeServices.layer)("inspect --blame skipped files", (it) => {
+  it.effect("counts no skipped file before the first commit", () =>
+    Effect.gen(function* () {
+      yield* setNow;
+      const fs = yield* FileSystem.FileSystem;
+      const path = yield* Path.Path;
+      const repo = yield* makeTempRepository;
+      yield* fs.makeDirectory(path.join(repo.directory, "src"));
+      yield* fs.writeFileString(
+        path.join(repo.directory, "src", "a.ts"),
+        "a1\n",
+      );
+      yield* repo.git("add", "src/a.ts");
+
+      const result = yield* inspect({
+        ...analyzeOptionsFor(repo, { blame: true }),
+        patterns: ["src/a.ts"],
+      });
+
+      assert.deepStrictEqual(result.matches[0]?.lineOwners, {
+        skippedFiles: 0,
+        lines: 0,
+        owners: [],
+      });
+    }),
+  );
+
+  it.effect(
+    "counts a failed file once for all matches together, though entries overlap",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* commitHistory(repo);
+        yield* makeBlameFailFor(repo, "src/b.ts");
+
+        const result = yield* inspect({
+          ...analyzeOptionsFor(repo, { blame: true }),
+          patterns: ["src/b.ts", "src"],
+        });
+
+        assert.deepStrictEqual(
+          result.matches.map((entry) => entry.lineOwners?.skippedFiles),
+          [1, 1],
+        );
+        assert.strictEqual(result.lineOwners?.skippedFiles, 1);
+      }),
   );
 });

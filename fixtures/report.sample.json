@@ -1769,6 +1769,7 @@
           "no active expert for 12 of 14 files (last expert commit 2025-11-14)"
         ],
         "lineOwners": {
+          "skippedFiles": 0,
           "lines": 3420,
           "owners": [
             {
@@ -1834,6 +1835,7 @@
           "no active expert for 30 of 52 files (last expert commit 2024-12-03)"
         ],
         "lineOwners": {
+          "skippedFiles": 0,
           "lines": 6180,
           "owners": [
             {

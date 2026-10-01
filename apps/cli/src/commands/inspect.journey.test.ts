@@ -4,6 +4,7 @@ import { InspectResult } from "@codesaga/engine";
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 
+import { breakBlameOf, makeShallowClone } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
 import { makeTeamProject } from "../testing/projects.js";
 
@@ -198,6 +199,62 @@ describe("codesaga inspect --blame", () => {
         ["Ada Lovelace", 3, 0.5],
         ["Grace", 3, 0.5],
       ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.live(
+    "warns once on stderr when git blame failed for a file, counting it once for overlapping arguments",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        breakBlameOf(repo, "src/a.ts");
+
+        const result = yield* journey({
+          args: ["inspect", "src/a.ts", "src", "--json", "--blame"],
+          cwd: repo.root,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe(
+          "codesaga: git blame failed for 1 file; line owners cover the rest",
+        );
+        const inspected = yield* decode(result.stdout);
+        expect(inspected.lineOwners?.skippedFiles).toBe(1);
+      }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga inspect a shallow clone", () => {
+  it.live(
+    "warns on stderr, keeps stdout to the JSON and says so in the result",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        const clone = yield* makeShallowClone(repo, 1);
+
+        const result = yield* journey({
+          args: ["inspect", "src/a.ts", "--json"],
+          cwd: clone,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toContain("shallow clone");
+        const inspected = yield* decode(result.stdout);
+        expect(inspected.shallow).toBe(true);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("does not warn and reports a complete clone as not shallow", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTeamProject;
+
+      const result = yield* journey({
+        args: ["inspect", "src/a.ts", "--json"],
+        cwd: repo.root,
+      });
+
+      expect(result.stderr).toBe("");
+      expect((yield* decode(result.stdout)).shallow).toBe(false);
     }).pipe(Effect.scoped),
   );
 });

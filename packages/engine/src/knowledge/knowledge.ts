@@ -2,6 +2,7 @@
 // Composes the model and the set and directory descriptions over the full history of the scope.
 // One pass over the commits, then one per reported directory.
 
+import { lineOwnersField } from "../blame/line-owners.js";
 import type { Report } from "../report/report.js";
 import { MIN_DIRECTORY_FILES, directoryKnowledge } from "./directories.js";
 import { EXPERT_RATIO } from "./doe.js";
@@ -40,5 +41,6 @@ export const knowledge = (
       people: repository.truckFactor,
     },
     directories: directoryKnowledge(paths, input.scope, model),
+    ...lineOwnersField(repository.lineOwners),
   };
 };

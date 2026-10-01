@@ -23,6 +23,7 @@ const ownership: Ownership = {
     ],
     ["docs/c.ts", new Map([["ada@example.com", { name: "Ada", lines: 100 }]])],
   ]),
+  failed: new Set(),
   signatures: SIGNATURES,
   identities: new Map([
     ["grace@example.com", { name: "Grace Hopper" }],
@@ -34,6 +35,7 @@ describe("lineOwnersOf", () => {
   it("adds up the files of the set, with each author's share of all its lines", () => {
     // ada 6 + 1, grace 2 + 3, bot 2: 14 lines.
     expect(lineOwnersOf(["src/a.ts", "src/b.ts"], ownership)).toStrictEqual({
+      skippedFiles: 0,
       lines: 14,
       owners: [
         {
@@ -68,6 +70,7 @@ describe("lineOwnersOf kinds", () => {
       files: new Map([
         ["x.ts", new Map([["ci@acme.example", { name: "Acme CI", lines: 2 }]])],
       ]),
+      failed: new Set(),
       signatures: [
         ...SIGNATURES,
         {
@@ -94,6 +97,7 @@ describe("lineOwnersOf kinds", () => {
           new Map([["noreply@anthropic.com", { name: "Claude", lines: 4 }]]),
         ],
       ]),
+      failed: new Set(),
       signatures: SIGNATURES,
       identities: new Map(),
     };
@@ -119,6 +123,7 @@ describe("lineOwnersOf limits and ties", () => {
           ),
         ],
       ]),
+      failed: new Set(),
       signatures: SIGNATURES,
       identities: new Map(),
     };
@@ -140,6 +145,7 @@ describe("lineOwnersOf limits and ties", () => {
           ]),
         ],
       ]),
+      failed: new Set(),
       signatures: SIGNATURES,
       identities: new Map(),
     };
@@ -148,8 +154,21 @@ describe("lineOwnersOf limits and ties", () => {
 
     expect(result.owners.map(({ name }) => name)).toStrictEqual(["Abe", "Bea"]);
     expect(lineOwnersOf(["skipped.ts"], tied)).toStrictEqual({
+      skippedFiles: 0,
       lines: 0,
       owners: [],
     });
+  });
+
+  it("counts the paths of the set whose blame failed, and only those", () => {
+    const withFailures: Ownership = {
+      ...ownership,
+      failed: new Set(["src/broken.ts", "elsewhere.ts"]),
+    };
+
+    expect(
+      lineOwnersOf(["src/a.ts", "src/broken.ts"], withFailures).skippedFiles,
+    ).toBe(1);
+    expect(lineOwnersOf(["src/a.ts"], withFailures).skippedFiles).toBe(0);
   });
 });

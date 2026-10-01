@@ -8,8 +8,8 @@ import type { ChildProcessSpawner } from "effect/process";
 import { withCustomSignatures } from "../automation/custom-signatures.js";
 import type { CustomSignatures } from "../automation/custom-signatures.js";
 import type { Signature } from "../automation/signatures.js";
-import type { LineAuthors } from "../blame/parse-blame.js";
-import { readBlame } from "../blame/read-blame.js";
+import { NO_BLAME, readBlame } from "../blame/read-blame.js";
+import type { Blame } from "../blame/read-blame.js";
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import {
@@ -48,8 +48,8 @@ export type RepositoryFacts = {
   /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
   readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
-  /** `git blame` of the universe files at HEAD, by path; undefined unless `blame` was requested. */
-  readonly blame: ReadonlyMap<string, LineAuthors> | undefined;
+  /** `git blame` of the universe files at HEAD; undefined unless `blame` was requested. */
+  readonly blame: Blame | undefined;
   /** Whether a path counts as code, for files that no longer exist too. */
   readonly isCodePath: (path: string) => boolean;
   /** The table that classifies commits: the built-in rows, then the custom ones. */
@@ -129,6 +129,15 @@ const resolveWindows = (
     return { since, previous: undefined };
   });
 
+/** Blame of the universe at `head`; there is nothing to blame before the first commit. */
+const blameUniverse = (
+  head: string | null,
+  universe: ReadonlyArray<InventoryFile>,
+): Effect.Effect<Blame, GitError, Git> =>
+  head === null
+    ? Effect.succeed(NO_BLAME)
+    : readBlame(universe.map((file) => file.path));
+
 const gatherInRepository = (
   options: AnalyzeOptions,
   root: string,
@@ -156,9 +165,7 @@ const gatherInRepository = (
             useCache: options.cache ?? true,
           });
     const blame =
-      options.blame === true
-        ? yield* readBlame(universe.map((file) => file.path))
-        : undefined;
+      options.blame === true ? yield* blameUniverse(head, universe) : undefined;
     return {
       toolVersion: options.toolVersion,
       now: yield* DateTime.now,

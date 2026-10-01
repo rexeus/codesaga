@@ -21,6 +21,7 @@ const dmitri = {
 
 const result: InspectResult = {
   schemaVersion: 1,
+  shallow: false,
   window: {
     since: "2025-01-01T00:00:00.000Z",
     until: "2026-09-30T10:00:00.000Z",

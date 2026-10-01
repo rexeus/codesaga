@@ -7,6 +7,7 @@ const decode = Schema.decodeUnknownSync(InspectResult);
 
 const result = {
   schemaVersion: 1,
+  shallow: false,
   window: {
     since: "2026-01-01T00:00:00.000Z",
     until: "2026-09-30T10:15:00.000Z",

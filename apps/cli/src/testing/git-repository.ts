@@ -1,6 +1,12 @@
 // Builds throwaway git repositories for CLI journeys, isolated from the host's git config.
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -95,3 +101,19 @@ export const makeShallowClone = (source: GitRepository, depth: number) =>
     );
     return root;
   });
+
+/**
+ * Makes `git blame` fail for `file` while `git log` still reads it: a
+ * textconv filter that exits non-zero, routed to the file by the attributes.
+ */
+export const breakBlameOf = (repo: GitRepository, file: string): void => {
+  appendFileSync(
+    join(repo.root, ".git", "config"),
+    '[diff "broken"]\n\ttextconv = false\n',
+  );
+  mkdirSync(join(repo.root, ".git", "info"), { recursive: true });
+  appendFileSync(
+    join(repo.root, ".git", "info", "attributes"),
+    `${file} diff=broken\n`,
+  );
+};

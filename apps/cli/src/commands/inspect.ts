@@ -4,8 +4,10 @@ import { Argument, Command } from "effect/cli";
 
 import { blameConfigSince, resolveSettings } from "../config/settings.js";
 import { NothingMatched, noFileMatches } from "../errors/nothing-matched.js";
+import { warnIfBlameSkipped } from "../output/blame-warning.js";
 import { escapeForTerminal } from "../output/escape.js";
 import { printResult } from "../output/print-result.js";
+import { warnIfShallow } from "../output/shallow-warning.js";
 import { renderInspect } from "../output/terminal/inspect-view.js";
 import { version } from "../version.js";
 import { WorkingDirectory } from "../working-directory.js";
@@ -46,6 +48,8 @@ export const inspectCommand = Command.make(
       blame: settings.blame,
       patterns,
     }).pipe(blameConfigSince(settings));
+    yield* warnIfShallow(result.shallow);
+    yield* warnIfBlameSkipped(result.lineOwners);
     if (result.matches.length === 0) {
       return yield* new NothingMatched({ patterns: result.unmatched });
     }

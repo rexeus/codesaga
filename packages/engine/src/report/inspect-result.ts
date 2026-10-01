@@ -40,8 +40,16 @@ const InspectEntry = Schema.Struct({
  */
 export const InspectResult = Schema.Struct({
   schemaVersion: Schema.Literal(1),
+  /**
+   * A shallow clone: history before its oldest fetched commit is missing, so
+   * expertise and counts undercount, and blame credits the lines of the cut
+   * history to the boundary commit's author. `git fetch --unshallow` completes it.
+   */
+  shallow: Schema.Boolean,
   window: ActivityWindow,
   matches: Schema.Array(InspectEntry),
   unmatched: Schema.Array(Schema.String),
+  /** Present only when the analysis ran with `blame`: the line owners of the files all matches cover together, each file once. */
+  lineOwners: Schema.optionalKey(LineOwners),
 });
 export type InspectResult = typeof InspectResult.Type;

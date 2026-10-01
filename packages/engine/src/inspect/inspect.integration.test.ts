@@ -50,6 +50,7 @@ layer(NodeServices.layer)("inspect one argument", (it) => {
 
       assert.deepStrictEqual(result, {
         schemaVersion: 1,
+        shallow: false,
         window: {
           since: "2026-01-05T09:00:00.000Z",
           until: "2026-03-10T00:00:00.000Z",

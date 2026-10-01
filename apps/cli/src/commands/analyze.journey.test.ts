@@ -5,6 +5,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 
 import {
+  breakBlameOf,
   makeShallowClone,
   makeTempDirectory,
 } from "../testing/git-repository.js";
@@ -269,6 +270,7 @@ describe("codesaga analyze --blame", () => {
       expect(result.stderr).toBe("");
       const report = yield* decode(result.stdout);
       expect(report.knowledge.directories[0]?.lineOwners).toStrictEqual({
+        skippedFiles: 0,
         lines: 8,
         owners: [
           {
@@ -304,6 +306,35 @@ describe("codesaga analyze --blame", () => {
 
         expect(result.stdout).toContain("leading line owner");
         expect(result.stdout).toContain("Grace 63%");
+      }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga analyze --blame a file git cannot blame", () => {
+  const grace = { name: "Grace", email: "grace@example.com" };
+
+  it.live(
+    "warns once on stderr when git blame failed for a file and still prints the JSON",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+        repo.commit(1, { "src/c.ts": "c1\nc2\n" }, { author: grace });
+        breakBlameOf(repo, "src/a.ts");
+
+        const result = yield* journey({
+          args: ["analyze", "--json", "--blame"],
+          cwd: repo.root,
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe(
+          "codesaga: git blame failed for 1 file; line owners cover the rest",
+        );
+        const report = yield* decode(result.stdout);
+        expect(report.knowledge.lineOwners).toMatchObject({
+          skippedFiles: 1,
+          lines: 5,
+        });
       }).pipe(Effect.scoped),
   );
 
