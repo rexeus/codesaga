@@ -2,6 +2,7 @@ import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem, Path } from "effect";
 
+import { fieldsOf } from "../testing/error-fields.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { GitCommandFailed, NotAGitRepository } from "./git-errors.js";
 import { Git } from "./git.js";
@@ -40,8 +41,8 @@ layer(NodeServices.layer)("locateRepository", (it) => {
         const failure = yield* Effect.flip(locateRepository(directory));
 
         assert.deepStrictEqual(
-          failure,
-          new NotAGitRepository({ path: directory }),
+          fieldsOf(failure),
+          fieldsOf(new NotAGitRepository({ path: directory })),
         );
       }),
   );
@@ -55,8 +56,8 @@ layer(NodeServices.layer)("locateRepository", (it) => {
         const failure = yield* Effect.flip(locateRepository(missing));
 
         assert.deepStrictEqual(
-          failure,
-          new NotAGitRepository({ path: missing }),
+          fieldsOf(failure),
+          fieldsOf(new NotAGitRepository({ path: missing })),
         );
       }),
   );
@@ -80,7 +81,16 @@ layer(NodeServices.layer)(
           const failure = yield* Effect.flip(locateRepository(repo.directory));
 
           assert.instanceOf(failure, GitCommandFailed);
-          assert.strictEqual(failure.exitCode, 128);
+          assert.deepStrictEqual(
+            fieldsOf(failure),
+            fieldsOf(
+              new GitCommandFailed({
+                args: ["rev-parse", "--show-toplevel"],
+                exitCode: 128,
+                stderr: failure.stderr,
+              }),
+            ),
+          );
           assert.include(failure.stderr, "bad config");
         }),
     );
@@ -134,8 +144,8 @@ layer(NodeServices.layer)("repositoryScope", (it) => {
         const failure = yield* Effect.flip(repositoryScope(root, root, ".."));
 
         assert.deepStrictEqual(
-          failure,
-          new NotAGitRepository({ path: path.dirname(root) }),
+          fieldsOf(failure),
+          fieldsOf(new NotAGitRepository({ path: path.dirname(root) })),
         );
       }),
   );

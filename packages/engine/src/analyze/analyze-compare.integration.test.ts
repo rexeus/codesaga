@@ -4,6 +4,7 @@ import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { fieldsOf } from "../testing/error-fields.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { InvalidCompare } from "./analysis-window.js";
@@ -168,8 +169,8 @@ layer(NodeServices.layer)("analyze --compare", (it) => {
       );
 
       assert.deepStrictEqual(
-        failure,
-        new InvalidCompare({ input: "30d", reason: "withSince" }),
+        fieldsOf(failure),
+        fieldsOf(new InvalidCompare({ input: "30d", reason: "withSince" })),
       );
     }),
   );

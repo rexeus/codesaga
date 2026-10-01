@@ -2,6 +2,7 @@ import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem, Stream } from "effect";
 
+import { fieldsOf } from "../testing/error-fields.js";
 import { setScopedEnv } from "../testing/scoped-env.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { GitCommandFailed, GitNotFound } from "./git-errors.js";
@@ -49,12 +50,14 @@ layer(NodeServices.layer)("Git", (it) => {
         );
 
         assert.deepStrictEqual(
-          failure,
-          new GitCommandFailed({
-            args: ["rev-parse", "--verify", "missing-ref"],
-            exitCode: 128,
-            stderr: "fatal: Needed a single revision",
-          }),
+          fieldsOf(failure),
+          fieldsOf(
+            new GitCommandFailed({
+              args: ["rev-parse", "--verify", "missing-ref"],
+              exitCode: 128,
+              stderr: "fatal: Needed a single revision",
+            }),
+          ),
         );
       }),
   );
@@ -69,7 +72,7 @@ layer(NodeServices.layer)("Git failures to start", (it) => {
 
       const failure = yield* Effect.flip(git.text(["--version"]));
 
-      assert.deepStrictEqual(failure, new GitNotFound());
+      assert.deepStrictEqual(fieldsOf(failure), fieldsOf(new GitNotFound()));
     }),
   );
 
@@ -84,12 +87,14 @@ layer(NodeServices.layer)("Git failures to start", (it) => {
       const failure = yield* Effect.flip(git.text(["--version"]));
 
       assert.deepStrictEqual(
-        failure,
-        new GitCommandFailed({
-          args: ["--version"],
-          exitCode: -1,
-          stderr: "spawn ENOTDIR",
-        }),
+        fieldsOf(failure),
+        fieldsOf(
+          new GitCommandFailed({
+            args: ["--version"],
+            exitCode: -1,
+            stderr: "spawn ENOTDIR",
+          }),
+        ),
       );
     }),
   );

@@ -2,15 +2,24 @@ import { Runtime } from "effect";
 import { CliError } from "effect/cli";
 import { describe, expect, it } from "vitest";
 
+import { fieldsOf } from "../testing/error-fields.js";
 import { PathNotFound } from "./path-not-found.js";
-import { toReportedError, toUnexpectedError } from "./reported-error.js";
+import {
+  CliReportedError,
+  toReportedError,
+  toUnexpectedError,
+} from "./reported-error.js";
+
+const reported = (message: string, exitCode: number) =>
+  fieldsOf(new CliReportedError({ message, exitCode, resultPrinted: false }));
 
 describe("toReportedError", () => {
   it("maps a missing path to a usage error", () => {
     const error = toReportedError(new PathNotFound({ path: "/repo/src/x.ts" }));
 
-    expect(error.message).toBe("no such file or directory: /repo/src/x.ts");
-    expect(error.exitCode).toBe(2);
+    expect(fieldsOf(error)).toStrictEqual(
+      reported("no such file or directory: /repo/src/x.ts", 2),
+    );
   });
 
   it("maps a flag the parser rejected to a usage error", () => {
@@ -22,10 +31,9 @@ describe("toReportedError", () => {
       }),
     );
 
-    expect(error.message).toBe(
-      "Unrecognized flag: --nope in command codesaga analyze",
+    expect(fieldsOf(error)).toStrictEqual(
+      reported("Unrecognized flag: --nope in command codesaga analyze", 2),
     );
-    expect(error.exitCode).toBe(2);
   });
 
   it("joins the parse errors that came with a help display into one usage error", () => {
@@ -39,10 +47,9 @@ describe("toReportedError", () => {
       }),
     );
 
-    expect(error.message).toBe(
-      "Missing required flag: --a; Missing required flag: --b",
+    expect(fieldsOf(error)).toStrictEqual(
+      reported("Missing required flag: --a; Missing required flag: --b", 2),
     );
-    expect(error.exitCode).toBe(2);
   });
 
   it("escapes control characters that came from user input", () => {
@@ -50,8 +57,8 @@ describe("toReportedError", () => {
       new PathNotFound({ path: "\u001B[31mred\nline" }),
     );
 
-    expect(error.message).toBe(
-      "no such file or directory: \\u001b[31mred\\u000aline",
+    expect(fieldsOf(error)).toStrictEqual(
+      reported("no such file or directory: \\u001b[31mred\\u000aline", 2),
     );
   });
 
@@ -67,13 +74,14 @@ describe("toUnexpectedError", () => {
   it("words a defect as exit code 1 without its stack", () => {
     const error = toUnexpectedError(new Error("boom"));
 
-    expect(error.message).toBe("unexpected error: boom");
-    expect(error.exitCode).toBe(1);
+    expect(fieldsOf(error)).toStrictEqual(
+      reported("unexpected error: boom", 1),
+    );
   });
 
   it("words a non-error defect with its string form", () => {
-    expect(toUnexpectedError("broken").message).toBe(
-      "unexpected error: broken",
+    expect(fieldsOf(toUnexpectedError("broken"))).toStrictEqual(
+      reported("unexpected error: broken", 1),
     );
   });
 });

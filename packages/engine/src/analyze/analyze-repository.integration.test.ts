@@ -6,6 +6,7 @@ import { TestClock } from "effect/testing";
 import { GitNotFound, NotAGitRepository } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { fieldsOf } from "../testing/error-fields.js";
 import { setScopedEnv } from "../testing/scoped-env.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
@@ -113,8 +114,8 @@ layer(NodeServices.layer)("analyze failures", (it) => {
       );
 
       assert.deepStrictEqual(
-        failure,
-        new NotAGitRepository({ path: directory }),
+        fieldsOf(failure),
+        fieldsOf(new NotAGitRepository({ path: directory })),
       );
     }),
   );
@@ -126,7 +127,7 @@ layer(NodeServices.layer)("analyze failures", (it) => {
 
       const failure = yield* Effect.flip(analyze(analyzeOptionsFor(repo)));
 
-      assert.deepStrictEqual(failure, new GitNotFound());
+      assert.deepStrictEqual(fieldsOf(failure), fieldsOf(new GitNotFound()));
     }),
   );
 
@@ -138,7 +139,10 @@ layer(NodeServices.layer)("analyze failures", (it) => {
         analyze(analyzeOptionsFor(repo, { since: "last week" })),
       );
 
-      assert.deepStrictEqual(failure, new InvalidSince({ input: "last week" }));
+      assert.deepStrictEqual(
+        fieldsOf(failure),
+        fieldsOf(new InvalidSince({ input: "last week" })),
+      );
     }),
   );
 });

@@ -153,8 +153,16 @@ describe("searchPullRequests failures", () => {
       Effect.gen(function* () {
         const failure = yield* Effect.flip(search(() => "unreachable").run);
 
-        assert.strictEqual(failure._tag, "GithubRequestFailed");
-        assert.include(JSON.stringify(failure), "connection refused");
+        assert.deepStrictEqual(
+          fieldsOf(failure),
+          fieldsOf(
+            new GithubRequestFailed({
+              status: null,
+              message:
+                "Transport: connection refused (POST https://api.github.com/graphql)",
+            }),
+          ),
+        );
         assert.notInclude(JSON.stringify(failure), "s3cret-token");
       }),
   );

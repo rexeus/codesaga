@@ -14,6 +14,7 @@ Tests protect behavior while leaving implementations free to change. A green tes
 - **One owner per contract.** Assert each behavior at the level that owns it. A CLI test does not re-verify the expertise formula.
 - **Independent expected values.** Derive expectations from a hand-computed literal or the specification, never from the unit under test or the production constants it uses.
 - **Assert exact errors.** Check the tagged error (`_tag`) and its fields, not just that something failed.
+  Compare tagged errors as `fieldsOf(actual)` against `fieldsOf(new X({...}))` (`src/testing/error-fields.ts` in the engine and the CLI): `deepStrictEqual` and `toStrictEqual` on two `Error` instances skip fields and the `message`.
 - **No test-only production surface.** Production modules export nothing only tests use. Shared support lives in `src/testing/`, and every export there has a test caller; knip enforces both.
 - **Create state inside the test.** Temporary directories and fakes are made per test and cleaned up by scope or `afterEach`; no shared mutable fixtures.
 - **No sleeps, no network, no real user config.** Isolate git from the machine's config (`GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`) in the repository helper.

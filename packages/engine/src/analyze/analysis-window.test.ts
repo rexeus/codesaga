@@ -2,6 +2,7 @@ import { assert, describe, it } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
+import { fieldsOf } from "../testing/error-fields.js";
 import {
   InvalidCompare,
   InvalidSince,
@@ -53,7 +54,10 @@ describe("resolveTimeRange", () => {
 
       const failure = yield* Effect.flip(resolveTimeRange(since));
 
-      assert.deepStrictEqual(failure, new InvalidSince({ input: since }));
+      assert.deepStrictEqual(
+        fieldsOf(failure),
+        fieldsOf(new InvalidSince({ input: since })),
+      );
     }),
   );
 });
@@ -130,8 +134,8 @@ describe("resolveComparedRanges", () => {
       const failure = yield* Effect.flip(resolveComparedRanges(duration));
 
       assert.deepStrictEqual(
-        failure,
-        new InvalidCompare({ input: duration, reason: "duration" }),
+        fieldsOf(failure),
+        fieldsOf(new InvalidCompare({ input: duration, reason: "duration" })),
       );
     }),
   );
