@@ -73,7 +73,10 @@ export const chartSvg = (
       width: size.width,
       height: size.height,
       viewBox: `0 0 ${size.width} ${size.height}`,
-      role: "img",
+      // A keyboard-reachable chart is an application, so screen readers hand
+      // the arrow keys to it instead of using them to read the page.
+      role: reachable ? "application" : "img",
+      ...(reachable ? { "aria-roledescription": "chart" } : {}),
       "aria-label": reachable
         ? `${description}. ${KEYBOARD_HINT}`
         : description,
