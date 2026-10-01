@@ -9,10 +9,12 @@ import {
   responsiveChart,
   timeAxis,
 } from "./chart-frame.js";
+import type { Plot } from "./chart-frame.js";
 import { h, s } from "./dom.js";
 import { section, tableView } from "./section.js";
 import { dataTable } from "./table.js";
 import { bindTooltip } from "./tooltip.js";
+import type { TooltipContent } from "./tooltip.js";
 
 const WEEKDAY_NAMES = [
   "Monday",
@@ -24,7 +26,7 @@ const WEEKDAY_NAMES = [
   "Sunday",
 ];
 
-const dotMarks = (layout: PunchcardLayout): SVGElement[] => [
+const gridMarks = (layout: PunchcardLayout): SVGElement[] => [
   ...layout.weekdayTicks.flatMap(({ position, label }) => {
     const text = s("text", {
       class: "tick-label",
@@ -49,7 +51,21 @@ const dotMarks = (layout: PunchcardLayout): SVGElement[] => [
     s("circle", { class: "mark c-commits", cx, cy, r: radius }),
   ),
   ...timeAxis(layout.hourTicks, layout.plot.height),
-  ...layout.cells.map((cell) => {
+];
+
+/** The dot grid with one hover area per cell, visited row by row, starting at the busiest cell. */
+const dotPlot = (layout: PunchcardLayout): Required<Plot> => {
+  const contents = layout.cells.map((cell): TooltipContent => ({
+    title: `${cell.weekday} ${hourSpan(cell.hour)}`,
+    rows: [
+      {
+        label: "commits",
+        value: formatCount(cell.commits),
+        key: "c-commits",
+      },
+    ],
+  }));
+  const areas = layout.cells.map((cell, index) => {
     const area = s("rect", {
       class: "zone",
       x: cell.x,
@@ -57,19 +73,22 @@ const dotMarks = (layout: PunchcardLayout): SVGElement[] => [
       width: layout.cell.width,
       height: layout.cell.height,
     });
-    bindTooltip(area, {
-      title: `${cell.weekday} ${hourSpan(cell.hour)}`,
-      rows: [
-        {
-          label: "commits",
-          value: formatCount(cell.commits),
-          key: "c-commits",
-        },
-      ],
-    });
+    bindTooltip(area, contents[index] ?? { title: "", rows: [] });
     return area;
-  }),
-];
+  });
+  return {
+    marks: [...gridMarks(layout), ...areas],
+    stops: {
+      grid: { rows: layout.weekdayTicks.length, columns: 24 },
+      start: Math.max(
+        0,
+        layout.busiest === null ? 0 : layout.cells.indexOf(layout.busiest),
+      ),
+      areas,
+      content: (index) => contents[index] ?? { title: "", rows: [] },
+    },
+  };
+};
 
 const caption = (layout: PunchcardLayout): string => {
   const { busiest } = layout;
@@ -106,7 +125,7 @@ export const renderPunchcard = ({ punchcard }: Report): HTMLElement => {
     return chartSvg(
       layout.size,
       "Dot grid of commits by weekday and hour of the day",
-      ...dotMarks(layout),
+      dotPlot(layout),
     );
   });
   return section(

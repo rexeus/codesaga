@@ -1,6 +1,8 @@
 import { PLOT_ORIGIN } from "../layout/plot.js";
 import type { Size, Tick } from "../layout/plot.js";
 import { h, s } from "./dom.js";
+import { makeReachable } from "./keyboard.js";
+import type { Stops } from "./keyboard.js";
 
 /** The horizontal gridlines and left-hand labels of a value axis. */
 export const valueAxis = (
@@ -44,12 +46,27 @@ export const timeAxis = (
     return text;
   });
 
-/** An `<svg>` of `size` whose children are drawn in plot coordinates. */
+const KEYBOARD_HINT =
+  "Focus the chart and use the arrow keys, Home and End to read its values.";
+
+/** What a chart draws in plot coordinates and, optionally, what the keyboard can visit in it. */
+export type Plot = {
+  readonly marks: readonly SVGElement[];
+  readonly stops?: Stops;
+};
+
+/**
+ * An `<svg>` of `size` showing `plot`. With stops the chart is one tab stop
+ * that the arrow keys walk through.
+ */
 export const chartSvg = (
   size: Size,
   description: string,
-  ...plotChildren: readonly SVGElement[]
+  plot?: Plot,
 ): SVGElement => {
+  const marks = plot?.marks ?? [];
+  const stops = plot?.stops;
+  const reachable = stops !== undefined && stops.areas.length > 0;
   const svg = s(
     "svg",
     {
@@ -57,17 +74,23 @@ export const chartSvg = (
       height: size.height,
       viewBox: `0 0 ${size.width} ${size.height}`,
       role: "img",
-      "aria-label": description,
+      "aria-label": reachable
+        ? `${description}. ${KEYBOARD_HINT}`
+        : description,
     },
     s("g", { transform: `translate(${PLOT_ORIGIN.x} ${PLOT_ORIGIN.y})` }),
   );
-  svg.firstElementChild?.append(...plotChildren);
+  svg.firstElementChild?.append(...marks);
+  if (reachable) {
+    makeReachable(svg, stops);
+  }
   return svg;
 };
 
 /**
  * Draws a chart into `host` and redraws it whenever the host's width changes,
- * so the layout always matches the pixels it has.
+ * so the layout always matches the pixels it has. A chart that had the
+ * keyboard focus gets it back.
  */
 export const responsiveChart = (
   host: HTMLElement,
@@ -80,7 +103,11 @@ export const responsiveChart = (
       return;
     }
     drawnWidth = width;
+    const hadFocus = host.contains(document.activeElement);
     host.replaceChildren(draw(width));
+    if (hadFocus && host.firstElementChild instanceof SVGElement) {
+      host.firstElementChild.focus();
+    }
   };
   new ResizeObserver(render).observe(host);
   render();

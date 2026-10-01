@@ -14,6 +14,7 @@ import {
   timeAxis,
   valueAxis,
 } from "./chart-frame.js";
+import type { Plot } from "./chart-frame.js";
 import { h, s } from "./dom.js";
 import { hoverZones } from "./hover.js";
 import { legend, legendItem, section, tableView } from "./section.js";
@@ -32,12 +33,8 @@ const baseline = (layout: ActivityLayout, y: number): SVGElement =>
 const unit = (resolution: Resolution): string =>
   resolution === "weeks" ? "week" : "month";
 
-const commitsChart = (layout: ActivityLayout): SVGElement[] => [
-  ...valueAxis(layout.commits.ticks, layout.plot.width),
-  ...barMarks(layout.commits.bars, "c-commits"),
-  baseline(layout, layout.plot.height),
-  ...timeAxis(layout.timeTicks, layout.plot.height),
-  ...hoverZones(layout.zones, layout.plot.height, (index) => ({
+const commitsChart = (layout: ActivityLayout): Required<Plot> => {
+  const hover = hoverZones(layout.zones, layout.plot.height, (index) => ({
     title: layout.buckets[index]?.label ?? "",
     rows: [
       {
@@ -46,16 +43,21 @@ const commitsChart = (layout: ActivityLayout): SVGElement[] => [
         key: "c-commits",
       },
     ],
-  })),
-];
+  }));
+  return {
+    stops: hover.stops,
+    marks: [
+      ...valueAxis(layout.commits.ticks, layout.plot.width),
+      ...barMarks(layout.commits.bars, "c-commits"),
+      baseline(layout, layout.plot.height),
+      ...timeAxis(layout.timeTicks, layout.plot.height),
+      ...hover.marks,
+    ],
+  };
+};
 
-const churnChart = (layout: ActivityLayout): SVGElement[] => [
-  ...valueAxis(layout.churn.ticks, layout.plot.width),
-  ...barMarks(layout.churn.added, "c-added"),
-  ...barMarks(layout.churn.deleted, "c-deleted"),
-  baseline(layout, layout.churn.zero),
-  ...timeAxis(layout.timeTicks, layout.plot.height),
-  ...hoverZones(layout.zones, layout.plot.height, (index) => ({
+const churnChart = (layout: ActivityLayout): Required<Plot> => {
+  const hover = hoverZones(layout.zones, layout.plot.height, (index) => ({
     title: layout.buckets[index]?.label ?? "",
     rows: [
       {
@@ -69,38 +71,60 @@ const churnChart = (layout: ActivityLayout): SVGElement[] => [
         key: "c-deleted",
       },
     ],
-  })),
-];
+  }));
+  return {
+    stops: hover.stops,
+    marks: [
+      ...valueAxis(layout.churn.ticks, layout.plot.width),
+      ...barMarks(layout.churn.added, "c-added"),
+      ...barMarks(layout.churn.deleted, "c-deleted"),
+      baseline(layout, layout.churn.zero),
+      ...timeAxis(layout.timeTicks, layout.plot.height),
+      ...hover.marks,
+    ],
+  };
+};
 
-const contributorsChart = (layout: ActivityLayout): SVGElement[] => {
+const contributorsChart = (layout: ActivityLayout): Required<Plot> => {
   const { points, ticks, area, line, zones } = layout.contributors;
   const last = points.at(-1);
-  return [
-    ...valueAxis(ticks, layout.plot.width),
-    s("path", { class: "wash c-people", d: area }),
-    s("path", { class: "line c-people", d: line }),
-    ...(last === undefined
-      ? []
-      : [s("circle", { class: "dot c-people", cx: last.x, cy: last.y, r: 5 })]),
-    baseline(layout, layout.plot.height),
-    ...timeAxis(layout.timeTicks, layout.plot.height),
-    ...hoverZones(zones, layout.plot.height, (index) => ({
-      title: points[index]?.month ?? "",
-      rows: [
-        {
-          label: "active contributors",
-          value: formatCount(points[index]?.contributors ?? 0),
-          key: "c-people",
-        },
-      ],
-    })),
-  ];
+  const hover = hoverZones(zones, layout.plot.height, (index) => ({
+    title: points[index]?.month ?? "",
+    rows: [
+      {
+        label: "active contributors",
+        value: formatCount(points[index]?.contributors ?? 0),
+        key: "c-people",
+      },
+    ],
+  }));
+  return {
+    stops: hover.stops,
+    marks: [
+      ...valueAxis(ticks, layout.plot.width),
+      s("path", { class: "wash c-people", d: area }),
+      s("path", { class: "line c-people", d: line }),
+      ...(last === undefined
+        ? []
+        : [
+            s("circle", {
+              class: "dot c-people",
+              cx: last.x,
+              cy: last.y,
+              r: 5,
+            }),
+          ]),
+      baseline(layout, layout.plot.height),
+      ...timeAxis(layout.timeTicks, layout.plot.height),
+      ...hover.marks,
+    ],
+  };
 };
 
 type ChartSpec = {
   readonly title: (resolution: Resolution) => string;
   readonly description: string;
-  readonly marks: (layout: ActivityLayout) => SVGElement[];
+  readonly marks: (layout: ActivityLayout) => Plot;
   readonly extras?: readonly Node[];
 };
 
@@ -116,7 +140,7 @@ const chart = (activity: Report["activity"], spec: ChartSpec): HTMLElement => {
       return chartSvg(size, spec.description);
     }
     caption.textContent = spec.title(layout.resolution);
-    return chartSvg(size, spec.description, ...spec.marks(layout));
+    return chartSvg(size, spec.description, spec.marks(layout));
   });
   return figure;
 };

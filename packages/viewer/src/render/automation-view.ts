@@ -13,6 +13,7 @@ import {
   timeAxis,
   valueAxis,
 } from "./chart-frame.js";
+import type { Plot } from "./chart-frame.js";
 import { h, s } from "./dom.js";
 import { hoverZones } from "./hover.js";
 import { legend, legendItem, section, tableView } from "./section.js";
@@ -25,27 +26,8 @@ type Automation = Report["automation"];
 const entityOf = (key: string): string =>
   AUTOMATION_CLASSES.find((entry) => entry.key === key)?.entity ?? "";
 
-const stackMarks = (layout: AutomationLayout): SVGElement[] => [
-  ...valueAxis(layout.ticks, layout.plot.width),
-  ...layout.stacks.flatMap(({ segments }) =>
-    segments
-      .filter(({ height }) => height > 0)
-      .map((segment) =>
-        s("path", {
-          class: `mark ${entityOf(segment.key)}`,
-          d: barPath(segment),
-        }),
-      ),
-  ),
-  s("line", {
-    class: "baseline",
-    x1: 0,
-    x2: layout.plot.width,
-    y1: layout.plot.height,
-    y2: layout.plot.height,
-  }),
-  ...timeAxis(layout.timeTicks, layout.plot.height),
-  ...hoverZones(layout.zones, layout.plot.height, (index) => {
+const stackPlot = (layout: AutomationLayout): Required<Plot> => {
+  const hover = hoverZones(layout.zones, layout.plot.height, (index) => {
     const stack = layout.stacks[index];
     return {
       title: stack?.month ?? "",
@@ -60,8 +42,33 @@ const stackMarks = (layout: AutomationLayout): SVGElement[] => [
         { label: "commits in total", value: formatCount(stack?.total ?? 0) },
       ],
     };
-  }),
-];
+  });
+  return {
+    stops: hover.stops,
+    marks: [
+      ...valueAxis(layout.ticks, layout.plot.width),
+      ...layout.stacks.flatMap(({ segments }) =>
+        segments
+          .filter(({ height }) => height > 0)
+          .map((segment) =>
+            s("path", {
+              class: `mark ${entityOf(segment.key)}`,
+              d: barPath(segment),
+            }),
+          ),
+      ),
+      s("line", {
+        class: "baseline",
+        x1: 0,
+        x2: layout.plot.width,
+        y1: layout.plot.height,
+        y2: layout.plot.height,
+      }),
+      ...timeAxis(layout.timeTicks, layout.plot.height),
+      ...hover.marks,
+    ],
+  };
+};
 
 const stackedChart = (months: Automation["months"]): HTMLElement => {
   const { figure, host } = chartFigure("Commits per month by author class");
@@ -73,7 +80,7 @@ const stackedChart = (months: Automation["months"]): HTMLElement => {
     return chartSvg(
       size,
       description,
-      ...(layout === null ? [] : stackMarks(layout)),
+      layout === null ? undefined : stackPlot(layout),
     );
   });
   return figure;

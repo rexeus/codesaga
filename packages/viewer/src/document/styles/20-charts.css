@@ -105,6 +105,12 @@ svg .zone {
   fill: transparent;
 }
 
+svg .zone.active {
+  fill: var(--wash);
+  stroke: var(--text-2);
+  stroke-width: 1;
+}
+
 .tooltip {
   position: fixed;
   z-index: 10;
