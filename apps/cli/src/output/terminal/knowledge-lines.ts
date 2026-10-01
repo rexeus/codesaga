@@ -84,13 +84,36 @@ const directoryLines = (
   );
 };
 
-/** The knowledge block: the truck factor, and the five riskiest directories when there are any. */
+/**
+ * The one line that replaces the whole block in a repository with a single
+ * contributor, where every directory is an island by construction; `null` otherwise.
+ */
+const soleContributorLine = (report: Report): string | null => {
+  const { truckFactor } = report.knowledge;
+  const [only] = truckFactor.people;
+  return report.overview.contributors.total === 1 &&
+    truckFactor.value === 1 &&
+    only !== undefined
+    ? `one contributor — ${nameOf(only)}${inactiveMark(only)} is the only expert everywhere`
+    : null;
+};
+
+/**
+ * The knowledge block: the truck factor, and the five riskiest directories when there are any.
+ * A single-contributor repository gets one line instead.
+ */
 export const knowledgeLines = (
   report: Report,
   style: Style,
-): ReadonlyArray<string> => [
-  ...section("Truck factor", [truckFactorLine(report.knowledge)], style),
-  ...(report.knowledge.directories.length === 0
-    ? []
-    : directoryLines(report.knowledge, style)),
-];
+): ReadonlyArray<string> => {
+  const sole = soleContributorLine(report);
+  if (sole !== null) {
+    return section("Knowledge", [sole], style);
+  }
+  return [
+    ...section("Truck factor", [truckFactorLine(report.knowledge)], style),
+    ...(report.knowledge.directories.length === 0
+      ? []
+      : directoryLines(report.knowledge, style)),
+  ];
+};

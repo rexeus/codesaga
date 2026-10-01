@@ -137,6 +137,47 @@ describe("renderAnalysis truck factor", () => {
   });
 });
 
+const soleAuthor = (active: boolean) => {
+  const report = sampleReport();
+  const [first] = report.knowledge.truckFactor.people;
+  const person = Object.assign({}, first, {
+    name: "Dennis Wentzien",
+    active,
+  });
+  return {
+    ...report,
+    overview: {
+      ...report.overview,
+      contributors: { total: 1, active30: 1, active90: 1, active365: 1 },
+    },
+    knowledge: {
+      ...report.knowledge,
+      truckFactor: { value: 1, people: [person] },
+    },
+  };
+};
+
+describe("renderAnalysis in a single-author repository", () => {
+  it("says once that one person is the only expert instead of listing islands", () => {
+    const lines = renderAnalysis(soleAuthor(true), plain).split("\n");
+
+    expect(lines).toContain(
+      "Knowledge                  one contributor — Dennis Wentzien is the only expert everywhere",
+    );
+    expect(lines.some((line) => line.startsWith("Truck factor"))).toBe(false);
+    expect(lines.some((line) => line.startsWith("Knowledge risks"))).toBe(
+      false,
+    );
+    expect(lines.some((line) => line.includes("island"))).toBe(false);
+  });
+
+  it("marks a sole contributor who is no longer active", () => {
+    expect(renderAnalysis(soleAuthor(false), plain)).toContain(
+      "one contributor — Dennis Wentzien (inactive) is the only expert everywhere",
+    );
+  });
+});
+
 describe("renderAnalysis edge cases", () => {
   it("names a repository without commits and omits what it cannot know", () => {
     const report = sampleReport();
