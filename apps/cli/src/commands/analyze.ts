@@ -3,7 +3,10 @@ import type { AnalyzeOptions } from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import { Argument, Command, Flag } from "effect/cli";
 
-import { writeHtmlReport } from "../output/html/write-html-report.js";
+import {
+  prepareHtmlTarget,
+  writeHtmlReport,
+} from "../output/html/write-html-report.js";
 import { limitReport } from "../output/limit-report.js";
 import { printResult } from "../output/print-result.js";
 import { warnIfShallow } from "../output/shallow-warning.js";
@@ -72,6 +75,14 @@ export const analyzeCommand = Command.make(
   Effect.fn(function* (flags) {
     const { path, json, since, cache, include, exclude, limit } = flags;
     const cwd = yield* WorkingDirectory;
+    // Fail on an unwritable --out before the slow analysis, not after it.
+    const htmlTarget =
+      flags.html || Option.isSome(flags.out)
+        ? yield* prepareHtmlTarget(
+            cwd,
+            Option.getOrElse(flags.out, () => DEFAULT_HTML_FILE),
+          )
+        : undefined;
     // A path argument both locates the repository and narrows the scope,
     // so `codesaga analyze ../other-repo` works from anywhere.
     const target = yield* resolveAnalysisTarget(cwd, path);
@@ -86,13 +97,8 @@ export const analyzeCommand = Command.make(
     const report = yield* analyze(options);
     yield* warnIfShallow(report);
     // The dashboard embeds the whole report: --limit bounds only the JSON document.
-    if (flags.html || Option.isSome(flags.out)) {
-      yield* writeHtmlReport({
-        report,
-        file: Option.getOrElse(flags.out, () => DEFAULT_HTML_FILE),
-        cwd,
-        open: flags.open,
-      });
+    if (htmlTarget !== undefined) {
+      yield* writeHtmlReport({ report, target: htmlTarget, open: flags.open });
     }
     // --limit bounds the JSON document; the terminal view picks its own top entries.
     return yield* printResult(

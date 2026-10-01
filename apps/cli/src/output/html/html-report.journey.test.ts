@@ -75,19 +75,41 @@ describe("codesaga analyze --html", () => {
         expect(existsSync(join(repo.root, "codesaga-report.html"))).toBe(true);
       }).pipe(Effect.scoped),
   );
+});
 
-  it.live("exits 1 when the dashboard file cannot be written", () =>
+describe("codesaga analyze --out", () => {
+  it.live(
+    "exits 1 naming the missing directory before any history is read",
+    () =>
+      Effect.gen(function* () {
+        // Not a repository: reading history would end with exit 3, so exit 1 proves the check ran first.
+        const cwd = yield* makeTempDirectory;
+        const missing = join(cwd, "missing");
+
+        const result = yield* journey({
+          args: ["analyze", "--out", join("missing", "saga.html"), "--no-open"],
+          cwd,
+        });
+
+        expect(result.stdout).toBe("");
+        expect(result.stderr).toBe(
+          `codesaga: cannot write ${join(missing, "saga.html")}: directory does not exist: ${missing}`,
+        );
+        expect(result.exitCode).toBe(1);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("exits 1 when the dashboard path is a directory", () =>
     Effect.gen(function* () {
       const repo = yield* makeTeamProject;
-      const out = join(repo.root, "missing", "saga.html");
 
       const result = yield* journey({
-        args: ["analyze", "--out", out, "--no-open"],
+        args: ["analyze", "--out", repo.root, "--no-open"],
         cwd: repo.root,
       });
 
       expect(result.stdout).toBe("");
-      expect(result.stderr).toContain(`codesaga: cannot write ${out}`);
+      expect(result.stderr).toContain(`codesaga: cannot write ${repo.root}`);
       expect(result.exitCode).toBe(1);
     }).pipe(Effect.scoped),
   );

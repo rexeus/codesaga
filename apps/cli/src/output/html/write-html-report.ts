@@ -33,23 +33,48 @@ const openInBrowser = (file: string) =>
   );
 
 /**
- * Writes the self-contained dashboard for `report` to `file` (resolved against
- * `cwd`), prints its absolute path to stderr so stdout stays free for
- * `--json`, and opens it unless `open` is false. Failing to open is not an
- * error.
+ * Resolves `file` against `cwd` and checks that its directory exists and is
+ * writable, so a bad `--out` fails before the analysis reads any history.
+ * Returns the absolute target.
+ *
+ * Fails with `HtmlWriteFailed` naming the directory.
+ */
+export const prepareHtmlTarget = (cwd: string, file: string) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const paths = yield* Path.Path;
+    const target = paths.resolve(cwd, file);
+    const directory = paths.dirname(target);
+    const fail = (reason: string) =>
+      new HtmlWriteFailed({ path: target, reason: `${reason}: ${directory}` });
+    const info = yield* fs
+      .stat(directory)
+      .pipe(Effect.mapError(() => fail("directory does not exist")));
+    if (info.type !== "Directory") {
+      return yield* fail("not a directory");
+    }
+    yield* fs
+      .access(directory, { writable: true })
+      .pipe(Effect.mapError(() => fail("directory is not writable")));
+    return target;
+  });
+
+/**
+ * Writes the self-contained dashboard for `report` to `target` (an absolute
+ * path from `prepareHtmlTarget`), prints the path to stderr so stdout stays
+ * free for `--json`, and opens it unless `open` is false. Failing to open is
+ * not an error.
  */
 export const writeHtmlReport = (options: {
   readonly report: Report;
-  readonly file: string;
-  readonly cwd: string;
+  readonly target: string;
   readonly open: boolean;
 }) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
-    const paths = yield* Path.Path;
-    const target = paths.resolve(options.cwd, options.file);
+    const { report, target, open } = options;
     yield* fs
-      .writeFileString(target, renderReportHtml(options.report))
+      .writeFileString(target, renderReportHtml(report))
       .pipe(
         Effect.mapError(
           (error) =>
@@ -57,7 +82,7 @@ export const writeHtmlReport = (options: {
         ),
       );
     yield* Console.error(`codesaga: wrote ${escapeForTerminal(target)}`);
-    if (options.open) {
+    if (open) {
       yield* openInBrowser(target);
     }
   });

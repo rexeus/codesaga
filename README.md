@@ -24,7 +24,7 @@ Requires Node.js 22 or newer and `git` on your PATH. Works for any language.
 
 `codesaga analyze --html` writes `codesaga-report.html` — one self-contained file, no network access — and opens it. Top to bottom: key figures, activity, automation, knowledge, contributors, punch card and languages, in light and dark mode. Every chart has a table view, and tables sort by any column.
 
-`--out <file>` picks the path and implies `--html`; `--no-open` skips the browser. The path is printed to stderr, so `--html --json` still gives a clean stdout.
+`--out <file>` picks the path and implies `--html`; its directory must exist, which is checked before the analysis starts. `--no-open` skips the browser. The path is printed to stderr, so `--html --json` still gives a clean stdout.
 
 ## For agents
 
