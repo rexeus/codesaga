@@ -29,7 +29,7 @@ export type TreeSizes = {
 };
 
 /** Identifies the directory of `file` after `depth` steps below its anchor. */
-export const nodeKey = (file: TreeFile, depth: number): string =>
+const nodeKey = (file: TreeFile, depth: number): string =>
   `${file.anchor}\0${file.dirs.slice(0, depth).join("/")}`;
 
 const increment = (counts: Map<string, number>, key: string): void => {
