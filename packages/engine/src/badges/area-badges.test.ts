@@ -25,6 +25,7 @@ const quietArea = (
   overrides: Partial<AreaBadgeInput> = {},
 ): AreaBadgeInput => ({
   kind: "package",
+  path: "packages/a",
   paths: Array.from({ length: 10 }, (_, i) => `packages/a/src/f${i}.ts`),
   truckFactor: 2,
   island: false,
@@ -200,6 +201,24 @@ describe("areaBadges rules in detail", () => {
       kindsOf({ firstCommits: [firstCommit(5), elsewhere] }),
     ).not.toContain("newcomer-friendly");
   });
+});
+
+describe("areaBadges well tested", () => {
+  it.each(["packages/a/test", "tests/fixtures", "src/__tests__", "spec"])(
+    "is not awarded to the test area %s",
+    (path) => {
+      expect(kindsOf({ path, paths: withTests(10) })).not.toContain(
+        "well-tested",
+      );
+    },
+  );
+
+  it.each([".", "packages/testing", "packages/latest"])(
+    "is awarded to %s, which is no test directory",
+    (path) => {
+      expect(kindsOf({ path, paths: withTests(10) })).toContain("well-tested");
+    },
+  );
 });
 
 describe("areaBadges evidence and order", () => {

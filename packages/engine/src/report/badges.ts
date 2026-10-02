@@ -26,7 +26,8 @@ export const AreaBadge = Schema.Struct({
    * `thresholds.badges.quietDays` days. `newcomer-friendly`: at least
    * `thresholds.badges.newcomerFriendlyFirstCommits` people made their first
    * commit here in the last `newcomerFriendlyDays` days. `well-tested`: at
-   * least `thresholds.badges.wellTestedShare` of the files are tests.
+   * least `thresholds.badges.wellTestedShare` of the files are tests; never
+   * awarded to an area whose own path is inside a test directory.
    */
   kind: Schema.Literals([
     "island",

@@ -5,7 +5,7 @@
 import { activity } from "../activity/activity.js";
 import { punchcard } from "../activity/punchcard.js";
 import { automation } from "../automation/automation.js";
-import { AREA_BADGE_THRESHOLDS } from "../badges/area-badges.js";
+import { AREA_BADGE_THRESHOLDS } from "../badges/area-badge-thresholds.js";
 import { CONTRIBUTOR_BADGE_THRESHOLDS } from "../badges/contributor-badges.js";
 import { comparison } from "../compare/comparison.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";

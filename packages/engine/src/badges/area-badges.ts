@@ -1,5 +1,5 @@
 // Owns the badges of one area: which achievements its knowledge state and history earn, in priority order.
-// Apart from the partition because the rules read commits and peers; only the thresholds are part of the report.
+// Apart from the partition because the rules read commits and peers; the thresholds live in `area-badge-thresholds.ts`.
 // Cost: constant work per area over the numbers the caller gathered, plus one pass over its files and first commits.
 
 import { DateTime } from "effect";
@@ -10,21 +10,7 @@ import { ORPHANED_SHARE } from "../knowledge/file-set.js";
 import type { AreaBadge } from "../report/badges.js";
 import { nounOf, percentOf } from "../report/sentences.js";
 import { isTestPath } from "../universe/path-kinds.js";
-
-/** The rules behind the area badges, for the report's `thresholds.badges`. */
-export const AREA_BADGE_THRESHOLDS = {
-  sharedActiveExperts: 4,
-  sharedTruckFactor: 4,
-  fadingFromDays: 90,
-  fadingToDays: 183,
-  newDays: 90,
-  newAfterStartDays: 180,
-  handoverDays: 180,
-  quietDays: 183,
-  newcomerFriendlyFirstCommits: 2,
-  newcomerFriendlyDays: 180,
-  wellTestedShare: 0.4,
-};
+import { AREA_BADGE_THRESHOLDS } from "./area-badge-thresholds.js";
 
 const {
   sharedActiveExperts,
@@ -58,6 +44,8 @@ type AreaExpert = {
 export type AreaBadgeInput = {
   /** A `rest` area groups small leftovers and earns no badge. */
   readonly kind: "package" | "directory" | "rest";
+  /** The area's root, repository-relative; "." for the repository root. */
+  readonly path: string;
   /** The area's universe files, repository-relative. */
   readonly paths: ReadonlyArray<string>;
   readonly truckFactor: number;
@@ -220,9 +208,12 @@ const newcomerFriendly = ({ firstCommits, paths, nowSeconds }: Context) => {
     : undefined;
 };
 
-const wellTested = ({ paths }: Context) => {
-  const tests = paths.filter((path) => isTestPath(path)).length;
-  return paths.length > 0 && tests / paths.length >= wellTestedShare
+/** An area inside a test directory is made of tests by definition, so being well tested says nothing. */
+const wellTested = ({ path, paths }: Context) => {
+  const tests = paths.filter((file) => isTestPath(file)).length;
+  return paths.length > 0 &&
+    !isTestPath(`${path}/placeholder`) &&
+    tests / paths.length >= wellTestedShare
     ? {
         kind: "well-tested" as const,
         label: "Well tested",

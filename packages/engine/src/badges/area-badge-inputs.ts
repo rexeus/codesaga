@@ -168,6 +168,7 @@ export const areaBadgeInputs = (
     );
     return {
       kind: area.kind,
+      path: area.path,
       paths: area.paths,
       truckFactor: area.truckFactor,
       island: area.island,
