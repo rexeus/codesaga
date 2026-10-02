@@ -14,6 +14,10 @@ const CATEGORY_OF: Record<TerritoryBadge["kind"], TerritoryBadge["category"]> =
     "new-territory": "activity",
     "in-focus": "activity",
     quiet: "activity",
+    heavyweight: "code",
+    hotspot: "code",
+    churning: "code",
+    "deeply-nested": "code",
     "well-tested": "code",
   };
 

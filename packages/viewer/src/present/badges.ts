@@ -41,6 +41,10 @@ const TERRITORY_LOOKS: Record<
   "in-focus": { icon: "target", tone: "info" },
   quiet: { icon: "snow", tone: "plain" },
   "newcomer-friendly": { icon: "usersplus", tone: "good" },
+  heavyweight: { icon: "layers", tone: "plain" },
+  hotspot: { icon: "flame", tone: "warn" },
+  churning: { icon: "repeat", tone: "plain" },
+  "deeply-nested": { icon: "branch", tone: "plain" },
   "well-tested": { icon: "check", tone: "good" },
 };
 

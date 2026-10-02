@@ -13,6 +13,27 @@ export type TerritoryExpert = {
   readonly lastTime: number;
 };
 
+/** The code stats the code badges compare, for a territory and for the repository alike. */
+export type CodeFacts = {
+  readonly files: number;
+  readonly codeLines: number;
+  readonly medianFileLines: number;
+  readonly medianRevisions: number;
+  /** Revisions times lines, summed over the files. */
+  readonly revisionLines: number;
+  readonly complexityPerLine: number;
+};
+
+/** The territories at one level of the tree, the one a territory belongs to, as the relative code badges compare them. */
+export type SiblingFacts = {
+  /** The named territories at the level, the territory itself included; the `other` territory is not one of them. */
+  readonly count: number;
+  /** Code lines of those territories together. */
+  readonly codeLines: number;
+  /** Revisions times lines of those territories together. */
+  readonly revisionLines: number;
+};
+
 /** What the rules read about one territory; the caller gathers it from the knowledge model and the commits. */
 export type TerritoryBadgeInput = {
   /** An `other` territory groups small leftovers and earns no badge. */
@@ -28,6 +49,12 @@ export type TerritoryBadgeInput = {
   readonly experts: ReadonlyArray<TerritoryExpert>;
   /** For each of the territory's files, the time of its first commit; their earliest is when the territory was created. */
   readonly fileFirstCommits: ReadonlyArray<number>;
+  /** The code stats of the territory's files. */
+  readonly code: CodeFacts;
+  /** The code stats of the whole universe, which the code badges compare the territory with. */
+  readonly repository: CodeFacts;
+  /** The territories at the same level of the tree: the siblings under the same parent, or the first cut. */
+  readonly siblings: SiblingFacts;
   /** The newest commit that touched any file of the territory; undefined when none is known. */
   readonly lastChangeTime: number | undefined;
   /** Human and agent-assisted commits in the last `inFocusDays` days that touched the territory. */

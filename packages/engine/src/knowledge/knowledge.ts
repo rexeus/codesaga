@@ -30,8 +30,12 @@ import {
   RECOMMENDATION_ACTIVE_DAYS,
   recommendDetail,
 } from "./recommended-detail.js";
-import { territoriesAtDetail, territoryTree } from "./territories.js";
-import type { TerritoryTree, TerritoryWithFiles } from "./territories.js";
+import {
+  measureTerritories,
+  territoriesAtDetail,
+  territoryTree,
+} from "./territories.js";
+import type { MeasuredTerritory, TerritoryTree } from "./territories.js";
 import { MAX_DETAIL } from "./territory-partition.js";
 import {
   BIG_FILES_SHARE,
@@ -115,7 +119,7 @@ type BadgeInputs = ReturnType<typeof territoryBadgeInputs>;
 
 /** The report's territory: the described one with its date and badges, and its children the same. */
 const reportedTerritory = (
-  source: TerritoryWithFiles,
+  source: MeasuredTerritory,
   inputs: BadgeInputs,
   facts: KnowledgeFacts,
 ): Territory => {
@@ -124,7 +128,7 @@ const reportedTerritory = (
   return {
     ...territory,
     lastChangedAt: isoOfEpochSeconds(input?.lastChangeTime ?? facts.headTime),
-    stats: facts.stats.forPaths(source.paths),
+    stats: source.stats,
     badges: input === undefined ? [] : territoryBadges(input, facts.now),
     territories: territories.map((child) =>
       reportedTerritory(child, inputs, facts),
@@ -144,7 +148,16 @@ const territoriesSection = (
   });
   const { detail: recommendedDetail, reason } = recommendationFor(facts, tree);
   const history = territoryHistoryOf(facts.commits, facts.now, facts.shallow);
-  const inputs = territoryBadgeInputs(tree.territories, history, model);
+  const territories = measureTerritories(
+    tree.territories,
+    facts.stats.forPaths,
+  );
+  const inputs = territoryBadgeInputs(
+    territories,
+    history,
+    model,
+    facts.stats.repository,
+  );
   return {
     section: {
       detail: Math.min(
@@ -155,11 +168,11 @@ const territoriesSection = (
       maxDetail: tree.maxDetail,
       reason,
       totalTerritories: tree.territories.length,
-      territories: tree.territories.map((territory) =>
+      territories: territories.map((territory) =>
         reportedTerritory(territory, inputs, facts),
       ),
     },
-    recommended: territoriesAtDetail(tree.territories, recommendedDetail).map(
+    recommended: territoriesAtDetail(territories, recommendedDetail).map(
       (territory) =>
         storyTerritoryOf(
           territory,

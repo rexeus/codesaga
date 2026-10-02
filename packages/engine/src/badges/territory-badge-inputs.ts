@@ -10,7 +10,12 @@ import { isActiveWithin } from "../contributors/activeness.js";
 import type { Human } from "../knowledge/contributions.js";
 import { isActive } from "../knowledge/model.js";
 import type { KnowledgeModel } from "../knowledge/model.js";
-import type { TerritoryWithFiles } from "../knowledge/territories.js";
+import type {
+  MeasuredTerritory,
+  TerritoryWithFiles,
+} from "../knowledge/territories.js";
+import type { CodeStats } from "../report/code-stats.js";
+import { codeFactsOf, siblingFactsOf } from "./code-facts.js";
 import type { TerritoryBadgeInput } from "./territory-badge-facts.js";
 import { TERRITORY_BADGE_THRESHOLDS } from "./territory-badge-thresholds.js";
 
@@ -168,19 +173,23 @@ const expertsOf = (
 };
 
 /**
- * The badge input of every territory of the tree, found by the territory itself. The
- * territory in focus is chosen among its named siblings, the territories with the
- * same parent, or the first cut: the commits of an `other` territory add up many
- * small ones and do not compete.
+ * The badge input of every territory of the tree, found by the territory itself.
+ * `repositoryStats` are the whole universe's, which the code badges compare with.
+ * The territory in focus is chosen among its named siblings, the territories with
+ * the same parent, or the first cut: the commits of an `other` territory add up
+ * many small ones and do not compete.
  */
 export const territoryBadgeInputs = (
-  tree: ReadonlyArray<TerritoryWithFiles>,
+  tree: ReadonlyArray<MeasuredTerritory>,
   history: TerritoryHistory,
   model: KnowledgeModel,
-): ReadonlyMap<TerritoryWithFiles, TerritoryBadgeInput> => {
+  repositoryStats: CodeStats,
+): ReadonlyMap<MeasuredTerritory, TerritoryBadgeInput> => {
   const facts = territoryFactsOf(tree, history);
-  const inputs = new Map<TerritoryWithFiles, TerritoryBadgeInput>();
-  const visit = (siblings: ReadonlyArray<TerritoryWithFiles>): void => {
+  const repository = codeFactsOf(repositoryStats);
+  const inputs = new Map<MeasuredTerritory, TerritoryBadgeInput>();
+  const visit = (siblings: ReadonlyArray<MeasuredTerritory>): void => {
+    const siblingFacts = siblingFactsOf(siblings);
     for (const territory of siblings) {
       const own = facts.get(territory);
       const peers = siblings.flatMap((peer) =>
@@ -196,6 +205,9 @@ export const territoryBadgeInputs = (
         island: territory.island,
         orphaned: territory.orphaned,
         experts: expertsOf(territory, model, own?.personFirst ?? new Map()),
+        code: codeFactsOf(territory.stats),
+        repository,
+        siblings: siblingFacts,
         fileFirstCommits: territory.paths.flatMap(
           (path) => history.fileFirstCommits.get(path) ?? [],
         ),

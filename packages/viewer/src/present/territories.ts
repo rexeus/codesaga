@@ -95,6 +95,10 @@ const SOLO_BADGES = new Set([
   "new-territory",
   "in-focus",
   "quiet",
+  "heavyweight",
+  "hotspot",
+  "churning",
+  "deeply-nested",
   "well-tested",
 ]);
 

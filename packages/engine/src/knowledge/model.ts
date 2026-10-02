@@ -43,7 +43,7 @@ export type KnowledgeInput = {
 
 /** What the territories read besides the model's input. */
 export type TerritoryInput = {
-  /** The code stats of the universe; every territory carries the stats of its files. */
+  /** The code stats of the universe; every territory carries the stats of its files, and the code badges compare them with the repository's. */
   readonly stats: UniverseStats;
 };
 

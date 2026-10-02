@@ -60,7 +60,7 @@ export const CodeStats = Schema.Struct({
     p90: Schema.Finite,
     /** Revisions of all files together. */
     revisions: Count,
-    /** The sum over the files of revisions times code lines, after codeheat's churn times size. */
+    /** The sum over the files of revisions times code lines; the weight that `thresholds.badges.hotspotShare` compares, after codeheat's churn times size. */
     revisionLines: Count,
     /** Buckets "1", "2", "3–4", "5–9", "10–19" and "20+" revisions. */
     histogram: Schema.Array(Bin),

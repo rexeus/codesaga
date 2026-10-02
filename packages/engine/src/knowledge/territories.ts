@@ -4,6 +4,7 @@
 
 import { Order } from "effect";
 
+import type { CodeStats } from "../report/code-stats.js";
 import type { Territory } from "../report/knowledge-report.js";
 import { byRisk, describeDirectory } from "./directories.js";
 import type { KnowledgeModel } from "./model.js";
@@ -22,6 +23,12 @@ export type TerritoryWithFiles = Omit<
   /** The territory's universe files, repository-relative, including those of its children. */
   readonly paths: ReadonlyArray<string>;
   readonly territories: ReadonlyArray<TerritoryWithFiles>;
+};
+
+/** A territory with the code stats of its files, as the badge rules compare it; its children are measured too. */
+export type MeasuredTerritory = Omit<TerritoryWithFiles, "territories"> & {
+  readonly stats: CodeStats;
+  readonly territories: ReadonlyArray<MeasuredTerritory>;
 };
 
 /** The territories described, and how their details run. */
@@ -117,3 +124,17 @@ export const territoriesAtDetail = <
       ? territoriesAtDetail(territory.territories, detail)
       : [territory],
   );
+
+/**
+ * The territories with the code stats of their files, children included.
+ * `statsOf` measures the files at the given paths.
+ */
+export const measureTerritories = (
+  territories: ReadonlyArray<TerritoryWithFiles>,
+  statsOf: (paths: ReadonlyArray<string>) => CodeStats,
+): ReadonlyArray<MeasuredTerritory> =>
+  territories.map((territory) => ({
+    ...territory,
+    stats: statsOf(territory.paths),
+    territories: measureTerritories(territory.territories, statsOf),
+  }));

@@ -1,44 +1,15 @@
 import { DateTime } from "effect";
 import { describe, expect, it } from "vitest";
 
-import { at } from "../testing/classified-commit.js";
+import {
+  daysAgo,
+  expert,
+  quietTerritory,
+} from "../testing/territory-badge-input.js";
 import type { TerritoryBadgeInput } from "./territory-badge-facts.js";
 import { territoryBadges } from "./territory-badges.js";
 
 const now = DateTime.makeUnsafe("2026-07-01T00:00:00Z");
-const nowSeconds = at("2026-07-01T00:00:00Z");
-
-const daysAgo = (days: number): number => nowSeconds - days * 86_400;
-
-const expert = (
-  overrides: Partial<TerritoryBadgeInput["experts"][number]> = {},
-) => ({
-  files: 5,
-  soleFiles: 0,
-  firstTime: daysAgo(2000),
-  lastTime: daysAgo(1),
-  ...overrides,
-});
-
-/** A territory that earns no badge: ten source files, two active experts, old, changed yesterday. */
-const quietTerritory = (
-  overrides: Partial<TerritoryBadgeInput> = {},
-): TerritoryBadgeInput => ({
-  kind: "package",
-  path: "packages/a",
-  paths: Array.from({ length: 10 }, (_, i) => `packages/a/src/f${i}.ts`),
-  truckFactor: 2,
-  island: false,
-  orphaned: false,
-  experts: [expert(), expert()],
-  fileFirstCommits: [daysAgo(2000), daysAgo(1500)],
-  lastChangeTime: daysAgo(1),
-  recentCommits: 0,
-  peerRecentCommits: 0,
-  startTime: 0,
-  firstCommits: [],
-  ...overrides,
-});
 
 const kindsOf = (overrides: Partial<TerritoryBadgeInput>) =>
   territoryBadges(quietTerritory(overrides), now).map(({ kind }) => kind);

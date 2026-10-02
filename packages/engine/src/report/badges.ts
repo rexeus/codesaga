@@ -27,7 +27,20 @@ export const TerritoryBadge = Schema.Struct({
    * repository are not new one by one. `in-focus`: the territory with the most
    * human and agent-assisted commits in the last `thresholds.badges.inFocusDays`
    * days, whatever the window of the analysis. `quiet`: unchanged for at least
-   * `thresholds.badges.quietDays` days. `well-tested`: at least
+   * `thresholds.badges.quietDays` days. `heavyweight`: at least
+   * `thresholds.badges.heavyweightShare` of the repository's code lines, or a
+   * median file of at least `heavyweightMedianFileLines` lines. `hotspot`: at
+   * least `thresholds.badges.hotspotShare` of the repository's revisions times
+   * lines (`stats.churn.revisionLines`), after codeheat's churn times size.
+   * Both also need `codeBadgeMinSiblings` named territories at the territory's
+   * level of the tree, itself included, and a share of their code lines
+   * (`heavyweight`) or revisions times lines (`hotspot`) of at least
+   * `codeBadgeFairShareFactor` times the fair share, one over their number, so
+   * a small cut does not badge everything. `churning`: the median
+   * file was revised at least `churningRatio` times as often as the
+   * repository's and at least `churningMinRevisions` times. `deeply-nested`:
+   * at least `nestedRatio` times the repository's indentation levels per line
+   * and at least `nestedMinLevels`. `well-tested`: at least
    * `thresholds.badges.wellTestedShare` of the files are tests; never awarded to
    * a territory whose own path is inside a test directory.
    */
@@ -42,12 +55,16 @@ export const TerritoryBadge = Schema.Struct({
     "new-territory",
     "in-focus",
     "quiet",
+    "heavyweight",
+    "hotspot",
+    "churning",
+    "deeply-nested",
     "well-tested",
   ]),
   /**
    * What the badge is about: `knowledge` (`island`, `orphaned`, `one-expert`,
    * `shared-knowledge`, `knowledge-fading`, `handover`, `newcomer-friendly`),
-   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`well-tested`).
+   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`heavyweight`, `hotspot`, `churning`, `deeply-nested`, `well-tested`).
    * Determined by `kind`.
    */
   category: Schema.Literals(["knowledge", "code", "activity"]),

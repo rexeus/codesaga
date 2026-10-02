@@ -10,6 +10,7 @@ import { ORPHANED_SHARE } from "../knowledge/file-set.js";
 import type { TerritoryBadge } from "../report/badges.js";
 import { nounOf, percentOf } from "../report/sentences.js";
 import { isTestPath } from "../universe/path-kinds.js";
+import { churning, deeplyNested, heavyweight, hotspot } from "./code-badges.js";
 import { withCategory } from "./territory-badge-category.js";
 import type { EarnedBadge } from "./territory-badge-category.js";
 import type {
@@ -204,13 +205,17 @@ const RULES: ReadonlyArray<(context: Context) => EarnedBadge | undefined> = [
   inFocus,
   quiet,
   newcomerFriendly,
+  heavyweight,
+  hotspot,
+  churning,
+  deeplyNested,
   wellTested,
 ];
 
 /**
  * The badges the territory earns, most important first: island, orphaned, one
  * expert, shared knowledge, knowledge fading, handover, new territory, in focus,
- * quiet, newcomer-friendly, well tested. Each carries its rule and the numbers behind
+ * quiet, newcomer-friendly, heavyweight, hotspot, churning, deeply nested, well tested. Each carries its rule and the numbers behind
  * it as evidence. An `other` territory earns none. Pure: the caller gathers the
  * input from the knowledge model and the commits.
  */
