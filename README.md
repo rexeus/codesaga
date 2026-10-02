@@ -260,10 +260,10 @@ A deep dive is a language analysis beyond the code stats, in the report's `deepD
 
 - `files` — the universe's TypeScript and JavaScript files; it equals `parsed` plus `declarationFiles` plus every count in `skipped`.
 - `declarationFiles` — `.d.ts`, `.d.mts` and `.d.cts` files, which hold types only and are counted, not parsed.
-- `skipped` — files that were not analyzed, by reason, only for reasons that occurred: `too-large` (over 1 MiB), `minified` (lines average over 300 characters, or one is over 10,000), `too-deep` (nested more than 1,000 brackets deep, or deeper than a parser can follow), `syntax-error` (nothing could be recovered from the file), `parser-error`, `unreadable` and `parser-unavailable`. Hostile input is skipped and counted, never fatal.
+- `skipped` — files that were not analyzed, by reason, only for reasons that occurred: `too-large` (over 1 MiB), `minified` (non-blank lines average over 300 characters), `too-deep` (a syntax tree deeper than the parser's stack can follow), `syntax-error` (nothing could be recovered from the file), `parser-crashed` (the file killed the parser's process; the others of its batch are still parsed), `parser-error` (any other failure of the parser), `unreadable` and `parser-unavailable`. Hostile input is skipped and counted, never fatal.
 - `parser` — the parser's `name` and `version`.
 
-oxc-parser is codesaga's only runtime dependency. It ships a native binding for each platform. Where it or the binding cannot be loaded (an unsupported platform, or an install that left the optional binding out), `analyze` still succeeds: the section keeps its coverage, every file is skipped as `parser-unavailable`, `parser.version` is `null`, and `unavailable` gives the loader's message. `inspect` never loads the parser.
+oxc-parser is codesaga's only runtime dependency. It ships a native binding for each platform, and a native parser can crash its process on hostile input, so codesaga parses in up to four child processes (one fewer than your cores) that run the same program again; a file that kills one is found by bisecting its batch and is the only one lost. The children end with the run and write nothing to stdout. Where it or the binding cannot be loaded (an unsupported platform, or an install that left the optional binding out), `analyze` still succeeds: the section keeps its coverage, every file is skipped as `parser-unavailable`, `parser.version` is `null`, and `unavailable` gives the loader's message. `inspect` never loads the parser.
 
 ## How the numbers work
 
