@@ -158,11 +158,21 @@ const signatureOf = (areas: ReadonlyArray<PartitionArea>): string =>
  * `AREA_MIN_FILES` files (see `cutSteps`), so one package cannot become one
  * giant area. Areas with
  * fewer than `AREA_MIN_FILES` files are grouped per parent as one `rest` area.
- * Level 1 is always returned, with no areas for no files.
+ * Level 1 is always returned, with no areas for no files. A scope that is
+ * itself a file has one level with one `directory` area for that file.
  */
 export const partitionLevels = (
   input: PartitionInput,
 ): Arr.NonEmptyReadonlyArray<PartitionLevel> => {
+  const [onlyPath] = input.paths;
+  if (input.paths.length === 1 && onlyPath === input.scope) {
+    return [
+      {
+        depth: 1,
+        areas: [{ path: onlyPath, kind: "directory", paths: [onlyPath] }],
+      },
+    ];
+  }
   const files = placeFiles(input);
   const sizes = treeSizes(files);
   const cuts = Arr.makeBy(MAX_AREA_DEPTH, (index) =>

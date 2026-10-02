@@ -134,4 +134,24 @@ layer(NodeServices.layer)("analyze knowledge areas options", (it) => {
       ]);
     }),
   );
+
+  it.effect("shows a scoped file as one directory area of that file", () =>
+    Effect.gen(function* () {
+      yield* setNow;
+      const repo = yield* makeTempRepository;
+      yield* commitTwoPackages(repo);
+
+      const { knowledge } = yield* analyze(
+        analyzeOptionsFor(repo, { scope: "packages/lib/x.ts" }),
+      );
+
+      assert.deepStrictEqual(summarize(knowledge.areas.levels), [
+        ["directory packages/lib/x.ts 1"],
+      ]);
+      assert.strictEqual(
+        knowledge.areas.reason,
+        "level 1: 1 area for 1 active contributor",
+      );
+    }),
+  );
 });

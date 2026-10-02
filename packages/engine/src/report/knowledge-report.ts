@@ -83,7 +83,7 @@ const AreaKnowledge = Schema.Struct({
   /**
    * `package`: the root of a package, marked by a manifest such as
    * `package.json`; `directory`: a directory below a package root or below the
-   * scope; `rest`: the small areas below `path` grouped as "other files". For
+   * scope, or the scoped file itself when `analyze` is given a file; `rest`: the small areas below `path` grouped as "other files". For
    * `rest`, `path` is the directory that holds them, so a `package` area and
    * its `rest` area share a path: `path` and `kind` together identify an area.
    * A `rest` area with fewer than `thresholds.areas.minFiles` files is a
