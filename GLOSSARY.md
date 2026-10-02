@@ -26,8 +26,16 @@
 
 **Truck factor** — the number of people who must leave before more than half of a file set has no expert, found by removing, greedily, the person who is expert on the most still-covered files. The report names the removed people in order.
 
-**Knowledge island** — a directory where one person is the sole expert on at least 80% of the files.
+**Package root** — a directory that holds a package manifest: `package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `setup.py`, `pom.xml`, `build.gradle`, `build.gradle.kts`, any `*.csproj`, `composer.json`, `Gemfile`, `mix.exs`, `deno.json` or `deno.jsonc`. The file name is the only signal. A root with no universe file holds nothing, and the analysis scope's own manifest makes the scope a package only when no package lies below it.
 
-**Orphaned knowledge** — a directory where more than 50% of the files have no active expert.
+**Area** — a part of the repository's universe that, with its siblings at the same level, covers every file exactly once: a package, a directory below a package root or the scope, or a `rest` area. An area has the knowledge fields of a directory. A file directly in a package root belongs to that root's own area. Areas replace directories in the report, where `knowledge.directories` stays but is deprecated because its directories overlap. A scope that is a file is one area, that file.
+
+**Level** — how deep the areas are cut. Level 1 is the package roots, or the top-level directories below the scope when there are no packages; each further level is one directory step deeper, up to level 6, and a level that would repeat the one before it is not reported. An area holding more than 40% of the files and having subdirectories is split further within its level, by one step when that already yields two areas of at least 3 files and by two steps at most otherwise. The report starts at the level whose count of areas that are not `rest` areas is closest to two per contributor active in 90 days (4 to 25, a tie to the coarser level) and says why; `--depth` overrides it.
+
+**Rest area** — the areas with fewer than 3 files, grouped per parent directory as one area of "other files" (`kind: "rest"`), listed last in its level. It does not count as a viable area for the recommended level. With fewer than 3 files it is never a knowledge island or orphaned knowledge.
+
+**Knowledge island** — an area where one person is the sole expert on at least 80% of the files.
+
+**Orphaned knowledge** — an area where more than 50% of the files have no active expert.
 
 **Gate** — a limit that `codesaga check` holds the repository to: a minimum or maximum on one measure (truck factor, orphaned directories, knowledge islands, agent and agent-assisted share of commits, or contributors active in 90 days). A measurement exactly at its limit passes. `check` exits 5 when any gate fails and evaluates none in a shallow clone.
