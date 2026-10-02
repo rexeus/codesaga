@@ -105,6 +105,16 @@ describe("rhythmBadges early bird and weekend regular", () => {
     ).toStrictEqual([]);
   });
 
+  it("reads a negative offset the right way round: 21:30 at -05:00 is evening although it is 02:30 in UTC", () => {
+    expect(kinds(mondays(40, "21:30:00", "-05:00"), true)).toStrictEqual([]);
+    expect(kinds(mondays(40, "02:00:00", "-05:00"), true)).toStrictEqual([
+      "night-owl",
+    ]);
+    expect(kinds(mondays(40, "06:00:00", "-05:00"), true)).toStrictEqual([
+      "early-bird",
+    ]);
+  });
+
   it("takes the weekend from the author's local day", () => {
     const earlySaturdays = Array.from({ length: 10 }, (_, week) =>
       local(week, 5, "00:30:00", "+02:00"),

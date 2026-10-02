@@ -7,8 +7,6 @@ import type { ContributorBadgeTerritory } from "./contributor-badge-facts.js";
 export type TerritoryActivity = {
   /** Commits per territory, each commit counting once per territory it touches; territories without a commit are absent. */
   readonly perTerritory: ReadonlyMap<ContributorBadgeTerritory, number>;
-  /** The time of the earliest commit that touches each territory in `perTerritory`, in seconds since the epoch. */
-  readonly firstTouch: ReadonlyMap<ContributorBadgeTerritory, number>;
   /** Commits that touch at least one of the territories. */
   readonly inTerritories: number;
 };
@@ -29,20 +27,51 @@ export const territoryActivity = (
     ),
   );
   const perTerritory = new Map<ContributorBadgeTerritory, number>();
-  const firstTouch = new Map<ContributorBadgeTerritory, number>();
   let inTerritories = 0;
-  for (const { changes, time } of commits) {
+  for (const { changes } of commits) {
     const touched = new Set(
       changes.flatMap(({ path }) => territoryOfPath.get(path) ?? []),
     );
     inTerritories += touched.size > 0 ? 1 : 0;
     for (const territory of touched) {
       perTerritory.set(territory, (perTerritory.get(territory) ?? 0) + 1);
-      firstTouch.set(
-        territory,
-        Math.min(firstTouch.get(territory) ?? time, time),
-      );
     }
   }
-  return { perTerritory, firstTouch, inTerritories };
+  return { perTerritory, inTerritories };
+};
+
+/** The path itself, every directory above it and the repository root `.`, as territory paths. */
+const prefixesOf = (path: string): ReadonlyArray<string> => {
+  const parts = path.split("/");
+  return [".", ...parts.map((_, index) => parts.slice(0, index + 1).join("/"))];
+};
+
+/**
+ * The time of the person's earliest commit under each named territory's
+ * `path`, in seconds since the epoch; territories never touched are absent. It
+ * reads the paths as the history reports them, so files deleted since count as
+ * a visit, which `territory.paths` (today's files) would miss.
+ */
+export const firstVisits = (
+  commits: ReadonlyArray<ClassifiedCommit>,
+  territories: ReadonlyArray<ContributorBadgeTerritory>,
+): ReadonlyMap<ContributorBadgeTerritory, number> => {
+  const atPath = new Map<string, ContributorBadgeTerritory[]>();
+  for (const territory of namedTerritories(territories)) {
+    atPath.set(territory.path, [
+      ...(atPath.get(territory.path) ?? []),
+      territory,
+    ]);
+  }
+  const first = new Map<ContributorBadgeTerritory, number>();
+  for (const { changes, time } of commits) {
+    for (const { path } of changes) {
+      for (const territory of prefixesOf(path).flatMap(
+        (prefix) => atPath.get(prefix) ?? [],
+      )) {
+        first.set(territory, Math.min(first.get(territory) ?? time, time));
+      }
+    }
+  }
+  return first;
 };

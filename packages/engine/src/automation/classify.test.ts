@@ -202,6 +202,16 @@ describe("humanCoAuthorsOf", () => {
     expect(humanCoAuthorsOf(commit({ trailers }))).toBe(1);
   });
 
+  it("does not count a malformed trailer without an address", () => {
+    const trailers = [
+      coAuthor("broken"),
+      coAuthor("Grace <not-an-address>"),
+      coAuthor("Grace <>"),
+    ];
+
+    expect(humanCoAuthorsOf(commit({ trailers }))).toBe(0);
+  });
+
   it("is zero for a co-author line that git did not parse as a trailer", () => {
     const markers = ["Co-authored-by: Grace <grace@example.com>"];
 

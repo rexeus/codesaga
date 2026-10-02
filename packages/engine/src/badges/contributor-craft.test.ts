@@ -57,6 +57,12 @@ describe("contributorBadges toolsmith", () => {
     expect(kindsOf(mix(10, 0, paths))).toContain("toolsmith");
   });
 
+  it("does not take application code named like a config for tooling", () => {
+    expect(kindsOf(mix(10, 0, ["src/app.config.service.ts"]))).not.toContain(
+      "toolsmith",
+    );
+  });
+
   it("ignores commits without changes", () => {
     const empty = Array.from({ length: 20 }, (_, i) =>
       commit(daysAgo(1 + i), []),

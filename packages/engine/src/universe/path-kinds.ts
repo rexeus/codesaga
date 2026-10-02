@@ -36,6 +36,47 @@ const RELEASE_METADATA_PATTERNS = [
   "**/release*",
 ];
 
+// Tools whose `<tool>.config.<extension>` file is configuration. A bare `*.config.*` would also match application code such as `app.config.ts`.
+const CONFIGURED_TOOLS = [
+  "vite",
+  "vitest",
+  "next",
+  "nuxt",
+  "astro",
+  "svelte",
+  "webpack",
+  "rollup",
+  "rolldown",
+  "tsup",
+  "tsdown",
+  "esbuild",
+  "eslint",
+  "prettier",
+  "jest",
+  "playwright",
+  "cypress",
+  "tailwind",
+  "postcss",
+  "babel",
+  "commitlint",
+  "lint-staged",
+  "turbo",
+  "knip",
+  "drizzle",
+  "vue",
+  "remix",
+  "metro",
+  "storybook",
+  "oxlint",
+  "oxfmt",
+  "biome",
+  "stylelint",
+  "docusaurus",
+  "gatsby",
+  "capacitor",
+  "wrangler",
+];
+
 // Files that build, ship or configure the project rather than being the project: CI, containers, manifests and lockfiles, tool configuration.
 // Matched at any depth, so a package of a monorepo counts like the root.
 const TOOLING_PATH_PATTERNS = [
@@ -48,7 +89,11 @@ const TOOLING_PATH_PATTERNS = [
   "**/package-lock.json",
   "**/yarn.lock",
   "**/bun.lock*",
-  "**/*.config.*",
+  `**/{${CONFIGURED_TOOLS.join(",")}}.config.{js,cjs,mjs,ts,cts,mts,json}`,
+  "**/.babelrc*",
+  "**/.commitlintrc*",
+  "**/.lintstagedrc*",
+  "**/.stylelintrc*",
   "**/tsconfig*.json",
   "**/turbo.json",
   "**/.oxlintrc.json",
@@ -79,7 +124,8 @@ export const isDocPath = (path: string): boolean =>
  * Whether a repository-relative path is tooling: CI configuration
  * (`.github/**`, `.gitlab-ci.yml`, `.circleci/**`), a `Dockerfile*`, a package
  * manifest or lockfile (`package.json`, `pnpm-lock.yaml`, `package-lock.json`,
- * `yarn.lock`, `bun.lock*`) or tool configuration (`*.config.*`,
+ * `yarn.lock`, `bun.lock*`) or tool configuration (`<tool>.config.<extension>`
+ * of a known tool such as `vite` or `eslint`, never `app.config.ts`;
  * `tsconfig*.json`, `turbo.json`, `.oxlintrc.json`, `.eslintrc*`,
  * `.prettierrc*`, `biome.json`, `renovate.json`, `.changeset/config.json`),
  * in any directory.

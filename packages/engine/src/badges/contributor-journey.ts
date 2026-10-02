@@ -10,7 +10,7 @@ import { isNewContributor } from "../contributors/status.js";
 import { nounOf, percentOf } from "../report/sentences.js";
 import type { BadgeContext } from "./contributor-badge-facts.js";
 import { CONTRIBUTOR_BADGE_THRESHOLDS } from "./contributor-badge-thresholds.js";
-import { territoryActivity } from "./contributor-territories.js";
+import { firstVisits } from "./contributor-territories.js";
 
 const {
   founderShare,
@@ -67,8 +67,9 @@ export const longHauler = ({ commits, now, repositoryStart }: BadgeContext) => {
 /**
  * First commits in at least `explorerMinTerritories` territories of the
  * recommended detail within the last `explorerDays` days, for someone who is
- * not new here, since that badge says it already. Leftover territories do not
- * count, and a shallow clone withholds it: a first commit seen there may not
+ * not new here, since that badge says it already. A territory counts as
+ * visited by any earlier commit under its path, deleted files included.
+ * Leftover territories do not count, and a shallow clone withholds it: a first commit seen there may not
  * be the first.
  */
 export const explorer = ({
@@ -78,9 +79,9 @@ export const explorer = ({
   territories = [],
 }: BadgeContext) => {
   const first = firstTimeOf(commits.map(({ time }) => time));
-  const entered = [
-    ...territoryActivity(commits, territories).firstTouch.values(),
-  ].filter((time) => isActiveWithin(time, now, explorerDays)).length;
+  const entered = [...firstVisits(commits, territories).values()].filter(
+    (time) => isActiveWithin(time, now, explorerDays),
+  ).length;
   return repositoryStart !== undefined &&
     !isNewContributor(first, repositoryStart, now) &&
     entered >= explorerMinTerritories

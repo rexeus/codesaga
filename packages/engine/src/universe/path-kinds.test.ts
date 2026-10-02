@@ -82,6 +82,10 @@ describe("isToolingPath", () => {
     "tsconfig.json",
     "packages/a/tsconfig.build.json",
     "turbo.json",
+    "eslint.config.js",
+    "packages/web/tailwind.config.cjs",
+    "vitest.config.mts",
+    ".babelrc",
     ".oxlintrc.json",
     ".eslintrc.cjs",
     ".prettierrc",
@@ -103,6 +107,10 @@ describe("isToolingPath", () => {
     "src/package.json.ts",
     "composer.lock",
     "tsconfig.ts",
+    "src/app.config.service.ts",
+    "src/database.config.ts",
+    "app.config.ts",
+    "src/vite.config.helpers.ts",
   ])("does not take %s for tooling", (path) => {
     expect(isToolingPath(path)).toBe(false);
   });

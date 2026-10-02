@@ -52,6 +52,7 @@ const GITHUB_NOREPLY = /^(\d+)\+.+@users\.noreply\.github\.com$/iu;
 const BOT_NAME = /\[bot\]$/iu;
 const NOREPLY_BOT = /^(?:\d+\+)?(.+\[bot\])@users\.noreply\.github\.com$/iu;
 const PERSON_WITH_EMAIL = /^(.*?)\s*<([^>]*)>$/u;
+const ADDRESS = /^[^@\s]+@[^@\s]+$/u;
 const BODY_CO_AUTHOR = /^co-authored-by:\s*[^<>]*<([^<>]+)>\s*$/iu;
 
 const githubIdOf = (email: string): number | undefined => {
@@ -151,8 +152,10 @@ const automatedAuthorOf = (
 };
 
 /**
- * The number of distinct people, by lowercased address or else name, that the
- * parsed `Co-authored-by` trailers name besides the author. A person is anyone
+ * The number of distinct people, by lowercased address, that the parsed
+ * `Co-authored-by` trailers name besides the author. A trailer counts only in
+ * the shape `Name <address>`; `Co-authored-by: broken` names nobody. Addresses
+ * are compared as written, since `.mailmap` does not apply to trailers. A person is anyone
  * who matches no row of `signatures` and no `[bot]` account, so a team's own
  * signatures count. Needs only the trailers: the human share of a commit's
  * help is a fact about the commit, whatever its class.
@@ -163,9 +166,9 @@ export const humanCoAuthorsOf = (
 ): number => {
   const author = signals.author.email.toLowerCase();
   const people = coAuthorsOf(signals)
-    .filter(({ name, email }) => name !== "" || email !== "")
+    .filter(({ email }) => ADDRESS.test(email))
     .filter((person) => automatedAuthorOf(person, signatures) === undefined)
-    .map(({ name, email }) => (email === "" ? name : email).toLowerCase())
+    .map(({ email }) => email.toLowerCase())
     .filter((key) => key !== author);
   return new Set(people).size;
 };

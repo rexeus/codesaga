@@ -109,6 +109,28 @@ describe("contributorBadges explorer", () => {
 });
 
 describe("contributorBadges explorer withheld", () => {
+  it("does not count a territory where the person only had files that are deleted today", () => {
+    const commits = [
+      ...exploring(["pkg1", "pkg2"]),
+      commit(daysAgo(300), ["pkg3/old.ts"]),
+      commit(daysAgo(5), ["pkg3/f0.ts"]),
+    ];
+
+    expect(kindsOf(commits, { territories })).not.toContain("explorer");
+    expect(
+      kindsOf(exploring(["pkg1", "pkg2", "pkg3"]), { territories }),
+    ).toContain("explorer");
+  });
+
+  it("does not take a sibling path with the same prefix for the territory", () => {
+    const commits = [
+      ...exploring(["pkg1", "pkg2", "pkg3"]),
+      commit(daysAgo(300), ["pkg30/old.ts"]),
+    ];
+
+    expect(kindsOf(commits, { territories })).toContain("explorer");
+  });
+
   it("does not count the leftover territories", () => {
     const withOther = [
       ...territories.slice(0, 3),

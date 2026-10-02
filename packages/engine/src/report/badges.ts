@@ -114,7 +114,8 @@ export const ContributorBadge = Schema.Struct({
    * not `new-here`; withheld in a shallow clone. `toolsmith`: at least
    * `toolsmithShare` of the human commits of the last `recentWindowDays` days
    * (at least `toolsmithMinCommits`) change only tooling files: CI,
-   * containers, package manifests and lockfiles, tool configuration.
+   * containers, package manifests and lockfiles, and the configuration files
+   * of known tools such as `vite.config.ts` or `tsconfig.json`.
    * `reviewer`: at least `reviewerReviews`
    * reviews; only with `--github`.
    */
