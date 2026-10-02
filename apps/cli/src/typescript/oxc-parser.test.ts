@@ -47,7 +47,9 @@ describe("makeOxcParserLayer", () => {
   );
 
   it.live(
-    "skips the file that crashes the parser as parser-crashed and still parses the rest",
+    // Whether this payload crashes the native parser or overflows the walker
+    // depends on the machine's stack size; either way only that file is lost.
+    "skips the file too deep to parse and still parses the rest",
     () =>
       withParser((parser) =>
         Effect.gen(function* () {
@@ -58,12 +60,16 @@ describe("makeOxcParserLayer", () => {
             { path: "d.ts", text: "const d = 1;\n" },
           ]);
 
-          assert.deepStrictEqual(results, [
-            PARSED,
-            { kind: "skipped", reason: "parser-crashed" },
-            PARSED,
-            PARSED,
-          ]);
+          assert.deepStrictEqual(
+            [results[0], results[2], results[3]],
+            [PARSED, PARSED, PARSED],
+          );
+          const hostile = results[1];
+          assert.ok(
+            hostile?.kind === "skipped" &&
+              (hostile.reason === "parser-crashed" ||
+                hostile.reason === "too-deep"),
+          );
         }),
       ),
     60_000,

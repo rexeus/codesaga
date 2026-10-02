@@ -23,6 +23,13 @@ import { mcpToolsList } from "./mcp-tools-list.mjs";
 import { expectBundledArtifact } from "./packed-artifact.mjs";
 import { removeParserBindings, valueAt } from "./parser-dependency.mjs";
 
+/**
+ * A counter read from untrusted JSON, or 0 when it is missing.
+ * @param {unknown} value
+ * @returns {number}
+ */
+const countOf = (value) => (typeof value === "number" ? value : 0);
+
 const repository = resolve(import.meta.dirname, "..");
 
 /**
@@ -143,8 +150,12 @@ const expectWorkingInstall = async (
   }
   const coverage = ["deepDives", "typescript", "coverage"];
   const parsed = valueAt(analysis, ...coverage, "parsed");
+  // The payload crashes the native parser or overflows the walker, depending
+  // on the machine's stack size; either way exactly that one file is skipped.
   const crashed = valueAt(analysis, ...coverage, "skipped", "parser-crashed");
-  if (typeof parsed !== "number" || parsed < 1 || crashed !== 1) {
+  const tooDeep = valueAt(analysis, ...coverage, "skipped", "too-deep");
+  const lost = countOf(crashed) + countOf(tooDeep);
+  if (typeof parsed !== "number" || parsed < 1 || lost !== 1) {
     throw new Error(
       `codesaga from ${installer} should parse the fixture's TypeScript and count its one file that crashes the parser: ${analysis}`,
     );

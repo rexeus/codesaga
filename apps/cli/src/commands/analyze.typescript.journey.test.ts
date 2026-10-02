@@ -73,7 +73,9 @@ describe("codesaga analyze --json deep dive", () => {
 
 describe("codesaga analyze --json when a file crashes the parser", () => {
   it.live(
-    "still produces the JSON when a file crashes the parser, and counts it",
+    // Whether this payload crashes the native parser or overflows the walker
+    // depends on the machine's stack size; either way the run survives.
+    "still produces the JSON when a file is too deep to parse, and counts it",
     () =>
       Effect.gen(function* () {
         const repo = yield* makeGitRepository;
@@ -93,11 +95,11 @@ describe("codesaga analyze --json when a file crashes the parser", () => {
         expect(result.stderr).toBe("");
         const coverage = (yield* decode(result.stdout)).deepDives?.typescript
           ?.coverage;
-        expect(coverage).toMatchObject({
-          files: 3,
-          parsed: 2,
-          skipped: { "parser-crashed": 1 },
-        });
+        expect(coverage).toMatchObject({ files: 3, parsed: 2 });
+        const skipped = Object.entries(coverage?.skipped ?? {});
+        expect(skipped).toHaveLength(1);
+        expect(["parser-crashed", "too-deep"]).toContain(skipped[0]?.[0]);
+        expect(skipped[0]?.[1]).toBe(1);
       }).pipe(Effect.scoped),
     60_000,
   );
