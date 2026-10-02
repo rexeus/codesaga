@@ -29,6 +29,7 @@ const commit: Commit = {
       oid: "1".repeat(40),
       previousOid: "2".repeat(40),
       mode: "100644",
+      previousMode: "100755",
     },
     {
       path: "src/gone.ts",

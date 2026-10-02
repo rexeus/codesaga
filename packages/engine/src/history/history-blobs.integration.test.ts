@@ -62,6 +62,7 @@ layer(NodeServices.layer)("readHistory blob ids", (it) => {
           oid: second,
           previousOid: first,
           mode: "100644",
+          previousMode: "100644",
           previousLife: true,
         });
         assert.deepStrictEqual(deleted?.changes[0], {
@@ -69,6 +70,7 @@ layer(NodeServices.layer)("readHistory blob ids", (it) => {
           added: 0,
           deleted: 2,
           previousOid: second,
+          previousMode: "100644",
           previousLife: true,
         });
       }),
@@ -125,11 +127,35 @@ layer(NodeServices.layer)("readHistory modes", (it) => {
       const [commit] = yield* history(repo);
 
       assert.deepStrictEqual(
-        commit?.changes.map(({ path: file, mode }) => [file, mode]),
+        commit?.changes.map(({ path: file, mode, previousMode }) => [
+          file,
+          previousMode,
+          mode,
+        ]),
         [
-          ["link.ts", "120000"],
-          ["run.sh", "100755"],
+          ["link.ts", undefined, "120000"],
+          ["run.sh", "100644", "100755"],
         ],
+      );
+    }),
+  );
+
+  it.effect("tells a symlink that becomes a file by its previous mode", () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const path = yield* Path.Path;
+      const repo = yield* makeTempRepository;
+      const link = path.join(repo.directory, "a.ts");
+      yield* fs.symlink("elsewhere", link);
+      yield* repo.commit("2026-03-01T12:00:00Z");
+      yield* fs.remove(link);
+      yield* repo.commit("2026-03-02T12:00:00Z", { "a.ts": "export {};\n" });
+
+      const [commit] = yield* history(repo);
+
+      assert.deepStrictEqual(
+        [commit?.changes[0]?.previousMode, commit?.changes[0]?.mode],
+        ["120000", "100644"],
       );
     }),
   );

@@ -3,16 +3,12 @@
 import { Effect, Stream } from "effect";
 import type { FileSystem, Path } from "effect";
 
+import { cacheFile } from "../cache/cache-store.js";
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import { logFingerprint } from "./cache-fingerprint.js";
 import { inTopologicalOrder } from "./commit-order.js";
-import {
-  cacheFile,
-  cacheStatus,
-  loadCache,
-  storeCache,
-} from "./history-cache.js";
+import { cacheStatus, loadCache, storeCache } from "./history-cache.js";
 import { LOG_FORMAT_ARGS, LogParser } from "./parse-log.js";
 import type { Commit } from "./parse-log.js";
 
@@ -26,6 +22,9 @@ export type CommitLogOptions = {
   /** Whether to read and write the cache file. */
   readonly useCache: boolean;
 };
+
+/** The file name changes with the cache document, together with its version. */
+const HISTORY_CACHE_FILE = "history-v2.json";
 
 const readLog = (
   revisions: string,
@@ -102,7 +101,9 @@ export const readCommits = (
   Git | FileSystem.FileSystem | Path.Path
 > =>
   Effect.gen(function* () {
-    const file = options.useCache ? yield* cacheFile(options.root) : undefined;
+    const file = options.useCache
+      ? yield* cacheFile(options.root, HISTORY_CACHE_FILE)
+      : undefined;
     return file === undefined
       ? inTopologicalOrder(yield* readLog(options.head))
       : yield* readThroughCache(file, options);

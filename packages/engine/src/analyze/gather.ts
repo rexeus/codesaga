@@ -24,6 +24,7 @@ import { readHistory } from "../history/history.js";
 import { packageRootsOf } from "../knowledge/package-roots.js";
 import type { Report } from "../report/report.js";
 import type { TypeScriptFacts } from "../typescript/gather-typescript.js";
+import type { HistoryFacts } from "../typescript/history-facts.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { inventory, namedAsCode } from "../universe/inventory.js";
 import { projectFilesOf } from "../universe/project-files.js";
@@ -73,6 +74,11 @@ export type RepositoryFacts = {
    * universe without such files.
    */
   readonly typescript?: TypeScriptFacts | undefined;
+  /**
+   * The facts of every historical TypeScript and JavaScript blob by id;
+   * absent where `typescript` is, and when the parser did not load.
+   */
+  readonly historyFacts?: HistoryFacts | undefined;
 };
 
 /** Every expected failure of `analyze`. */

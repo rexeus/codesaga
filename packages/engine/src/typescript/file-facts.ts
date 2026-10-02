@@ -23,7 +23,7 @@ import { walk } from "./walk.js";
  * The version of `FileFacts`. Facts a cache holds under another version are
  * stale, so it rises with every change to what the facts mean or contain.
  */
-const FILE_FACTS_VERSION = 10;
+export const FILE_FACTS_VERSION = 10;
 
 /** The facts of one parsed file. */
 export type FileFacts = {

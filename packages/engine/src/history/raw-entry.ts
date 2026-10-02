@@ -8,6 +8,8 @@ export type BlobFields = {
   readonly previousOid?: string;
   /** The file's mode after the commit, as git prints it (`100644`, `120000` for a symlink, `160000` for a submodule); absent when the commit deletes it. */
   readonly mode?: string;
+  /** The file's mode before the commit, so that a symlink that becomes a file is told from a file; absent when the commit adds it. */
+  readonly previousMode?: string;
 };
 
 export type RawEntry = {
@@ -18,8 +20,7 @@ export type RawEntry = {
 
 // `:<old mode> <new mode> <old id> <new id> <status>[<score>]`, ids unabbreviated.
 const RAW_ENTRY = /^:(\d+) (\d+) ([0-9a-f]+) ([0-9a-f]+) ([A-Z])\d*$/u;
-const NO_MODE = /^0+$/u;
-const NO_BLOB = /^0+$/u;
+const ZEROS = /^0+$/u;
 
 /** The raw entry in `text` (without its path tokens), or undefined when it is not one. */
 export const parseRawEntry = (text: string): RawEntry | undefined => {
@@ -27,13 +28,21 @@ export const parseRawEntry = (text: string): RawEntry | undefined => {
   if (match === null) {
     return undefined;
   }
-  const [, , mode = "", previousOid = "", oid = "", status = ""] = match;
+  const [
+    ,
+    previousMode = "",
+    mode = "",
+    previousOid = "",
+    oid = "",
+    status = "",
+  ] = match;
   return {
     status,
     blob: {
-      ...(NO_BLOB.test(oid) ? {} : { oid }),
-      ...(NO_BLOB.test(previousOid) ? {} : { previousOid }),
-      ...(NO_MODE.test(mode) ? {} : { mode }),
+      ...(ZEROS.test(oid) ? {} : { oid }),
+      ...(ZEROS.test(previousOid) ? {} : { previousOid }),
+      ...(ZEROS.test(mode) ? {} : { mode }),
+      ...(ZEROS.test(previousMode) ? {} : { previousMode }),
     },
   };
 };

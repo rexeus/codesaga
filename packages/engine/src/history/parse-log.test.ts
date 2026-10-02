@@ -270,12 +270,14 @@ describe("LogParser blobs", () => {
         oid: id("c"),
         previousOid: id("b"),
         mode: "100755",
+        previousMode: "100644",
       },
       {
         path: "gone.ts",
         added: 0,
         deleted: 4,
         previousOid: id("d"),
+        previousMode: "100644",
         removed: true,
       },
       {
@@ -286,6 +288,7 @@ describe("LogParser blobs", () => {
         oid: id("f"),
         previousOid: id("e"),
         mode: "100644",
+        previousMode: "100644",
       },
       { path: "link.ts", added: 1, deleted: 0, oid: id("1"), mode: "120000" },
     ]);
@@ -307,6 +310,7 @@ describe("LogParser blobs of a SHA-256 repository", () => {
         oid: wide("b"),
         previousOid: wide("a"),
         mode: "100644",
+        previousMode: "100644",
       },
     ]);
   });

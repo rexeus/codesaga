@@ -14,7 +14,7 @@ export type BlobRef = {
 };
 
 /** Why a blob has no text. */
-type SkipReason =
+export type SkipReason =
   /** Not valid UTF-8. */
   | "binary"
   /** The mode says the entry is a symlink. */
@@ -34,7 +34,14 @@ const SKIPPED_BY_MODE = new Map<string, SkipReason>([
 ]);
 const FULL_ID = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 
-const refusal = ({ oid, mode }: BlobRef): SkipReason | undefined => {
+/**
+ * Why `readBlobs` would not read the blob, or undefined when it would: an id
+ * that is not a full hex id, or a mode that marks a symlink or a submodule.
+ */
+export const skipBeforeReading = ({
+  oid,
+  mode,
+}: BlobRef): SkipReason | undefined => {
   if (!FULL_ID.test(oid)) {
     return "unreadable";
   }
@@ -71,11 +78,11 @@ export const readBlobs = (
     Effect.gen(function* () {
       const git = yield* Git;
       const refused = blobs.flatMap((blob): Array<BlobRead> => {
-        const reason = refusal(blob);
+        const reason = skipBeforeReading(blob);
         return reason === undefined ? [] : [skipped(blob.oid, reason)];
       });
       const requested = blobs
-        .filter((blob) => refusal(blob) === undefined)
+        .filter((blob) => skipBeforeReading(blob) === undefined)
         .map(({ oid }) => oid);
       if (requested.length === 0) {
         return Stream.fromIterable(refused);

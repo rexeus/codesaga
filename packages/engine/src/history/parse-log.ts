@@ -59,7 +59,7 @@ export type Commit = {
 };
 
 /** Bump on any change to how commits, trailers, markers, subjects, renames or removals are parsed. */
-export const PARSER_VERSION = 5;
+export const PARSER_VERSION = 6;
 
 /**
  * Arguments that make `git log` print what `LogParser` reads. Merge commits

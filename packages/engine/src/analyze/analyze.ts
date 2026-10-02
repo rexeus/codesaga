@@ -8,6 +8,7 @@ import type { ChildProcessSpawner } from "effect/process";
 
 import type { Report } from "../report/report.js";
 import { gatherTypeScript } from "../typescript/gather-typescript.js";
+import { gatherHistoryFacts } from "../typescript/history-facts.js";
 import type { TypeScriptParser } from "../typescript/typescript-parser.js";
 import { buildReport } from "./build-report.js";
 import { gatherFacts } from "./gather.js";
@@ -20,6 +21,8 @@ import type { AnalyzeError, AnalyzeOptions } from "./gather.js";
  *
  * The report gains `deepDives.typescript` when the universe has TypeScript or
  * JavaScript files; a parser that did not load degrades it to its coverage.
+ * Every historical blob of those files is parsed once and its facts cached in
+ * the git directory unless `options.cache` is false.
  *
  * Fails with `NotAGitRepository`, `GitNotFound`, or `GitCommandFailed` when
  * git cannot answer, and with `InvalidSince` for a `since` that is neither
@@ -43,5 +46,15 @@ export const analyze = (
       facts.universe,
       facts.projectFiles,
     );
-    return buildReport({ ...facts, typescript });
+    const { head } = facts.repository;
+    const historyFacts =
+      typescript === undefined || head === null
+        ? undefined
+        : yield* gatherHistoryFacts({
+            root: facts.root,
+            head,
+            commits: facts.commits,
+            useCache: options.cache ?? true,
+          });
+    return buildReport({ ...facts, typescript, historyFacts });
   });

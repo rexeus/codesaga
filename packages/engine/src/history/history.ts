@@ -91,7 +91,7 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
         endedNames.push(change.renamedFrom);
       }
     }
-    const { added, deleted, oid, previousOid, mode } = change;
+    const { added, deleted, oid, previousOid, mode, previousMode } = change;
     return {
       path,
       added,
@@ -99,6 +99,7 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
       ...(oid === undefined ? {} : { oid }),
       ...(previousOid === undefined ? {} : { previousOid }),
       ...(mode === undefined ? {} : { mode }),
+      ...(previousMode === undefined ? {} : { previousMode }),
       ...(isPrevious ? { previousLife: true as const } : {}),
       ...(change.renamedFrom === undefined ? {} : { renamed: true as const }),
     };
