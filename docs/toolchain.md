@@ -4,20 +4,20 @@ Why each tool is here, how the pieces depend on each other, and how to upgrade t
 
 ## The stack
 
-| Tool                      | Role                                                                                                                                                      |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Node 24 (`.nvmrc`)        | Development runtime. The published bundle supports Node ≥ 22.                                                                                             |
-| pnpm 12                   | Workspace and catalog. `minimumReleaseAge: 1440` (strict because set explicitly) rejects packages published less than a day ago.                          |
-| turbo                     | Runs `build`, `typecheck` and `test:unit` per package in dependency order; `build` outputs are cached.                                                    |
-| TypeScript 7              | The native compiler, patched by `@effect/tsgo` with Effect diagnostics.                                                                                   |
-| oxlint + oxlint-tsgolint  | Strict, type-aware lint (`.oxlintrc.json`) and the Effect preset (`.oxlint-effect.json`).                                                                 |
-| eslint-plugin-sonarjs     | Cognitive complexity, loaded by oxlint as a JS plugin.                                                                                                    |
-| oxfmt                     | Formatting, import sorting, `package.json` sorting.                                                                                                       |
-| knip                      | Unused files, exports, dependencies, and catalog entries. `includeEntryExports` keeps public APIs honest.                                                 |
-| vitest + `@effect/vitest` | Tests; `it.effect` for Effect code.                                                                                                                       |
-| rolldown                  | Bundles the CLI, its workspace packages, and Effect into the single published file `apps/cli/dist/codesaga.js`.                                           |
-| tsx                       | Runs the CLI build scripts and the CLI from source (`pnpm --filter codesaga dev`), since Node does not strip types inside `node_modules` workspace links. |
-| changesets                | Versioning and changelog for the published `codesaga` package.                                                                                            |
+| Tool                      | Role                                                                                                                                                                                                                                                        |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Node 24 (`.nvmrc`)        | Development runtime. The published bundle supports Node ≥ 22.                                                                                                                                                                                               |
+| pnpm 12                   | Workspace and catalog. `minimumReleaseAge: 4320` (strict because set explicitly) rejects packages published less than three days ago; `trustPolicy: no-downgrade` rejects a version less trusted than an earlier one (exceptions are listed with a reason). |
+| turbo                     | Runs `build`, `typecheck` and `test:unit` per package in dependency order; `build` outputs are cached.                                                                                                                                                      |
+| TypeScript 7              | The native compiler, patched by `@effect/tsgo` with Effect diagnostics.                                                                                                                                                                                     |
+| oxlint + oxlint-tsgolint  | Strict, type-aware lint (`.oxlintrc.json`) and the Effect preset (`.oxlint-effect.json`).                                                                                                                                                                   |
+| eslint-plugin-sonarjs     | Cognitive complexity, loaded by oxlint as a JS plugin.                                                                                                                                                                                                      |
+| oxfmt                     | Formatting, import sorting, `package.json` sorting.                                                                                                                                                                                                         |
+| knip                      | Unused files, exports, dependencies, and catalog entries. `includeEntryExports` keeps public APIs honest.                                                                                                                                                   |
+| vitest + `@effect/vitest` | Tests; `it.effect` for Effect code.                                                                                                                                                                                                                         |
+| rolldown                  | Bundles the CLI, its workspace packages, and Effect into the single published file `apps/cli/dist/codesaga.js`.                                                                                                                                             |
+| tsx                       | Runs the CLI build scripts and the CLI from source (`pnpm --filter codesaga dev`), since Node does not strip types inside `node_modules` workspace links.                                                                                                   |
+| changesets                | Versioning and changelog for the published `codesaga` package.                                                                                                                                                                                              |
 
 ## Coupled versions
 
