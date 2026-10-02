@@ -60,7 +60,10 @@ type State = {
   readonly showEvery: boolean;
 };
 
-const CARD_LIMIT = { rows: TERRITORY_CARDS_SHOWN, noun: "territories" };
+const CARD_LIMIT = {
+  rows: TERRITORY_CARDS_SHOWN,
+  noun: "first-cut territories",
+};
 
 /** The elements of the section that a redraw replaces. */
 type Parts = {
