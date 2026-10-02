@@ -126,6 +126,7 @@ const areaLines = (
         style.dim(
           `Areas at level ${areas.depth} of ${areas.levels.length} (recommended: ${areas.recommendedDepth})`,
         ),
+        style.dim(areas.reason),
       ],
       style,
     ),

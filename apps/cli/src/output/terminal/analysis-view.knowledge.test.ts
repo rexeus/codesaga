@@ -208,8 +208,11 @@ describe("renderAnalysis areas", () => {
     expect(lines).toContain(
       "  packages/db/migrations      30  orphaned, island  Dmitri Volkov 100% (inactive)",
     );
-    expect(lines).toContain(
+    const note = lines.indexOf(
       "                           Areas at level 2 of 3 (recommended: 1)",
+    );
+    expect(lines[note + 1]).toBe(
+      "                           level 1: 11 areas for 4 active contributors",
     );
   });
 

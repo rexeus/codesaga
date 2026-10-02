@@ -35,6 +35,7 @@ describe("renderAnalysis", () => {
       "  apps/admin                  58                    Aiko Tanaka 72%",
       "  infra                       27                    Tomás Herrera 78%",
       "                           Areas at level 1 of 3 (recommended: 1)",
+      "                           level 1: 11 areas for 4 active contributors",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
