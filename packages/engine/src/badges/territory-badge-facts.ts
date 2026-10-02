@@ -32,6 +32,10 @@ export type SiblingFacts = {
   readonly codeLines: number;
   /** Revisions times lines of those territories together. */
   readonly revisionLines: number;
+  /** The median, over those territories, of their median file's revisions. */
+  readonly medianRevisions: number;
+  /** The median, over those territories, of their indentation levels per line. */
+  readonly complexityPerLine: number;
 };
 
 /** What the rules read about one territory; the caller gathers it from the knowledge model and the commits. */

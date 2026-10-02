@@ -24,7 +24,7 @@ const territory = (
 describe("heavyweight", () => {
   it("is earned by 20% of the repository's code lines and not by less", () => {
     expect(heavyweight(territory({ codeLines: 2_000 }))?.evidence).toBe(
-      "Holds 20% of the repository's code lines. It holds 20% of the code lines of its 10 sibling territories.",
+      "Holds 20% of the repository's code lines. It holds 20% of the code lines among itself and 9 other territories.",
     );
     expect(heavyweight(territory({ codeLines: 1_999 }))).toBeUndefined();
   });
@@ -40,7 +40,7 @@ describe("heavyweight", () => {
         repository: large,
       })?.evidence,
     ).toBe(
-      "The median file has 400 lines. It holds 20% of the code lines of its 10 sibling territories.",
+      "The median file has 400 lines. It holds 20% of the code lines among itself and 9 other territories.",
     );
     expect(
       heavyweight({
@@ -55,7 +55,7 @@ describe("heavyweight", () => {
       heavyweight(territory({ codeLines: 3_000, medianFileLines: 450 }))
         ?.evidence,
     ).toBe(
-      "Holds 30% of the repository's code lines. The median file has 450 lines. It holds 30% of the code lines of its 10 sibling territories.",
+      "Holds 30% of the repository's code lines. The median file has 450 lines. It holds 30% of the code lines among itself and 9 other territories.",
     );
   });
 });
@@ -94,7 +94,12 @@ describe("heavyweight among siblings", () => {
       heavyweight({
         code: { ...quiet.code, codeLines: 0 },
         repository: { ...repositoryCode, codeLines: 0 },
-        siblings: { count: 3, codeLines: 0, revisionLines: 0 },
+        siblings: {
+          ...quiet.siblings,
+          count: 3,
+          codeLines: 0,
+          revisionLines: 0,
+        },
       }),
     ).toBeUndefined();
   });
@@ -103,7 +108,7 @@ describe("heavyweight among siblings", () => {
 describe("hotspot", () => {
   it("is earned by 25% of the repository's revisions times lines and not by less", () => {
     expect(hotspot(territory({ revisionLines: 5_000 }))?.evidence).toBe(
-      "25% of the repository's revisions times lines sit here, the hotspot measure of codeheat, and 25% among its 10 sibling territories.",
+      "25% of the repository's revisions times lines sit here, the hotspot measure of codeheat, and 25% among itself and 9 other territories.",
     );
     expect(hotspot(territory({ revisionLines: 4_999 }))).toBeUndefined();
   });
@@ -141,7 +146,7 @@ describe("hotspot", () => {
 describe("churning", () => {
   it("needs a median of 5 revisions when the repository's median is low", () => {
     expect(churning(territory({ medianRevisions: 5 }))?.evidence).toBe(
-      "The median file changed 5 times, the repository's 2.",
+      "The median file changed 5 times, the repository's 2; among itself and 9 other territories the median is 2.",
     );
     expect(churning(territory({ medianRevisions: 4.9 }))).toBeUndefined();
   });
@@ -158,10 +163,31 @@ describe("churning", () => {
   });
 });
 
+describe("churning among siblings", () => {
+  it("needs 1.5 times the median of its siblings, not only the repository's median", () => {
+    // 6 revisions against a sibling median of 4 is 1.5 times, and 5.9 is not
+    expect(
+      churning(territory({ medianRevisions: 6 }, { medianRevisions: 4 })),
+    ).toBeDefined();
+    expect(
+      churning(territory({ medianRevisions: 5.9 }, { medianRevisions: 4 })),
+    ).toBeUndefined();
+  });
+
+  it("needs at least three territories at its level", () => {
+    expect(
+      churning(territory({ medianRevisions: 6 }, { count: 3 })),
+    ).toBeDefined();
+    expect(
+      churning(territory({ medianRevisions: 6 }, { count: 2 })),
+    ).toBeUndefined();
+  });
+});
+
 describe("deeplyNested", () => {
   it("needs 1.0 levels per line when the repository is flat", () => {
     expect(deeplyNested(territory({ complexityPerLine: 1 }))?.evidence).toBe(
-      "1.00 indentation levels per line, the repository's 0.50.",
+      "1.00 indentation levels per line, the repository's 0.50; among itself and 9 other territories the median is 0.50.",
     );
     expect(
       deeplyNested(territory({ complexityPerLine: 0.99 })),
@@ -182,6 +208,31 @@ describe("deeplyNested", () => {
         ...territory({ complexityPerLine: 2.09 }),
         repository: nested,
       }),
+    ).toBeUndefined();
+  });
+});
+
+describe("deeplyNested among siblings", () => {
+  it("needs 1.5 times the median of its siblings, not only the repository's levels", () => {
+    // 1.5 levels against a sibling median of 1 is 1.5 times, and 1.49 is not
+    expect(
+      deeplyNested(
+        territory({ complexityPerLine: 1.5 }, { complexityPerLine: 1 }),
+      ),
+    ).toBeDefined();
+    expect(
+      deeplyNested(
+        territory({ complexityPerLine: 1.49 }, { complexityPerLine: 1 }),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("needs at least three territories at its level", () => {
+    expect(
+      deeplyNested(territory({ complexityPerLine: 1.5 }, { count: 3 })),
+    ).toBeDefined();
+    expect(
+      deeplyNested(territory({ complexityPerLine: 1.5 }, { count: 2 })),
     ).toBeUndefined();
   });
 });

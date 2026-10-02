@@ -78,10 +78,12 @@ const BadgeThresholds = Schema.Struct({
   newcomerFriendlyFirstCommits: Count,
   newcomerFriendlyDays: Count,
   wellTestedShare: Share,
-  /** `heavyweight` and `hotspot` need at least this many named territories at the territory's level of the tree, itself included. */
+  /** `heavyweight`, `hotspot`, `churning` and `deeply-nested` need at least this many named territories at the territory's level of the tree, itself included. */
   codeBadgeMinSiblings: Count,
   /** `heavyweight` and `hotspot` need a share among those territories of at least this many times the fair share, one over their number. */
   codeBadgeFairShareFactor: Schema.Finite,
+  /** `churning` and `deeply-nested` need a value of at least this many times the median of those territories. */
+  codeBadgeMedianFactor: Schema.Finite,
   /** `heavyweight` needs at least this share of the repository's code lines ... */
   heavyweightShare: Share,
   /** ... or a median file of at least this many lines. */

@@ -24,4 +24,5 @@ export const TERRITORY_BADGE_THRESHOLDS = {
   nestedMinLevels: 1,
   codeBadgeMinSiblings: 3,
   codeBadgeFairShareFactor: 2,
+  codeBadgeMedianFactor: 1.5,
 };

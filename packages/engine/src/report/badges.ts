@@ -40,7 +40,9 @@ export const TerritoryBadge = Schema.Struct({
    * file was revised at least `churningRatio` times as often as the
    * repository's and at least `churningMinRevisions` times. `deeply-nested`:
    * at least `nestedRatio` times the repository's indentation levels per line
-   * and at least `nestedMinLevels`. `well-tested`: at least
+   * and at least `nestedMinLevels`. Both also need `codeBadgeMinSiblings` named
+   * territories at the territory's level and a value of at least
+   * `codeBadgeMedianFactor` times the median of those territories' values. `well-tested`: at least
    * `thresholds.badges.wellTestedShare` of the files are tests; never awarded to
    * a territory whose own path is inside a test directory.
    */

@@ -15,6 +15,15 @@ export const codeFactsOf = (stats: CodeStats): CodeFacts => ({
   complexityPerLine: stats.complexity.perLine,
 });
 
+/** The median of `values`, halfway between the two middle ones for an even number; 0 for none. */
+const medianOf = (values: ReadonlyArray<number>): number => {
+  const sorted = values.toSorted((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1
+    ? (sorted[middle] ?? 0)
+    : ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
+};
+
 /** The named territories among `siblings` and what they hold together. */
 export const siblingFactsOf = (
   siblings: ReadonlyArray<MeasuredTerritory>,
@@ -26,6 +35,10 @@ export const siblingFactsOf = (
     revisionLines: named.reduce(
       (sum, { stats }) => sum + stats.churn.revisionLines,
       0,
+    ),
+    medianRevisions: medianOf(named.map(({ stats }) => stats.churn.median)),
+    complexityPerLine: medianOf(
+      named.map(({ stats }) => stats.complexity.perLine),
     ),
   };
 };

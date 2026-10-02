@@ -31,7 +31,7 @@ export const repositoryCode: CodeFacts = {
   complexityPerLine: 0.5,
 };
 
-/** A territory that earns no badge: ten source files, two active experts, old, changed yesterday, an unremarkable tenth of the code, one of ten siblings. */
+/** A territory that earns no badge: ten source files, two active experts, old, changed yesterday, an unremarkable tenth of the code, one of ten siblings with the same medians. */
 export const quietTerritory = (
   overrides: Partial<TerritoryBadgeInput> = {},
 ): TerritoryBadgeInput => ({
@@ -51,7 +51,13 @@ export const quietTerritory = (
     complexityPerLine: 0.5,
   },
   repository: repositoryCode,
-  siblings: { count: 10, codeLines: 10_000, revisionLines: 20_000 },
+  siblings: {
+    count: 10,
+    codeLines: 10_000,
+    revisionLines: 20_000,
+    medianRevisions: 2,
+    complexityPerLine: 0.5,
+  },
   fileFirstCommits: [daysAgo(2000), daysAgo(1500)],
   lastChangeTime: daysAgo(1),
   recentCommits: 0,

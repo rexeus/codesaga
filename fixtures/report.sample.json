@@ -75,6 +75,7 @@
       "nestedMinLevels": 1,
       "codeBadgeMinSiblings": 3,
       "codeBadgeFairShareFactor": 2,
+      "codeBadgeMedianFactor": 1.5,
       "minCommitsForShare": 10,
       "allRounderTerritoryShare": 0.5,
       "allRounderMinTerritories": 4,
