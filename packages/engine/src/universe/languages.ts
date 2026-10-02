@@ -79,7 +79,7 @@ export const isSourceLanguage = (path: string): boolean =>
   languageOf(path) !== undefined;
 
 /** The language of files whose extension is not on the allow-list; only `--include` admits them. */
-const OTHER_LANGUAGE = "Other";
+export const OTHER_LANGUAGE = "Other";
 
 /** The language name of a path, "Other" for an extension that is not on the allow-list. */
 export const languageNameOf = (path: string): string =>

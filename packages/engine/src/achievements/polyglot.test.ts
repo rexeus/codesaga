@@ -54,6 +54,39 @@ describe("achievements polyglot", () => {
   });
 });
 
+describe("achievements polyglot without Other", () => {
+  it("does not count the files of no listed language as one", () => {
+    const stats = {
+      files: 10,
+      tests: { files: 0, lines: 0 },
+      languages: [
+        ...languages(100, 100, 100, 100),
+        { name: "Other", files: 1, lines: 100 },
+      ],
+    };
+
+    expect(achievementOf("polyglot", { stats })).toMatchObject({
+      reached: false,
+      detail: "4 languages: TypeScript, Python, Ruby, Go.",
+      progress: { value: 4, target: 5, unit: "languages" },
+    });
+  });
+
+  it("does not date the milestone at a commit that adds files of no listed language", () => {
+    const commits = [
+      changing("2026-02-01T09:00:00Z", { "notes.xyz": [500, 0] }),
+      fourLanguages,
+    ];
+
+    expect(
+      achievementOf("polyglot", {
+        commits,
+        stats: statsWith(1000, 100, 100, 100),
+      }),
+    ).toMatchObject({ reached: false, reachedAt: null });
+  });
+});
+
 describe("achievements polyglot history", () => {
   it("dates the milestone at the commit after which five languages each held 1% of the estimated lines", () => {
     const commits = [

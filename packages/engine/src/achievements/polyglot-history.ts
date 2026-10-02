@@ -3,7 +3,7 @@
 // Cost: one pass over the commits' changes, and a pass over the languages after each commit that changed code.
 
 import type { ClassifiedCommit } from "../automation/classify.js";
-import { languageNameOf } from "../universe/languages.js";
+import { OTHER_LANGUAGE, languageNameOf } from "../universe/languages.js";
 import { ACHIEVEMENT_THRESHOLDS } from "./thresholds.js";
 
 const { polyglotLanguages, polyglotMinShare } = ACHIEVEMENT_THRESHOLDS;
@@ -14,13 +14,14 @@ export type LanguageLines = {
   readonly lines: number;
 };
 
-/** The languages with at least `polyglotMinShare` of the code lines, in the order given. */
+/** The languages with at least `polyglotMinShare` of the code lines, in the order given; the files of no listed language are not one. */
 export const significantLanguages = (
   languages: ReadonlyArray<LanguageLines>,
 ): ReadonlyArray<LanguageLines> => {
   const total = languages.reduce((sum, { lines }) => sum + lines, 0);
   return languages.filter(
-    ({ lines }) => lines > 0 && lines / total >= polyglotMinShare,
+    ({ name, lines }) =>
+      name !== OTHER_LANGUAGE && lines > 0 && lines / total >= polyglotMinShare,
   );
 };
 
