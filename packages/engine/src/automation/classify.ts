@@ -38,6 +38,12 @@ export type ClassifiedCommit = Classification & {
   /** The first line of the commit message; empty when there is none. */
   readonly subject: string;
   readonly author: Identity;
+  /**
+   * How many other people the commit's `Co-authored-by` trailers name: those
+   * that match no agent or bot signature and are not the author. Zero when
+   * there is none, and for a co-author line that git did not parse as a trailer.
+   */
+  readonly humanCoAuthors: number;
   /** Changes after rename resolution, every path, code or not. */
   readonly changes: ReadonlyArray<FileChange>;
 };
@@ -46,6 +52,7 @@ const GITHUB_NOREPLY = /^(\d+)\+.+@users\.noreply\.github\.com$/iu;
 const BOT_NAME = /\[bot\]$/iu;
 const NOREPLY_BOT = /^(?:\d+\+)?(.+\[bot\])@users\.noreply\.github\.com$/iu;
 const PERSON_WITH_EMAIL = /^(.*?)\s*<([^>]*)>$/u;
+const ADDRESS = /^[^@\s]+@[^@\s]+$/u;
 const BODY_CO_AUTHOR = /^co-authored-by:\s*[^<>]*<([^<>]+)>\s*$/iu;
 
 const githubIdOf = (email: string): number | undefined => {
@@ -142,6 +149,28 @@ const automatedAuthorOf = (
   return botAccount === undefined
     ? undefined
     : { class: "bot", tools: [botAccount] };
+};
+
+/**
+ * The number of distinct people, by lowercased address, that the parsed
+ * `Co-authored-by` trailers name besides the author. A trailer counts only in
+ * the shape `Name <address>`; `Co-authored-by: broken` names nobody. Addresses
+ * are compared as written, since `.mailmap` does not apply to trailers. A person is anyone
+ * who matches no row of `signatures` and no `[bot]` account, so a team's own
+ * signatures count. Needs only the trailers: the human share of a commit's
+ * help is a fact about the commit, whatever its class.
+ */
+export const humanCoAuthorsOf = (
+  signals: CommitSignals,
+  signatures: ReadonlyArray<Signature> = SIGNATURES,
+): number => {
+  const author = signals.author.email.toLowerCase();
+  const people = coAuthorsOf(signals)
+    .filter(({ email }) => ADDRESS.test(email))
+    .filter((person) => automatedAuthorOf(person, signatures) === undefined)
+    .map(({ email }) => email.toLowerCase())
+    .filter((key) => key !== author);
+  return new Set(people).size;
 };
 
 /**

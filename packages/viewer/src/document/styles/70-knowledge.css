@@ -351,8 +351,7 @@
   border-color: var(--axis);
 }
 
-.pill.info,
-.pill.tone-info {
+.pill.info {
   background: var(--accent-wash);
   color: var(--accent-ink);
 }

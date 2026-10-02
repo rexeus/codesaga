@@ -99,11 +99,13 @@ const commitKnownHistory = (repo: TempRepository) =>
 const graceBadges: Report["contributors"][number]["badges"] = [
   {
     kind: "founder",
+    category: "journey",
     label: "Founder",
     evidence: "First author of 50% of today's files.",
   },
   {
     kind: "new-here",
+    category: "journey",
     label: "New here",
     evidence: "First commit on 2026-02-04, 33 days ago.",
   },

@@ -1,4 +1,4 @@
-// Owns telling test files and documentation from other paths, for the badges and stories that read what a commit changed.
+// Owns telling test files, documentation and tooling from other paths, for the badges and stories that read what a commit changed.
 // Judged by the path alone, so a file that no longer exists is classified like one that does.
 import { matchesAny } from "./globs.js";
 
@@ -36,6 +36,74 @@ const RELEASE_METADATA_PATTERNS = [
   "**/release*",
 ];
 
+// Tools whose `<tool>.config.<extension>` file is configuration. A bare `*.config.*` would also match application code such as `app.config.ts`.
+const CONFIGURED_TOOLS = [
+  "vite",
+  "vitest",
+  "next",
+  "nuxt",
+  "astro",
+  "svelte",
+  "webpack",
+  "rollup",
+  "rolldown",
+  "tsup",
+  "tsdown",
+  "esbuild",
+  "eslint",
+  "prettier",
+  "jest",
+  "playwright",
+  "cypress",
+  "tailwind",
+  "postcss",
+  "babel",
+  "commitlint",
+  "lint-staged",
+  "turbo",
+  "knip",
+  "drizzle",
+  "vue",
+  "remix",
+  "metro",
+  "storybook",
+  "oxlint",
+  "oxfmt",
+  "biome",
+  "stylelint",
+  "docusaurus",
+  "gatsby",
+  "capacitor",
+  "wrangler",
+];
+
+// Files that build, ship or configure the project rather than being the project: CI, containers, manifests and lockfiles, tool configuration.
+// Matched at any depth, so a package of a monorepo counts like the root.
+const TOOLING_PATH_PATTERNS = [
+  "**/.github/**",
+  "**/.gitlab-ci.yml",
+  "**/.circleci/**",
+  "**/Dockerfile*",
+  "**/package.json",
+  "**/pnpm-lock.yaml",
+  "**/package-lock.json",
+  "**/yarn.lock",
+  "**/bun.lock*",
+  `**/{${CONFIGURED_TOOLS.join(",")}}.config.{js,cjs,mjs,ts,cts,mts,json}`,
+  "**/.babelrc*",
+  "**/.commitlintrc*",
+  "**/.lintstagedrc*",
+  "**/.stylelintrc*",
+  "**/tsconfig*.json",
+  "**/turbo.json",
+  "**/.oxlintrc.json",
+  "**/.eslintrc*",
+  "**/.prettierrc*",
+  "**/biome.json",
+  "**/renovate.json",
+  "**/.changeset/config.json",
+];
+
 const isReleaseMetadata = matchesAny(RELEASE_METADATA_PATTERNS);
 const isDocumentation = matchesAny(DOC_PATH_PATTERNS);
 
@@ -51,3 +119,17 @@ export const isTestPath: (path: string) => boolean =
  */
 export const isDocPath = (path: string): boolean =>
   isDocumentation(path) && !isReleaseMetadata(path.toLowerCase());
+
+/**
+ * Whether a repository-relative path is tooling: CI configuration
+ * (`.github/**`, `.gitlab-ci.yml`, `.circleci/**`), a `Dockerfile*`, a package
+ * manifest or lockfile (`package.json`, `pnpm-lock.yaml`, `package-lock.json`,
+ * `yarn.lock`, `bun.lock*`) or tool configuration (`<tool>.config.<extension>`
+ * of a known tool such as `vite` or `eslint`, never `app.config.ts`;
+ * `tsconfig*.json`, `turbo.json`, `.oxlintrc.json`, `.eslintrc*`,
+ * `.prettierrc*`, `biome.json`, `renovate.json`, `.changeset/config.json`),
+ * in any directory.
+ */
+export const isToolingPath: (path: string) => boolean = matchesAny(
+  TOOLING_PATH_PATTERNS,
+);

@@ -17,6 +17,7 @@ export const classifiedCommit = (
   offsetMinutes: 0,
   subject: "",
   author: { name: "Ada", email: "ada@example.com" },
+  humanCoAuthors: 0,
   changes: [],
   ...overrides,
 });

@@ -2,7 +2,7 @@
 // Reported as `thresholds`, so consumers see the rules next to the numbers they produced.
 
 import { ACHIEVEMENT_THRESHOLDS } from "../achievements/thresholds.js";
-import { CONTRIBUTOR_BADGE_THRESHOLDS } from "../badges/contributor-badges.js";
+import { CONTRIBUTOR_BADGE_THRESHOLDS } from "../badges/contributor-badge-thresholds.js";
 import { TERRITORY_BADGE_THRESHOLDS } from "../badges/territory-badge-thresholds.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import {

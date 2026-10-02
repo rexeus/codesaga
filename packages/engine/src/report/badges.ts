@@ -78,8 +78,9 @@ export const TerritoryBadge = Schema.Struct({
 export type TerritoryBadge = typeof TerritoryBadge.Type;
 
 /**
- * A badge of a contributor: positive or neutral, never comparative, and
- * never about working hours. Reviewing needs `--github`.
+ * A badge of a contributor: positive or neutral, and never comparative. It
+ * describes what the person's commits show and never ranks them. Reviewing
+ * needs `--github`.
  */
 export const ContributorBadge = Schema.Struct({
   /**
@@ -95,7 +96,27 @@ export const ContributorBadge = Schema.Struct({
    * touch documentation. `steady`: a commit in each of the last
    * `steadyMonths` months. `new-here`: the first commit lies at most
    * `newHereDays` days back. `back-again`: active again after a pause of at
-   * least `backAgainGapDays` days. `reviewer`: at least `reviewerReviews`
+   * least `backAgainGapDays` days. `night-owl`, `early-bird` and
+   * `weekend-regular`: at least `rhythmShare` of the person's human commits of
+   * the last `rhythmWindowDays` days fall between `rhythmNightFromHour` and
+   * `rhythmNightToHour` o'clock, between `rhythmNightToHour` and
+   * `rhythmEarlyToHour`, or on a Saturday or Sunday, in the author's local
+   * time. They need `rhythmMinCommits` such commits in `rhythmMinMonths`
+   * calendar months, and are withheld when `rhythmUtcShare` of them carry
+   * +00:00 while the history has other offsets. `pair-partner`: at least
+   * `pairPartnerCommits` commits of the last `recentWindowDays` days carry a
+   * `Co-authored-by` trailer that names another person, not an agent or a bot.
+   * `long-hauler`: a first commit at least `longHaulerYears` years ago and a
+   * commit in each of the last `longHaulerQuarters` quarters, counted back from
+   * now in blocks of three months; withheld in a shallow clone. `explorer`:
+   * first commits in at least `explorerMinTerritories` territories of the
+   * recommended detail within the last `explorerDays` days, for someone who is
+   * not `new-here`; withheld in a shallow clone. `toolsmith`: at least
+   * `toolsmithShare` of the human commits of the last `recentWindowDays` days
+   * (at least `toolsmithMinCommits`) change only tooling files: CI,
+   * containers, package manifests and lockfiles, and the configuration files
+   * of known tools such as `vite.config.ts` or `tsconfig.json`.
+   * `reviewer`: at least `reviewerReviews`
    * reviews; only with `--github`.
    */
   kind: Schema.Literals([
@@ -109,7 +130,29 @@ export const ContributorBadge = Schema.Struct({
     "steady",
     "new-here",
     "back-again",
+    "night-owl",
+    "early-bird",
+    "weekend-regular",
+    "pair-partner",
+    "long-hauler",
+    "explorer",
+    "toolsmith",
     "reviewer",
+  ]),
+  /**
+   * What the badge is about: `focus` (`all-rounder`, `specialist`, `keeper`),
+   * `craft` (`tidier`, `tester`, `documenter`, `toolsmith`), `rhythm`
+   * (`night-owl`, `early-bird`, `weekend-regular`), `collaboration`
+   * (`pair-partner`, `reviewer`) or `journey` (`founder`, `long-hauler`,
+   * `explorer`, `steady`, `new-here`, `back-again`).
+   * Determined by `kind`. A person's badges are ordered by category in that order.
+   */
+  category: Schema.Literals([
+    "focus",
+    "craft",
+    "rhythm",
+    "collaboration",
+    "journey",
   ]),
   /** Short text for the badge itself, such as "engine specialist". */
   label: Schema.String,

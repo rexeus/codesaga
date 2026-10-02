@@ -87,6 +87,22 @@
       "steadyMonths": 6,
       "newHereDays": 90,
       "backAgainGapDays": 183,
+      "rhythmWindowDays": 365,
+      "rhythmMinCommits": 40,
+      "rhythmMinMonths": 3,
+      "rhythmShare": 0.25,
+      "rhythmNightFromHour": 22,
+      "rhythmNightToHour": 5,
+      "rhythmEarlyToHour": 8,
+      "rhythmUtcShare": 0.9,
+      "recentWindowDays": 365,
+      "pairPartnerCommits": 5,
+      "longHaulerYears": 3,
+      "longHaulerQuarters": 4,
+      "explorerDays": 90,
+      "explorerMinTerritories": 3,
+      "toolsmithShare": 0.3,
+      "toolsmithMinCommits": 10,
       "reviewerReviews": 10
     },
     "achievements": {
@@ -1337,21 +1353,31 @@
       "badges": [
         {
           "kind": "all-rounder",
+          "category": "focus",
           "label": "All-rounder",
           "evidence": "Commits in 7 of 11 territories."
         },
         {
-          "kind": "founder",
-          "label": "Founder",
-          "evidence": "First author of 31% of today's files."
-        },
-        {
           "kind": "keeper",
+          "category": "focus",
           "label": "Keeper of docs",
           "evidence": "The only active expert of docs."
         },
         {
+          "kind": "pair-partner",
+          "category": "collaboration",
+          "label": "Pair partner",
+          "evidence": "9 commits in the last year with another person as co-author."
+        },
+        {
+          "kind": "founder",
+          "category": "journey",
+          "label": "Founder",
+          "evidence": "First author of 31% of today's files."
+        },
+        {
           "kind": "steady",
+          "category": "journey",
           "label": "Steady",
           "evidence": "A commit in each of the last 6 months."
         }
@@ -1391,11 +1417,25 @@
       "badges": [
         {
           "kind": "tester",
+          "category": "craft",
           "label": "Tester",
           "evidence": "44% of the changed files are tests."
         },
         {
+          "kind": "night-owl",
+          "category": "rhythm",
+          "label": "Night owl",
+          "evidence": "Often commits late: 28% of their commits in the last year between 22:00 and 05:00 (42 of 150)."
+        },
+        {
+          "kind": "explorer",
+          "category": "journey",
+          "label": "Explorer",
+          "evidence": "First commits in 3 territories in the last 90 days."
+        },
+        {
           "kind": "steady",
+          "category": "journey",
           "label": "Steady",
           "evidence": "A commit in each of the last 6 months."
         }
@@ -1432,7 +1472,14 @@
         0, 0, 0, 0
       ],
       "status": "active",
-      "badges": []
+      "badges": [
+        {
+          "kind": "early-bird",
+          "category": "rhythm",
+          "label": "Early bird",
+          "evidence": "Often commits early: 31% of their commits in the last year between 05:00 and 08:00 (37 of 118)."
+        }
+      ]
     },
     {
       "name": "Jonas Weber",
@@ -1468,6 +1515,7 @@
       "badges": [
         {
           "kind": "keeper",
+          "category": "focus",
           "label": "Keeper of packages/auth/src/providers",
           "evidence": "The only active expert of packages/auth/src/providers."
         }
@@ -1535,7 +1583,14 @@
       "status": "new",
       "badges": [
         {
+          "kind": "toolsmith",
+          "category": "craft",
+          "label": "Toolsmith",
+          "evidence": "46% of their commits in the last year change only tooling files, such as CI, containers, manifests and configuration (32 of 70)."
+        },
+        {
           "kind": "new-here",
+          "category": "journey",
           "label": "New here",
           "evidence": "First commit on 2026-07-08, 84 days ago."
         }
@@ -1571,6 +1626,7 @@
       "badges": [
         {
           "kind": "documenter",
+          "category": "craft",
           "label": "Documenter",
           "evidence": "56% of the commits touch documentation."
         }

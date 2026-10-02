@@ -110,6 +110,37 @@ const BadgeThresholds = Schema.Struct({
   steadyMonths: Count,
   newHereDays: Count,
   backAgainGapDays: Count,
+  /** `night-owl`, `early-bird` and `weekend-regular` read the human commits of the last this many days ... */
+  rhythmWindowDays: Count,
+  /** ... need at least this many of them ... */
+  rhythmMinCommits: Count,
+  /** ... in at least this many calendar months ... */
+  rhythmMinMonths: Count,
+  /** ... and at least this share of them in the hours or on the days of the badge. */
+  rhythmShare: Share,
+  /** `night-owl` counts the hours from this one on, until `rhythmNightToHour` the next morning ... */
+  rhythmNightFromHour: Count,
+  /** ... and `early-bird` the hours from here until `rhythmEarlyToHour`. */
+  rhythmNightToHour: Count,
+  rhythmEarlyToHour: Count,
+  /** The rhythm badges are withheld when at least this share of a person's commits carry +00:00 while the history has other offsets. */
+  rhythmUtcShare: Share,
+  /** `pair-partner` and `toolsmith` read the commits of the last this many days. */
+  recentWindowDays: Count,
+  /** `pair-partner` needs this many commits with a human co-author. */
+  pairPartnerCommits: Count,
+  /** `long-hauler` needs a first commit at least this many years ago ... */
+  longHaulerYears: Count,
+  /** ... and a commit in each of this many last quarters. */
+  longHaulerQuarters: Count,
+  /** `explorer` counts first commits in territories within this many days ... */
+  explorerDays: Count,
+  /** ... in at least this many territories. */
+  explorerMinTerritories: Count,
+  /** `toolsmith` needs this share of the commits to change only tooling files ... */
+  toolsmithShare: Share,
+  /** ... out of at least this many commits that change files. */
+  toolsmithMinCommits: Count,
   reviewerReviews: Count,
 });
 

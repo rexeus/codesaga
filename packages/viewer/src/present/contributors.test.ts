@@ -131,9 +131,24 @@ describe("the status filter", () => {
 
 describe("the badges of a solo repository", () => {
   const badges = [
-    { kind: "keeper", label: "Keeper of src", evidence: "only expert" },
-    { kind: "all-rounder", label: "All-rounder", evidence: "all territories" },
-    { kind: "steady", label: "Steady", evidence: "every month" },
+    {
+      kind: "keeper",
+      category: "focus",
+      label: "Keeper of src",
+      evidence: "only expert",
+    },
+    {
+      kind: "all-rounder",
+      category: "focus",
+      label: "All-rounder",
+      evidence: "all territories",
+    },
+    {
+      kind: "steady",
+      category: "journey",
+      label: "Steady",
+      evidence: "every month",
+    },
   ] as const;
 
   const rowOf = (allTime: number) => {
