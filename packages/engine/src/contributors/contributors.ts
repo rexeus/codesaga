@@ -112,6 +112,7 @@ const contributorOf = (
     status: contributorStatus(
       ownHistory.reduce((first, { time }) => Math.min(first, time), Infinity),
       lastTime,
+      repositoryStart,
       now,
     ),
     badges: contributorBadges(email, {

@@ -12,19 +12,34 @@ export const NEW_CONTRIBUTOR_DAYS = 90;
 export type ContributorStatus = "new" | "active" | "dormant";
 
 /**
- * `dormant` without a commit in the `ACTIVE_DAYS` days before `now`; `new` when
- * the first commit over the full history lies at most `NEW_CONTRIBUTOR_DAYS`
- * days back; otherwise `active`. Times are seconds since the epoch.
+ * Whether a contributor whose first commit is at `firstCommitTime` is new: it
+ * lies at most `NEW_CONTRIBUTOR_DAYS` days before `now`, and someone committed
+ * before it, since the founder of a young repository is nobody's newcomer.
+ * `repositoryStart` is the first commit of anyone who counts as a contributor.
+ * Times are seconds since the epoch.
+ */
+export const isNewContributor = (
+  firstCommitTime: number,
+  repositoryStart: number,
+  now: DateTime.Utc,
+): boolean =>
+  firstCommitTime > repositoryStart &&
+  isActiveWithin(firstCommitTime, now, NEW_CONTRIBUTOR_DAYS);
+
+/**
+ * `dormant` without a commit in the `ACTIVE_DAYS` days before `now`; `new`
+ * under `isNewContributor`; otherwise `active`.
  */
 export const contributorStatus = (
   firstCommitTime: number,
   lastCommitTime: number,
+  repositoryStart: number,
   now: DateTime.Utc,
 ): ContributorStatus => {
   if (!isActiveWithin(lastCommitTime, now, ACTIVE_DAYS)) {
     return "dormant";
   }
-  return isActiveWithin(firstCommitTime, now, NEW_CONTRIBUTOR_DAYS)
+  return isNewContributor(firstCommitTime, repositoryStart, now)
     ? "new"
     : "active";
 };

@@ -128,8 +128,9 @@ const Contributor = Schema.Struct({
    */
   weekly: Schema.Array(Count).check(Schema.isBetweenLength(52, 52)),
   /**
-   * `new`: the first commit over the full history lies at most
-   * `thresholds.badges.welcomeDays` days before now; `dormant`: not `active`;
+   * `dormant`: not `active`; `new`: the first commit over the full history
+   * lies at most `thresholds.badges.welcomeDays` days before now and someone
+   * committed before it (the founder of a young repository is `active`);
    * otherwise `active`.
    */
   status: Schema.Literals(["new", "active", "dormant"]),

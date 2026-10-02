@@ -8,7 +8,10 @@ import { isoDateOfDay, localDayOf } from "../activity/buckets.js";
 import { addMonths } from "../activity/calendar.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { ACTIVE_DAYS, isActiveWithin } from "../contributors/activeness.js";
-import { NEW_CONTRIBUTOR_DAYS } from "../contributors/status.js";
+import {
+  NEW_CONTRIBUTOR_DAYS,
+  isNewContributor,
+} from "../contributors/status.js";
 import type { ContributorBadge } from "../report/badges.js";
 
 /** The rules behind steady, welcome and returning, for the report's `thresholds.badges`. */
@@ -18,7 +21,7 @@ export const TENURE_BADGE_THRESHOLDS = {
   returningGapDays: 183,
 };
 
-const { steadyMonths, welcomeDays, returningGapDays } = TENURE_BADGE_THRESHOLDS;
+const { steadyMonths, returningGapDays } = TENURE_BADGE_THRESHOLDS;
 
 const SECONDS_PER_DAY = 86_400;
 
@@ -48,7 +51,7 @@ const steady = ({ times, nowSeconds }: Tenure) =>
 /** The first commit is recent, and someone committed before it: the founder of a young repository is no newcomer. */
 const welcome = ({ times, repositoryStart, now, nowSeconds }: Tenure) => {
   const first = Math.min(...times);
-  return first > repositoryStart && isActiveWithin(first, now, welcomeDays)
+  return isNewContributor(first, repositoryStart, now)
     ? {
         kind: "welcome" as const,
         label: "Welcome",

@@ -56,6 +56,15 @@ const withTests = (tests: number) =>
 const evidenceOf = (experts: AreaBadgeInput["experts"]) =>
   areaBadges(quietArea({ experts }), now)[0]?.evidence;
 
+/** An active main expert who first committed to the area `days` ago. */
+const recentMain = (days: number) => expert({ firstTime: daysAgo(days) });
+
+/** An expert who left more than 183 days ago, the previous main expert. */
+const dormantPredecessor = expert({
+  firstTime: daysAgo(1500),
+  lastTime: daysAgo(400),
+});
+
 /** Each badge is present at its threshold and absent just below it. */
 const cases: ReadonlyArray<
   readonly [string, Partial<AreaBadgeInput>, Partial<AreaBadgeInput>]
@@ -79,23 +88,19 @@ const cases: ReadonlyArray<
   ],
   [
     "handover",
-    {
-      experts: [
-        expert({ firstTime: daysAgo(500) }),
-        expert({ firstTime: daysAgo(1500), lastTime: daysAgo(400) }),
-      ],
-    },
-    {
-      experts: [
-        expert({ firstTime: daysAgo(500) }),
-        expert({ firstTime: daysAgo(1500), lastTime: daysAgo(100) }),
-      ],
-    },
+    { experts: [recentMain(180), dormantPredecessor] },
+    { experts: [recentMain(181), dormantPredecessor] },
   ],
   [
     "new",
-    { fileFirstCommits: [daysAgo(90), daysAgo(10)] },
-    { fileFirstCommits: [daysAgo(91), daysAgo(10)] },
+    {
+      startTime: daysAgo(270),
+      fileFirstCommits: [daysAgo(90), daysAgo(10)],
+    },
+    {
+      startTime: daysAgo(270),
+      fileFirstCommits: [daysAgo(91), daysAgo(10)],
+    },
   ],
   [
     "in-focus",
@@ -133,13 +138,37 @@ describe("areaBadges", () => {
     ).not.toContain("knowledge-fading");
   });
 
-  it("does not take a newer expert for the previous one in a handover", () => {
-    const experts = [
-      expert({ firstTime: daysAgo(500) }),
-      expert({ firstTime: daysAgo(100), lastTime: daysAgo(400) }),
-    ];
+  it("awards handover only to a recent replacement of a dormant main expert", () => {
+    const longGone = { ...dormantPredecessor, lastTime: daysAgo(184) };
+    const stillHere = { ...dormantPredecessor, lastTime: daysAgo(183) };
 
-    expect(kindsOf({ experts })).not.toContain("handover");
+    // the main expert has been around for years, or nobody left, or the main expert left
+    expect(
+      kindsOf({ experts: [recentMain(500), dormantPredecessor] }),
+    ).not.toContain("handover");
+    expect(kindsOf({ experts: [recentMain(10), stillHere] })).not.toContain(
+      "handover",
+    );
+    expect(kindsOf({ experts: [recentMain(10), longGone] })).toContain(
+      "handover",
+    );
+    expect(
+      kindsOf({
+        experts: [
+          { ...recentMain(10), lastTime: daysAgo(400) },
+          dormantPredecessor,
+        ],
+      }),
+    ).not.toContain("handover");
+  });
+
+  it("does not call an area new when the repository is not 180 days older", () => {
+    const created = { fileFirstCommits: [daysAgo(10)] };
+
+    expect(kindsOf({ ...created, startTime: daysAgo(190) })).toContain("new");
+    expect(kindsOf({ ...created, startTime: daysAgo(189) })).not.toContain(
+      "new",
+    );
   });
 
   it("awards no single expert to an island", () => {
@@ -199,12 +228,6 @@ describe("areaBadges evidence and order", () => {
         fileFirstCommits: [daysAgo(5)],
       }),
     ).toStrictEqual(["island", "orphaned", "new", "quiet", "well-tested"]);
-  });
-
-  it("does not call an area new when its files are the repository's first", () => {
-    expect(
-      kindsOf({ startTime: daysAgo(10), fileFirstCommits: [daysAgo(10)] }),
-    ).not.toContain("new");
   });
 
   it("awards no badge to a rest area", () => {

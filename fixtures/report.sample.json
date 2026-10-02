@@ -56,6 +56,8 @@
       "fadingFromDays": 90,
       "fadingToDays": 183,
       "newDays": 90,
+      "newAfterStartDays": 180,
+      "handoverDays": 180,
       "quietDays": 183,
       "newcomerFriendlyFirstCommits": 2,
       "newcomerFriendlyDays": 180,

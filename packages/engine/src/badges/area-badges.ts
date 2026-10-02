@@ -18,6 +18,8 @@ export const AREA_BADGE_THRESHOLDS = {
   fadingFromDays: 90,
   fadingToDays: 183,
   newDays: 90,
+  newAfterStartDays: 180,
+  handoverDays: 180,
   quietDays: 183,
   newcomerFriendlyFirstCommits: 2,
   newcomerFriendlyDays: 180,
@@ -30,6 +32,8 @@ const {
   fadingFromDays,
   fadingToDays,
   newDays,
+  newAfterStartDays,
+  handoverDays,
   quietDays,
   newcomerFriendlyFirstCommits,
   newcomerFriendlyDays,
@@ -61,7 +65,7 @@ export type AreaBadgeInput = {
   readonly orphaned: boolean;
   /** Every expert of the area, not only the five the report lists, most files first. */
   readonly experts: ReadonlyArray<AreaExpert>;
-  /** For each of the area's files, the time of its first commit. */
+  /** For each of the area's files, the time of its first commit; their earliest is when the area was created. */
   readonly fileFirstCommits: ReadonlyArray<number>;
   /** The newest commit that touched any file of the area; undefined when none is known. */
   readonly lastChangeTime: number | undefined;
@@ -69,7 +73,7 @@ export type AreaBadgeInput = {
   readonly commitsInWindow: number;
   /** The most commits in the activity window that touched any other area of the same level. */
   readonly peerCommitsInWindow: number;
-  /** The time of the repository's first commit; files created then are the founding ones, never `new`. */
+  /** The time of the repository's first commit; an area is `new` only well after it. */
   readonly startTime: number;
   /** The first commit of every person who arrived after the repository started, with the paths it changed. */
   readonly firstCommits: ReadonlyArray<{
@@ -144,24 +148,23 @@ const knowledgeFading = ({ experts, nowSeconds }: Context) => {
     : undefined;
 };
 
-/** A new main expert is active while an earlier expert has gone quiet. */
-const handover = ({ experts, now }: Context) => {
+/**
+ * The previous main expert (the dormant expert on the most files) is replaced
+ * by an active main expert who first committed to the area recently.
+ */
+const handover = ({ experts, now, nowSeconds }: Context) => {
   const [main] = experts;
-  const previous =
-    main === undefined
-      ? undefined
-      : experts.find(
-          (expert) =>
-            expert.firstTime < main.firstTime &&
-            !isActiveWithin(expert.lastTime, now, ACTIVE_DAYS),
-        );
+  const previous = experts.find(
+    (expert) => !isActiveWithin(expert.lastTime, now, ACTIVE_DAYS),
+  );
   return main !== undefined &&
     previous !== undefined &&
-    isActiveWithin(main.lastTime, now, ACTIVE_DAYS)
+    isActiveWithin(main.lastTime, now, ACTIVE_DAYS) &&
+    isActiveWithin(main.firstTime, now, handoverDays)
     ? {
         kind: "handover" as const,
         label: "Handover",
-        evidence: `A newer expert leads; the previous one last committed on ${dateOf(previous.lastTime)}.`,
+        evidence: `A main expert who joined ${Math.floor((nowSeconds - main.firstTime) / SECONDS_PER_DAY)} days ago replaced the previous one, last active on ${dateOf(previous.lastTime)}.`,
       }
     : undefined;
 };
@@ -169,7 +172,7 @@ const handover = ({ experts, now }: Context) => {
 const newArea = ({ fileFirstCommits, startTime, now, nowSeconds }: Context) => {
   const created = Math.min(...fileFirstCommits);
   return fileFirstCommits.length > 0 &&
-    created > startTime &&
+    created - startTime >= newAfterStartDays * SECONDS_PER_DAY &&
     isActiveWithin(created, now, newDays)
     ? {
         kind: "new" as const,

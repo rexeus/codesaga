@@ -13,6 +13,7 @@ describe("contributorStatus", () => {
       contributorStatus(
         at("2026-04-02T00:00:00Z"),
         at("2026-06-30T00:00:00Z"),
+        at("2020-01-01T00:00:00Z"),
         now,
       ),
     ).toBe("new");
@@ -23,6 +24,7 @@ describe("contributorStatus", () => {
       contributorStatus(
         at("2026-04-01T23:59:59Z"),
         at("2026-06-30T00:00:00Z"),
+        at("2020-01-01T00:00:00Z"),
         now,
       ),
     ).toBe("active");
@@ -34,6 +36,7 @@ describe("contributorStatus", () => {
       contributorStatus(
         at("2024-01-01T00:00:00Z"),
         at("2025-12-30T00:00:00Z"),
+        at("2020-01-01T00:00:00Z"),
         now,
       ),
     ).toBe("active");
@@ -41,6 +44,34 @@ describe("contributorStatus", () => {
       contributorStatus(
         at("2024-01-01T00:00:00Z"),
         at("2025-12-29T23:59:59Z"),
+        at("2020-01-01T00:00:00Z"),
+        now,
+      ),
+    ).toBe("dormant");
+  });
+});
+
+describe("contributorStatus founder", () => {
+  it("is not new for the one who started the repository, whatever their age", () => {
+    const start = at("2026-06-01T00:00:00Z");
+
+    expect(
+      contributorStatus(start, at("2026-06-30T00:00:00Z"), start, now),
+    ).toBe("active");
+    expect(
+      contributorStatus(start, at("2026-06-30T00:00:00Z"), start - 1, now),
+    ).toBe("new");
+  });
+
+  it("is dormant for a founder who left, not new", () => {
+    const start = at("2026-04-10T00:00:00Z");
+
+    expect(contributorStatus(start, start, start, now)).toBe("active");
+    expect(
+      contributorStatus(
+        at("2025-01-01T00:00:00Z"),
+        at("2025-01-02T00:00:00Z"),
+        0,
         now,
       ),
     ).toBe("dormant");

@@ -15,9 +15,13 @@ export const AreaBadge = Schema.Struct({
    * `shared-knowledge`: at least `thresholds.badges.sharedActiveExperts` active
    * experts and a truck factor of at least `thresholds.badges.sharedTruckFactor`.
    * `knowledge-fading`: the main expert has been silent for
-   * `thresholds.badges.fadingFromDays` to `fadingToDays` days. `handover`: a
-   * new expert rises while the previous main expert is dormant. `new`: the area
-   * was created in the last `thresholds.badges.newDays` days. `in-focus`: the
+   * `thresholds.badges.fadingFromDays` to `fadingToDays` days. `handover`: the
+   * previous main expert (the dormant expert on the most files) is replaced by
+   * an active main expert whose first commit to the area is at most
+   * `thresholds.badges.handoverDays` days old. `new`: the area's first commit
+   * is at most `thresholds.badges.newDays` days old and at least
+   * `thresholds.badges.newAfterStartDays` days after the repository's first
+   * commit, so the areas of a young repository are not new one by one. `in-focus`: the
    * area with the most commits in the window. `quiet`: unchanged for at least
    * `thresholds.badges.quietDays` days. `newcomer-friendly`: at least
    * `thresholds.badges.newcomerFriendlyFirstCommits` people made their first

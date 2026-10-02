@@ -117,14 +117,21 @@ layer(NodeServices.layer)("analyze area badges", (it) => {
           ],
         );
         assert.deepStrictEqual(
+          report.contributors.map(({ name, status }) => [name, status]),
+          [
+            ["Ada Lovelace", "active"],
+            ["Grace", "new"],
+          ],
+        );
+        assert.deepStrictEqual(
           report.knowledge.areas.levels[0]?.areas.map(({ path, badges }) => [
             path,
             badges.map(({ kind }) => kind),
           ]),
           [
             ["apps/web", ["island"]],
-            ["packages/cli", ["island", "new"]],
-            ["packages/lib", ["island", "new"]],
+            ["packages/cli", ["island"]],
+            ["packages/lib", ["island"]],
           ],
         );
       }),

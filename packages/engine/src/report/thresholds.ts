@@ -62,6 +62,10 @@ const BadgeThresholds = Schema.Struct({
   fadingFromDays: Count,
   fadingToDays: Count,
   newDays: Count,
+  /** An area is `new` only when its first commit is at least this many days after the repository's first. */
+  newAfterStartDays: Count,
+  /** `handover` needs the new main expert's first commit to the area at most this many days ago. */
+  handoverDays: Count,
   quietDays: Count,
   newcomerFriendlyFirstCommits: Count,
   newcomerFriendlyDays: Count,
