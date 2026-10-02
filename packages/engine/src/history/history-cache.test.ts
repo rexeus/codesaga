@@ -134,6 +134,24 @@ layer(NodeServices.layer)("storing the history cache", (effectIt) => {
         );
       }),
   );
+
+  effectIt.effect(
+    "removes the history-v1.json that this cache superseded",
+    () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const directory = yield* fs.makeTempDirectoryScoped({
+          prefix: "codesaga-cache-",
+        });
+        const old = path.join(directory, "history-v1.json");
+        yield* fs.writeFileString(old, "{}");
+
+        yield* storeCache(path.join(directory, "history-v2.json"), cache);
+
+        assert.isFalse(yield* fs.exists(old));
+      }),
+  );
 });
 
 describe("cacheStatus", () => {

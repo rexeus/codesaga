@@ -1,7 +1,6 @@
 // Owns the history cache file: what it holds, where it lives, and whether it still applies.
 // The cache is an optimization only: reading or writing it never fails.
-import { Effect, FileSystem, Schema } from "effect";
-import type { Path } from "effect";
+import { Effect, FileSystem, Path, Schema } from "effect";
 
 import { writeFileAtomically } from "../cache/cache-store.js";
 import type { Commit } from "./parse-log.js";
@@ -111,10 +110,25 @@ export const loadCache = (
     };
   }).pipe(Effect.orElseSucceed(() => undefined));
 
+/** The file this cache replaced when its version rose; nothing reads it again. */
+const SUPERSEDED_FILE = "history-v1.json";
+
+const removeSupersededCache = (
+  file: string,
+): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    yield* fs.remove(path.join(path.dirname(file), SUPERSEDED_FILE), {
+      force: true,
+    });
+  }).pipe(Effect.ignore);
+
 /**
  * Replaces the cache in `file` atomically, so a concurrent run sees the old or
  * the new file, never a torn one. A failure leaves the old file in place.
- * Temporary files of runs that died over an hour ago are removed on the way.
+ * Temporary files of runs that died over an hour ago, and a `history-v1.json`
+ * beside the file, are removed on the way.
  */
 export const storeCache = (
   file: string,
@@ -126,5 +140,6 @@ export const storeCache = (
     commits: cache.commits.map((commit) => toCached(commit)),
   }).pipe(
     Effect.flatMap((text) => writeFileAtomically(file, text)),
+    Effect.andThen(removeSupersededCache(file)),
     Effect.ignore,
   );
