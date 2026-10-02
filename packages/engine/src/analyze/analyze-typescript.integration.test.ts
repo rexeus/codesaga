@@ -70,6 +70,118 @@ layer(analyzeServices)("analyze the TypeScript deep dive", (it) => {
   );
 });
 
+layer(analyzeServices)(
+  "analyze the TypeScript deep dive's type safety",
+  (it) => {
+    it.effect(
+      "counts escape hatches of production code and tests apart, and per territory",
+      () =>
+        Effect.gen(function* () {
+          yield* setNow;
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-02-01T09:00:00Z", {
+            "app/a.ts": "export const a = (x: unknown) => x as any;\n",
+            "app/b.ts": "// @ts-nocheck\nexport const b = 1;\n",
+            "app/c.ts": "export const c = 1;\n",
+            "app/a.test.ts": "export const t = (x: unknown) => x!;\n",
+            "lib/d.ts": "export const d = 1;\n",
+            "lib/e.ts": "export const e = 1;\n",
+            "lib/f.ts": "export const f = 1;\n",
+          });
+
+          const report = yield* analyze(analyzeOptionsFor(repo));
+
+          const { typeSafety } = report.deepDives?.typescript ?? {};
+          assert.deepStrictEqual(typeSafety?.nocheckFiles, ["app/b.ts"]);
+          assert.deepStrictEqual(
+            [typeSafety?.production.files, typeSafety?.production.escapes],
+            [6, 2],
+          );
+          assert.deepStrictEqual(
+            [typeSafety?.tests.files, typeSafety?.tests.counts.nonNull],
+            [1, 1],
+          );
+          const byPath = Object.fromEntries(
+            report.knowledge.territories.territories.map((territory) => [
+              territory.path,
+              territory.typescript,
+            ]),
+          );
+          assert.deepStrictEqual(byPath["lib"], {
+            files: 3,
+            codeLines: 3,
+            escapesPer1000: 0,
+            esmShare: 1,
+          });
+          assert.strictEqual(byPath["app"]?.files, 4);
+          assert.strictEqual(byPath["app"]?.escapesPer1000, 500);
+        }),
+    );
+  },
+);
+
+layer(analyzeServices)(
+  "analyze the TypeScript deep dive's code style",
+  (it) => {
+    it.effect(
+      "reports the module systems, the idioms and the stack of a repository",
+      () =>
+        Effect.gen(function* () {
+          yield* setNow;
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-02-01T09:00:00Z", {
+            "package.json": JSON.stringify({
+              name: "app",
+              type: "module",
+              dependencies: { react: "^19", effect: "^4" },
+              devDependencies: { vitest: "^3" },
+            }),
+            "test/fixture/package.json": '{ "dependencies": { "vue": "^3" } }',
+            "src/view.tsx":
+              'import { useState } from "react";\nimport type { Props } from "./props";\nexport const View = (p: Props) => { const [a] = useState(p); return <p>{a}</p>; };\n',
+            "src/props.ts": "export interface Props { a: number }\n",
+            "src/main.ts":
+              'import { Effect } from "effect";\nimport fs from "node:fs";\nexport default Effect.succeed(fs);\n',
+            "src/legacy.cjs":
+              'const x = require("lodash");\nmodule.exports = { x };\n',
+            "src/view.test.ts":
+              'import { it } from "vitest";\nit("works", () => {});\n',
+          });
+
+          const { deepDives } = yield* analyze(analyzeOptionsFor(repo));
+
+          const typescript = deepDives?.typescript;
+          assert.deepStrictEqual(typescript?.modules, {
+            files: 5,
+            esmFiles: 4,
+            commonjsFiles: 1,
+            bothFiles: 0,
+            imports: { declarations: 5, typeOnly: 1 },
+            nonErasable: {
+              files: 0,
+              enums: 0,
+              namespaces: 0,
+              parameterProperties: 0,
+              decorators: 0,
+            },
+            packageTypes: { module: 1, commonjs: 0, unspecified: 0 },
+          });
+          assert.deepStrictEqual(
+            typescript?.ecosystem?.tools.map(({ name }) => name),
+            ["Effect", "React", "Vitest"],
+          );
+          assert.deepStrictEqual(
+            [typescript?.ecosystem?.dependencies, typescript?.ecosystem?.hooks],
+            [
+              { manifests: 1, runtime: 2, dev: 1 },
+              { calls: 1, files: 1 },
+            ],
+          );
+        }),
+    );
+  },
+);
+
 layer(analyzeServices)("analyze the TypeScript deep dive without it", (it) => {
   it.effect(
     "has no deep dive for a repository without TypeScript or JavaScript",

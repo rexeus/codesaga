@@ -4,6 +4,7 @@ import { Schema } from "effect";
 
 import { TerritoryBadge } from "./badges.js";
 import { CodeStats } from "./code-stats.js";
+import { TerritoryTypeScript } from "./typescript-territory.js";
 
 const Count = Schema.Natural;
 
@@ -109,6 +110,12 @@ const TerritoryFields = Schema.Struct({
    * those are the repository's own.
    */
   stats: CodeStats,
+  /**
+   * The territory's TypeScript and JavaScript as the deep dive reads them, in
+   * the few figures that let a card be held against the repository's. Absent
+   * without a deep dive, and for a territory with no parsed file.
+   */
+  typescript: Schema.optionalKey(TerritoryTypeScript),
   /** Badges of the territory, most important first; the dashboard shows the first three. */
   badges: Schema.Array(TerritoryBadge),
   /** The territories it splits into before the output limit cut `territories`; 0 for a territory that does not split. */

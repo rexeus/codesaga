@@ -26,6 +26,8 @@ import type { Report } from "../report/report.js";
 import type { TypeScriptFacts } from "../typescript/gather-typescript.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { inventory, namedAsCode } from "../universe/inventory.js";
+import { projectFilesOf } from "../universe/project-files.js";
+import type { ProjectFiles } from "../universe/project-files.js";
 import { listTrackedFiles } from "../universe/tracked-files.js";
 import {
   InvalidCompare,
@@ -53,6 +55,8 @@ export type RepositoryFacts = {
   /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
   readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
+  /** The `package.json` and `tsconfig*.json` files of the project, from `projectFilesOf`: the manifests and configs the deep dives read. */
+  readonly projectFiles: ProjectFiles;
   /** The directories of the scope that hold a package manifest; "." is the repository root. */
   readonly packageRoots: ReadonlyArray<string>;
   /** The territory detail to start at, as requested; absent for the recommended one. */
@@ -203,6 +207,7 @@ const gatherInRepository = (
       commits,
       headTime,
       universe,
+      projectFiles: yield* projectFilesOf(tracked),
       packageRoots: packageRootsOf(tracked),
       detail: options.detail,
       blame,

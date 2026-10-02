@@ -79,6 +79,10 @@ type KnowledgeFacts = KnowledgeInput &
     readonly shallow: boolean;
     /** The detail to start at, from 1, rounded down; a detail beyond the deepest one means the deepest. The recommended detail when absent, not finite or below 1. */
     readonly detail?: number | undefined;
+    /** The deep dive's figures for the files at the given paths; absent without a deep dive. */
+    readonly typescriptOf?:
+      | ((paths: ReadonlyArray<string>) => Territory["typescript"])
+      | undefined;
   };
 
 /** The requested detail rounded down; the recommended one when it is absent, not finite or below 1. */
@@ -123,12 +127,14 @@ const reportedTerritory = (
   inputs: BadgeInputs,
   facts: KnowledgeFacts,
 ): Territory => {
-  const { paths: _paths, territories, ...territory } = source;
+  const { paths, territories, ...territory } = source;
   const input = inputs.get(source);
+  const typescript = facts.typescriptOf?.(paths);
   return {
     ...territory,
     lastChangedAt: isoOfEpochSeconds(input?.lastChangeTime ?? facts.headTime),
     stats: source.stats,
+    ...(typescript === undefined ? {} : { typescript }),
     badges: input === undefined ? [] : territoryBadges(input, facts.now),
     territories: territories.map((child) =>
       reportedTerritory(child, inputs, facts),

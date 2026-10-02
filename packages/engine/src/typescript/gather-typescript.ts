@@ -4,8 +4,16 @@
 import { Array as Arr, Effect, FileSystem, Path } from "effect";
 
 import type { InventoryFile } from "../universe/inventory.js";
+import type { ProjectFiles } from "../universe/project-files.js";
+import { readManifests } from "./ecosystem/read-manifests.js";
+import type { PackageManifest } from "./ecosystem/read-manifests.js";
 import type { FactsResult, SourceText } from "./facts-of-source.js";
 import { isDeclarationPath, isScriptPath } from "./source-kinds.js";
+import { directoryOf } from "./tsconfig/posix-path.js";
+import { readTsconfigs } from "./tsconfig/read-tsconfigs.js";
+import type { WorkspacePackages } from "./tsconfig/read-tsconfigs.js";
+import type { TsconfigProject } from "./tsconfig/strictness.js";
+import { declaredTypeScript } from "./tsconfig/typescript-version.js";
 import { TypeScriptParser } from "./typescript-parser.js";
 import type { ParserStatus } from "./typescript-parser.js";
 
@@ -14,9 +22,14 @@ export type TypeScriptFacts = {
   readonly status: ParserStatus;
   /** Declaration files, which are counted and not parsed. */
   readonly declarationFiles: ReadonlyArray<string>;
-  /** Every other file with its verdict. */
+  /** The `package.json` files of the repository. */
+  readonly manifests: ReadonlyArray<PackageManifest>;
+  /** The `tsconfig` files and the declared TypeScript version. */
+  readonly project: TsconfigProject;
+  /** Every other file with its verdict and the non-blank lines the universe measured for it. */
   readonly files: ReadonlyArray<{
     readonly path: string;
+    readonly lines: number;
     readonly result: FactsResult;
   }>;
 };
@@ -47,6 +60,7 @@ const verdicts = (
   root: string,
   paths: ReadonlyArray<string>,
   parser: TypeScriptParser["Service"],
+  linesOf: (path: string) => number,
 ) =>
   Effect.gen(function* () {
     const sources = yield* Effect.forEach(
@@ -60,12 +74,61 @@ const verdicts = (
     const facts = yield* parser.factsOf(readable);
     const judged = Arr.zip(readable, facts).map(([source, result]) => ({
       path: source.path,
+      lines: linesOf(source.path),
       result,
     }));
     const unreadable = paths
       .filter((_, index) => sources[index] === undefined)
-      .map((path) => ({ path, result: UNREADABLE }));
+      .map((path) => ({ path, lines: linesOf(path), result: UNREADABLE }));
     return [...judged, ...unreadable];
+  });
+
+const readText = (
+  root: string,
+  file: string,
+): Effect.Effect<
+  string | undefined,
+  never,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    return yield* fs.readFileString(path.join(root, file));
+  }).pipe(Effect.orElseSucceed(() => undefined));
+
+/** The manifests that name their package, by name, with the directory they lie in. */
+const workspacePackagesOf = (
+  manifests: ReadonlyArray<PackageManifest>,
+): WorkspacePackages =>
+  new Map(
+    manifests.flatMap(({ name, path }) =>
+      name === null ? [] : [[name, directoryOf(path)] as const],
+    ),
+  );
+
+/** The project's configs, read with their `extends`, and the TypeScript the root manifest declares. */
+const readProject = (
+  root: string,
+  projectFiles: ProjectFiles,
+  manifests: ReadonlyArray<PackageManifest>,
+): Effect.Effect<TsconfigProject, never, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const configs = yield* readTsconfigs(
+      root,
+      projectFiles.tsconfigs,
+      workspacePackagesOf(manifests),
+    );
+    const manifest = yield* readText(root, "package.json");
+    const workspace = yield* readText(root, "pnpm-workspace.yaml");
+    return {
+      configs,
+      typescript: declaredTypeScript(
+        manifest,
+        manifests.flatMap(({ typescript }) => typescript ?? []),
+        workspace,
+      ),
+    };
   });
 
 /**
@@ -77,6 +140,7 @@ const verdicts = (
 export const gatherTypeScript = (
   root: string,
   universe: ReadonlyArray<InventoryFile>,
+  projectFiles: ProjectFiles,
 ): Effect.Effect<
   TypeScriptFacts | undefined,
   never,
@@ -90,15 +154,19 @@ export const gatherTypeScript = (
       return undefined;
     }
     const parser = yield* TypeScriptParser;
+    const manifests = yield* readManifests(root, projectFiles.manifests);
     const declarationFiles = scripts.filter((path) => isDeclarationPath(path));
     const parsable = scripts.filter((path) => !isDeclarationPath(path));
+    const lines = new Map(universe.map(({ path, loc }) => [path, loc]));
     const batches = yield* Effect.forEach(
       Arr.chunksOf(parsable, BATCH_SIZE),
-      (paths) => verdicts(root, paths, parser),
+      (paths) => verdicts(root, paths, parser, (path) => lines.get(path) ?? 0),
     );
     return {
       status: yield* parser.status,
       declarationFiles,
+      project: yield* readProject(root, projectFiles, manifests),
+      manifests,
       files: batches.flat(),
     };
   });

@@ -16,6 +16,27 @@ const limitTerritories = (
     }),
   );
 
+/** The `tsconfig` postures cut to the first `limit`, most governed files first; `totalConfigs` keeps their count. */
+const limitDeepDives = (
+  deepDives: NonNullable<Report["deepDives"]>,
+  limit: number,
+): NonNullable<Report["deepDives"]> => {
+  const { typescript } = deepDives;
+  if (typescript?.strictness === undefined) {
+    return deepDives;
+  }
+  return {
+    ...deepDives,
+    typescript: {
+      ...typescript,
+      strictness: {
+        ...typescript.strictness,
+        configs: typescript.strictness.configs.slice(0, limit),
+      },
+    },
+  };
+};
+
 /**
  * Applies `--limit` to a report: `contributors` is cut to its first `limit`
  * entries and so are the knowledge `directories`, the first-cut `territories` and
@@ -23,7 +44,9 @@ const limitTerritories = (
  * keeps the full count of each list), `0`
  * keeps everything, and `totals` still describes the untruncated size.
  * The pull request authors and reviewers are cut the same way, with their
- * sizes in `pullRequests.totals`. Time series are never cut.
+ * sizes in `pullRequests.totals`, and so are the `tsconfig` postures of the
+ * TypeScript deep dive, with their number in `strictness.totalConfigs`. Time
+ * series are never cut.
  */
 export const limitReport = (report: Report, limit: number): Report =>
   limit === 0
@@ -42,6 +65,9 @@ export const limitReport = (report: Report, limit: number): Report =>
             ),
           },
         },
+        ...(report.deepDives === undefined
+          ? {}
+          : { deepDives: limitDeepDives(report.deepDives, limit) }),
         ...(report.pullRequests === undefined
           ? {}
           : {

@@ -3141,7 +3141,14 @@
               "totalTerritories": 0,
               "territories": []
             }
-          ]
+          ],
+          "typescript": {
+            "files": 38,
+            "codeLines": 4300,
+            "escapesPer1000": 4.1,
+            "strict": true,
+            "esmShare": 1
+          }
         },
         {
           "path": "packages/auth",
@@ -3252,7 +3259,14 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 14,
+            "codeLines": 1700,
+            "escapesPer1000": 2.4,
+            "strict": "unknown",
+            "esmShare": 1
+          }
         },
         {
           "path": "apps/admin",
@@ -3357,7 +3371,14 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 40,
+            "codeLines": 4700,
+            "escapesPer1000": 9.8,
+            "strict": "mixed",
+            "esmShare": 0.9167
+          }
         },
         {
           "path": "infra",
@@ -3455,7 +3476,14 @@
           },
           "badges": [],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 20,
+            "codeLines": 2300,
+            "escapesPer1000": 1.3,
+            "strict": true,
+            "esmShare": 1
+          }
         },
         {
           "path": ".github",
@@ -3651,7 +3679,14 @@
           },
           "badges": [],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 6,
+            "codeLines": 700,
+            "escapesPer1000": 0,
+            "strict": true,
+            "esmShare": 1
+          }
         },
         {
           "path": "scripts",
@@ -3756,7 +3791,14 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 5,
+            "codeLines": 600,
+            "escapesPer1000": 8.3,
+            "strict": true,
+            "esmShare": 0.6
+          }
         },
         {
           "path": "apps/web",
@@ -4632,7 +4674,14 @@
               "totalTerritories": 0,
               "territories": []
             }
-          ]
+          ],
+          "typescript": {
+            "files": 84,
+            "codeLines": 9800,
+            "escapesPer1000": 5.1,
+            "strict": true,
+            "esmShare": 1
+          }
         },
         {
           "path": "packages/api",
@@ -4755,7 +4804,14 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 52,
+            "codeLines": 6200,
+            "escapesPer1000": 6.4,
+            "strict": true,
+            "esmShare": 1
+          }
         },
         {
           "path": "packages/ui",
@@ -4878,7 +4934,14 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 70,
+            "codeLines": 8100,
+            "escapesPer1000": 3.2,
+            "strict": true,
+            "esmShare": 1
+          }
         }
       ]
     }
@@ -5172,6 +5235,389 @@
         "parser": {
           "name": "oxc-parser",
           "version": "0.152.0"
+        }
+      },
+      "typeSafety": {
+        "production": {
+          "files": 262,
+          "lines": 38400,
+          "filesWithEscape": 121,
+          "escapeFileShare": 0.4618,
+          "escapes": 191,
+          "escapesPer1000": 4.974,
+          "counts": {
+            "any": 41,
+            "assertions": 118,
+            "doubleAssertions": 6,
+            "asAny": 9,
+            "assertionChains": 112,
+            "anyOutsideAssertions": 21,
+            "benignAny": 6,
+            "nonNull": 27,
+            "tsIgnore": 3,
+            "tsExpectError": 5,
+            "tsNocheck": 1,
+            "lintDisables": 22,
+            "satisfies": 34,
+            "unknown": 96,
+            "typePredicates": 12
+          },
+          "per1000": {
+            "any": 1.0677,
+            "assertions": 3.0729,
+            "doubleAssertions": 0.1562,
+            "asAny": 0.2344,
+            "assertionChains": 2.9167,
+            "anyOutsideAssertions": 0.5469,
+            "benignAny": 0.1562,
+            "nonNull": 0.7031,
+            "tsIgnore": 0.0781,
+            "tsExpectError": 0.1302,
+            "tsNocheck": 0.026,
+            "lintDisables": 0.5729,
+            "satisfies": 0.8854,
+            "unknown": 2.5,
+            "typePredicates": 0.3125
+          }
+        },
+        "tests": {
+          "files": 76,
+          "lines": 12100,
+          "filesWithEscape": 48,
+          "escapeFileShare": 0.6316,
+          "escapes": 257,
+          "escapesPer1000": 21.2397,
+          "counts": {
+            "any": 30,
+            "assertions": 210,
+            "doubleAssertions": 14,
+            "asAny": 18,
+            "assertionChains": 196,
+            "anyOutsideAssertions": 7,
+            "benignAny": 2,
+            "nonNull": 40,
+            "tsIgnore": 1,
+            "tsExpectError": 9,
+            "tsNocheck": 0,
+            "lintDisables": 4,
+            "satisfies": 3,
+            "unknown": 15,
+            "typePredicates": 0
+          },
+          "per1000": {
+            "any": 2.4793,
+            "assertions": 17.3554,
+            "doubleAssertions": 1.157,
+            "asAny": 1.4876,
+            "assertionChains": 16.1983,
+            "anyOutsideAssertions": 0.5785,
+            "benignAny": 0.1653,
+            "nonNull": 3.3058,
+            "tsIgnore": 0.0826,
+            "tsExpectError": 0.7438,
+            "tsNocheck": 0.0,
+            "lintDisables": 0.3306,
+            "satisfies": 0.2479,
+            "unknown": 1.2397,
+            "typePredicates": 0.0
+          }
+        },
+        "nocheckFiles": ["apps/admin/src/legacy/export-csv.ts"]
+      },
+      "strictness": {
+        "typescript": {
+          "declared": "^5.9.2",
+          "strictByDefault": false
+        },
+        "configs": [
+          {
+            "path": "apps/web/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 96,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": true,
+            "allowJs": true,
+            "checkJs": false,
+            "target": "ES2020",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/ui/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 72,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": true,
+            "isolatedModules": true,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/api/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 64,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": true,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext"
+          },
+          {
+            "path": "apps/admin/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 44,
+            "strict": false,
+            "strictExceptions": ["noImplicitAny"],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": true,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/db/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 40,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext"
+          },
+          {
+            "path": "packages/auth/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": ["@tsconfig/node20/tsconfig.json"],
+            "files": 14,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 8,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          }
+        ],
+        "totalConfigs": 7,
+        "governedFiles": 338,
+        "ungovernedFiles": 4,
+        "jsFilesOutsideConfigs": 3
+      },
+      "modules": {
+        "files": 338,
+        "esmFiles": 312,
+        "commonjsFiles": 9,
+        "bothFiles": 2,
+        "imports": {
+          "declarations": 1640,
+          "typeOnly": 402
+        },
+        "nonErasable": {
+          "files": 6,
+          "enums": 4,
+          "namespaces": 0,
+          "parameterProperties": 9,
+          "decorators": 0
+        },
+        "packageTypes": {
+          "module": 7,
+          "commonjs": 1,
+          "unspecified": 3
+        }
+      },
+      "idioms": {
+        "files": 262,
+        "declarations": {
+          "interfaces": 58,
+          "objectTypes": 131
+        },
+        "enums": {
+          "enums": 3,
+          "stringUnions": 47
+        },
+        "topLevel": {
+          "classes": 11,
+          "functions": 146,
+          "arrowConsts": 402
+        },
+        "async": {
+          "awaits": 418,
+          "thenCalls": 23
+        },
+        "privacy": {
+          "hashPrivate": 2,
+          "privateModifiers": 7
+        },
+        "exports": {
+          "defaultExports": 64,
+          "namedExports": 780
+        },
+        "bindings": {
+          "consts": 3120,
+          "lets": 214,
+          "vars": 3
+        },
+        "iteration": {
+          "forOf": 96,
+          "forEachCalls": 71
+        },
+        "mutation": {
+          "mutationCalls": 84,
+          "transformCalls": 512,
+          "spreads": 266
+        },
+        "nullish": {
+          "optionalChains": 390,
+          "nullishCoalescing": 171
+        }
+      },
+      "ecosystem": {
+        "tools": [
+          {
+            "name": "React",
+            "category": "framework",
+            "files": 141,
+            "declaredIn": 3
+          },
+          {
+            "name": "Next.js",
+            "category": "framework",
+            "files": 58,
+            "declaredIn": 1
+          },
+          {
+            "name": "Vitest",
+            "category": "test",
+            "files": 44,
+            "declaredIn": 4
+          },
+          {
+            "name": "zod",
+            "category": "validation",
+            "files": 31,
+            "declaredIn": 2
+          },
+          {
+            "name": "Prisma",
+            "category": "data",
+            "files": 12,
+            "declaredIn": 1
+          },
+          {
+            "name": "ESLint",
+            "category": "lint",
+            "files": 0,
+            "declaredIn": 3
+          },
+          {
+            "name": "Prettier",
+            "category": "format",
+            "files": 0,
+            "declaredIn": 1
+          },
+          {
+            "name": "Turborepo",
+            "category": "monorepo",
+            "files": 0,
+            "declaredIn": 1
+          }
+        ],
+        "packages": [
+          {
+            "name": "react",
+            "files": 141
+          },
+          {
+            "name": "next",
+            "files": 58
+          },
+          {
+            "name": "zod",
+            "files": 31
+          }
+        ],
+        "undeclared": 23,
+        "nodeBuiltins": [
+          {
+            "name": "path",
+            "files": 14
+          },
+          {
+            "name": "fs",
+            "files": 9
+          },
+          {
+            "name": "crypto",
+            "files": 6
+          }
+        ],
+        "dependencies": {
+          "manifests": 11,
+          "runtime": 38,
+          "dev": 41
+        },
+        "hooks": {
+          "calls": 412,
+          "files": 97
         }
       }
     }
