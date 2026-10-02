@@ -152,6 +152,7 @@ export const navItems = (report: Report): NavItem[] => [
     : [link("pull-requests", "Pull requests")]),
   link("knowledge", "Knowledge"),
   ...(hasStats(report.stats) ? [link("stats", "Stats")] : []),
+  link("achievements", "Achievements"),
   link("team", "Team"),
   ...(botsCard(report) === null ? [] : [link("bots", "Bots & Agents")]),
 ];

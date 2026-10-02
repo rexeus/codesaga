@@ -3,12 +3,12 @@ import type { SectionId } from "../present/sections.js";
 import { h } from "./dom.js";
 import { icon } from "./icons.js";
 
-/** A section of the page: an eyebrow, a title and a line, then its content. */
+/** A section of the page: an eyebrow, a title and a line (text, or nodes to set a part of it strong), then its content. */
 export const section = (
   id: SectionId,
   eyebrow: string,
   title: string,
-  description: string,
+  description: string | readonly (Node | string)[],
   ...content: readonly Node[]
 ): HTMLElement => {
   const block = h(
@@ -23,7 +23,11 @@ export const section = (
         h("div", "eyebrow", icon(SECTION_ICONS[id], 15, 2), eyebrow),
         h("h2", "", title),
       ),
-      h("p", "", description),
+      h(
+        "p",
+        "",
+        ...(typeof description === "string" ? [description] : description),
+      ),
     ),
     ...content,
   );

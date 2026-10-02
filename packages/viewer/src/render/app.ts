@@ -1,5 +1,6 @@
 import type { Report } from "@codesaga/engine";
 
+import { renderAchievements } from "./achievements-view.js";
 import { renderActivity } from "./activity-view.js";
 import { renderBots } from "./bots-view.js";
 import { renderContributors } from "./contributors-view.js";
@@ -38,6 +39,7 @@ export const mountApp = (report: Report, root: HTMLElement): void => {
       ...(pullRequests === null ? [] : [pullRequests]),
       renderKnowledge(report),
       renderStats(report),
+      renderAchievements(report),
       renderContributors(report),
       ...(bots === null ? [] : [bots]),
       footer(report),

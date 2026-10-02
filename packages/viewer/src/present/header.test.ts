@@ -126,6 +126,7 @@ describe("navItems", () => {
       ["activity", "Activity"],
       ["knowledge", "Knowledge"],
       ["stats", "Stats"],
+      ["achievements", "Achievements"],
       ["team", "Team"],
       ["bots", "Bots & Agents"],
     ]);
