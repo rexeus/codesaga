@@ -6,10 +6,24 @@ import type { BlobRef } from "../git/blob-reader.js";
 import type { GitError } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import type { FileChange, HistoryCommit } from "../history/history.js";
-import { isDeclarationPath, isScriptPath } from "./source-kinds.js";
+import {
+  isDeclarationPath,
+  isScriptPath,
+  parseOptionsOf,
+} from "./source-kinds.js";
 
 /** A blob to parse, with the path that tells how to parse it. */
 export type HistoryBlob = BlobRef & { readonly path: string };
+
+/**
+ * What a verdict is keyed by: the blob and the options its path makes the
+ * parser read it with. The same blob under `a.ts` and `b.tsx` parses
+ * differently, so it has two verdicts.
+ */
+export const factsKey = (oid: string, path: string): string => {
+  const { lang, sourceType } = parseOptionsOf(path);
+  return `${oid}:${lang}:${sourceType}`;
+};
 
 const isParsable = (path: string): boolean =>
   isScriptPath(path) && !isDeclarationPath(path);
@@ -55,8 +69,8 @@ const blobsOfChange = (change: FileChange): Array<HistoryBlob> => {
 
 /**
  * The distinct blobs of the changes' TypeScript and JavaScript files, before
- * and after each commit, and of `head`; declaration files are left out. A blob
- * that several paths hold is named by the first path met.
+ * and after each commit, and of `head`, each with every path it was met
+ * under; declaration files are left out.
  */
 export const blobsOfHistory = (
   commits: ReadonlyArray<Pick<HistoryCommit, "changes">>,
@@ -68,8 +82,9 @@ export const blobsOfHistory = (
     .filter(({ path }) => isParsable(path))
     .flatMap((change) => blobsOfChange(change));
   for (const blob of [...changed, ...head]) {
-    if (!blobs.has(blob.oid)) {
-      blobs.set(blob.oid, blob);
+    const key = `${blob.oid}:${blob.path}`;
+    if (!blobs.has(key)) {
+      blobs.set(key, blob);
     }
   }
   return [...blobs.values()];

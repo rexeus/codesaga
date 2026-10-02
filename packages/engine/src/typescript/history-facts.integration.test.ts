@@ -1,32 +1,14 @@
 import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
-import { Effect, FileSystem, Layer, Path } from "effect";
+import { Effect, FileSystem, Layer, Path, Schema } from "effect";
 
-import { Git } from "../git/git.js";
-import { readHistory } from "../history/history.js";
-import { oxcParse } from "../testing/oxc-parser.js";
+import {
+  countingParser,
+  gatherOf,
+  recordingServices,
+} from "../testing/history-facts.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
-import { factsOfSource } from "./facts-of-source.js";
-import { gatherHistoryFacts } from "./history-facts.js";
-import { TypeScriptParser } from "./typescript-parser.js";
-
-/** The real parser that records how many sources each call was given. */
-const countingParser = (version: string) => {
-  const calls: Array<number> = [];
-  const parser = Layer.succeed(
-    TypeScriptParser,
-    TypeScriptParser.of({
-      status: Effect.succeed({ kind: "ready", name: "oxc-parser", version }),
-      factsOf: (sources) =>
-        Effect.sync(() => {
-          calls.push(sources.length);
-          return sources.map((source) => factsOfSource(oxcParse, source));
-        }),
-    }),
-  );
-  return { parser, parsed: () => calls.reduce((sum, n) => sum + n, 0) };
-};
 
 const SAME = "export const a = 1;\n";
 
@@ -52,110 +34,126 @@ const commitHistory = (repo: TempRepository) =>
     yield* repo.commit("2026-03-04T12:00:00Z");
   });
 
-const gather = (repo: TempRepository, useCache: boolean) =>
-  Effect.gen(function* () {
-    const head = (yield* repo.git("rev-parse", "HEAD")).trim();
-    const { commits } = yield* readHistory({
-      root: repo.directory,
-      head,
-      shallowBoundary: new Set(),
-      useCache: false,
-    });
-    return yield* gatherHistoryFacts({
-      root: repo.directory,
-      head,
-      commits,
-      useCache,
-    });
-  }).pipe(Effect.provide(Git.layer(repo.directory)));
-
 const cacheFile = (repo: TempRepository) =>
   `${repo.directory}/.git/codesaga/syntax-v1.json`;
 
+/** One run: the parser it used and the blobs git was asked for. */
+const run = (
+  repo: TempRepository,
+  options?: Parameters<typeof gatherOf>[1],
+  version = "1",
+) => {
+  const parser = countingParser(version);
+  const services = recordingServices(repo);
+  return gatherOf(repo, options).pipe(
+    Effect.provide(Layer.mergeAll(parser.layer, services.layer)),
+    Effect.map((facts) => ({
+      facts,
+      parsed: parser.parsed(),
+      read: services.read,
+    })),
+  );
+};
+
 layer(NodeServices.layer)("gatherHistoryFacts", (it) => {
   it.effect(
-    "parses each distinct blob once and keys the verdicts by full blob id",
+    "parses each distinct blob once and keys the verdicts by blob id and parse options",
     () =>
       Effect.gen(function* () {
         const repo = yield* makeTempRepository;
         yield* commitHistory(repo);
-        const { parser, parsed } = countingParser("1");
 
-        const facts = yield* gather(repo, true).pipe(Effect.provide(parser));
+        const { facts, parsed } = yield* run(repo);
 
         const first = (yield* repo.git("rev-parse", "HEAD~3:a.ts")).trim();
         const edited = (yield* repo.git("rev-parse", "HEAD:a.ts")).trim();
         const bad = (yield* repo.git("rev-parse", "HEAD:bad.ts")).trim();
-        assert.strictEqual(parsed(), 3);
+        assert.strictEqual(parsed, 3);
         assert.deepStrictEqual(
           Object.fromEntries(
-            Array.from(facts?.factsByOid ?? [], ([oid, { kind }]) => [
-              oid,
+            Array.from(facts?.factsByBlob ?? [], ([key, { kind }]) => [
+              key,
               kind,
             ]),
           ),
-          { [first]: "parsed", [edited]: "parsed", [bad]: "skipped" },
+          {
+            [`${first}:ts:module`]: "parsed",
+            [`${edited}:ts:module`]: "parsed",
+            [`${bad}:ts:module`]: "skipped",
+          },
         );
-        assert.deepStrictEqual(facts?.factsByOid.get(bad), {
+        assert.deepStrictEqual(facts?.factsByBlob.get(`${bad}:ts:module`), {
           kind: "skipped",
           reason: "syntax-error",
         });
       }),
   );
-});
 
-layer(NodeServices.layer)("gatherHistoryFacts with the cache", (it) => {
-  it.effect("parses nothing on a second run and returns the same facts", () =>
-    Effect.gen(function* () {
-      const repo = yield* makeTempRepository;
-      yield* commitHistory(repo);
-      const cold = countingParser("1");
-      const warm = countingParser("1");
+  it.effect(
+    "parses and reads nothing on a second run and returns the same facts",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitHistory(repo);
 
-      const first = yield* gather(repo, true).pipe(Effect.provide(cold.parser));
-      const second = yield* gather(repo, true).pipe(
-        Effect.provide(warm.parser),
-      );
+        const cold = yield* run(repo);
+        const warm = yield* run(repo);
 
-      assert.strictEqual(cold.parsed(), 3);
-      assert.strictEqual(warm.parsed(), 0);
-      assert.deepStrictEqual(second, first);
-    }),
+        assert.strictEqual(cold.parsed, 3);
+        assert.strictEqual(cold.read.length, 3);
+        assert.strictEqual(warm.parsed, 0);
+        assert.deepStrictEqual(warm.read, []);
+        assert.deepStrictEqual(warm.facts, cold.facts);
+      }),
   );
 
   it.effect("parses again when the parser's version changed", () =>
     Effect.gen(function* () {
       const repo = yield* makeTempRepository;
       yield* commitHistory(repo);
-      yield* gather(repo, true).pipe(
-        Effect.provide(countingParser("1").parser),
-      );
-      const upgraded = countingParser("2");
+      yield* run(repo);
 
-      yield* gather(repo, true).pipe(Effect.provide(upgraded.parser));
+      const upgraded = yield* run(repo, {}, "2");
 
-      assert.strictEqual(upgraded.parsed(), 3);
+      assert.strictEqual(upgraded.parsed, 3);
     }),
   );
+});
 
+layer(NodeServices.layer)("gatherHistoryFacts without the cache", (it) => {
   it.effect("neither reads nor writes the cache without it", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const repo = yield* makeTempRepository;
       yield* commitHistory(repo);
-      yield* gather(repo, true).pipe(
-        Effect.provide(countingParser("1").parser),
-      );
-      const uncached = countingParser("1");
-      yield* gather(repo, false).pipe(Effect.provide(uncached.parser));
-      assert.strictEqual(uncached.parsed(), 3);
+      yield* run(repo);
 
+      const uncached = yield* run(repo, { useCache: false });
       yield* fs.remove(cacheFile(repo));
-      yield* gather(repo, false).pipe(
-        Effect.provide(countingParser("1").parser),
-      );
+      yield* run(repo, { useCache: false });
 
+      assert.strictEqual(uncached.parsed, 3);
       assert.isFalse(yield* fs.exists(cacheFile(repo)));
+    }),
+  );
+
+  it.effect("keeps only the entries a run referenced", () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const repo = yield* makeTempRepository;
+      yield* commitHistory(repo);
+      yield* run(repo);
+
+      yield* run(repo, { exclude: ["bad.ts"] });
+
+      const stored = yield* Schema.decodeEffect(
+        Schema.fromJsonString(
+          Schema.Struct({
+            facts: Schema.Record(Schema.String, Schema.Unknown),
+          }),
+        ),
+      )(yield* fs.readFileString(cacheFile(repo)));
+      assert.strictEqual(Object.keys(stored.facts).length, 2);
     }),
   );
 });

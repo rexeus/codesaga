@@ -10,6 +10,7 @@ import { SkipReason } from "../report/typescript-deep-dive.js";
 import type { FactsResult } from "./facts-of-source.js";
 import { FILE_FACTS_VERSION } from "./file-facts.js";
 import type { FileFacts } from "./file-facts.js";
+import { INPUT_GUARD_LIMITS } from "./input-guards.js";
 import { parseOptionsOf } from "./source-kinds.js";
 import type { ParserStatus } from "./typescript-parser.js";
 
@@ -30,7 +31,8 @@ const OPTION_EXTENSIONS = [
 /**
  * What the cache file holds. A file whose `version` differs is unreadable, so
  * change the version and the file name together when this shape changes.
- * Each fact is `FileFacts` as it is, or `{ skipped }`; the facts are not
+ * Facts are keyed by blob id and parse options (`factsKey`), and each is
+ * `FileFacts` as it is, or `{ skipped }`; the facts are not
  * checked beyond their `version`, which the fingerprint ties to the code.
  */
 const CacheDocument = Schema.fromJsonString(
@@ -61,8 +63,8 @@ const entryOf = (result: FactsResult): unknown =>
 
 /**
  * A digest of what decides the facts of a blob besides its content: the
- * parser and its version, the version of `FileFacts`, and how each
- * extension is read. Facts cached under another fingerprint are stale.
+ * parser and its version, the version of `FileFacts`, the limits of the
+ * input guards, and how each extension is read. Facts cached under another fingerprint are stale.
  */
 export const factsFingerprint = (
   parser: Extract<ParserStatus, { kind: "ready" }>,
@@ -71,6 +73,7 @@ export const factsFingerprint = (
     parser: parser.name,
     parserVersion: parser.version,
     factsVersion: FILE_FACTS_VERSION,
+    guards: INPUT_GUARD_LIMITS,
     options: OPTION_EXTENSIONS.map((extension) =>
       parseOptionsOf(`file.${extension}`),
     ),
