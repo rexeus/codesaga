@@ -13,8 +13,8 @@ import { isTestPath } from "../universe/path-kinds.js";
 
 /** The rules behind the area badges, for the report's `thresholds.badges`. */
 export const AREA_BADGE_THRESHOLDS = {
-  sharedActiveExperts: 3,
-  sharedTruckFactor: 3,
+  sharedActiveExperts: 4,
+  sharedTruckFactor: 4,
   fadingFromDays: 90,
   fadingToDays: 183,
   newDays: 90,

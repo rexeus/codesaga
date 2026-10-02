@@ -78,8 +78,8 @@ const cases: ReadonlyArray<
   ],
   [
     "shared-knowledge",
-    { experts: [expert(), expert(), expert()], truckFactor: 3 },
-    { experts: [expert(), expert()], truckFactor: 3 },
+    { experts: [expert(), expert(), expert(), expert()], truckFactor: 4 },
+    { experts: [expert(), expert(), expert()], truckFactor: 4 },
   ],
   [
     "knowledge-fading",
@@ -161,7 +161,9 @@ describe("areaBadges", () => {
       }),
     ).not.toContain("handover");
   });
+});
 
+describe("areaBadges rules in detail", () => {
   it("does not call an area new when the repository is not 180 days older", () => {
     const created = { fileFirstCommits: [daysAgo(10)] };
 
@@ -169,6 +171,20 @@ describe("areaBadges", () => {
     expect(kindsOf({ ...created, startTime: daysAgo(189) })).not.toContain(
       "new",
     );
+  });
+
+  it("awards shared knowledge only with both four active experts and a truck factor of four", () => {
+    const four = [expert(), expert(), expert(), expert()];
+
+    expect(kindsOf({ experts: four, truckFactor: 3 })).not.toContain(
+      "shared-knowledge",
+    );
+    expect(
+      kindsOf({
+        experts: [...four.slice(0, 3), expert({ lastTime: daysAgo(400) })],
+        truckFactor: 4,
+      }),
+    ).not.toContain("shared-knowledge");
   });
 
   it("awards no single expert to an island", () => {
