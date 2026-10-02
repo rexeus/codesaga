@@ -40,7 +40,7 @@ export type SplitPlan = {
   readonly other: ReadonlyArray<string>;
   /** "big: 52 files" or "src/api and src/ui have different experts". */
   readonly reason: string;
-  /** Distinct main experts among the folders, less one; 0 for a split by size alone. */
+  /** Folders with different main experts, less one; 0 for a split by size alone. */
   readonly expertiseGain: number;
   /** The territory holds more than `BIG_SHARE` of all files: it never stands as one card, so the split is not left for a finer detail. */
   readonly dominant: boolean;
@@ -91,25 +91,41 @@ const cutBelow = (
     : { folders: new Map(enough), stray: leftovers };
 };
 
-/** The person who is an expert on most files of the set, when they are one on at least `MAIN_EXPERT_SHARE` of the files that have an expert. */
-const mainExpertOf = (
+/** How many of a folder's files each person is an expert on, and how many of its files have an expert. */
+type Expertise = {
+  readonly counts: ReadonlyMap<string, number>;
+  readonly withExpert: number;
+};
+
+const expertiseOf = (
   paths: ReadonlyArray<string>,
   expertsOf: SplitContext["expertsOf"],
-): string | undefined => {
-  const files = new Map<string, number>();
+): Expertise => {
+  const counts = new Map<string, number>();
   let withExpert = 0;
   for (const path of paths) {
     const experts = expertsOf(path);
     withExpert += experts.length > 0 ? 1 : 0;
     for (const email of experts) {
-      files.set(email, (files.get(email) ?? 0) + 1);
+      counts.set(email, (counts.get(email) ?? 0) + 1);
     }
   }
-  const [main] = [...files].toSorted(
-    ([emailA, a], [emailB, b]) => b - a || (emailA < emailB ? -1 : 1),
+  return { counts, withExpert };
+};
+
+/** The share of the folder's files with an expert that `email` is an expert on. */
+const shareOf = ({ counts, withExpert }: Expertise, email: string): number =>
+  (counts.get(email) ?? 0) / withExpert;
+
+/** The one person who is an expert on the most files, when no one else is on as many and they are on at least `MAIN_EXPERT_SHARE` of the files that have an expert. */
+const mainExpertOf = (expertise: Expertise): string | undefined => {
+  const [first, second] = [...expertise.counts].toSorted(
+    ([, a], [, b]) => b - a,
   );
-  return main !== undefined && main[1] / withExpert >= MAIN_EXPERT_SHARE
-    ? main[0]
+  return first !== undefined &&
+    first[1] !== second?.[1] &&
+    shareOf(expertise, first[0]) >= MAIN_EXPERT_SHARE
+    ? first[0]
     : undefined;
 };
 
@@ -120,17 +136,43 @@ const isBig = (files: number, totalFiles: number): boolean =>
       Math.max(BIG_MIN_FILES, BIG_FILES_SHARE * totalFiles),
     ) || files > BIG_SHARE * totalFiles;
 
-type Folder = { readonly path: string; readonly expert: string | undefined };
+type Folder = {
+  readonly path: string;
+  readonly expertise: Expertise;
+  readonly expert: string | undefined;
+};
+
+/** Folders have different experts when each one's main expert is not an expert on at least `MAIN_EXPERT_SHARE` of the other's files, which would make them the same circle of people. */
+const differ = (a: Folder, b: Folder): boolean =>
+  a.expert !== undefined &&
+  b.expert !== undefined &&
+  a.expert !== b.expert &&
+  shareOf(a.expertise, b.expert) < MAIN_EXPERT_SHARE &&
+  shareOf(b.expertise, a.expert) < MAIN_EXPERT_SHARE;
+
+/** The folders with a main expert, largest first, that differ from every one chosen before them. */
+const distinctLeaders = (
+  folders: ReadonlyArray<Folder>,
+): ReadonlyArray<Folder> => {
+  const chosen: Array<Folder> = [];
+  for (const folder of folders) {
+    if (
+      folder.expert !== undefined &&
+      chosen.every((one) => differ(one, folder))
+    ) {
+      chosen.push(folder);
+    }
+  }
+  return chosen;
+};
 
 /** Why the folders are worth a split: the two largest that have different main experts, else the territory's size; undefined for neither. */
 const reasonOf = (
-  folders: ReadonlyArray<Folder>,
+  leaders: ReadonlyArray<Folder>,
   files: number,
   totalFiles: number,
 ): string | undefined => {
-  const led = folders.filter(({ expert }) => expert !== undefined);
-  const [first] = led;
-  const second = led.find(({ expert }) => expert !== first?.expert);
+  const [first, second] = leaders;
   if (first !== undefined && second !== undefined) {
     return `${first.path} and ${second.path} have different experts`;
   }
@@ -141,9 +183,9 @@ const reasonOf = (
  * How `territory` would split into its child folders, or undefined when it should
  * not. It splits when it is big (more than `min(BIG_MAX_FILES, max(BIG_MIN_FILES,
  * files / 4))` of the analysis's files, or more than `BIG_SHARE` of them) or when
- * its folders have different main experts, and only when at least two folders
- * hold `TERRITORY_MIN_FILES` files. The reason names the experts when they differ,
- * else the size. Other files never split.
+ * its folders have different main experts (see `differ`), and only when at least
+ * two folders hold `TERRITORY_MIN_FILES` files. The reason names the folders when
+ * their experts differ, else the size. Other files never split.
  */
 export const planSplit = (
   { path, kind, paths }: TreeTerritory,
@@ -161,15 +203,20 @@ export const planSplit = (
     return undefined;
   }
   const sized = [...folders]
-    .map(([folder, files]) => ({
-      path: folder,
-      paths: files,
-      expert: mainExpertOf(files, expertsOf),
-    }))
+    .map(([folder, files]) => {
+      const expertise = expertiseOf(files, expertsOf);
+      return {
+        path: folder,
+        paths: files,
+        expertise,
+        expert: mainExpertOf(expertise),
+      };
+    })
     .toSorted(
       (a, b) => b.paths.length - a.paths.length || (a.path < b.path ? -1 : 1),
     );
-  const reason = reasonOf(sized, paths.length, totalFiles);
+  const leaders = distinctLeaders(sized);
+  const reason = reasonOf(leaders, paths.length, totalFiles);
   return reason === undefined
     ? undefined
     : {
@@ -180,9 +227,6 @@ export const planSplit = (
         other: stray,
         reason,
         dominant: paths.length > BIG_SHARE * totalFiles,
-        expertiseGain: Math.max(
-          0,
-          new Set(sized.flatMap(({ expert }) => expert ?? [])).size - 1,
-        ),
+        expertiseGain: Math.max(0, leaders.length - 1),
       };
 };

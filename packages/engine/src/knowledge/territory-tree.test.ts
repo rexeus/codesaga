@@ -209,40 +209,6 @@ describe("planSplit by expertise", () => {
     ).toBeUndefined();
   });
 
-  it("does not split when only one folder has a main expert", () => {
-    expect(
-      planSplit(territoryOf("pkg", paths), contextOf(30, { "pkg/src": "ada" })),
-    ).toBeUndefined();
-  });
-});
-
-describe("planSplit main experts", () => {
-  // three packages of 10 files in 30: none is big
-  const paths = [...filesIn("pkg/src", 5), ...filesIn("pkg/test", 5)];
-
-  it("has no main expert in a folder where no one is an expert on half the files that have one", () => {
-    // src: ada on 2 files, bob on 3 of 5 -> main bob, 60%; test: ada 2, bob 2, cy 1 -> ada and bob tie on 2 of 5, 40%
-    const experts: Record<string, ReadonlyArray<string>> = {
-      "pkg/src/f0.ts": ["bob"],
-      "pkg/src/f1.ts": ["bob"],
-      "pkg/src/f2.ts": ["bob"],
-      "pkg/src/f3.ts": ["ada"],
-      "pkg/src/f4.ts": ["ada"],
-      "pkg/test/f0.ts": ["ada"],
-      "pkg/test/f1.ts": ["ada"],
-      "pkg/test/f2.ts": ["bob"],
-      "pkg/test/f3.ts": ["bob"],
-      "pkg/test/f4.ts": ["cy"],
-    };
-
-    const plan = planSplit(territoryOf("pkg", paths), {
-      totalFiles: 30,
-      expertsOf: (path) => experts[path] ?? [],
-    });
-
-    expect(plan).toBeUndefined();
-  });
-
   it("prefers the expertise reason when the territory is also big", () => {
     const plan = planSplit(
       territoryOf("pkg", [
@@ -253,5 +219,93 @@ describe("planSplit main experts", () => {
     );
 
     expect(plan?.reason).toBe("pkg/src and pkg/test have different experts");
+  });
+
+  it("does not split when only one folder has a main expert", () => {
+    expect(
+      planSplit(territoryOf("pkg", paths), contextOf(30, { "pkg/src": "ada" })),
+    ).toBeUndefined();
+  });
+});
+
+/** A context where each file's experts are listed per folder, file by file: `{ "pkg/src": [["ada"], ["ada", "bob"]] }`. */
+const contextOfFiles = (
+  totalFiles: number,
+  folders: Readonly<Record<string, ReadonlyArray<ReadonlyArray<string>>>>,
+): SplitContext => {
+  const experts = new Map(
+    Object.entries(folders).flatMap(([folder, files]) =>
+      files.map((people, index): [string, ReadonlyArray<string>] => [
+        `${folder}/f${index}.ts`,
+        people,
+      ]),
+    ),
+  );
+  return { totalFiles, expertsOf: (path) => experts.get(path) ?? [] };
+};
+
+describe("planSplit main experts", () => {
+  // three packages of 10 files in 30: none is big
+  const paths = [...filesIn("pkg/src", 5), ...filesIn("pkg/test", 5)];
+  const ada = ["ada"];
+  const bob = ["bob"];
+  const both = ["ada", "bob"];
+
+  it("has no main expert in a folder where no one is an expert on half the files that have one", () => {
+    // src: bob on 3 of 5 files, ada on 2 -> main bob, 60%; test: ada 2, bob 2, cy 1 -> ada and bob tie on 2 of 5, 40%
+    const context = contextOfFiles(30, {
+      "pkg/src": [bob, bob, bob, ada, ada],
+      "pkg/test": [ada, ada, bob, bob, ["cy"]],
+    });
+
+    expect(planSplit(territoryOf("pkg", paths), context)).toBeUndefined();
+  });
+
+  it("has no main expert in a folder where two people tie for the most files, however many files they cover", () => {
+    // src: ada and bob are both experts on 3 of 5 files, 60% each and tied; test: grace on all
+    const context = contextOfFiles(30, {
+      "pkg/src": [both, both, both, [], []],
+      "pkg/test": Array.from({ length: 5 }, () => ["grace"]),
+    });
+
+    expect(planSplit(territoryOf("pkg", paths), context)).toBeUndefined();
+  });
+
+  it("does not split folders whose main expert is also an expert on half of the other's files", () => {
+    // src: ada on all 5 files, bob on 4; test: bob on all 5, ada on 3 -> both work in both
+    const context = contextOfFiles(30, {
+      "pkg/src": [both, both, both, both, ada],
+      "pkg/test": [both, both, both, bob, bob],
+    });
+
+    expect(planSplit(territoryOf("pkg", paths), context)).toBeUndefined();
+  });
+
+  it("does not split when only one side's main expert works on the other side", () => {
+    // src: ada on all 5 files, bob on 1 (20%); test: bob on all 5, ada on 3 (60%)
+    const context = contextOfFiles(30, {
+      "pkg/src": [both, ada, ada, ada, ada],
+      "pkg/test": [both, both, both, bob, bob],
+    });
+
+    expect(planSplit(territoryOf("pkg", paths), context)).toBeUndefined();
+  });
+
+  it("counts folders that share their people as one circle in the gain", () => {
+    // src: ada; test: grace; docs: linus, with ada an expert on 2 of its 3 files
+    const context = contextOfFiles(33, {
+      "pkg/src": Array.from({ length: 5 }, () => ada),
+      "pkg/test": Array.from({ length: 5 }, () => ["grace"]),
+      "pkg/docs": [["linus", "ada"], ["linus", "ada"], ["linus"]],
+    });
+
+    const plan = planSplit(
+      territoryOf("pkg", [...paths, ...filesIn("pkg/docs", 3)]),
+      context,
+    );
+
+    // ada works in docs, so docs and src are one circle, and test is the second
+    expect(plan?.reason).toBe("pkg/src and pkg/test have different experts");
+    expect(plan?.expertiseGain).toBe(1);
   });
 });
