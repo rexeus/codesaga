@@ -55,6 +55,34 @@ describe("achievements unbroken", () => {
   });
 });
 
+describe("achievements unbroken contributors", () => {
+  it("does not count bot and agent commits towards the streak", () => {
+    const bots = commitsEvery("2026-02-01T09:00:00Z", DAY, 30, () => ({
+      class: "bot" as const,
+    }));
+    const agents = commitsEvery("2026-02-01T09:00:00Z", DAY, 30, () => ({
+      class: "agent" as const,
+    }));
+
+    expect(achievementOf("unbroken", { commits: bots })).toMatchObject({
+      reached: false,
+      progress: { value: 0, target: 30, unit: "days in a row" },
+    });
+    expect(achievementOf("unbroken", { commits: agents })?.reached).toBe(false);
+  });
+
+  it("counts agent-assisted commits and breaks the streak where only a bot committed", () => {
+    const assisted = commitsEvery("2026-02-01T09:00:00Z", DAY, 30, (index) => ({
+      class: index === 14 ? ("bot" as const) : ("agent-assisted" as const),
+    }));
+
+    expect(achievementOf("unbroken", { commits: assisted })).toMatchObject({
+      reached: false,
+      progress: { value: 15, target: 30, unit: "days in a row" },
+    });
+  });
+});
+
 describe("achievements spring-cleaning", () => {
   it("stays locked one line short and shows the biggest cleanup", () => {
     const commits = [

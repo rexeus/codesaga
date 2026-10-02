@@ -28,7 +28,7 @@ export type HistoryFacts = {
   readonly commitTimes: ReadonlyArray<number>;
   /** The time of each contributor's first commit, oldest first. */
   readonly contributorStarts: ReadonlyArray<number>;
-  /** The most consecutive days with a commit in the author's local time. */
+  /** The most consecutive days with a human or agent-assisted commit in the author's local time. */
   readonly longestStreak: number;
   /** The day on which the first run of `unbrokenDays` consecutive days was complete. */
   readonly streakCompletedDay: number | undefined;
@@ -81,7 +81,9 @@ export const historyFacts = (
   isCodePath: (path: string) => boolean,
 ): HistoryFacts => {
   const runs = dayRuns(
-    commits.map(({ time, offsetMinutes }) => localDayOf(time, offsetMinutes)),
+    commits
+      .filter((commit) => isContributorCommit(commit))
+      .map(({ time, offsetMinutes }) => localDayOf(time, offsetMinutes)),
   );
   const completed = runs.find(({ length }) => length >= unbrokenDays);
   return {

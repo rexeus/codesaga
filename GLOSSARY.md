@@ -98,9 +98,9 @@ Badges of a contributor:
 - **Marathon** (`marathon`, milestone) — at least 1,000 days between the first and the last commit; `reachedAt` is 1,000 days after the first commit.
 - **Community** (`community`, milestone, tiers 10, 50 and 100) — the contributors over the full history; `reachedAt` is the day of the first commit of the 10th, 50th or 100th, whichever tier is the highest reached.
 - **Bus-proof** (`bus-proof`, state) — a truck factor of at least 5.
-- **Polyglot** (`polyglot`, milestone) — at least 5 languages with each at least 1% of the code lines. It is reached when the files at HEAD show it or the history once did. `reachedAt` is the first commit after which the net lines each commit added per language, over every path that counted as code and deleted files too, gave five languages each 1%; it is an estimate, and falls back to the last commit when only the files at HEAD show it.
+- **Polyglot** (`polyglot`, milestone) — at least 5 languages with each at least 1% of the code lines; files of no listed language ("Other") are not a language. It is reached when the files at HEAD show it or the history once did. `reachedAt` is the first commit after which the net lines each commit added per language, over every path that counted as code and deleted files too, gave five languages each 1%; it is an estimate, and falls back to the last commit when only the files at HEAD show it.
 - **Test culture** (`test-culture`, state) — at least 30% of the files are tests.
-- **Unbroken** (`unbroken`, milestone) — a commit on each of 30 consecutive days, in the authors' local days; `reachedAt` is the 30th day of the first such run.
+- **Unbroken** (`unbroken`, milestone) — a human or agent-assisted commit on each of 30 consecutive days, in the authors' local days; bot and agent commits do not count; `reachedAt` is the 30th day of the first such run.
 - **Spring cleaning** (`spring-cleaning`, milestone) — one commit that removed at least 1,000 more code lines than it added; `reachedAt` is the day of the first.
 - **Fresh blood** (`fresh-blood`, state) — at least 5 people made their first commit in the last 90 days, counted as _new_ contributors are.
 

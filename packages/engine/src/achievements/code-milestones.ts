@@ -57,7 +57,7 @@ export const polyglot = (
   };
 };
 
-/** `unbroken`: a commit on each of `unbrokenDays` consecutive days; the day is the author's local one. */
+/** `unbroken`: a human or agent-assisted commit on each of `unbrokenDays` consecutive days; the day is the author's local one. */
 export const unbroken = (
   {
     longestStreak,

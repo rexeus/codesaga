@@ -29,9 +29,9 @@ const Count = Schema.Natural;
  * - `marathon`: 1,000 days between the first and the last commit; `reachedAt` is 1,000 days after the first commit.
  * - `community`: tiers of 10, 50 and 100 contributors over the full history; `reachedAt` is the day the highest tier's contributor made a first commit. No contributor is named.
  * - `bus-proof`: a truck factor of at least 5.
- * - `polyglot`: at least 5 languages with each at least 1% of the code lines. `reachedAt` is estimated from the net lines each commit added per language, and falls back to the last commit when only the files at HEAD show it.
+ * - `polyglot`: at least 5 languages with each at least 1% of the code lines, "Other" not being one. `reachedAt` is estimated from the net lines each commit added per language, and falls back to the last commit when only the files at HEAD show it.
  * - `test-culture`: at least 30% of the files are tests.
- * - `unbroken`: a commit on each of 30 consecutive days; `reachedAt` is the 30th day of the first such run.
+ * - `unbroken`: a human or agent-assisted commit on each of 30 consecutive days; `reachedAt` is the 30th day of the first such run.
  * - `spring-cleaning`: one commit that removed at least 1,000 more code lines than it added; `reachedAt` is the day of the first.
  * - `fresh-blood`: at least 5 people made their first commit in the last 90 days.
  */
