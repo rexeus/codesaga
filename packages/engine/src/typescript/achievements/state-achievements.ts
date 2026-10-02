@@ -6,7 +6,7 @@ import { countOf, nounOf } from "../../report/sentences.js";
 import type { TypeScriptAchievement } from "../../report/typescript-achievements.js";
 import type { Strictness } from "../../report/typescript-strictness.js";
 import { sum } from "../../stats/measures.js";
-import { isTestPath } from "../../universe/path-kinds.js";
+import { isTestPath, isToolingPath } from "../../universe/path-kinds.js";
 import type { ParsedFile } from "../parsed-file.js";
 import { isTypeScriptPath } from "../source-kinds.js";
 
@@ -97,9 +97,11 @@ const strictThroughout = (
   });
 };
 
+/** Tool configuration files (`jest.config.js`, `.prettierrc.cjs`) are CommonJS by their tool's convention, so they are no module files here. */
 const esmOnly = (production: ReadonlyArray<ParsedFile>) => {
   const modules = production.filter(
-    ({ facts }) => facts.modules.esm + facts.modules.commonjs > 0,
+    ({ path, facts }) =>
+      !isToolingPath(path) && facts.modules.esm + facts.modules.commonjs > 0,
   );
   const commonjs = modules.filter(({ facts }) => facts.modules.commonjs > 0);
   const reached = modules.length >= typeScriptMinFiles && commonjs.length === 0;

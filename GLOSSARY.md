@@ -118,7 +118,7 @@ Badges of a contributor, grouped by category:
 
 - **Any-free** (`any-free`, state) — no explicit `any` keyword in production code, among at least 50 production TypeScript files.
 - **Strict throughout** (`strict-throughout`, state) — every TypeScript file lies under a `tsconfig` that is effectively strict, among at least 10 production TypeScript files.
-- **ESM only** (`esm-only`, state) — no production file uses CommonJS, among at least 10 production module files.
+- **ESM only** (`esm-only`, state) — no production file uses CommonJS, among at least 10 production module files; tool configuration files such as `jest.config.js` are left out.
 - **No ts-ignore** (`no-ts-ignore`, state) — no `@ts-ignore` and no `@ts-nocheck` in production code, among at least 10 production TypeScript files.
 - **Tightened** (`tightened`, milestone) — the production escape hatches per 1,000 lines fell by at least half from their peak (at least 20 escape hatches at the peak); `reachedAt` is the last day of the first month it showed. Listed once the history is read.
 

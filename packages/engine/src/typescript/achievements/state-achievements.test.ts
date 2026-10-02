@@ -197,6 +197,32 @@ describe("esm-only", () => {
   });
 });
 
+describe("esm-only and tool configuration", () => {
+  it("leaves tool configuration files out of the module files and of the CommonJS ones", () => {
+    const commonjs: Counts = { modules: { commonjs: 1 } };
+    const parsed = [
+      ...files(10),
+      file("jest.config.js", commonjs),
+      file("packages/a/eslint.config.cjs", commonjs),
+      file(".prettierrc.cjs", commonjs),
+    ];
+
+    expect(achievement(parsed, "esm-only")).toMatchObject({
+      reached: true,
+      detail: "No CommonJS in 10 production module files.",
+    });
+  });
+
+  it("still counts application CommonJS that merely looks like configuration", () => {
+    const parsed = [
+      ...files(10),
+      file("src/app.config.js", { modules: { commonjs: 1 } }),
+    ];
+
+    expect(achievement(parsed, "esm-only")?.reached).toBe(false);
+  });
+});
+
 describe("no-ts-ignore", () => {
   it("is lost by one @ts-ignore or one @ts-nocheck, not by @ts-expect-error", () => {
     expect(achievement(files(10), "no-ts-ignore")?.reached).toBe(true);
