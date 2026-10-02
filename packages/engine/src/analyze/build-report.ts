@@ -5,14 +5,27 @@
 import { activity } from "../activity/activity.js";
 import { punchcard } from "../activity/punchcard.js";
 import { automation } from "../automation/automation.js";
+import { AREA_BADGE_THRESHOLDS } from "../badges/area-badges.js";
+import { CONTRIBUTOR_BADGE_THRESHOLDS } from "../badges/contributor-badges.js";
 import { comparison } from "../compare/comparison.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import { contributors } from "../contributors/contributors.js";
-import { KNOWLEDGE_THRESHOLDS, knowledge } from "../knowledge/knowledge.js";
+import {
+  AREA_THRESHOLDS,
+  KNOWLEDGE_THRESHOLDS,
+  knowledge,
+} from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import type { Report } from "../report/report.js";
 import type { RepositoryFacts } from "./gather.js";
 import { prepareAnalysis } from "./prepare.js";
+
+const THRESHOLDS: Report["thresholds"] = {
+  activeDays: ACTIVE_DAYS,
+  ...KNOWLEDGE_THRESHOLDS,
+  areas: AREA_THRESHOLDS,
+  badges: { ...AREA_BADGE_THRESHOLDS, ...CONTRIBUTOR_BADGE_THRESHOLDS },
+};
 
 /** Builds the report from the facts, each section over the commits it covers. */
 export const buildReport = (facts: RepositoryFacts): Report => {
@@ -37,6 +50,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
   });
   const people = contributors({
     commits,
+    history: scoped,
     scope,
     now: facts.now,
     isCodePath: facts.isCodePath,
@@ -47,7 +61,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     generatedAt: window.until,
     repository: { ...facts.repository, firstCommitAt, lastCommitAt },
     window: { ...window, commits: commits.length },
-    thresholds: { activeDays: ACTIVE_DAYS, ...KNOWLEDGE_THRESHOLDS },
+    thresholds: THRESHOLDS,
     totals: {
       contributors: people.length,
       directories: knowledgeSection.directories.length,
@@ -58,6 +72,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     contributors: people,
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
+    highlights: [],
     ...(previous === undefined
       ? {}
       : {

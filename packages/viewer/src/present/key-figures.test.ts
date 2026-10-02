@@ -15,7 +15,7 @@ describe("keyFigures", () => {
     expect(valuesByLabel()).toEqual({
       Age: "2y 11m",
       Commits: "2,246",
-      "Active contributors": "3",
+      "Active contributors": "4",
       "Truck factor": "2",
       // (203 agent-assisted + 111 agent) of 2246 commits
       "AI share": "14%",

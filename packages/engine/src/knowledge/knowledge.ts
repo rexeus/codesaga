@@ -4,11 +4,18 @@
 
 import { lineOwnersField } from "../blame/line-owners.js";
 import type { Report } from "../report/report.js";
+import { AREA_MIN_FILES, MAX_AREA_DEPTH } from "./areas.js";
 import { MIN_DIRECTORY_FILES, directoryKnowledge } from "./directories.js";
 import { EXPERT_RATIO } from "./doe.js";
 import { ISLAND_SHARE, ORPHANED_SHARE, describeFileSet } from "./file-set.js";
 import { knowledgeModel } from "./model.js";
 import type { KnowledgeInput } from "./model.js";
+import {
+  AREAS_PER_CONTRIBUTOR,
+  MAX_TARGET_AREAS,
+  MIN_TARGET_AREAS,
+  RECOMMENDATION_ACTIVE_DAYS,
+} from "./recommended-depth.js";
 
 /** The knowledge constants, for the report's `thresholds`. */
 export const KNOWLEDGE_THRESHOLDS = {
@@ -16,6 +23,16 @@ export const KNOWLEDGE_THRESHOLDS = {
   minDirectoryFiles: MIN_DIRECTORY_FILES,
   islandShare: ISLAND_SHARE,
   orphanedShare: ORPHANED_SHARE,
+};
+
+/** How the areas are cut and recommended, for the report's `thresholds.areas`. */
+export const AREA_THRESHOLDS = {
+  minFiles: AREA_MIN_FILES,
+  maxDepth: MAX_AREA_DEPTH,
+  recommendationActiveDays: RECOMMENDATION_ACTIVE_DAYS,
+  areasPerContributor: AREAS_PER_CONTRIBUTOR,
+  minTargetAreas: MIN_TARGET_AREAS,
+  maxTargetAreas: MAX_TARGET_AREAS,
 };
 
 /**

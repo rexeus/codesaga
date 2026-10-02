@@ -4,9 +4,12 @@
 import { Schema } from "effect";
 
 import { AutomationTotals } from "./automation-totals.js";
+import { ContributorBadge } from "./badges.js";
 import { Comparison } from "./comparison.js";
+import { Highlight } from "./highlights.js";
 import { Knowledge } from "./knowledge-report.js";
 import { PullRequests } from "./pull-requests.js";
+import { Thresholds } from "./thresholds.js";
 
 const Count = Schema.Natural;
 
@@ -37,20 +40,6 @@ export const ActivityWindow = Schema.Struct({
   until: Schema.String,
   /** Commits in the window. */
   commits: Count,
-});
-
-/** The constants an analysis applied, reported so consumers see them. */
-const Thresholds = Schema.Struct({
-  /** A contributor is active with a commit in this many days before now. */
-  activeDays: Count,
-  /** An expert's Degree of Expertise is at least this share of the highest among the file's authors. */
-  expertRatio: Schema.Finite,
-  /** A directory is reported when its subtree holds at least this many universe files. */
-  minDirectoryFiles: Count,
-  /** A directory is a knowledge island when one person is the sole expert on at least this share of its files. */
-  islandShare: Schema.Finite,
-  /** A directory is orphaned when more than this share of its files have no active expert. */
-  orphanedShare: Schema.Finite,
 });
 
 /** Headline numbers: the window's commits and contributors, the universe's size and languages. */
@@ -132,6 +121,20 @@ const Contributor = Schema.Struct({
   active: Schema.Boolean,
   /** The three directories with the most commits, at most two levels below the scope. */
   areas: Schema.Array(Schema.Struct({ path: Schema.String, commits: Count })),
+  /**
+   * Commits per week over the last 52 weeks before `window.until`, oldest
+   * first, in the weeks of `activity.weeks` (Monday, UTC); the last entry is
+   * the week of `window.until`. Weeks before `window.since` count zero.
+   */
+  weekly: Schema.Array(Count).check(Schema.isBetweenLength(52, 52)),
+  /**
+   * `new`: the first commit over the full history lies at most
+   * `thresholds.badges.welcomeDays` days before now; `dormant`: not `active`;
+   * otherwise `active`.
+   */
+  status: Schema.Literals(["new", "active", "dormant"]),
+  /** Achievements, most important first; the dashboard shows the first three. */
+  badges: Schema.Array(ContributorBadge),
 });
 
 /** Commits by bots and AI agents, which never count as contributors. */
@@ -186,6 +189,11 @@ export const Report = Schema.Struct({
   contributors: Schema.Array(Contributor),
   automation: Automation,
   knowledge: Knowledge,
+  /**
+   * Notable facts about the history and the team, most notable first, at most
+   * six; empty when nothing passes a threshold.
+   */
+  highlights: Schema.Array(Highlight).check(Schema.isMaxLength(6)),
   /** Only with `--compare`: the window against the span before it. */
   comparison: Schema.optionalKey(Comparison),
   /** Only with `--github`: pull requests and reviews read from GitHub. */

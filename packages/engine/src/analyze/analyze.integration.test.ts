@@ -10,6 +10,9 @@ import { analyze } from "./analyze.js";
 
 const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
+const zeros = (count: number): Array<number> =>
+  Array.from({ length: count }, () => 0);
+
 const lines = (prefix: string, count: number): string =>
   Array.from({ length: count }, (_, index) => `${prefix}${index}\n`).join("");
 
@@ -172,6 +175,10 @@ layer(NodeServices.layer)("analyze automation", (it) => {
           lastCommitAt: "2026-03-05T12:00:00.000Z",
           active: true,
           areas: [{ path: "src", commits: 3 }],
+          // the week of Monday 2026-02-02 once, the week of 2026-03-02 twice; now is Tuesday 2026-03-10
+          weekly: [...zeros(46), 1, 0, 0, 0, 2, 0],
+          status: "new",
+          badges: [],
         });
       }),
   );

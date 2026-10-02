@@ -27,6 +27,7 @@ const SECTIONS = [
   "contributors",
   "automation",
   "knowledge",
+  "highlights",
 ] as const;
 
 layer(NodeServices.layer)("Report", (it) => {
@@ -47,6 +48,35 @@ layer(NodeServices.layer)("Report", (it) => {
           report.knowledge.directories.length,
         );
       }),
+  );
+
+  it.effect("carries the story data of the redesign in the sample", () =>
+    Effect.gen(function* () {
+      const report = decode(yield* readSample);
+      const levels = report.knowledge.areas?.levels ?? [];
+
+      assert.deepStrictEqual(
+        levels.map(({ depth }) => depth),
+        [1, 2, 3],
+      );
+      assert.strictEqual(report.highlights.length, 6);
+      assert.deepStrictEqual(
+        report.contributors.map(({ status }) => status),
+        [
+          "active",
+          "active",
+          "active",
+          "active",
+          "active",
+          "new",
+          "dormant",
+          "dormant",
+        ],
+      );
+      for (const { weekly } of report.contributors) {
+        assert.strictEqual(weekly.length, 52);
+      }
+    }),
   );
 });
 
@@ -139,6 +169,59 @@ layer(NodeServices.layer)("Report rejects a knowledge section with", (it) => {
       assert.throws(() => {
         decode({ ...rest, knowledge: { ...knowledge, directories } });
       }, /experts/u);
+    }),
+  );
+});
+
+layer(NodeServices.layer)("Report rejects story data with", (it) => {
+  it.effect("a contributor whose weekly commits are not 52 weeks", () =>
+    Effect.gen(function* () {
+      const sample = decode(yield* readSample);
+      const [first, ...others] = sample.contributors;
+      const contributors = [
+        { ...first, weekly: first?.weekly.slice(0, 51) },
+        ...others,
+      ];
+
+      assert.throws(() => {
+        decode({ ...sample, contributors });
+      }, /weekly/u);
+    }),
+  );
+
+  it.effect("a contributor badge of an unknown kind", () =>
+    Effect.gen(function* () {
+      const sample = decode(yield* readSample);
+      const [first, ...others] = sample.contributors;
+      const badge = { kind: "night-owl", label: "Night owl", evidence: "" };
+      const contributors = [{ ...first, badges: [badge] }, ...others];
+
+      assert.throws(() => {
+        decode({ ...sample, contributors });
+      }, /kind/u);
+    }),
+  );
+
+  it.effect("more than six highlights", () =>
+    Effect.gen(function* () {
+      const sample = decode(yield* readSample);
+      const [first] = sample.highlights;
+      const highlights = Array.from({ length: 7 }, () => first);
+
+      assert.throws(() => {
+        decode({ ...sample, highlights });
+      }, /highlights/u);
+    }),
+  );
+
+  it.effect("an area section without levels", () =>
+    Effect.gen(function* () {
+      const { knowledge, ...rest } = decode(yield* readSample);
+      const areas = { ...knowledge.areas, levels: [] };
+
+      assert.throws(() => {
+        decode({ ...rest, knowledge: { ...knowledge, areas } });
+      }, /levels/u);
     }),
   );
 });

@@ -13,6 +13,7 @@ const run = (
 ) =>
   contributors({
     commits,
+    history: commits,
     scope,
     now,
     isCodePath: (path) => path.endsWith(".ts"),

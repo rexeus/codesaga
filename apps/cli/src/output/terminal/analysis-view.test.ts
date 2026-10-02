@@ -18,7 +18,7 @@ describe("renderAnalysis", () => {
   it("summarizes the sample report in the documented layout", () => {
     expect(renderAnalysis(sampleReport(), plain).split("\n")).toStrictEqual([
       "codesaga · aurora-web · main @ 9f3c2b1",
-      "2 years · 2,246 commits · 8 contributors, 3 active in 90 days · 60,942 lines in 7 languages",
+      "2 years · 2,246 commits · 8 contributors, 4 active in 90 days · 60,942 lines in 7 languages",
       "",
       "Activity, last 12 months   █▆█▇▇▆▇▆▅▅▄▅  724 commits",
       "Contributors               commits  active days  last commit",

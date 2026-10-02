@@ -25,8 +25,8 @@ describe("sortContributors", () => {
       "Priya",
       "Jonas",
       "Aiko",
-      "Sam",
       "Lena",
+      "Sam",
       "Dmitri",
     ]);
   });

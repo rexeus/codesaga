@@ -2,6 +2,8 @@
 // `Report` embeds it and `InspectResult` reuses its pieces, so both describe people alike.
 import { Schema } from "effect";
 
+import { AreaBadge } from "./badges.js";
+
 const Count = Schema.Natural;
 
 /** Who wrote the lines of a set of files, according to `git blame`. */
@@ -71,6 +73,51 @@ const DirectoryKnowledge = Schema.Struct({
 });
 
 /**
+ * The knowledge state of one area: a part of the repository that, together with
+ * its siblings at the same level, covers every universe file exactly once.
+ * Reads like a directory, so every field of `DirectoryKnowledge` applies to
+ * the files of the area alone.
+ */
+const AreaKnowledge = Schema.Struct({
+  ...DirectoryKnowledge.fields,
+  /**
+   * `package`: the root of a package, marked by a manifest such as
+   * `package.json`; `directory`: a directory below a package root or below the
+   * scope; `rest`: the small areas below `path` grouped as "other files". For
+   * `rest`, `path` is the directory that holds them, so a `package` area and
+   * its `rest` area share a path: `path` and `kind` together identify an area.
+   */
+  kind: Schema.Literals(["package", "directory", "rest"]),
+  /** Achievements of the area, most important first; the dashboard shows the first three. */
+  badges: Schema.Array(AreaBadge),
+});
+export type AreaKnowledge = typeof AreaKnowledge.Type;
+
+/** The areas of one level of depth. */
+const AreaLevel = Schema.Struct({
+  /** 1 for packages (or top-level directories without packages), each further level one directory step deeper. */
+  depth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+  /** Ordered like `directories`: riskiest first. Possibly truncated by the output limit, per level. */
+  areas: Schema.Array(AreaKnowledge),
+});
+export type AreaLevel = typeof AreaLevel.Type;
+
+/**
+ * The knowledge in non-overlapping areas at several levels of depth, all
+ * computed by the engine so that viewers only pick a level.
+ */
+const Areas = Schema.Struct({
+  /** The level the terminal and the dashboard start at: `--depth` or `recommendedDepth`. */
+  depth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+  /** The level that suits the team size, chosen with `thresholds.areas`. */
+  recommendedDepth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+  /** The recommendation in words: "level 2: 11 areas for 6 active contributors". */
+  reason: Schema.String,
+  /** Levels 1 to the deepest useful one (at most `thresholds.areas.maxDepth`), in order. */
+  levels: Schema.NonEmptyArray(AreaLevel),
+});
+
+/**
  * Who knows the code and whether they are still around. Covers the whole
  * history and the universe files of the scope, independent of `window`. Only
  * humans are experts: a file changed only by bots and agents has no expert.
@@ -91,8 +138,17 @@ export const Knowledge = Schema.Struct({
   /**
    * Riskiest first: orphaned, then islands, then lower truck factor, then
    * more files, then path; possibly truncated (see `totals.directories`).
+   *
+   * Deprecated: the directories overlap. Read `areas` instead; this field goes
+   * with schemaVersion 2. (Not an `@deprecated` tag: the repository's
+   * `no-deprecated` lint would flag every producer and consumer until then.)
    */
   directories: Schema.Array(DirectoryKnowledge),
+  /**
+   * The knowledge in areas that partition the files. Optional while analyze
+   * does not produce it yet; it becomes required together with the engine.
+   */
+  areas: Schema.optionalKey(Areas),
   /** Present only when the analysis ran with `blame`: the line owners of all `files` together, which no sum over `directories` gives. */
   lineOwners: Schema.optionalKey(LineOwners),
 });
