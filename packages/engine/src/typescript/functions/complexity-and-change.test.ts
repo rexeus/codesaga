@@ -32,7 +32,7 @@ const revisions = revisionsOf({
 
 describe("complexityAndChangeOf", () => {
   it("shares the revisions that landed in files whose hardest function scores 15 or more", () => {
-    const block = complexityAndChangeOf(ten, revisions);
+    const block = complexityAndChangeOf(ten, revisions, false);
 
     expect(block).toMatchObject({
       files: 10,
@@ -44,7 +44,7 @@ describe("complexityAndChangeOf", () => {
   });
 
   it("lists the files in the top decile of both hardness and revisions", () => {
-    const block = complexityAndChangeOf(ten, revisions);
+    const block = complexityAndChangeOf(ten, revisions, false);
 
     expect(block?.hotspots).toStrictEqual([
       { path: "src/f0.ts", complexity: 20, revisions: 30 },
@@ -65,16 +65,33 @@ describe("complexityAndChangeOf edge cases", () => {
         },
       ],
       revisions,
+      false,
     );
 
     expect(block?.files).toBe(10);
     expect(block?.revisions).toBe(67);
   });
 
+  it("says when the history is a shallow clone, and says nothing otherwise", () => {
+    const rows = [file("src/a.ts", 40)];
+    const revisionsOfA = revisionsOf({ "src/a.ts": 2 });
+
+    expect(complexityAndChangeOf(rows, revisionsOfA, true)).toMatchObject({
+      shallow: true,
+      revisions: 2,
+    });
+    expect(complexityAndChangeOf(rows, revisionsOfA, false)).not.toHaveProperty(
+      "shallow",
+    );
+  });
+});
+
+describe("complexityAndChangeOf hotspots", () => {
   it("does not call a file revised once a hotspot", () => {
     const block = complexityAndChangeOf(
       [file("src/a.ts", 40), file("src/b.ts", 2)],
       revisionsOf({ "src/a.ts": 1, "src/b.ts": 1 }),
+      false,
     );
 
     expect(block?.hotspots).toStrictEqual([]);
@@ -92,6 +109,7 @@ describe("complexityAndChangeOf edge cases", () => {
           rows.map(({ path }, index) => [path, 5 + (index % 2)]),
         ),
       ),
+      false,
     );
 
     expect(block?.hotspots.map(({ path }) => path)).toStrictEqual([
@@ -104,9 +122,13 @@ describe("complexityAndChangeOf edge cases", () => {
   });
 
   it("is undefined when no production file has a function", () => {
-    expect(complexityAndChangeOf([], new Map())).toBeUndefined();
+    expect(complexityAndChangeOf([], new Map(), false)).toBeUndefined();
     expect(
-      complexityAndChangeOf([file("src/a.test.ts", 30)], revisionsOf({})),
+      complexityAndChangeOf(
+        [file("src/a.test.ts", 30)],
+        revisionsOf({}),
+        false,
+      ),
     ).toBeUndefined();
   });
 });

@@ -79,6 +79,12 @@ export type Functions = typeof Functions.Type;
 export const ComplexityAndChange = Schema.Struct({
   /** Production files with at least one function: the denominator. */
   files: Count,
+  /**
+   * True when the repository is a shallow clone: the revisions are those of
+   * the visible history only, so the shares describe that part and files
+   * look less revised than they are. Absent otherwise.
+   */
+  shallow: Schema.optionalKey(Schema.Literal(true)),
   /** Revisions of those files in the current life of each path, summed. */
   revisions: Count,
   /** Files whose hardest function scores 15 or more. */

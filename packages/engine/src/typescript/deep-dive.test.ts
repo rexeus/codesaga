@@ -6,7 +6,7 @@ import type { FactsResult } from "./facts-of-source.js";
 import type { TypeScriptFacts } from "./gather-typescript.js";
 
 const analysisOf = (facts: TypeScriptFacts) =>
-  typescriptAnalysis(facts, new Map());
+  typescriptAnalysis(facts, new Map(), false);
 
 const parsed: FactsResult = { kind: "parsed", facts: factsWith({}) };
 const skipped = (reason: "too-deep" | "syntax-error"): FactsResult => ({
@@ -176,6 +176,7 @@ describe("typescriptAnalysis blocks of a repository", () => {
         files: [{ path: "a.ts", lines: 10, result: complex }],
       },
       new Map([["a.ts", 3]]),
+      false,
     );
 
     expect(Object.keys(section)).toStrictEqual([

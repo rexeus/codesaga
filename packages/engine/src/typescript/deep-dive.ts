@@ -61,11 +61,13 @@ export type TypeScriptAnalysis = {
  * `files` equal to parsed, declaration and skipped files together, and the
  * blocks over the parsed files, which are absent when there are none.
  * `revisions` are the commits per path in its current life, which
- * `complexityAndChange` joins to the functions.
+ * `complexityAndChange` joins to the functions; `shallow` says the history
+ * is a shallow clone.
  */
 export const typescriptAnalysis = (
   facts: TypeScriptFacts,
   revisions: ReadonlyMap<string, number>,
+  shallow: boolean,
 ): TypeScriptAnalysis => {
   const parsed = parsedFilesOf(facts.files);
   const byPath = new Map(parsed.map((file) => [file.path, file]));
@@ -75,7 +77,7 @@ export const typescriptAnalysis = (
   ]);
   const hasFacts = parsed.length > 0;
   const ecosystem = ecosystemOf(parsed, facts.manifests);
-  const changed = complexityAndChangeOf(parsed, revisions);
+  const changed = complexityAndChangeOf(parsed, revisions, shallow);
   return {
     section: {
       coverage: coverageOf(facts),

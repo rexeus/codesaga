@@ -115,12 +115,12 @@ const peopleOf = (
   });
 
 const typescriptOf = (
-  { typescript }: RepositoryFacts,
+  { typescript, repository }: RepositoryFacts,
   revisions: ReadonlyMap<string, number>,
 ): TypeScriptAnalysis | undefined =>
   typescript === undefined
     ? undefined
-    : typescriptAnalysis(typescript, revisions);
+    : typescriptAnalysis(typescript, revisions, repository.shallow);
 
 /** The sections that exist only for some runs or some repositories. */
 const optionalSections = (

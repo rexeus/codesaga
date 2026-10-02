@@ -33,12 +33,14 @@ const byRevisionsThenHardnessThenPath = (left: Row, right: Row): number =>
 
 /**
  * The join of the production files' hardest functions with their revisions,
- * `revisions` being the commits per path in its current life. Undefined when
+ * `revisions` being the commits per path in its current life, and `shallow`
+ * whether the history is a shallow clone, which the block says. Undefined when
  * no production file holds a function.
  */
 export const complexityAndChangeOf = (
   files: ReadonlyArray<ParsedFile>,
   revisions: ReadonlyMap<string, number>,
+  shallow: boolean,
 ): ComplexityAndChange | undefined => {
   const rows: ReadonlyArray<Row> = files
     .filter(({ path, facts }) => !isTestPath(path) && facts.functions.count > 0)
@@ -64,6 +66,7 @@ export const complexityAndChangeOf = (
     HOTSPOT_QUANTILE,
   );
   return {
+    ...(shallow ? { shallow: true as const } : {}),
     files: rows.length,
     revisions: totalRevisions,
     complexFiles: complex.length,
