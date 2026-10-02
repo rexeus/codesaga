@@ -1,6 +1,54 @@
+import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
 import { territoryBadges, contributorBadges } from "./badges.js";
+import { ICON_NAMES } from "./icons.js";
+
+type ContributorBadge = Report["contributors"][number]["badges"][number];
+
+/** The tone every kind of the contract is drawn in; the type makes a missing kind a compile error. */
+const TONE_OF: Record<ContributorBadge["kind"], ContributorBadge["category"]> =
+  {
+    "all-rounder": "focus",
+    specialist: "focus",
+    keeper: "focus",
+    tidier: "craft",
+    tester: "craft",
+    documenter: "craft",
+    toolsmith: "craft",
+    "night-owl": "rhythm",
+    "early-bird": "rhythm",
+    "weekend-regular": "rhythm",
+    "pair-partner": "collaboration",
+    reviewer: "collaboration",
+    founder: "journey",
+    "long-hauler": "journey",
+    explorer: "journey",
+    steady: "journey",
+    "new-here": "journey",
+    "back-again": "journey",
+  };
+
+const KINDS = [
+  "all-rounder",
+  "specialist",
+  "keeper",
+  "tidier",
+  "tester",
+  "documenter",
+  "toolsmith",
+  "night-owl",
+  "early-bird",
+  "weekend-regular",
+  "pair-partner",
+  "reviewer",
+  "founder",
+  "long-hauler",
+  "explorer",
+  "steady",
+  "new-here",
+  "back-again",
+] as const satisfies ReadonlyArray<ContributorBadge["kind"]>;
 
 const badge = <Kind extends string>(
   kind: Kind,
@@ -88,6 +136,17 @@ describe("contributorBadges", () => {
       ["focus", "key-round"],
       ["journey", "sparkles"],
     ]);
+  });
+
+  it("gives every kind a glyph the page ships and the tone of its category", () => {
+    const chips = contributorBadges(
+      KINDS.map((kind) => ({ ...badge(kind), category: TONE_OF[kind] })),
+    ).all;
+
+    expect(KINDS).toHaveLength(Object.keys(TONE_OF).length);
+    expect(chips.map(({ tone }) => tone)).toEqual(KINDS.map((k) => TONE_OF[k]));
+    expect(chips.every(({ icon }) => ICON_NAMES.includes(icon))).toBe(true);
+    expect(new Set(chips.map(({ icon }) => icon)).size).toBe(KINDS.length);
   });
 
   it("has an empty row without badges", () => {
