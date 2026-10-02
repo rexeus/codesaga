@@ -1,8 +1,9 @@
-// Owns the human view of `analyze`: one screen with the headline, stories, activity, people, knowledge, stats, automation and languages.
+// Owns the human view of `analyze`: one screen with the headline, stories, activity, people, knowledge, stats, achievements, automation and languages.
 // Every name that came from git or the file system passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
 import { escapeForTerminal } from "../escape.js";
+import { achievementLines } from "./achievement-lines.js";
 import {
   ago,
   count,
@@ -184,6 +185,7 @@ export const renderAnalysis = (report: Report, style: Style): string =>
     ...contributorLines(report, style),
     ...knowledgeLines(report, style),
     ...statsLines(report, style),
+    ...achievementLines(report, style),
     ...(report.automation.tools.length === 0
       ? []
       : section("Automation", automationLines(report), style)),

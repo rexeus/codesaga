@@ -42,6 +42,7 @@ describe("renderAnalysis", () => {
       "Stats                      473 files · 60,942 lines · 25% tests",
       "                           median file 96 lines · 5 revisions per file · 1.70 indentation levels per line",
       "                           2 spaces · lines 33 median, 72 p90 · 8% comments",
+      "Achievements               4 of 9 · First 1,000 commits · Marathon · Polyglot · Spring cleaning",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
@@ -115,6 +116,20 @@ describe("renderAnalysis stats", () => {
         plain,
       ),
     ).toContain("\nStats                      no code files\n");
+  });
+});
+
+describe("renderAnalysis achievements", () => {
+  it("counts the reached ones and names none that is locked", () => {
+    const report = sampleReport();
+    const locked = report.achievements.map((achievement) => ({
+      ...achievement,
+      reached: false,
+    }));
+
+    expect(
+      renderAnalysis({ ...report, achievements: locked }, plain),
+    ).toContain("\nAchievements               0 of 9\n");
   });
 });
 
