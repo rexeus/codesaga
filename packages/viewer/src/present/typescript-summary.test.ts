@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { sampleBlock, sampleDeepDive } from "../testing/reports.js";
-import { typeScriptState } from "./typescript-summary.js";
+import { hasTypeScriptFiles, typeScriptState } from "./typescript-summary.js";
 
 const deepDive = sampleDeepDive();
 
+const stateOf = (block: Parameters<typeof typeScriptState>[0]) =>
+  typeScriptState(block, true);
+
 describe("coverage", () => {
   it("says how many files were read and what was left out", () => {
-    const state = typeScriptState(deepDive);
+    const state = stateOf(deepDive);
 
     expect(state.coverage).toEqual({
       headline: "338 of 345 files read",
@@ -20,7 +23,7 @@ describe("coverage", () => {
   });
 
   it("names a parser that did not load and leaves out what did not happen", () => {
-    const state = typeScriptState({
+    const state = stateOf({
       coverage: {
         files: 3,
         parsed: 0,
@@ -39,7 +42,7 @@ describe("coverage", () => {
 
 describe("typeScriptState", () => {
   it("sums the code up in one figure per block the report has", () => {
-    const state = typeScriptState(deepDive);
+    const state = stateOf(deepDive);
 
     expect(state.kind).toBe("ready");
     expect(
@@ -48,7 +51,7 @@ describe("typeScriptState", () => {
   });
 
   it("explains each figure with the counts behind it", () => {
-    const state = typeScriptState(deepDive);
+    const state = stateOf(deepDive);
 
     // 191 sites; 294 of 338 governed files are strict (the admin config is not);
     // 47 of 1,840 functions score 15 or more; 1 cycle exists only through types
@@ -64,7 +67,7 @@ describe("typeScriptState", () => {
   });
 
   it("leaves out the figure of a block the report does not carry", () => {
-    const state = typeScriptState({
+    const state = stateOf({
       coverage: deepDive.coverage,
       strictness: sampleBlock("strictness"),
       functions: sampleBlock("functions"),
@@ -77,7 +80,7 @@ describe("typeScriptState", () => {
   });
 
   it("says no tsconfig governs a file instead of a share", () => {
-    const state = typeScriptState({
+    const state = stateOf({
       ...deepDive,
       strictness: {
         ...sampleBlock("strictness"),
@@ -93,7 +96,7 @@ describe("typeScriptState", () => {
   });
 
   it("does not take zero cases for none when the runner is not known", () => {
-    const state = typeScriptState({
+    const state = stateOf({
       ...deepDive,
       tests: { ...sampleBlock("tests"), cases: 0 },
     });
@@ -107,7 +110,7 @@ describe("typeScriptState", () => {
 
 describe("typeScriptState without an analysis", () => {
   it("shows only a calm note when the parser did not load", () => {
-    const state = typeScriptState({
+    const state = stateOf({
       coverage: {
         files: 40,
         parsed: 0,
@@ -126,7 +129,7 @@ describe("typeScriptState without an analysis", () => {
   });
 
   it("shows only a calm note when no file could be read", () => {
-    const state = typeScriptState({
+    const state = stateOf({
       coverage: {
         files: 2,
         parsed: 0,
@@ -141,5 +144,27 @@ describe("typeScriptState without an analysis", () => {
       message:
         "No TypeScript or JavaScript file could be read, so there is nothing to analyze.",
     });
+  });
+});
+
+describe("a JavaScript-only repository", () => {
+  it("has no figure on escape hatches or strictness, which are about types", () => {
+    const state = typeScriptState(deepDive, false);
+
+    expect(state).toMatchObject({ kind: "ready", typed: false });
+    expect(
+      state.kind === "ready" && state.figures.map(({ label }) => label),
+    ).toEqual(["Complex functions", "Import cycles", "Test cases"]);
+  });
+});
+
+describe("hasTypeScriptFiles", () => {
+  it("looks for TypeScript among the languages of the code stats", () => {
+    expect(
+      hasTypeScriptFiles([{ name: "JavaScript" }, { name: "TypeScript" }]),
+    ).toBe(true);
+    expect(hasTypeScriptFiles([{ name: "JavaScript" }, { name: "CSS" }])).toBe(
+      false,
+    );
   });
 });

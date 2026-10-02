@@ -1,6 +1,9 @@
 import type { Report } from "@codesaga/engine";
 
-import { typeScriptState } from "../present/typescript-summary.js";
+import {
+  hasTypeScriptFiles,
+  typeScriptState,
+} from "../present/typescript-summary.js";
 import type { TypeScriptDeepDive } from "../present/typescript-summary.js";
 import { h } from "./dom.js";
 import { section } from "./section.js";
@@ -35,11 +38,28 @@ const row = (
     h("div", "c5 col", ...narrow.filter((card) => card !== null)),
   );
 
-const typeSafety = ({
-  typeSafety: safety,
-  strictness,
-}: TypeScriptDeepDive): HTMLElement[] =>
-  safety === undefined && strictness === undefined
+const untyped = (): HTMLElement =>
+  h(
+    "section",
+    "card panel",
+    h(
+      "p",
+      "ts-calm-text",
+      "This repository has no TypeScript file, so there are no type escape hatches to count. Types written in JSDoc comments are not read.",
+    ),
+  );
+
+const typeSafety = (
+  { typeSafety: safety, strictness }: TypeScriptDeepDive,
+  typed: boolean,
+): HTMLElement[] => {
+  if (!typed) {
+    return [
+      group("Type safety", "Where the code leaves the type system"),
+      untyped(),
+    ];
+  }
+  return safety === undefined && strictness === undefined
     ? []
     : [
         group(
@@ -51,6 +71,7 @@ const typeSafety = ({
           : [row(escapesCard(safety), counterpartsCard(safety))]),
         ...(strictness === undefined ? [] : [strictnessCard(strictness)]),
       ];
+};
 
 const functions = ({
   functions: shape,
@@ -124,7 +145,10 @@ export const renderTypeScript = (report: Report): HTMLElement | null => {
   if (deepDive === undefined) {
     return null;
   }
-  const state = typeScriptState(deepDive);
+  const state = typeScriptState(
+    deepDive,
+    hasTypeScriptFiles(report.stats.languages),
+  );
   return section(
     "typescript",
     "Deep dive: TypeScript",
@@ -136,7 +160,7 @@ export const renderTypeScript = (report: Report): HTMLElement | null => {
       summaryCard(state),
       ...(state.kind === "ready"
         ? [
-            ...typeSafety(deepDive),
+            ...typeSafety(deepDive, state.typed),
             ...functions(deepDive),
             ...imports(deepDive),
             ...more(deepDive),

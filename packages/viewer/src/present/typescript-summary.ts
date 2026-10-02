@@ -40,6 +40,8 @@ export type TypeScriptState =
     }
   | {
       readonly kind: "ready";
+      /** False for a repository whose code is JavaScript only: it has no types to escape from or to check. */
+      readonly typed: boolean;
       readonly coverage: CoverageView;
       readonly figures: readonly SummaryFigure[];
     };
@@ -131,24 +133,34 @@ const testFigure = ({ cases, files }: Block<"tests">): SummaryFigure => ({
 });
 
 /** One figure per block the report carries, in a fixed order. */
-const figuresOf = (deepDive: TypeScriptDeepDive): SummaryFigure[] => {
+const figuresOf = (
+  deepDive: TypeScriptDeepDive,
+  typed: boolean,
+): SummaryFigure[] => {
   const { typeSafety, strictness, functions, imports, tests } = deepDive;
   return [
-    ...(typeSafety === undefined ? [] : [escapeFigure(typeSafety)]),
-    ...(strictness === undefined ? [] : [strictFigure(strictness)]),
+    ...(typeSafety === undefined || !typed ? [] : [escapeFigure(typeSafety)]),
+    ...(strictness === undefined || !typed ? [] : [strictFigure(strictness)]),
     ...(functions === undefined ? [] : [complexFigure(functions)]),
     ...(imports === undefined ? [] : [cycleFigure(imports)]),
     ...(tests === undefined ? [] : [testFigure(tests)]),
   ];
 };
 
+/** Whether the repository has TypeScript files, as its code stats list the languages. */
+export const hasTypeScriptFiles = (
+  languages: readonly { readonly name: string }[],
+): boolean => languages.some(({ name }) => name === "TypeScript");
+
 /**
  * What the section shows. A parser that did not load, or a universe where no
  * file could be read, leaves the coverage and a calm note; otherwise the
- * figures of every block the report carries, in a fixed order.
+ * figures of every block the report carries, in a fixed order. `typed` is
+ * false for a JavaScript-only repository, which has no figure on types.
  */
 export const typeScriptState = (
   deepDive: TypeScriptDeepDive,
+  typed: boolean,
 ): TypeScriptState => {
   const coverage = coverageView(deepDive.coverage);
   if (deepDive.coverage.unavailable !== undefined) {
@@ -166,5 +178,10 @@ export const typeScriptState = (
       coverage,
     };
   }
-  return { kind: "ready", coverage, figures: figuresOf(deepDive) };
+  return {
+    kind: "ready",
+    typed,
+    coverage,
+    figures: figuresOf(deepDive, typed),
+  };
 };
