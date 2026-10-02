@@ -190,7 +190,8 @@ layer(analyzeServices)("analyze the strictness of other repositories", (it) => {
         configs: [],
         totalConfigs: 0,
         governedFiles: 0,
-        ungovernedFiles: 1,
+        ungovernedFiles: 0,
+        jsFilesOutsideConfigs: 1,
       });
     }),
   );

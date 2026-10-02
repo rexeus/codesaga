@@ -117,7 +117,9 @@ export const selectionOf = (
 };
 
 const SCRIPT_EXTENSION = /\.(?:js|jsx|mjs|cjs)$/iu;
-const isJavaScript = (path: string): boolean => SCRIPT_EXTENSION.test(path);
+/** Whether the path is a JavaScript file, which a config governs only when it checks JavaScript. */
+export const isJavaScriptPath = (path: string): boolean =>
+  SCRIPT_EXTENSION.test(path);
 
 const isPrimary = (selection: ConfigSelection): boolean =>
   selection.path.endsWith("/tsconfig.json") ||
@@ -133,7 +135,7 @@ export const governingConfig = (
   selections: ReadonlyArray<ConfigSelection>,
   path: string,
 ): string | undefined => {
-  const javaScript = isJavaScript(path);
+  const javaScript = isJavaScriptPath(path);
   const candidates = selections.filter(
     (selection) =>
       (!javaScript || selection.checksJs) && selection.selects(path),

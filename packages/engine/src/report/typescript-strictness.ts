@@ -67,7 +67,13 @@ export const Strictness = Schema.Struct({
   totalConfigs: Schema.Natural,
   /** TypeScript and JavaScript files that some config governs. */
   governedFiles: Schema.Natural,
-  /** The universe's TypeScript and JavaScript files that no config governs; with `governedFiles` they add up to `coverage.files`. */
+  /** TypeScript files (declaration files included) that no config governs. */
   ungovernedFiles: Schema.Natural,
+  /**
+   * JavaScript files that no config governs, as is usual without `allowJs`
+   * and `checkJs`: they are not type-checked and not a gap. With
+   * `governedFiles` and `ungovernedFiles` they add up to `coverage.files`.
+   */
+  jsFilesOutsideConfigs: Schema.Natural,
 });
 export type Strictness = typeof Strictness.Type;

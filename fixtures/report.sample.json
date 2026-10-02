@@ -5447,7 +5447,8 @@
         ],
         "totalConfigs": 7,
         "governedFiles": 338,
-        "ungovernedFiles": 7
+        "ungovernedFiles": 4,
+        "jsFilesOutsideConfigs": 3
       },
       "modules": {
         "files": 338,

@@ -7,7 +7,11 @@ import type {
   Tri,
 } from "../../report/typescript-strictness.js";
 import { sum } from "../../stats/measures.js";
-import { governingConfig, selectionOf } from "./assign-configs.js";
+import {
+  governingConfig,
+  isJavaScriptPath,
+  selectionOf,
+} from "./assign-configs.js";
 import type { LoadedTsconfig } from "./config-file.js";
 import { chainOf, postureOf, unresolvedOf } from "./effective-options.js";
 import type { Posture } from "./effective-options.js";
@@ -28,6 +32,10 @@ export type StrictnessAnalysis = {
     paths: ReadonlyArray<string>,
   ) => TerritoryStrict | undefined;
 };
+
+/** Whether the file is a plain `tsconfig.json`, which is a project of its directory even when others extend it. */
+const isPlainName = (path: string): boolean =>
+  path === "tsconfig.json" || path.endsWith("/tsconfig.json");
 
 const strictByDefaultOf = ({ major }: DeclaredTypeScript): Tri =>
   major === null ? "unknown" : major >= FIRST_STRICT_BY_DEFAULT_MAJOR;
@@ -56,7 +64,7 @@ const assignmentOf = (
     const posture = postures.get(config.path);
     return selectionOf(config, {
       checksJs: posture?.allowJs === true && posture.checkJs === true,
-      isBase: extended.has(config.path),
+      isBase: extended.has(config.path) && !isPlainName(config.path),
     });
   });
   return new Map(
@@ -91,6 +99,8 @@ export const strictnessOf = (
     }
   }
   const governed = sum(governedBy.values());
+  const outside = [...governor].filter(([, config]) => config === undefined);
+  const jsOutside = outside.filter(([path]) => isJavaScriptPath(path)).length;
   return {
     section: {
       typescript: { declared: typescript.declared, strictByDefault },
@@ -105,7 +115,8 @@ export const strictnessOf = (
         .toSorted(byFilesThenPath),
       totalConfigs: configs.length,
       governedFiles: governed,
-      ungovernedFiles: paths.length - governed,
+      ungovernedFiles: outside.length - jsOutside,
+      jsFilesOutsideConfigs: jsOutside,
     },
     strictOf: (territoryPaths) =>
       summarize(
