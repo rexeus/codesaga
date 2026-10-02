@@ -28,6 +28,7 @@ const MAX_NEWCOMERS_NAMED = 5;
 type Milestone = {
   readonly day: number;
   readonly value: number;
+  readonly unit: "years" | "days";
   readonly label: string;
 };
 
@@ -52,12 +53,14 @@ const milestonesOf = (firstDay: number, nowDay: number): Array<Milestone> => {
         first.getUTCDate(),
       ),
       value: index + 1,
+      unit: "years",
       label: nounOf(index + 1, "year"),
     }),
   );
   const days = MILESTONE_DAYS.map((count): Milestone => ({
     day: firstDay + count,
     value: count,
+    unit: "days",
     label: nounOf(count, "day"),
   }));
   return [...years, ...days];
@@ -85,6 +88,7 @@ const anniversaryHighlight = (
       title: "Anniversary",
       detail: `The first commit ${nearest.day > nowDay ? "turns" : "turned"} ${nearest.label} old on ${isoDateOfDay(nearest.day)}.${dayOneOf(first)}`,
       value: nearest.value,
+      unit: nearest.unit,
       date: isoDateOfDay(nearest.day),
     },
   ];

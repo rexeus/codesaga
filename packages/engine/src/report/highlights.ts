@@ -8,7 +8,7 @@ import { Schema } from "effect";
  * fields carry the facts behind them for consumers that draw their own. Which
  * of them are set, and what `value` counts, depends on `kind`:
  *
- * - `anniversary`: `value` is the age in years, or in days for the 100, 500 and 1000 day milestones (`title` and `detail` say which); `date` is the anniversary, up to seven days from now.
+ * - `anniversary`: `value` is the age in `unit`, years or days for the 100, 500 and 1000 day milestones; `date` is the anniversary, up to seven days from now.
  * - `streak`: `value` is the days of the longest run of days with a commit (author's local days), `date` its first day.
  * - `night-owls`: `value` is the share (0 to 1) of human commits at 22:00 to 05:00 local time.
  * - `weekend`: `value` is the share (0 to 1) of human commits on a Saturday or Sunday local time.
@@ -40,6 +40,8 @@ export const Highlight = Schema.Struct({
   detail: Schema.String,
   /** The number the fact is about; its unit depends on `kind`. */
   value: Schema.optionalKey(Schema.Finite),
+  /** What `value` counts: set for `anniversary` only, absent for every other kind. */
+  unit: Schema.optionalKey(Schema.Literals(["years", "days"])),
   /** `YYYY-MM-DD`; UTC, except for `streak` and `busiest-day`, which read the author's local calendar days. */
   date: Schema.optionalKey(Schema.String),
   /** Repository-relative path of the area or file the fact is about. */

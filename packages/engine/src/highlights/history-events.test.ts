@@ -23,6 +23,7 @@ describe("historyEventHighlights anniversary", () => {
         title: "Anniversary",
         detail: "The first commit turns 5 years old on 2026-07-05.",
         value: 5,
+        unit: "years",
         date: "2026-07-05",
       },
     ]);
@@ -43,6 +44,7 @@ describe("historyEventHighlights anniversary", () => {
     expect(anniversaryOf("2026-03-23T10:00:00Z")).toMatchObject([
       {
         value: 100,
+        unit: "days",
         detail: "The first commit turned 100 days old on 2026-07-01.",
         date: "2026-07-01",
       },
@@ -52,10 +54,10 @@ describe("historyEventHighlights anniversary", () => {
   it("reports the 500- and 1000-day milestones", () => {
     // 500 days after 2025-02-16 is 2026-07-01; 1000 days after 2023-10-06 is 2026-07-02
     expect(anniversaryOf("2025-02-16T10:00:00Z")).toMatchObject([
-      { value: 500 },
+      { value: 500, unit: "days" },
     ]);
     expect(anniversaryOf("2023-10-06T10:00:00Z")).toMatchObject([
-      { value: 1000, date: "2026-07-02" },
+      { value: 1000, unit: "days", date: "2026-07-02" },
     ]);
   });
 
