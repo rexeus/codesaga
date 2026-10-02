@@ -73,3 +73,20 @@ describe("layoutHistogram", () => {
     ).toBe(true);
   });
 });
+
+describe("layoutHistogram of a skewed histogram", () => {
+  it("annotates every bucket that has files when asked", () => {
+    const skewed = layoutHistogram(
+      [...bins, { label: "201+", files: 0 }],
+      SIZE,
+      true,
+    );
+
+    expect(skewed.bars.map(({ annotated }) => annotated)).toEqual([
+      true,
+      true,
+      true,
+      false,
+    ]);
+  });
+});

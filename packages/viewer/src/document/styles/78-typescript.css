@@ -1,0 +1,426 @@
+/* The Deep dive: TypeScript section: a summary strip, then groups of cards, then folded cards. */
+.ts-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ts-stack > .grid12 {
+  align-items: start;
+}
+
+.ts-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  margin-top: 22px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--grid);
+}
+
+.ts-group h3 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.ts-group p {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+/* The summary strip. */
+.ts-figs {
+  display: grid;
+  grid-template-columns: repeat(var(--figs, 5), minmax(0, 1fr));
+  gap: 18px 24px;
+}
+
+.ts-fig {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ts-fig-value {
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.ts-fig-note {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.ts-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--grid);
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.ts-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.ts-note b {
+  color: var(--ink-2);
+  font-weight: 650;
+}
+
+.ts-calm-text {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.ts-lead {
+  margin-top: 6px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.ts-subblock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--grid);
+}
+
+.chart > .note,
+.chart > .ts-lead {
+  margin-top: 4px;
+}
+
+/* Rows of figures under a card's head, with a count of what they tell. */
+.ts-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px 16px;
+  margin: 8px 0 4px;
+}
+
+.ts-facts > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ts-facts b {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.ts-facts span {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.ts-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 28px;
+  margin: 10px 0 4px;
+}
+
+.ts-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.chart .slabel {
+  margin-top: 8px;
+}
+
+.chart .tbar.big {
+  margin: 2px 0;
+}
+
+/* Escape hatches. */
+.es-set {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.es-set .slabel {
+  margin-top: 0;
+}
+
+.es-fig {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.es-fig b {
+  color: var(--ink);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* A table of rows that wrap into a grid: a name column and numeric columns. */
+.ktable {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.kt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px 66px 84px;
+  gap: 8px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.ktable.three .kt {
+  grid-template-columns: minmax(0, 1fr) 66px 66px;
+}
+
+.kt .num {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.kt .num:nth-child(2) {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.kt.head {
+  padding-top: 0;
+  border-top: 0;
+  align-items: end;
+  color: var(--ink-3);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.kt.head .num {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.kt .k {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kt .k.two {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.kt .k.two .muted {
+  font-size: 12px;
+}
+
+.kt .k.two .mono {
+  font-size: 12.5px;
+}
+
+.es-set.minor .es-fig b {
+  font-size: 20px;
+}
+
+/* Strictness. */
+.strict-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 40px;
+  margin-top: 6px;
+}
+
+.strict-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.strict-bars .legend {
+  margin-top: 6px;
+}
+
+.strict-bars .note {
+  margin-top: 2px;
+}
+.opt {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.opt-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  font-size: 13px;
+}
+
+.opt-head .mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+.opt-head .muted {
+  font-size: 12px;
+}
+
+.unknown-state {
+  --mark: transparent;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--other) 0 3px,
+    transparent 3px 6px
+  );
+}
+
+.swatch.unknown-state {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--other) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.cfg {
+  min-width: 0;
+  margin-top: 8px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.cfg .slabel {
+  margin-top: 0;
+}
+
+.cfg-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+}
+
+.cfg-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 0;
+  border-top: 1px solid var(--grid);
+}
+
+.cfg-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cfg-path {
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.cfg-head .muted {
+  flex: none;
+  font-size: 12px;
+}
+
+.flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.flag {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.flag.on {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.flag.off {
+  box-shadow: inset 0 0 0 1px var(--axis);
+  color: var(--ink-3);
+}
+
+.flag.unknown {
+  box-shadow: inset 0 0 0 1px var(--axis);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--wash) 0 3px,
+    transparent 3px 6px
+  );
+  color: var(--ink-3);
+}
+
+.show-all {
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .strict-grid,
+  .ts-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ts-figs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+  }
+
+  .ts-fig:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .ts-fig-value {
+    font-size: 26px;
+  }
+
+  .kt {
+    grid-template-columns: minmax(0, 1fr) 46px 56px 62px;
+    gap: 6px;
+  }
+
+  .ktable.three .kt {
+    grid-template-columns: minmax(0, 1fr) 54px 56px;
+  }
+}

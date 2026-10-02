@@ -55,7 +55,7 @@ const marks = (
     const entry = layout.bars[index];
     return {
       title: `${entry?.label ?? ""} ${view.unit}`,
-      rows: [{ label: "files", value: formatCount(entry?.files ?? 0) }],
+      rows: [{ label: view.noun, value: formatCount(entry?.files ?? 0) }],
       ...(entry?.median === true ? { text: "Holds the median file." } : {}),
     };
   });
@@ -110,7 +110,7 @@ export const histogramCard = (view: HistogramView): HTMLElement => {
   );
   responsiveChart(host, (width) => {
     const size = chartSizeFor(width, PLOT_HEIGHT);
-    const layout = layoutHistogram(view.bins, size);
+    const layout = layoutHistogram(view.bins, size, view.annotateAll);
     return chartSvg(size, `Bar chart: ${view.title}`, marks(view, layout));
   });
   figure.append(
@@ -121,7 +121,7 @@ export const histogramCard = (view: HistogramView): HTMLElement => {
         [
           { label: view.rangeHeading, cell: (bin) => bin.label },
           {
-            label: "Files",
+            label: `${view.noun.slice(0, 1).toUpperCase()}${view.noun.slice(1)}`,
             numeric: true,
             cell: (bin) => formatCount(bin.files),
           },

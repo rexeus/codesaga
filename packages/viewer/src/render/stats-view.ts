@@ -16,46 +16,14 @@ import type {
   StyleRow,
   TestRow,
 } from "../present/stats.js";
+import { card, weightedSegment } from "./card.js";
 import { h, mono } from "./dom.js";
 import { histogramCard } from "./histogram-card.js";
 import { icon } from "./icons.js";
 import { legend, legendItem, section } from "./section.js";
-import { bindTooltip } from "./tooltip.js";
 
 const DESCRIPTION =
   "Facts about the code at HEAD and the commits behind it. Nothing here is a score or a ranking.";
-
-const card = (
-  title: string,
-  subtitle: string,
-  ...content: readonly Node[]
-): HTMLElement =>
-  h(
-    "section",
-    "card chart",
-    h(
-      "div",
-      "chart-head",
-      h(
-        "div",
-        "",
-        h("h3", "chart-title", title),
-        h("p", "chart-sub", subtitle),
-      ),
-    ),
-    ...content,
-  );
-
-const weightedSegment = (
-  weight: number,
-  entity: string,
-  tip: string,
-): HTMLElement => {
-  const segment = h("i", entity);
-  segment.style.flex = `${Math.max(weight, 0.0001)} 1 0`;
-  bindTooltip(segment, { title: tip, rows: [] });
-  return segment;
-};
 
 const cells = (...values: readonly string[]): HTMLElement[] =>
   values.map((value) => h("span", "", value));

@@ -143,7 +143,7 @@ const link = (id: SectionId, label: string): NavItem => ({
   icon: SECTION_ICONS[id],
 });
 
-/** The sections the page has, in page order; Stories, Stats and Bots & Agents only exist when the report has something for them. */
+/** The sections the page has, in page order; Stories, Stats, TypeScript and Bots & Agents only exist when the report has something for them. */
 export const navItems = (report: Report): NavItem[] => [
   ...(report.stories.length === 0 ? [] : [link("stories", "Stories")]),
   link("activity", "Activity"),
@@ -152,6 +152,9 @@ export const navItems = (report: Report): NavItem[] => [
     : [link("pull-requests", "Pull requests")]),
   link("knowledge", "Knowledge"),
   ...(hasStats(report.stats) ? [link("stats", "Stats")] : []),
+  ...(report.deepDives?.typescript === undefined
+    ? []
+    : [link("typescript", "TypeScript")]),
   link("achievements", "Achievements"),
   link("team", "Team"),
   ...(botsCard(report) === null ? [] : [link("bots", "Bots & Agents")]),

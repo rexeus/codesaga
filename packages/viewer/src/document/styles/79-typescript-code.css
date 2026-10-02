@@ -1,0 +1,426 @@
+/* The Deep dive: TypeScript section, part two: functions, the import map and folded cards. */
+/* Functions and hotspots. */
+.fnlist {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.fn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(48px, 80px) 64px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.fn:first-child {
+  border-top: 0;
+}
+
+.fn-id {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.fn-id .mono {
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fn-name {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+.fn-place {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fn-place .mono {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+.fn .bar,
+.edge .bar,
+.cp .bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--grid);
+}
+
+.fn .bar i,
+.edge .bar i,
+.cp .bar i {
+  display: block;
+  position: relative;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.fn-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+
+.fn-fig b {
+  font-variant-numeric: tabular-nums;
+}
+
+.fn-fig span {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+/* The import map. */
+.edges {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.edge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 14px;
+  align-items: center;
+  padding: 9px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.edge:first-child {
+  border-top: 0;
+}
+
+.ends {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 7px;
+  min-width: 0;
+}
+
+.ends .to {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ends svg {
+  flex: none;
+  align-self: center;
+  color: var(--ink-3);
+}
+
+.tname {
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.tname.other {
+  color: var(--ink-3);
+  font-family: var(--sans);
+  font-size: 12.5px;
+}
+
+.edge-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.edge-fig b {
+  font-variant-numeric: tabular-nums;
+}
+
+.edge-fig .bar {
+  width: 100%;
+}
+
+.edge .bar i .types {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  border-radius: 0;
+  background: var(--card, var(--surface));
+  opacity: 0.55;
+}
+
+.cptable {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.cp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 48px 48px 62px;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.cp .num {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cp.head {
+  padding-top: 0;
+  border-top: 0;
+  color: var(--ink-3);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cp .inst {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.cp .inst .bar {
+  height: 4px;
+}
+
+.chips-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: baseline;
+}
+
+.chips-line .tname,
+.chips-line .mono {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 0;
+}
+
+.group .muted {
+  font-size: 12px;
+}
+
+.less {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 0;
+}
+
+.less .muted {
+  font-size: 12px;
+}
+
+.cycle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+/* A card that folds, and the grid the folded cards sit in. */
+.fold-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.fold[open] {
+  grid-column: 1 / -1;
+}
+
+.fold-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.fold-head::-webkit-details-marker {
+  display: none;
+}
+
+.fold-head:hover .fold-chevron {
+  background: var(--grid);
+}
+
+.fold-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fold-teaser {
+  margin-top: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.fold[open] .fold-teaser {
+  display: none;
+}
+
+.fold-chevron {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--wash);
+  color: var(--ink-2);
+  transition: transform 0.15s;
+}
+
+.fold[open] .fold-chevron {
+  transform: rotate(180deg);
+}
+
+.fold-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 20px 18px;
+}
+
+.idioms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 32px;
+}
+
+.idiom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.idiom .slabel {
+  margin-top: 0;
+}
+
+.idiom .legend strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.idiom .legend .muted {
+  font-variant-numeric: tabular-nums;
+}
+
+.tool-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 32px;
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.tool-group .slabel {
+  margin-top: 0;
+}
+
+.tool-group .pill {
+  gap: 6px;
+  height: auto;
+  min-height: 22px;
+  padding: 2px 9px;
+  white-space: normal;
+}
+
+.tool-group .pill .muted {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+@media (max-width: 900px) {
+  .idioms,
+  .tool-groups,
+  .fold-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .fn {
+    grid-template-columns: minmax(0, 1fr) 64px;
+    gap: 6px 12px;
+  }
+
+  .fn .bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .edge {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 10px;
+  }
+
+  .cp {
+    grid-template-columns: minmax(0, 1fr) 34px 40px 40px 52px;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+
+  .fold-head {
+    padding: 16px;
+  }
+
+  .fold-body {
+    padding: 0 16px 16px;
+  }
+}

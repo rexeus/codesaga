@@ -36,11 +36,13 @@ export type HistogramLayout = {
 /**
  * Lays the buckets out left to right in equal zones across a chart of `size`,
  * each a thin bar up from the baseline against one count scale. The median
- * bucket and the tallest are marked for annotation.
+ * bucket and the tallest are marked for annotation, or every non-empty one
+ * with `annotateAll`.
  */
 export const layoutHistogram = (
   bins: readonly HistogramBin[],
   size: Size,
+  annotateAll = false,
 ): HistogramLayout => {
   const plot = plotSize(size);
   const zoneWidth = plot.width / Math.max(1, bins.length);
@@ -59,7 +61,8 @@ export const layoutHistogram = (
       label,
       files,
       median: index === median,
-      annotated: files > 0 && (index === median || files === tallest),
+      annotated:
+        files > 0 && (annotateAll || index === median || files === tallest),
       x: zone.x + zone.width / 2,
     };
   });
