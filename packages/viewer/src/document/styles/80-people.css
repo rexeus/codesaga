@@ -1,0 +1,260 @@
+.people-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+}
+
+.filters button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.filters button b {
+  margin-left: 4px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.filters button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.filters button[aria-pressed="true"] b {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.ctable {
+  overflow-x: auto;
+}
+
+table.people {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.people th {
+  padding: 12px 16px 10px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+table.people th:first-child,
+table.people td:first-child {
+  padding-left: 22px;
+}
+
+table.people th:last-child,
+table.people td:last-child {
+  padding-right: 22px;
+  text-align: right;
+}
+
+table.people td {
+  padding: 12px 16px;
+  border-top: 1px solid var(--grid);
+  vertical-align: middle;
+}
+
+table.people tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.who .avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 12.5px;
+}
+
+.who .n {
+  font-weight: 620;
+}
+
+.who .s {
+  color: var(--ink-3);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.who .badges {
+  margin-top: 4px;
+  gap: 4px;
+}
+
+.who .pill {
+  height: 20px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+
+.weeks {
+  width: 190px;
+  height: 28px;
+}
+
+.weeks .b {
+  fill: var(--ink-3);
+  opacity: 0.55;
+}
+
+.weeks .b.recent {
+  fill: var(--accent);
+  opacity: 1;
+}
+
+.weeks .base {
+  stroke: var(--grid);
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.dot.dim {
+  opacity: 0.5;
+}
+
+.areachips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.areachips span {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.areachips span.more,
+.areachips span.muted {
+  padding-left: 2px;
+  border-color: transparent;
+  background: none;
+  color: var(--ink-3);
+}
+
+td.last {
+  color: var(--ink-2);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+td.last small {
+  display: block;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.bots {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 18px 22px;
+}
+
+.bots h3 {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.bots .sub {
+  margin-top: 2px;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.stack-bar {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin-bottom: 10px;
+}
+
+.stack-bar i {
+  display: block;
+  min-width: 4px;
+  border-radius: 4px;
+  background: var(--mark);
+}
+
+.tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+}
+
+.tool .ti {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+.tool .nm {
+  flex: 1;
+  font-weight: 600;
+}
+
+.tool .ct {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .bots {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatAge,
+  formatAgo,
   formatCompact,
   formatDateLong,
   formatMonth,
@@ -60,5 +61,18 @@ describe("dates in words", () => {
   it("writes a day with its month name and a month with its year", () => {
     expect(formatDateLong("2025-05-09T08:00:00.000Z")).toBe("9 May 2025");
     expect(formatMonth("2026-02")).toBe("Feb 2026");
+  });
+});
+
+describe("formatAgo", () => {
+  it.each([
+    ["2026-10-02T23:00:00.000Z", "today"],
+    ["2026-10-01T01:00:00.000Z", "yesterday"],
+    ["2026-09-26T10:00:00.000Z", "6 days ago"],
+    ["2026-08-14T10:00:00.000Z", "7 weeks ago"],
+    ["2026-06-30T10:00:00.000Z", "3 months ago"],
+    ["2024-06-30T10:00:00.000Z", "2 years ago"],
+  ])("reads %s as %s", (timestamp, expected) => {
+    expect(formatAgo(timestamp, "2026-10-02T09:00:00.000Z")).toBe(expected);
   });
 });

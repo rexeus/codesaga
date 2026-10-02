@@ -1,5 +1,6 @@
 import type { Report } from "@codesaga/engine";
 
+import { emphasize } from "./emphasis.js";
 import {
   formatAge,
   formatCount,
@@ -8,7 +9,7 @@ import {
   formatPercent,
 } from "./format.js";
 import type { IconName } from "./icons.js";
-import { initialsOf, slotOf } from "./people.js";
+import { initialsOf, personEntities } from "./people.js";
 import {
   hourTotals,
   isNightHour,
@@ -31,7 +32,7 @@ export type HighlightViz =
   | { readonly kind: "share"; readonly part: number; readonly rest: number }
   | {
       readonly kind: "people";
-      readonly people: readonly { initials: string; slot: number }[];
+      readonly people: readonly { initials: string; entity: string }[];
       readonly more: number;
     }
   | {
@@ -76,40 +77,15 @@ const addDays = (iso: string, days: number): string =>
 const noun = (count: number, one: string, many: string): string =>
   count === 1 ? one : many;
 
-const escapePattern = (text: string): string =>
-  text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
-
-const ISO_DATE = String.raw`\d{4}-\d{2}-\d{2}`;
-const QUOTED = '"[^"]+"';
-
-/**
- * The detail with its path, dates and quoted phrases set strong. The engine
- * words the sentence; this only picks out the facts in it.
- */
-const emphasize = ({ detail, path }: Highlight): Segment[] => {
-  const facts = path === undefined ? [] : [escapePattern(path)];
-  const pattern = new RegExp([...facts, ISO_DATE, QUOTED].join("|"), "gu");
-  const segments: Segment[] = [];
-  let from = 0;
-  for (const match of detail.matchAll(pattern)) {
-    segments.push(
-      { text: detail.slice(from, match.index), strong: false },
-      { text: match[0], strong: true },
-    );
-    from = match.index + match[0].length;
-  }
-  segments.push({ text: detail.slice(from), strong: false });
-  return segments.filter(({ text }) => text !== "");
-};
-
 const peopleViz = (
   { people = [] }: Highlight,
   total: number,
+  report: Report,
 ): HighlightViz => ({
   kind: "people",
   people: people.map(({ name, email }) => ({
     initials: initialsOf(name),
-    slot: slotOf(email),
+    entity: personEntities(report.contributors)(email),
   })),
   more: Math.max(0, total - people.length),
 });
@@ -133,21 +109,31 @@ const anniversary: Build = (highlight, { repository, generatedAt }) => {
   const days = Math.round(
     (dayNumber(generatedAt) - dayNumber(since)) / MS_PER_DAY,
   );
-  const count = valueOf(highlight);
-  const unit = highlight.unit ?? "years";
-  const marks =
-    unit === "years"
-      ? Array.from({ length: count }, (_, i) => DAYS_PER_YEAR * (i + 1))
-      : [count];
+  const value = valueOf(highlight);
+  const evidence = `first commit ${formatDate(since)} · ${formatCount(days)} days of history`;
+  if (highlight.unit === "days") {
+    return {
+      big: formatCount(value),
+      unit: "days old",
+      viz: {
+        kind: "timeline",
+        anniversaries: [Math.min(1, value / Math.max(1, days))],
+      },
+      evidence,
+    };
+  }
   const months = formatAge(since, generatedAt).split(" and ")[1];
   return {
-    big: `${formatCount(count)} ${noun(count, unit.slice(0, -1), unit)}`,
-    unit: unit === "years" && months !== undefined ? `+ ${months}` : "",
+    big: `${value} ${noun(value, "year", "years")}`,
+    unit: months === undefined ? "" : `+ ${months}`,
     viz: {
       kind: "timeline",
-      anniversaries: marks.map((day) => day / Math.max(1, days)),
+      anniversaries: Array.from(
+        { length: value },
+        (_, index) => (DAYS_PER_YEAR * (index + 1)) / Math.max(1, days),
+      ),
     },
-    evidence: `first commit ${formatDate(since)} · ${formatCount(days)} days of history`,
+    evidence,
   };
 };
 
@@ -197,16 +183,16 @@ const weekend: Build = (highlight, { punchcard }) => ({
   big: formatPercent(valueOf(highlight)),
   unit: "on weekends",
   viz: barsViz(weekdayTotals(punchcard), isWeekend),
-  evidence: "commits by weekday, Saturday and Sunday highlighted",
+  evidence: "commits by weekday, weekend highlighted",
 });
 
-const newcomers: Build = (highlight, { thresholds }) => {
+const newcomers: Build = (highlight, report) => {
   const people = valueOf(highlight);
   return {
     big: formatCount(people),
     unit: noun(people, "new face", "new faces"),
-    viz: peopleViz(highlight, people),
-    evidence: `first commit in the last ${thresholds.badges.welcomeDays} days`,
+    viz: peopleViz(highlight, people, report),
+    evidence: `first commit in the last ${report.thresholds.badges.welcomeDays} days`,
   };
 };
 
@@ -231,10 +217,10 @@ const biggestCleanup: Build = (highlight) => ({
   evidence: `commit of ${highlight.date ?? ""}, code files only`,
 });
 
-const truckFactorAlert: Build = (highlight) => ({
+const truckFactorAlert: Build = (highlight, report) => ({
   big: formatCount(valueOf(highlight)),
   unit: "person",
-  viz: peopleViz(highlight, 0),
+  viz: peopleViz(highlight, 0, report),
   evidence: "the knowledge of half the files rests on one person",
 });
 

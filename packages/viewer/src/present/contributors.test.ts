@@ -1,126 +1,130 @@
+import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
 import { sampleReport } from "../testing/reports.js";
-import {
-  areaLabel,
-  naturalDirection,
-  sortContributors,
-} from "./contributors.js";
-import { nextSort } from "./sort-state.js";
+import { filterOptions, personRows, rowsWithFilter } from "./contributors.js";
 
-const contributors = sampleReport().contributors;
-const firstNames = (rows: readonly { name: string }[]): string[] =>
-  rows.map(({ name }) => name.split(" ")[0] ?? "");
+const withPeople = (
+  people: readonly Partial<Report["contributors"][number]>[],
+): Report => {
+  const report = sampleReport();
+  const [template] = report.contributors;
+  if (template === undefined) {
+    throw new Error("the sample has contributors");
+  }
+  return {
+    ...report,
+    contributors: people.map((person, index) => ({
+      ...template,
+      email: `p${index}@x.dev`,
+      ...person,
+    })),
+  };
+};
 
-describe("sortContributors", () => {
-  it("sorts numbers, largest first when descending", () => {
-    const sorted = sortContributors(contributors, {
-      key: "activeDays",
-      direction: "desc",
-    });
-
-    expect(firstNames(sorted)).toEqual([
-      "Maya",
-      "Tomás",
-      "Priya",
-      "Jonas",
-      "Aiko",
-      "Lena",
-      "Sam",
-      "Dmitri",
+describe("the order of personRows", () => {
+  it("lists active people first, then new, then dormant, by days with a commit and name", () => {
+    const report = withPeople([
+      { name: "Zed", status: "dormant", activeDays: 900 },
+      { name: "Bea", status: "active", activeDays: 10 },
+      { name: "Abe", status: "active", activeDays: 10 },
+      { name: "Cal", status: "new", activeDays: 99 },
+      { name: "Dan", status: "active", activeDays: 50 },
     ]);
-  });
 
-  it("sorts dates by time, oldest first when ascending", () => {
-    const sorted = sortContributors(contributors, {
-      key: "firstCommitAt",
-      direction: "asc",
-    });
-
-    expect(firstNames(sorted)).toEqual([
-      "Maya",
-      "Tomás",
-      "Dmitri",
-      "Priya",
-      "Lena",
-      "Jonas",
-      "Aiko",
-      "Sam",
+    expect(personRows(report).map(({ name }) => name)).toEqual([
+      "Dan",
+      "Abe",
+      "Bea",
+      "Cal",
+      "Zed",
     ]);
-  });
-
-  it("sorts names without regard to case", () => {
-    const [base] = contributors;
-    if (base === undefined) {
-      throw new Error("the sample has contributors");
-    }
-    const rows = [
-      { ...base, name: "bob", email: "b@x" },
-      { ...base, name: "Alice", email: "a@x" },
-      { ...base, name: "carol", email: "c@x" },
-    ];
-
-    const sorted = sortContributors(rows, { key: "name", direction: "asc" });
-
-    expect(firstNames(sorted)).toEqual(["Alice", "bob", "carol"]);
   });
 });
 
-describe("sortContributors ties and status", () => {
-  it("puts active contributors first when descending and keeps the report order among equals", () => {
-    const sorted = sortContributors(contributors, {
-      key: "active",
-      direction: "desc",
-    });
+describe("personRows", () => {
+  it("writes the line under the name, the area chips and the last commit", () => {
+    const [row] = personRows(
+      withPeople([
+        {
+          name: "Maya Lindqvist",
+          commits: 1,
+          firstCommitAt: "2025-05-19T08:00:00.000Z",
+          lastCommitAt: "2026-08-14T08:00:00.000Z",
+          areas: [
+            { path: ".", commits: 5 },
+            { path: "src/github", commits: 3 },
+            { path: "docs", commits: 1 },
+          ],
+        },
+      ]),
+    );
 
-    expect(sorted.map(({ active }) => active)).toEqual([
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      false,
-      false,
+    expect(row).toMatchObject({
+      initials: "ML",
+      since: "since May 2025 · 1 commit",
+      areas: ["root", "src/github"],
+      moreAreas: 1,
+      lastAgo: "7 weeks ago",
+      lastDate: "14 Aug 2026",
+    });
+  });
+
+  it("gives the first seven people of the report their color", () => {
+    const rows = personRows(
+      withPeople([
+        { name: "A", status: "active" },
+        { name: "B", status: "dormant" },
+      ]),
+    );
+
+    expect(rows.map(({ entity }) => entity)).toEqual(["slot-1", "slot-2"]);
+  });
+});
+
+describe("the status filter", () => {
+  const rows = personRows(
+    withPeople([
+      { name: "A", status: "active", activeDays: 4 },
+      { name: "B", status: "new", activeDays: 3 },
+      { name: "C", status: "new", activeDays: 2 },
+      { name: "D", status: "dormant", activeDays: 1 },
+    ]),
+  );
+
+  it("counts the new people as active, like the key figure, and shows New and Dormant apart", () => {
+    expect(
+      filterOptions(rows).map(({ label, count }) => [label, count]),
+    ).toEqual([
+      ["All", 4],
+      ["Active", 3],
+      ["New", 2],
+      ["Dormant", 1],
     ]);
-    expect(firstNames(sorted).slice(0, 2)).toEqual(["Maya", "Tomás"]);
-    expect(firstNames(sorted).slice(6)).toEqual(["Lena", "Dmitri"]);
   });
 
-  it("leaves the order alone for a key that is not a column", () => {
-    const sorted = sortContributors(contributors, {
-      key: "unknown",
-      direction: "asc",
-    });
-
-    expect(sorted).toEqual(contributors);
-  });
-});
-
-describe("nextSort", () => {
-  it("starts another column in its natural direction", () => {
-    const from = { key: "commits", direction: "desc" } as const;
-
-    expect(nextSort(from, "name", naturalDirection("name"))).toEqual({
-      key: "name",
-      direction: "asc",
-    });
-    expect(nextSort(from, "added", naturalDirection("added"))).toEqual({
-      key: "added",
-      direction: "desc",
-    });
+  it("offers only the statuses somebody has", () => {
+    expect(
+      filterOptions(rows.filter(({ status }) => status !== "new")).map(
+        ({ label }) => label,
+      ),
+    ).toEqual(["All", "Active", "Dormant"]);
   });
 
-  it("flips the direction of the sorted column", () => {
-    const from = { key: "commits", direction: "desc" } as const;
-
-    expect(nextSort(from, "commits", "desc").direction).toBe("asc");
+  it("offers no filter for fewer than two people", () => {
+    expect(filterOptions(rows.slice(0, 1))).toEqual([]);
   });
-});
 
-describe("areaLabel", () => {
-  it("names the engine's dot the repository root and keeps other paths", () => {
-    expect(areaLabel(".")).toBe("repository root");
-    expect(areaLabel("packages/engine")).toBe("packages/engine");
+  it("lets through the people of a status, in list order", () => {
+    expect(rowsWithFilter(rows, "active").map(({ name }) => name)).toEqual([
+      "A",
+      "B",
+      "C",
+    ]);
+    expect(rowsWithFilter(rows, "new").map(({ name }) => name)).toEqual([
+      "B",
+      "C",
+    ]);
+    expect(rowsWithFilter(rows, "all")).toHaveLength(4);
   });
 });

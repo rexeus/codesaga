@@ -1,11 +1,11 @@
 import type { Report } from "@codesaga/engine";
 
 import { renderActivity } from "./activity-view.js";
+import { renderKnowledge } from "./areas-view.js";
 import { renderContributors } from "./contributors-view.js";
 import { h } from "./dom.js";
 import { renderHeader } from "./header.js";
 import { renderHighlights } from "./highlights-view.js";
-import { renderKnowledge } from "./knowledge-view.js";
 import { renderKeyFigures } from "./kpis-view.js";
 import { renderPullRequests } from "./pull-requests-view.js";
 

@@ -209,13 +209,13 @@
   font-size: 12.5px;
 }
 
-.solo {
+.solo-author {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.solo .avatar {
+.solo-author .avatar {
   width: 28px;
   height: 28px;
 }

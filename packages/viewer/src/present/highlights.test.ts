@@ -81,24 +81,21 @@ describe("the figures of a card", () => {
     ]);
   });
 
-  it("counts the days of a day milestone, not years, with a single marker on the timeline", () => {
+  it("counts the days of a day milestone instead of years", () => {
     const card = cardFor({
       kind: "anniversary",
       title: "Anniversary",
-      detail: "The first commit turns 500 days old on 2026-10-02.",
+      detail: "...",
       value: 500,
       unit: "days",
-      date: "2026-10-02",
+      date: "2025-02-23",
     });
 
-    // 10 Oct 2023 to 30 Sep 2026 is 1,086 days
-    expect(card).toMatchObject({
-      big: "500 days",
-      evidence: "first commit 2023-10-10 · 1,086 days of history",
+    expect(card).toMatchObject({ big: "500", unit: "days old" });
+    expect(card.viz).toEqual({
+      kind: "timeline",
+      anniversaries: [500 / 1086],
     });
-    expect(card.viz?.kind === "timeline" && card.viz.anniversaries).toEqual([
-      500 / 1086,
-    ]);
   });
 
   it("ends a streak on its last day and draws a dot per day up to 36", () => {

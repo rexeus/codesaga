@@ -97,8 +97,8 @@ const deltaFoot = (foot: Extract<Foot, { kind: "delta" }>): HTMLElement =>
 const personFoot = (foot: Extract<Foot, { kind: "person" }>): HTMLElement[] => [
   h(
     "div",
-    "solo",
-    h("span", `avatar slot-${foot.slot}`, foot.initials),
+    "solo-author",
+    h("span", `avatar ${foot.entity}`, foot.initials),
     h("span", "", foot.name),
   ),
   h("div", "cap", foot.detail),

@@ -7,7 +7,7 @@ import {
 } from "./format.js";
 import { languageShares } from "./languages.js";
 import type { LanguageShare } from "./languages.js";
-import { initialsOf, slotOf } from "./people.js";
+import { initialsOf, personEntities } from "./people.js";
 
 /** A short history drawn as a sparkline; the last `recent` values are emphasised. */
 export type Trend = {
@@ -28,7 +28,7 @@ export type Foot =
       readonly kind: "person";
       readonly name: string;
       readonly initials: string;
-      readonly slot: number;
+      readonly entity: string;
       readonly detail: string;
     }
   | { readonly kind: "languages"; readonly shares: readonly LanguageShare[] }
@@ -137,7 +137,7 @@ const soloFoot = ({ contributors, repository, generatedAt }: Report): Foot => {
     kind: "person",
     name: author.name,
     initials: initialsOf(author.name),
-    slot: slotOf(author.email),
+    entity: personEntities(contributors)(author.email),
     detail: `${formatCount(author.activeDays)} active days of ${formatCount(days)}`,
   };
 };

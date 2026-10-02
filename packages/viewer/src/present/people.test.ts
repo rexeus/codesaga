@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { initialsOf, slotOf } from "./people.js";
+import { initialsOf, personEntities } from "./people.js";
 
 describe("initialsOf", () => {
   it.each([
@@ -15,13 +15,26 @@ describe("initialsOf", () => {
   });
 });
 
-describe("slotOf", () => {
-  it("gives a person the same slot every time, within the seven categorical slots", () => {
-    const emails = ["a@x.dev", "b@x.dev", "c@x.dev", "d@x.dev", "e@x.dev"];
-    const slots = emails.map((email) => slotOf(email));
+describe("personEntities", () => {
+  const people = Array.from({ length: 9 }, (_, index) => ({
+    email: `p${index}@x.dev`,
+  }));
+  const entityOf = personEntities(people);
 
-    expect(slots).toEqual(emails.map((email) => slotOf(email)));
-    expect(slots.every((slot) => slot >= 1 && slot <= 7)).toBe(true);
-    expect(new Set(slots).size).toBeGreaterThan(1);
+  it("gives the first seven contributors a slot each, in the order of the report", () => {
+    expect(people.slice(0, 7).map(({ email }) => entityOf(email))).toEqual([
+      "slot-1",
+      "slot-2",
+      "slot-3",
+      "slot-4",
+      "slot-5",
+      "slot-6",
+      "slot-7",
+    ]);
+  });
+
+  it("leaves everyone else, known or not, with the neutral color", () => {
+    expect(entityOf("p8@x.dev")).toBe("slot-other");
+    expect(entityOf("stranger@x.dev")).toBe("slot-other");
   });
 });

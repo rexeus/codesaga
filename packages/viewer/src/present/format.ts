@@ -118,3 +118,38 @@ export const formatAge = (from: string, to: string): string => {
     ? plural(Math.round(days / DAYS_PER_WEEK), "week")
     : plural(days, "day");
 };
+
+const DAYS_PER_MONTH = 30.4;
+const DAYS_PER_YEAR = 365;
+const RECENT_DAYS = 14;
+const WEEKS_UNTIL_DAYS = 60;
+const MONTHS_UNTIL_DAYS = 700;
+
+/**
+ * How long before `now` a timestamp lies, in the coarsest unit that still
+ * tells: `today`, `yesterday`, `6 days ago`, `7 weeks ago`, `3 months ago`,
+ * `2 years ago`.
+ */
+export const formatAgo = (timestamp: string, now: string): string => {
+  const days = Math.round(
+    (Date.parse(`${now.slice(0, 10)}T00:00:00Z`) -
+      Date.parse(`${timestamp.slice(0, 10)}T00:00:00Z`)) /
+      MS_PER_DAY,
+  );
+  if (days < 1) {
+    return "today";
+  }
+  if (days === 1) {
+    return "yesterday";
+  }
+  if (days < RECENT_DAYS) {
+    return `${days} days ago`;
+  }
+  if (days < WEEKS_UNTIL_DAYS) {
+    return `${Math.round(days / DAYS_PER_WEEK)} weeks ago`;
+  }
+  if (days < MONTHS_UNTIL_DAYS) {
+    return `${Math.round(days / DAYS_PER_MONTH)} months ago`;
+  }
+  return `${Math.round(days / DAYS_PER_YEAR)} years ago`;
+};

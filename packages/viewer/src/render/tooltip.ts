@@ -10,6 +10,8 @@ type TooltipRow = {
 export type TooltipContent = {
   readonly title: string;
   readonly rows: readonly TooltipRow[];
+  /** A sentence under the rows, such as the rule behind a badge. */
+  readonly text?: string;
 };
 
 const POINTER_OFFSET = 14;
@@ -38,13 +40,14 @@ const place = (tooltip: HTMLElement, x: number, y: number): void => {
 
 /** Shows the page's tooltip near a viewport point. Every string is set as text. */
 export const showTooltip = (
-  { title, rows }: TooltipContent,
+  { title, rows, text }: TooltipContent,
   event: { readonly clientX: number; readonly clientY: number },
 ): void => {
   const tooltip = byId("tooltip", HTMLElement);
   tooltip.replaceChildren(
     h("div", "tooltip-title", title),
     ...rows.map((entry) => row(entry)),
+    ...(text === undefined ? [] : [h("div", "tooltip-text", text)]),
   );
   tooltip.hidden = false;
   place(tooltip, event.clientX, event.clientY);
@@ -54,7 +57,10 @@ export const hideTooltip = (): void => {
   byId("tooltip", HTMLElement).hidden = true;
 };
 
-/** Makes `target` show `content` while the pointer is over it. */
+/**
+ * Makes `target` show `content` while the pointer is over it, and, for a
+ * focusable target, while it has the keyboard focus.
+ */
 export const bindTooltip = (
   target: SVGElement | HTMLElement,
   content: TooltipContent,
@@ -65,4 +71,12 @@ export const bindTooltip = (
     }
   });
   target.addEventListener("pointerleave", hideTooltip);
+  target.addEventListener("focus", () => {
+    const box = target.getBoundingClientRect();
+    showTooltip(content, {
+      clientX: box.left + box.width / 2,
+      clientY: box.top + box.height / 2,
+    });
+  });
+  target.addEventListener("blur", hideTooltip);
 };

@@ -60,8 +60,8 @@ const peopleStack = (
   h(
     "div",
     "avatars",
-    ...viz.people.map(({ initials, slot }) =>
-      h("span", `avatar slot-${slot}`, initials),
+    ...viz.people.map(({ initials, entity }) =>
+      h("span", `avatar ${entity}`, initials),
     ),
     ...(viz.more > 0 ? [h("span", "more", `+${viz.more}`)] : []),
   );
