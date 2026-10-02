@@ -34,6 +34,7 @@ const run = (
     commits,
     universe: files(...paths),
     scope,
+    packageRoots: [],
     headTime: at("2026-02-01T00:00:00Z"),
     now,
   });
@@ -248,6 +249,12 @@ describe("knowledge chain rule and scope", () => {
       withoutActiveExpert: 0,
       truckFactor: { value: 0, people: [] },
       directories: [],
+      areas: {
+        depth: 1,
+        recommendedDepth: 1,
+        reason: "level 1: 0 areas for 0 contributors",
+        levels: [{ depth: 1, totalAreas: 0, areas: [] }],
+      },
     });
   });
 });

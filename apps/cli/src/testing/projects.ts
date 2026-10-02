@@ -40,6 +40,24 @@ export const makeTeamProject = Effect.map(makeGitRepository, (repo) => {
   return repo;
 });
 
+/**
+ * Ada, 30 days ago, adds three files in each of `a/x`, `b/y` and `c/z`: the
+ * knowledge areas have two levels, the top-level directories and the
+ * directories below them, and level 1 is the recommended one.
+ */
+export const makeAreasProject = Effect.map(makeGitRepository, (repo) => {
+  repo.commit(
+    30,
+    Object.fromEntries(
+      ["a/x", "b/y", "c/z"].flatMap((directory) =>
+        [1, 2, 3].map((index) => [`${directory}/f${index}.ts`, "x\n"]),
+      ),
+    ),
+    { author: ada },
+  );
+  return repo;
+});
+
 /** The team project with an `origin` on github.com, as `--github` needs. */
 export const makeGithubProject = Effect.map(makeTeamProject, (repo) => {
   repo.addOrigin("git@github.com:acme/web.git");

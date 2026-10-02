@@ -24,6 +24,27 @@ describe("limitReport", () => {
     expect(limited.totals.directories).toBe(8);
   });
 
+  it("cuts the areas of every level to the limit and keeps each level's total", () => {
+    const report = sampleReport();
+
+    const limited = limitReport(report, 3);
+
+    expect(
+      limited.knowledge.areas.levels.map(({ totalAreas, areas }) => [
+        totalAreas,
+        areas.length,
+      ]),
+    ).toStrictEqual([
+      [11, 3],
+      [27, 3],
+      [41, 3],
+    ]);
+    expect(limited.knowledge.areas.levels[0]?.areas).toStrictEqual(
+      report.knowledge.areas.levels[0]?.areas.slice(0, 3),
+    );
+    expect(limited.knowledge.areas.depth).toBe(report.knowledge.areas.depth);
+  });
+
   it("keeps the totals and the time series of the untruncated report", () => {
     const report = sampleReport();
 

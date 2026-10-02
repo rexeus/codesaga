@@ -39,6 +39,7 @@ export const inspectCommand = Command.make(
       include: [],
       exclude: [],
       limit: Option.none(),
+      depth: Option.none(),
     });
     const result = yield* inspect({
       cwd,

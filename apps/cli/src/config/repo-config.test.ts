@@ -129,3 +129,17 @@ describe("decodeRepoConfig gates", () => {
     ]);
   });
 });
+
+describe("decodeRepoConfig depth", () => {
+  it("accepts a whole number from 1", () => {
+    expect(decodeRepoConfig('{"depth":2}')).toStrictEqual(
+      Result.succeed({ depth: 2 }),
+    );
+  });
+
+  it("names a depth below 1", () => {
+    expect(problemsOf('{"depth":0}')).toStrictEqual([
+      "depth: Expected a value greater than or equal to 1",
+    ]);
+  });
+});

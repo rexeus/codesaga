@@ -1,4 +1,4 @@
-// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest directories.
+// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest areas at the chosen depth.
 // Every name and path that came from git passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -13,14 +13,14 @@ import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 import type { Column } from "./table.js";
 
-const TOP_DIRECTORIES = 5;
+const TOP_AREAS = 5;
 const MAX_PATH_WIDTH = 24;
 const MAX_TRUCK_FACTOR_NAMES = 3;
 
 type Knowledge = Report["knowledge"];
-type Directory = Knowledge["directories"][number];
-type Expert = Directory["experts"][number];
-type LineOwners = NonNullable<Directory["lineOwners"]>;
+type Area = Knowledge["areas"]["levels"][number]["areas"][number];
+type Expert = Area["experts"][number];
+type LineOwners = NonNullable<Area["lineOwners"]>;
 
 const LINE_OWNER_COLUMN: Column = {
   header: "leading line owner",
@@ -58,11 +58,11 @@ export const badgesOf = ({
 }): string =>
   [...(orphaned ? ["orphaned"] : []), ...(island ? ["island"] : [])].join(", ");
 
-const leadingExpert = (directory: Directory): string => {
-  const [top]: ReadonlyArray<Expert> = directory.experts;
+const leadingExpert = (area: Area): string => {
+  const [top]: ReadonlyArray<Expert> = area.experts;
   return top === undefined
     ? "no expert"
-    : `${nameOf(top)} ${share(top.files, directory.files)}${inactiveMark(top)}`;
+    : `${nameOf(top)} ${share(top.files, area.files)}${inactiveMark(top)}`;
 };
 
 /** An owner's name, marked when the account is an agent or a bot. */
@@ -79,34 +79,57 @@ const leadingLineOwner = (lineOwners: LineOwners | undefined): string => {
     : `${ownerLabel(top)} ${share(top.lines, lineOwners.lines)}`;
 };
 
-const directoryLines = (
-  { directories }: Knowledge,
+const OTHER_FILES = " (other)";
+
+/** The area's path, escaped and cut to the column; the small areas of a directory are marked as its other files. */
+const areaLabel = ({ path, kind }: Area): string =>
+  kind === "rest"
+    ? `${fitEscaped(path, MAX_PATH_WIDTH - OTHER_FILES.length)}${OTHER_FILES}`
+    : fitEscaped(path, MAX_PATH_WIDTH);
+
+const areaLines = (
+  { areas }: Knowledge,
   style: Style,
 ): ReadonlyArray<string> => {
-  const top = directories.slice(0, TOP_DIRECTORIES);
-  const blamed = top.some((directory) => directory.lineOwners !== undefined);
+  const level = areas.levels.find(({ depth }) => depth === areas.depth);
+  const top = (level?.areas ?? []).slice(0, TOP_AREAS);
+  if (top.length === 0) {
+    return [];
+  }
+  const blamed = top.some((area) => area.lineOwners !== undefined);
   const columns: ReadonlyArray<Column> = [
     { header: "files", align: "right" },
     { header: "flags", align: "left" },
     { header: "leading expert", align: "left" },
     ...(blamed ? [LINE_OWNER_COLUMN] : []),
   ];
-  return labelledTable(
-    "Knowledge risks",
-    top.map((directory) => fitEscaped(directory.path, MAX_PATH_WIDTH)),
-    renderTable(
-      columns,
-      top.map((directory) =>
-        [
-          plain(String(directory.files)),
-          plain(badgesOf(directory)),
-          plain(leadingExpert(directory)),
-        ].concat(blamed ? [plain(leadingLineOwner(directory.lineOwners))] : []),
+  return [
+    ...labelledTable(
+      "Knowledge areas",
+      top.map((area) => areaLabel(area)),
+      renderTable(
+        columns,
+        top.map((area) =>
+          [
+            plain(String(area.files)),
+            plain(badgesOf(area)),
+            plain(leadingExpert(area)),
+          ].concat(blamed ? [plain(leadingLineOwner(area.lineOwners))] : []),
+        ),
+        style,
       ),
       style,
     ),
-    style,
-  );
+    ...section(
+      "",
+      [
+        style.dim(
+          `Areas at level ${areas.depth} of ${areas.levels.length} (recommended: ${areas.recommendedDepth})`,
+        ),
+      ],
+      style,
+    ),
+  ];
 };
 
 /**
@@ -124,7 +147,7 @@ const soleContributorLine = (report: Report): string | null => {
 };
 
 /**
- * The knowledge block: the truck factor, and the five riskiest directories when there are any.
+ * The knowledge block: the truck factor, and the five riskiest areas of the chosen level when there are any.
  * A single-contributor repository gets one line instead.
  */
 export const knowledgeLines = (
@@ -137,8 +160,6 @@ export const knowledgeLines = (
   }
   return [
     ...section("Truck factor", [truckFactorLine(report.knowledge)], style),
-    ...(report.knowledge.directories.length === 0
-      ? []
-      : directoryLines(report.knowledge, style)),
+    ...areaLines(report.knowledge, style),
   ];
 };

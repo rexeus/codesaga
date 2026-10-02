@@ -7,7 +7,7 @@ import { Effect, Schema } from "effect";
 
 import type { GitRepository } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
-import { makeTeamProject } from "../testing/projects.js";
+import { makeAreasProject, makeTeamProject } from "../testing/projects.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -84,6 +84,30 @@ describe("codesaga defaults from a .codesaga.json", () => {
       expect(report.contributors).toHaveLength(1);
       expect(report.totals.contributors).toBe(2);
     }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga area depth from a .codesaga.json", () => {
+  it.live(
+    "starts at the recommended level, the config's depth, or the --depth flag, in that order of precedence",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeAreasProject;
+        const startLevel = (...flags: ReadonlyArray<string>) =>
+          Effect.map(analyzeJson(repo, ...flags), (report) => ({
+            depth: report.knowledge.areas.depth,
+            levels: report.knowledge.areas.levels.length,
+          }));
+
+        const recommended = yield* startLevel();
+        writeConfig(repo, { depth: 2 });
+        const fromConfig = yield* startLevel();
+        const fromFlag = yield* startLevel("--depth", "1");
+
+        expect(recommended).toStrictEqual({ depth: 1, levels: 2 });
+        expect(fromConfig).toStrictEqual({ depth: 2, levels: 2 });
+        expect(fromFlag).toStrictEqual({ depth: 1, levels: 2 });
+      }).pipe(Effect.scoped),
   );
 });
 

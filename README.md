@@ -88,7 +88,8 @@ Each argument — a file, a directory, or a glob — gives one entry aggregated 
 | `--github`                            | off              | Also reads pull requests and reviews from GitHub. See _Pull requests and reviews from GitHub_. Only this flag turns it on; `.codesaga.json` cannot.                                                          |
 | `--include <glob>`                    | language list    | Replaces the built-in list of source-code extensions. Repeatable.                                                                                                                                            |
 | `--exclude <glob>`                    | —                | Removes matching files. Repeatable.                                                                                                                                                                          |
-| `--limit <n>`                         | `25`             | Contributors and knowledge directories in `--json`; `0` for all. `totals` always tells the full size.                                                                                                        |
+| `--depth <n>`                         | recommended      | The knowledge area level to start at, from 1 (packages). A level beyond the deepest one means the deepest. See _How the numbers work_.                                                                       |
+| `--limit <n>`                         | `25`             | Contributors, knowledge directories and areas (per level) in `--json`; `0` for all. `totals` and each level's `totalAreas` always tell the full size.                                                        |
 | `--no-cache`                          | cache on         | Reads `git log` instead of the history cache, and leaves the cache alone. See _How the numbers work_.                                                                                                        |
 | `--blame`                             | off              | Also reports who wrote the lines that exist today, per directory, from `git blame`. Slower, see _Line ownership_. `--no-blame` overrides a config that turns it on.                                          |
 | `--json`                              | off              | One JSON document on stdout; everything else goes to stderr.                                                                                                                                                 |
@@ -168,6 +169,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect`
   "exclude": ["**/*.generated.ts"],
   "since": "12m",
   "limit": 50,
+  "depth": 2,
   "gates": { "minTruckFactor": 2, "maxOrphanedDirectories": 0 },
   "signatures": {
     "bots": [{ "name": "Acme CI", "emails": ["ci@acme.example"] }],
@@ -188,6 +190,7 @@ A `.codesaga.json` in the repository root sets defaults for `analyze`, `inspect`
 | `exclude`    | `--exclude` | Globs relative to the repository root.                                                                                                                   |
 | `since`      | `--since`   | Same syntax: `<n>d`, `<n>w`, `<n>m`, `<n>y`, or `YYYY-MM-DD`.                                                                                            |
 | `limit`      | `--limit`   | A whole number, `0` for all. Only `analyze --json` uses it.                                                                                              |
+| `depth`      | `--depth`   | A whole number from 1: the knowledge area level `analyze` starts at.                                                                                     |
 | `blame`      | `--blame`   | `true` turns line ownership on for `analyze` and `inspect`; `--no-blame` turns it off again.                                                             |
 | `gates`      | gate flags  | Limits for `check`, see _Gates in CI_. A flag overrides the config's limit for the same gate; other gates stay.                                          |
 | `signatures` | — (no flag) | In-house bots and agents. Each has a `name`, reported as the tool, and `emails` and `names` that identify it: exact matches, ignoring case, no patterns. |
@@ -274,7 +277,8 @@ The terminal view gains a "Pull requests" block and the dashboard a "Pull reques
   **Shallow clones.** Line ownership is unreliable in a shallow clone: blame credits every line whose history was cut off to the author of the boundary commit. `analyze` and `inspect` warn on stderr (`repository.shallow` in `analyze --json`, `shallow` in `inspect --json`); run `git fetch --unshallow` before trusting `--blame` there.
 
 - **Truck factor** — Avelino et al.'s algorithm (ICPC 2016): remove the person who is expert on the most files, again and again, until more than half of the files have no expert. The number removed is the truck factor; the report names them.
-- **Directories** — every directory with at least 3 files gets its own truck factor. A **knowledge island** has one person as the only expert on at least 80 % of its files. **Orphaned knowledge** means more than half of its files have no active expert. Directories are listed by risk: orphaned first, then islands, then by truck factor.
+- **Areas** — the repository cut into non-overlapping parts, at several levels, so that every file belongs to exactly one area per level. Level 1 is the packages, found by their manifests (`package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `setup.py`, `pom.xml`, `build.gradle(.kts)`, `*.csproj`, `composer.json`, `Gemfile`, `mix.exs`, `deno.json(c)`), or the top-level directories without any; each further level is one directory step deeper, up to level 6 and never repeating a level. A repository's own manifest makes it a package only when no package lies below it. An area with more than 40 % of the files and subdirectories is split up to two directories further within its level, so no single card holds the repository. Areas with fewer than 3 files are grouped per parent as one `rest` area ("other files"), listed last. Each area has the truck factor, islands and orphaned flags of a directory. The report starts at the level that suits the team: about two areas per contributor active in 90 days (every contributor if none is), between 4 and 25, taking the coarser level on a tie; `knowledge.areas.reason` says why. `--depth` and `depth` choose another start; every level is in the JSON either way.
+- **Directories** (deprecated, removed with `schemaVersion` 2: read the areas) — every directory with at least 3 files gets its own truck factor. A **knowledge island** has one person as the only expert on at least 80 % of its files. **Orphaned knowledge** means more than half of its files have no active expert. Directories are listed by risk: orphaned first, then islands, then by truck factor.
 
 The report states every threshold under `thresholds`, and the JSON contract is versioned by `schemaVersion`: new fields may appear, but a field is never renamed or removed without a new version.
 

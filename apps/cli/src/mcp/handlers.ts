@@ -41,6 +41,7 @@ type Params = {
   readonly include?: ReadonlyArray<string> | undefined;
   readonly exclude?: ReadonlyArray<string> | undefined;
   readonly limit?: number | undefined;
+  readonly depth?: number | undefined;
   readonly blame?: boolean | undefined;
   readonly github?: boolean | undefined;
 };
@@ -61,6 +62,7 @@ const resolveAnalysis = (params: Params) =>
       include: params.include ?? [],
       exclude: params.exclude ?? [],
       limit: Option.fromNullishOr(params.limit),
+      depth: Option.fromNullishOr(params.depth),
       blame: Option.fromNullishOr(params.blame),
     });
     return { target, settings };
@@ -111,6 +113,7 @@ const inspectPatterns = (params: {
       include: [],
       exclude: [],
       limit: Option.none(),
+      depth: Option.none(),
       blame: Option.fromNullishOr(params.blame),
     });
     const result = yield* inspect({
@@ -127,7 +130,7 @@ const inspectPatterns = (params: {
   });
 
 const checkGates = (
-  params: Omit<Params, "compare" | "limit" | "blame" | "github"> & {
+  params: Omit<Params, "compare" | "limit" | "depth" | "blame" | "github"> & {
     readonly minTruckFactor?: number | undefined;
     readonly maxOrphanedDirectories?: number | undefined;
     readonly maxIslandDirectories?: number | undefined;

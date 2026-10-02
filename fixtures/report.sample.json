@@ -28,6 +28,8 @@
     "areas": {
       "minFiles": 3,
       "maxDepth": 6,
+      "giantShare": 0.4,
+      "giantSplitSteps": 2,
       "recommendationActiveDays": 90,
       "areasPerContributor": 2,
       "minTargetAreas": 4,
@@ -2219,6 +2221,7 @@
       "levels": [
         {
           "depth": 1,
+          "totalAreas": 11,
           "areas": [
             {
               "path": "docs",
@@ -2267,7 +2270,34 @@
                   "label": "Single expert",
                   "evidence": "Maya Lindqvist is the only active expert."
                 }
-              ]
+              ],
+              "lineOwners": {
+                "skippedFiles": 0,
+                "lines": 3420,
+                "owners": [
+                  {
+                    "name": "Lena Fischer",
+                    "email": "lena.fischer@aurora.example",
+                    "lines": 2950,
+                    "share": 0.8626,
+                    "kind": "human"
+                  },
+                  {
+                    "name": "Maya Lindqvist",
+                    "email": "maya.lindqvist@aurora.example",
+                    "lines": 380,
+                    "share": 0.1111,
+                    "kind": "human"
+                  },
+                  {
+                    "name": "Claude Code",
+                    "email": "noreply@anthropic.com",
+                    "lines": 90,
+                    "share": 0.0263,
+                    "kind": "agent"
+                  }
+                ]
+              }
             },
             {
               "path": "packages/db",
@@ -2319,7 +2349,34 @@
                   "label": "Handover",
                   "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
                 }
-              ]
+              ],
+              "lineOwners": {
+                "skippedFiles": 0,
+                "lines": 6180,
+                "owners": [
+                  {
+                    "name": "Dmitri Volkov",
+                    "email": "dmitri.volkov@aurora.example",
+                    "lines": 4120,
+                    "share": 0.6667,
+                    "kind": "human"
+                  },
+                  {
+                    "name": "Maya Lindqvist",
+                    "email": "maya.lindqvist@aurora.example",
+                    "lines": 1500,
+                    "share": 0.2427,
+                    "kind": "human"
+                  },
+                  {
+                    "name": "dependabot[bot]",
+                    "email": "49699333+dependabot[bot]@users.noreply.github.com",
+                    "lines": 560,
+                    "share": 0.0906,
+                    "kind": "bot"
+                  }
+                ]
+              }
             },
             {
               "path": "packages/auth",
@@ -2686,6 +2743,7 @@
         },
         {
           "depth": 2,
+          "totalAreas": 27,
           "areas": [
             {
               "path": "packages/db/migrations",
@@ -3614,6 +3672,7 @@
         },
         {
           "depth": 3,
+          "totalAreas": 41,
           "areas": [
             {
               "path": "packages/db/migrations",

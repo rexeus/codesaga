@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { samplePullRequests } from "../../testing/sample-pull-requests.js";
-import { sampleReport } from "../../testing/sample-report.js";
+import { mapAreas, sampleReport } from "../../testing/sample-report.js";
 import { renderAnalysis } from "./analysis-view.js";
 import { makeStyle } from "./style.js";
 
@@ -28,12 +28,13 @@ describe("renderAnalysis", () => {
       "  Jonas Weber                  205          175  3 months ago",
       "  Aiko Tanaka                  135          120  4 months ago",
       "Truck factor               2 · Maya Lindqvist, Tomás Herrera",
-      "Knowledge risks            files  flags             leading expert                leading line owner",
+      "Knowledge areas            files  flags             leading expert                leading line owner",
       "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Lena Fischer 86%",
       "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  Dmitri Volkov 67%",
       "  packages/auth               19  island            Jonas Weber 95%",
       "  apps/admin                  58                    Aiko Tanaka 72%",
       "  infra                       27                    Tomás Herrera 78%",
+      "                           Areas at level 1 of 3 (recommended: 1)",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
@@ -184,7 +185,9 @@ describe("renderAnalysis edge cases", () => {
 
 describe("renderAnalysis escaping", () => {
   it("escapes control characters in names that came from git", () => {
-    const report = sampleReport();
+    const report = mapAreas(sampleReport(), (areas) =>
+      areas.map((area) => ({ ...area, path: "dir\u001B[31m" })),
+    );
     const hostile = {
       ...report,
       repository: {
@@ -196,13 +199,6 @@ describe("renderAnalysis escaping", () => {
         ...person,
         name: "\u001B[2Jevil",
       })),
-      knowledge: {
-        ...report.knowledge,
-        directories: report.knowledge.directories.map((directory) => ({
-          ...directory,
-          path: "dir\u001B[31m",
-        })),
-      },
       automation: {
         ...report.automation,
         tools: [

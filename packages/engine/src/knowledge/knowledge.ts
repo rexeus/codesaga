@@ -2,19 +2,30 @@
 // Composes the model and the set and directory descriptions over the full history of the scope.
 // One pass over the commits, then one per reported directory.
 
+import { Array as Arr } from "effect";
+
 import { lineOwnersField } from "../blame/line-owners.js";
+import { isActiveWithin } from "../contributors/activeness.js";
+import { countContributors } from "../contributors/count-contributors.js";
 import type { Report } from "../report/report.js";
-import { AREA_MIN_FILES, MAX_AREA_DEPTH } from "./areas.js";
+import {
+  AREA_MIN_FILES,
+  GIANT_AREA_SHARE,
+  GIANT_SPLIT_STEPS,
+  MAX_AREA_DEPTH,
+} from "./area-partition.js";
+import { areaLevels } from "./areas.js";
 import { MIN_DIRECTORY_FILES, directoryKnowledge } from "./directories.js";
 import { EXPERT_RATIO } from "./doe.js";
 import { ISLAND_SHARE, ORPHANED_SHARE, describeFileSet } from "./file-set.js";
 import { knowledgeModel } from "./model.js";
-import type { KnowledgeInput } from "./model.js";
+import type { KnowledgeInput, KnowledgeModel } from "./model.js";
 import {
   AREAS_PER_CONTRIBUTOR,
   MAX_TARGET_AREAS,
   MIN_TARGET_AREAS,
   RECOMMENDATION_ACTIVE_DAYS,
+  recommendDepth,
 } from "./recommended-depth.js";
 
 /** The knowledge constants, for the report's `thresholds`. */
@@ -29,10 +40,61 @@ export const KNOWLEDGE_THRESHOLDS = {
 export const AREA_THRESHOLDS = {
   minFiles: AREA_MIN_FILES,
   maxDepth: MAX_AREA_DEPTH,
+  giantShare: GIANT_AREA_SHARE,
+  giantSplitSteps: GIANT_SPLIT_STEPS,
   recommendationActiveDays: RECOMMENDATION_ACTIVE_DAYS,
   areasPerContributor: AREAS_PER_CONTRIBUTOR,
   minTargetAreas: MIN_TARGET_AREAS,
   maxTargetAreas: MAX_TARGET_AREAS,
+};
+
+type KnowledgeFacts = KnowledgeInput & {
+  /** Repository-relative scope; "." for the whole repository. */
+  readonly scope: string;
+  /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
+  readonly packageRoots: ReadonlyArray<string>;
+  /** The level to start at, from 1; a level beyond the deepest one means the deepest. The recommended level when absent. */
+  readonly depth?: number | undefined;
+};
+
+const areasSection = (
+  facts: KnowledgeFacts,
+  model: KnowledgeModel,
+): Report["knowledge"]["areas"] => {
+  const levels = areaLevels({
+    paths: facts.universe.map(({ path }) => path),
+    packageRoots: facts.packageRoots,
+    scope: facts.scope,
+    model,
+  });
+  const { depth: recommendedDepth, reason } = recommendDepth({
+    levels: levels.map(({ depth, areas }) => ({
+      depth,
+      viableAreas: areas.filter(({ kind }) => kind !== "rest").length,
+    })),
+    activeContributors: countContributors(
+      facts.commits.filter(({ time }) =>
+        isActiveWithin(time, facts.now, RECOMMENDATION_ACTIVE_DAYS),
+      ),
+    ),
+    historyContributors: countContributors(facts.commits),
+  });
+  return {
+    depth: Math.min(
+      Math.max(facts.depth ?? recommendedDepth, 1),
+      levels.length,
+    ),
+    recommendedDepth,
+    reason,
+    levels: Arr.map(levels, ({ depth, totalAreas, areas }) => ({
+      depth,
+      totalAreas,
+      areas: areas.map(({ paths: _paths, ...area }) => ({
+        ...area,
+        badges: [],
+      })),
+    })),
+  };
 };
 
 /**
@@ -40,14 +102,12 @@ export const AREA_THRESHOLDS = {
  *
  * `commits` are the classified commits of the scope over the full history,
  * newest first, independent of the activity window; `universe` is the scope's
- * files. Only humans are experts. Returns every directory; truncating for
- * output belongs to the caller.
+ * files. Only humans are experts. Returns every directory and every area of
+ * every level; truncating for output belongs to the caller.
  */
-export const knowledge = (
-  input: KnowledgeInput & { readonly scope: string },
-): Report["knowledge"] => {
-  const model = knowledgeModel(input);
-  const paths = input.universe.map(({ path }) => path);
+export const knowledge = (facts: KnowledgeFacts): Report["knowledge"] => {
+  const model = knowledgeModel(facts);
+  const paths = facts.universe.map(({ path }) => path);
   const repository = describeFileSet(paths, model);
   return {
     files: repository.files,
@@ -57,7 +117,8 @@ export const knowledge = (
       value: repository.truckFactor.length,
       people: repository.truckFactor,
     },
-    directories: directoryKnowledge(paths, input.scope, model),
+    directories: directoryKnowledge(paths, facts.scope, model),
+    areas: areasSection(facts, model),
     ...lineOwnersField(repository.lineOwners),
   };
 };

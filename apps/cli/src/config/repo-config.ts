@@ -28,6 +28,7 @@ const RepoConfig = Schema.Struct({
   exclude: Schema.optionalKey(Schema.Array(Schema.String)),
   since: Schema.optionalKey(Schema.String),
   limit: Schema.optionalKey(Schema.Natural),
+  depth: Schema.optionalKey(Schema.Int.check(Schema.isGreaterThanOrEqualTo(1))),
   blame: Schema.optionalKey(Schema.Boolean),
   signatures: Schema.optionalKey(
     Schema.Struct({

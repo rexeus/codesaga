@@ -79,9 +79,19 @@ export const analyzeCommand = Command.make(
       ),
       Flag.withDefault(true),
     ),
+    depth: Flag.Int("depth").pipe(
+      Flag.withDescription(
+        "Knowledge area level to start at, from 1 (packages) to deeper directories; a level beyond the deepest one means the deepest (default: the level recommended for the team)",
+      ),
+      Flag.filter(
+        (depth) => depth >= 1,
+        (depth) => `--depth must be 1 or greater, got ${depth}`,
+      ),
+      Flag.optional,
+    ),
     limit: Flag.Int("limit").pipe(
       Flag.withDescription(
-        `Contributors and knowledge directories to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
+        `Contributors and knowledge directories and areas (per level) to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
       ),
       Flag.filter(
         (limit) => limit >= 0,

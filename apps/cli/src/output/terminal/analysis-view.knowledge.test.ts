@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sampleReport } from "../../testing/sample-report.js";
+import { mapAreas, sampleReport } from "../../testing/sample-report.js";
 import { renderAnalysis } from "./analysis-view.js";
 import { makeStyle } from "./style.js";
 
@@ -31,15 +31,14 @@ describe("renderAnalysis knowledge", () => {
     expect(text).not.toContain("\u001B");
   });
 
-  it("says when most files have no expert and omits the directory table without directories", () => {
-    const report = sampleReport();
+  it("says when most files have no expert and omits the area table without areas", () => {
+    const report = mapAreas(sampleReport(), () => []);
     const lines = renderAnalysis(
       {
         ...report,
         knowledge: {
           ...report.knowledge,
           truckFactor: { value: 0, people: [] },
-          directories: [],
         },
       },
       plain,
@@ -48,7 +47,7 @@ describe("renderAnalysis knowledge", () => {
     expect(lines).toContain(
       "Truck factor               0 · most files have no expert",
     );
-    expect(lines.some((line) => line.startsWith("Knowledge risks"))).toBe(
+    expect(lines.some((line) => line.startsWith("Knowledge areas"))).toBe(
       false,
     );
   });
@@ -129,7 +128,7 @@ describe("renderAnalysis in a single-author repository", () => {
       "Knowledge                  one contributor — Dennis Wentzien is the only expert everywhere",
     );
     expect(lines.some((line) => line.startsWith("Truck factor"))).toBe(false);
-    expect(lines.some((line) => line.startsWith("Knowledge risks"))).toBe(
+    expect(lines.some((line) => line.startsWith("Knowledge areas"))).toBe(
       false,
     );
     expect(lines.some((line) => line.includes("island"))).toBe(false);
@@ -143,50 +142,86 @@ describe("renderAnalysis in a single-author repository", () => {
 });
 
 describe("renderAnalysis line owners", () => {
-  it("shows the leading line owner per directory, marking a bot", () => {
-    const report = sampleReport();
-    const [docs, db, ...rest] = report.knowledge.directories;
+  it("shows the leading line owner per area, marking a bot", () => {
     const owner = { email: "a@example.com", kind: "human" } as const;
-    const lines = renderAnalysis(
-      {
-        ...report,
-        knowledge: {
-          ...report.knowledge,
-          directories: [
-            Object.assign({}, docs, {
-              lineOwners: {
-                lines: 200,
-                owners: [{ ...owner, name: "Ada", lines: 150, share: 0.75 }],
-              },
-            }),
-            Object.assign({}, db, {
-              lineOwners: {
-                lines: 3,
-                owners: [
-                  {
-                    ...owner,
-                    name: "dependabot[bot]",
-                    kind: "bot",
-                    lines: 1,
-                    share: 0.3333,
-                  },
-                ],
-              },
-            }),
-            ...rest,
-          ],
-        },
-      },
-      plain,
-    ).split("\n");
+    const report = mapAreas(sampleReport(), (areas) =>
+      areas.map((area) => {
+        if (area.path === "docs") {
+          return {
+            ...area,
+            lineOwners: {
+              lines: 200,
+              skippedFiles: 0,
+              owners: [{ ...owner, name: "Ada", lines: 150, share: 0.75 }],
+            },
+          };
+        }
+        if (area.path === "packages/db") {
+          return {
+            ...area,
+            lineOwners: {
+              lines: 3,
+              skippedFiles: 0,
+              owners: [
+                {
+                  ...owner,
+                  name: "dependabot[bot]",
+                  kind: "bot",
+                  lines: 1,
+                  share: 0.3333,
+                },
+              ],
+            },
+          };
+        }
+        return area;
+      }),
+    );
+    const lines = renderAnalysis(report, plain).split("\n");
+
     expect(lines).toContain(
-      "Knowledge risks            files  flags             leading expert                leading line owner",
+      "Knowledge areas            files  flags             leading expert                leading line owner",
     );
     expect(lines).toContain(
       "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Ada 75%",
     );
     expect(lines).toContain(
       "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  dependabot[bot] (bot) 33%",
+    );
+  });
+});
+
+describe("renderAnalysis areas", () => {
+  it("shows the areas of the chosen depth and says which level it is", () => {
+    const report = sampleReport();
+    const lines = renderAnalysis(
+      {
+        ...report,
+        knowledge: {
+          ...report.knowledge,
+          areas: { ...report.knowledge.areas, depth: 2 },
+        },
+      },
+      plain,
+    ).split("\n");
+
+    expect(lines).toContain(
+      "  packages/db/migrations      30  orphaned, island  Dmitri Volkov 100% (inactive)",
+    );
+    expect(lines).toContain(
+      "                           Areas at level 2 of 3 (recommended: 1)",
+    );
+  });
+
+  it("marks the small areas of a directory as its other files", () => {
+    const report = mapAreas(sampleReport(), (areas) =>
+      areas.map((area, index) =>
+        index === 0 ? { ...area, kind: "rest", path: "apps" } : area,
+      ),
+    );
+
+    expect(renderAnalysis(report, plain).split("\n")).toContain(
+      "  apps (other)                14  orphaned, island  Lena Fischer 93% (inactive)   Lena Fischer 86%",
     );
   });
 });

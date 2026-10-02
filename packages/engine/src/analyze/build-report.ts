@@ -43,6 +43,8 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     commits: scoped,
     universe: facts.universe,
     scope,
+    packageRoots: facts.packageRoots,
+    depth: facts.depth,
     headTime,
     now: facts.now,
     blame: facts.blame,

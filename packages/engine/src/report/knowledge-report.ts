@@ -95,9 +95,16 @@ export type AreaKnowledge = typeof AreaKnowledge.Type;
 
 /** The areas of one level of depth. */
 const AreaLevel = Schema.Struct({
-  /** 1 for packages (or top-level directories without packages), each further level one directory step deeper. */
+  /**
+   * 1 for packages (or top-level directories without packages), each further
+   * level one directory step deeper. An area that holds more than
+   * `thresholds.areas.giantShare` of the files is split further within its
+   * level, so that one package does not become one card.
+   */
   depth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-  /** Ordered like `directories`: riskiest first. Possibly truncated by the output limit, per level. */
+  /** The areas of the level before the output limit cut `areas`. */
+  totalAreas: Count,
+  /** Ordered like `directories`: riskiest first, `rest` areas last. Possibly truncated by the output limit, per level; see `totalAreas`. */
   areas: Schema.Array(AreaKnowledge),
 });
 export type AreaLevel = typeof AreaLevel.Type;
@@ -107,13 +114,13 @@ export type AreaLevel = typeof AreaLevel.Type;
  * computed by the engine so that viewers only pick a level.
  */
 const Areas = Schema.Struct({
-  /** The level the terminal and the dashboard start at: `--depth` or `recommendedDepth`. */
+  /** The level the terminal and the dashboard start at: `--depth`, else `recommendedDepth`. A `--depth` beyond the deepest level is the deepest level. */
   depth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   /** The level that suits the team size, chosen with `thresholds.areas`. */
   recommendedDepth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   /** The recommendation in words: "level 2: 11 areas for 6 active contributors". */
   reason: Schema.String,
-  /** Levels 1 to the deepest useful one (at most `thresholds.areas.maxDepth`), in order. */
+  /** Levels 1 to the deepest useful one (at most `thresholds.areas.maxDepth`), in order; no two levels have the same areas. */
   levels: Schema.NonEmptyArray(AreaLevel),
 });
 
@@ -144,11 +151,8 @@ export const Knowledge = Schema.Struct({
    * `no-deprecated` lint would flag every producer and consumer until then.)
    */
   directories: Schema.Array(DirectoryKnowledge),
-  /**
-   * The knowledge in areas that partition the files. Optional while analyze
-   * does not produce it yet; it becomes required together with the engine.
-   */
-  areas: Schema.optionalKey(Areas),
+  /** The knowledge in areas that partition the files, at several levels of depth. */
+  areas: Areas,
   /** Present only when the analysis ran with `blame`: the line owners of all `files` together, which no sum over `directories` gives. */
   lineOwners: Schema.optionalKey(LineOwners),
 });

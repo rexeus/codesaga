@@ -1,27 +1,132 @@
-import { describe, it } from "vitest";
+import { DateTime } from "effect";
+import { describe, expect, it } from "vitest";
 
-describe("packageRootsOf", () => {
-  it.todo("finds the directory of every manifest kind the glossary lists");
-  it.todo("includes the repository root when it holds a manifest");
-  it.todo("returns nothing for a repository without manifests");
+import type { ClassifiedCommit } from "../automation/classify.js";
+import { at, classifiedCommit } from "../testing/classified-commit.js";
+import { areaLevels } from "./areas.js";
+import { knowledgeModel } from "./model.js";
+
+const now = DateTime.makeUnsafe("2026-03-01T00:00:00Z");
+const ada = { name: "Ada", email: "ada@example.com" };
+const grace = { name: "Grace", email: "grace@example.com" };
+
+const touching = (
+  time: string,
+  paths: ReadonlyArray<string>,
+  author: ClassifiedCommit["author"],
+): ClassifiedCommit =>
+  classifiedCommit({
+    time: at(time),
+    author,
+    changes: paths.map((path) => ({ path, added: 10, deleted: 0 })),
+  });
+
+const filesIn = (directory: string, count: number): ReadonlyArray<string> =>
+  Array.from({ length: count }, (_, index) => `${directory}/f${index}.ts`);
+
+const levelsOf = (
+  commits: ReadonlyArray<ClassifiedCommit>,
+  paths: ReadonlyArray<string>,
+  packageRoots: ReadonlyArray<string>,
+) =>
+  areaLevels({
+    paths,
+    packageRoots,
+    scope: ".",
+    model: knowledgeModel({
+      commits,
+      universe: paths.map((path) => ({ path, loc: 50 })),
+      headTime: at("2026-02-01T00:00:00Z"),
+      now,
+    }),
+  });
+
+const web = filesIn("apps/web", 4);
+const lib = filesIn("packages/lib", 4);
+
+describe("areaLevels knowledge", () => {
+  it("describes each area by the experts of its own files", () => {
+    const [level] = levelsOf(
+      [
+        touching("2026-02-20T00:00:00Z", web, ada),
+        touching("2026-02-19T00:00:00Z", lib, grace),
+      ],
+      [...web, ...lib],
+      ["apps/web", "packages/lib"],
+    );
+
+    expect(
+      level.areas.map(({ path, kind, files, island, experts }) => ({
+        path,
+        kind,
+        files,
+        island,
+        experts: experts.map(({ email, files: expertFiles }) => [
+          email,
+          expertFiles,
+        ]),
+      })),
+    ).toStrictEqual([
+      {
+        path: "apps/web",
+        kind: "package",
+        files: 4,
+        island: true,
+        experts: [["ada@example.com", 4]],
+      },
+      {
+        path: "packages/lib",
+        kind: "package",
+        files: 4,
+        island: true,
+        experts: [["grace@example.com", 4]],
+      },
+    ]);
+  });
 });
 
-describe("areaLevels", () => {
-  it.todo("puts every universe file into exactly one area at every level");
-  it.todo("makes level 1 the package roots when there are packages");
-  it.todo("makes level 1 the top-level directories without packages");
-  it.todo("anchors level 1 below the scope for a scoped analysis");
-  it.todo(
-    "puts apps/ui/index.ts and apps/ui/src/test.ts into one area at level 1",
-  );
-  it.todo(
-    "splits a package root into one area per directory step at each deeper level",
-  );
-  it.todo("keeps the files directly in a package root as that root's own area");
-  it.todo("groups areas under 3 files per parent as one rest area");
-  it.todo("keeps a rest area below 3 files, so no file is left out");
-  it.todo("stops at the level after which no area changes");
-  it.todo("stops at level 6 in a deeper tree");
-  it.todo("returns level 1 with no areas for no files");
-  it.todo("orders areas riskiest first and reports the kind of each");
+describe("areaLevels order and counts", () => {
+  it("lists orphaned areas first, then the healthy ones, and the small areas last", () => {
+    const old = filesIn("apps/old", 3);
+    const loose = ["scripts/a.ts", "scripts/b.ts"];
+    const [level] = levelsOf(
+      [
+        touching("2026-02-21T00:00:00Z", web, ada),
+        touching("2026-02-20T00:00:00Z", web, grace),
+        touching("2025-01-01T00:00:00Z", old, grace),
+        touching("2025-01-02T00:00:00Z", loose, ada),
+      ],
+      [...web, ...old, ...loose],
+      ["apps/web", "apps/old"],
+    );
+
+    expect(
+      level.areas.map(({ kind, path }) => `${kind} ${path}`),
+    ).toStrictEqual(["package apps/old", "package apps/web", "rest ."]);
+  });
+
+  it("counts the areas of every level, a level deeper having more", () => {
+    const paths = [
+      "apps/web/index.ts",
+      ...filesIn("apps/web/src", 3),
+      ...filesIn("packages/lib", 3),
+      ...filesIn("packages/cli", 3),
+    ];
+    const levels = levelsOf(
+      [touching("2026-02-20T00:00:00Z", paths, ada)],
+      paths,
+      ["apps/web", "packages/lib", "packages/cli"],
+    );
+
+    expect(
+      levels.map(({ depth, totalAreas, areas }) => [
+        depth,
+        totalAreas,
+        areas.length,
+      ]),
+    ).toStrictEqual([
+      [1, 3, 3],
+      [2, 4, 4],
+    ]);
+  });
 });

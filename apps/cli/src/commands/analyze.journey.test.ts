@@ -10,7 +10,7 @@ import {
   makeTempDirectory,
 } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
-import { makeTeamProject } from "../testing/projects.js";
+import { makeAreasProject, makeTeamProject } from "../testing/projects.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -78,6 +78,46 @@ describe("codesaga analyze --json", () => {
         "Grace",
       ]);
       expect(report.repository.firstCommitAt).not.toBeNull();
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga analyze --depth", () => {
+  it.live(
+    "starts the areas at --depth and at the deepest level when it is beyond",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeAreasProject;
+        const startLevel = (depth: string) =>
+          Effect.gen(function* () {
+            const result = yield* journey({
+              args: ["analyze", "--json", "--depth", depth],
+              cwd: repo.root,
+            });
+            return (yield* decode(result.stdout)).knowledge.areas;
+          });
+
+        const second = yield* startLevel("2");
+        const beyond = yield* startLevel("9");
+
+        expect(second.depth).toBe(2);
+        expect(second.recommendedDepth).toBe(1);
+        expect(beyond.depth).toBe(2);
+        expect(beyond.levels.map(({ depth }) => depth)).toStrictEqual([1, 2]);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("rejects a --depth below 1 as a usage error", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeAreasProject;
+
+      const result = yield* journey({
+        args: ["analyze", "--json", "--depth", "0"],
+        cwd: repo.root,
+      });
+
+      expect(result.stdout).toBe("");
+      expect(result.exitCode).toBe(2);
     }).pipe(Effect.scoped),
   );
 });

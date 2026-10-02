@@ -7,13 +7,13 @@ import type { Git } from "../git/git.js";
 import { matchesAny } from "./globs.js";
 import { isSourceLanguage } from "./languages.js";
 import { measureSourceFile } from "./source-file.js";
-import { listTrackedFiles, withoutGeneratedFiles } from "./tracked-files.js";
+import { withoutGeneratedFiles } from "./tracked-files.js";
 
 export type InventoryOptions = {
   /** Absolute path of the work tree root. */
   readonly root: string;
-  /** Repository-relative directory the universe is limited to; "." for all. */
-  readonly scope: string;
+  /** The regular files git tracks in the scope and does not ignore, from `listTrackedFiles`. */
+  readonly tracked: ReadonlyArray<string>;
   /** Globs that replace the language allow-list when non-empty. */
   readonly include: ReadonlyArray<string>;
   /** Globs removed after `include`. */
@@ -67,10 +67,10 @@ export const namedAsCode = (
 };
 
 /**
- * Builds the universe: tracked, not ignored, not `linguist-generated` or
- * `linguist-vendored`, named like code (a language allow-list, or `include`
- * instead of it, then `exclude`), and readable as unminified text.
- * Files come back sorted by path.
+ * Builds the universe from the tracked files: those not marked
+ * `linguist-generated` or `linguist-vendored`, named like code (a language
+ * allow-list, or `include` instead of it, then `exclude`), and readable as
+ * unminified text. Files come back sorted by path.
  *
  * Git must run in `options.root`.
  */
@@ -82,10 +82,9 @@ export const inventory = (
   Git | FileSystem.FileSystem | Path.Path
 > =>
   Effect.gen(function* () {
-    const tracked = yield* listTrackedFiles(options.scope);
     const isCode = namedAsCode(options);
     const candidates = yield* withoutGeneratedFiles(
-      tracked.filter((path) => isCode(path)),
+      options.tracked.filter((path) => isCode(path)),
     );
     const measured = yield* Effect.forEach(
       candidates,

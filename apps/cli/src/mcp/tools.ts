@@ -57,7 +57,11 @@ const AnalyzeTool = Tool.make("analyze", {
     exclude,
     limit: optional(
       Schema.Natural,
-      `Contributors and knowledge directories to return; 0 for no limit (default ${DEFAULT_LIMIT})`,
+      `Contributors and knowledge directories and areas (per level) to return; 0 for no limit (default ${DEFAULT_LIMIT})`,
+    ),
+    depth: optional(
+      Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+      "Knowledge area level to start at, from 1 (packages) to deeper directories; every level is returned, this one is knowledge.areas.depth; a level beyond the deepest one means the deepest. Default: the repository's .codesaga.json, else the level recommended for the team",
     ),
     compare: optional(
       Schema.String,

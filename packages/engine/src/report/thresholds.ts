@@ -11,6 +11,10 @@ const AreaThresholds = Schema.Struct({
   minFiles: Count,
   /** The deepest level reported. */
   maxDepth: Count,
+  /** An area with more than this share of the universe files, and subdirectories, is split further within its level. */
+  giantShare: Share,
+  /** A giant area is split at most this many directory steps beyond its level. */
+  giantSplitSteps: Count,
   /** Contributors with a commit in this many days before now size the recommendation. */
   recommendationActiveDays: Count,
   /** The recommended depth aims at this many areas per such contributor. */

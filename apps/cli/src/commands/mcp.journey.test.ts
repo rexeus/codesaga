@@ -7,7 +7,7 @@ import { Effect, Schema } from "effect";
 
 import { CheckResult } from "../check/check-result.js";
 import { startMcpSession } from "../testing/mcp-session.js";
-import { makeTeamProject } from "../testing/projects.js";
+import { makeAreasProject, makeTeamProject } from "../testing/projects.js";
 
 const ToolList = Schema.Struct({
   tools: Schema.Array(
@@ -93,6 +93,27 @@ describe("codesaga mcp analyze", () => {
         expect(limited.contributors).toHaveLength(1);
         expect(unlimited.contributors).toHaveLength(2);
         expect(unlimited.window.commits).toBe(5);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live(
+    "starts the areas at the depth param, over the repository's config",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeAreasProject;
+        writeFileSync(join(repo.root, ".codesaga.json"), '{"depth":2}');
+        const session = yield* startMcpSession(repo.root);
+        const startLevel = (params: { readonly depth?: number }) =>
+          Effect.gen(function* () {
+            const result = yield* session.callTool("analyze", params);
+            const report = yield* Schema.decodeUnknownEffect(Report)(
+              result.structuredContent,
+            );
+            return report.knowledge.areas.depth;
+          });
+
+        expect(yield* startLevel({})).toBe(2);
+        expect(yield* startLevel({ depth: 1 })).toBe(1);
       }).pipe(Effect.scoped),
   );
 

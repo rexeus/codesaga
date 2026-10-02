@@ -53,7 +53,7 @@ layer(NodeServices.layer)("Report", (it) => {
   it.effect("carries the story data of the redesign in the sample", () =>
     Effect.gen(function* () {
       const report = decode(yield* readSample);
-      const levels = report.knowledge.areas?.levels ?? [];
+      const levels = report.knowledge.areas.levels;
 
       assert.deepStrictEqual(
         levels.map(({ depth }) => depth),
@@ -211,6 +211,17 @@ layer(NodeServices.layer)("Report rejects story data with", (it) => {
       assert.throws(() => {
         decode({ ...sample, highlights });
       }, /highlights/u);
+    }),
+  );
+
+  it.effect("a knowledge section without areas", () =>
+    Effect.gen(function* () {
+      const { knowledge, ...rest } = decode(yield* readSample);
+      const { areas: _removed, ...withoutAreas } = knowledge;
+
+      assert.throws(() => {
+        decode({ ...rest, knowledge: withoutAreas });
+      }, /areas/u);
     }),
   );
 

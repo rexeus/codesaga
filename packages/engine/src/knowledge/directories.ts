@@ -13,7 +13,7 @@ import type { KnowledgeModel } from "./model.js";
 /** A directory is reported when its subtree holds at least this many universe files. */
 export const MIN_DIRECTORY_FILES = 3;
 
-type Directory = Report["knowledge"]["directories"][number];
+export type Directory = Report["knowledge"]["directories"][number];
 
 const flagFirst = (flag: (directory: Directory) => boolean) =>
   Order.flip(
@@ -21,7 +21,7 @@ const flagFirst = (flag: (directory: Directory) => boolean) =>
   );
 
 /** Riskiest first: orphaned, islands, lower truck factor, more files, path. */
-const byRisk = Order.combineAll([
+export const byRisk = Order.combineAll([
   flagFirst((directory) => directory.orphaned),
   flagFirst((directory) => directory.island),
   Order.mapInput(Order.Number, (directory: Directory) => directory.truckFactor),
@@ -33,6 +33,27 @@ const byRisk = Order.combineAll([
 
 const parentOf = (path: string): string =>
   path.slice(0, Math.max(0, path.lastIndexOf("/")));
+
+/** The knowledge state of the subtree at `path`, which holds the universe files `paths`. */
+export const describeDirectory = (
+  path: string,
+  paths: ReadonlyArray<string>,
+  model: KnowledgeModel,
+): Directory => {
+  const set = describeFileSet(paths, model);
+  return Object.assign(
+    {
+      path,
+      files: set.files,
+      truckFactor: set.truckFactor.length,
+      island: set.island,
+      orphaned: set.orphaned,
+      experts: set.experts,
+      reasons: set.reasons,
+    },
+    lineOwnersField(set.lineOwners),
+  );
+};
 
 /**
  * The reported directories below `scope` (the repository when it is "."), from
@@ -60,23 +81,12 @@ export const directoryKnowledge = (
         files.length >= MIN_DIRECTORY_FILES &&
         filesByDirectory.get(parentOf(directory))?.length !== files.length,
     )
-    .map(([path, files]): Directory => {
-      const set = describeFileSet(
+    .map(([path, files]) =>
+      describeDirectory(
+        path,
         files.map((file) => file.path),
         model,
-      );
-      return Object.assign(
-        {
-          path,
-          files: set.files,
-          truckFactor: set.truckFactor.length,
-          island: set.island,
-          orphaned: set.orphaned,
-          experts: set.experts,
-          reasons: set.reasons,
-        },
-        lineOwnersField(set.lineOwners),
-      );
-    })
+      ),
+    )
     .toSorted(byRisk);
 };
