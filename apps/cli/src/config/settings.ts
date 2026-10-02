@@ -22,8 +22,8 @@ export type SettingFlags = {
   readonly include: ReadonlyArray<string>;
   readonly exclude: ReadonlyArray<string>;
   readonly limit: Option.Option<number>;
-  /** `--depth`: the area level to start at. */
-  readonly depth: Option.Option<number>;
+  /** `--detail`: the territory detail to start at. */
+  readonly detail: Option.Option<number>;
   /** `--blame` or `--no-blame`; `None` leaves the config in charge. */
   readonly blame: Option.Option<boolean>;
 };
@@ -31,7 +31,7 @@ export type SettingFlags = {
 /** The analysis settings after flags and config are merged. */
 export type Settings = Pick<
   AnalyzeOptions,
-  "since" | "include" | "exclude" | "signatures" | "depth"
+  "since" | "include" | "exclude" | "signatures" | "detail"
 > & {
   /** Whether to read `git blame` for line owners; off unless a flag or the config turns it on. */
   readonly blame: boolean;
@@ -77,7 +77,10 @@ export const resolveSettings = (
         flags.exclude.length > 0 ? flags.exclude : (config.exclude ?? []),
       signatures: config.signatures,
       limit: Option.getOrElse(flags.limit, () => config.limit),
-      depth: Option.getOrElse(flags.depth, () => config.depth),
+      detail: Option.getOrElse(
+        flags.detail,
+        () => config.detail ?? config.depth,
+      ),
       blame: Option.getOrElse(flags.blame, () => config.blame ?? false),
       gates: config.gates,
       sinceFromConfig,
@@ -93,13 +96,13 @@ export const engineOptions = (
   settings: Settings,
 ): Pick<
   AnalyzeOptions,
-  "since" | "include" | "exclude" | "signatures" | "depth" | "toolVersion"
+  "since" | "include" | "exclude" | "signatures" | "detail" | "toolVersion"
 > => ({
   since: settings.since,
   include: settings.include,
   exclude: settings.exclude,
   signatures: settings.signatures,
-  depth: settings.depth,
+  detail: settings.detail,
   toolVersion: version,
 });
 

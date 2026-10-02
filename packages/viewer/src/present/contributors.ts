@@ -1,6 +1,5 @@
 import type { Report } from "@codesaga/engine";
 
-import { isSolo } from "./areas.js";
 import { contributorBadges } from "./badges.js";
 import type { BadgeRow } from "./badges.js";
 import {
@@ -10,6 +9,7 @@ import {
   formatMonth,
 } from "./format.js";
 import { initialsOf, personEntities } from "./people.js";
+import { isSolo } from "./territories.js";
 
 type Contributor = Report["contributors"][number];
 type Status = Contributor["status"];
@@ -18,13 +18,13 @@ type Badge = Contributor["badges"][number];
 /**
  * The filter buttons above the list. `active` includes the new people, as the
  * dashboard's active contributors do (a commit in the last 90 days); `new` is
- * the part of them whose first commit is recent.
+ * those whose first commit is recent.
  */
 export type StatusFilter = "all" | Status;
 
 /** How many people are listed before the reader asks for all. */
 export const PEOPLE_SHOWN = 12;
-const AREA_CHIPS_SHOWN = 2;
+const FOLDER_CHIPS_SHOWN = 2;
 export const RECENT_WEEKS = 12;
 const GROUP: Record<Status, number> = { active: 0, new: 1, dormant: 2 };
 const FILTERS: readonly { filter: StatusFilter; label: string }[] = [
@@ -35,7 +35,7 @@ const FILTERS: readonly { filter: StatusFilter; label: string }[] = [
 ];
 
 /** A directory as the list names it; the engine's "." is the repository root. */
-const areaName = (path: string): string => (path === "." ? "root" : path);
+const folderName = (path: string): string => (path === "." ? "root" : path);
 
 /** One contributor as a row of the list. */
 export type PersonRow = {
@@ -47,8 +47,8 @@ export type PersonRow = {
   /** `since May 2025 · 178 commits`. */
   readonly since: string;
   readonly weekly: readonly number[];
-  readonly areas: readonly string[];
-  readonly moreAreas: number;
+  readonly folders: readonly string[];
+  readonly moreFolders: number;
   readonly badges: BadgeRow;
   /** `7 weeks ago`, and the date it was. */
   readonly lastAgo: string;
@@ -84,10 +84,10 @@ export const personRows = (report: Report): PersonRow[] => {
     status: person.status,
     since: `since ${formatMonth(person.firstCommitAt)} · ${formatCount(person.commits)} ${person.commits === 1 ? "commit" : "commits"}`,
     weekly: person.weekly,
-    areas: person.areas
-      .slice(0, AREA_CHIPS_SHOWN)
-      .map(({ path }) => areaName(path)),
-    moreAreas: Math.max(0, person.areas.length - AREA_CHIPS_SHOWN),
+    folders: person.areas
+      .slice(0, FOLDER_CHIPS_SHOWN)
+      .map(({ path }) => folderName(path)),
+    moreFolders: Math.max(0, person.areas.length - FOLDER_CHIPS_SHOWN),
     badges: contributorBadges(
       solo
         ? person.badges.filter(({ kind }) => !SOLO_HIDDEN.has(kind))

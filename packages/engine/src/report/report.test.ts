@@ -27,7 +27,7 @@ const SECTIONS = [
   "contributors",
   "automation",
   "knowledge",
-  "highlights",
+  "stories",
 ] as const;
 
 layer(NodeServices.layer)("Report", (it) => {
@@ -50,16 +50,16 @@ layer(NodeServices.layer)("Report", (it) => {
       }),
   );
 
-  it.effect("carries the story data of the redesign in the sample", () =>
+  it.effect("carries the data of the redesigned dashboard in the sample", () =>
     Effect.gen(function* () {
       const report = decode(yield* readSample);
-      const levels = report.knowledge.areas.levels;
+      const details = report.knowledge.territories.details;
 
       assert.deepStrictEqual(
-        levels.map(({ depth }) => depth),
+        details.map(({ detail }) => detail),
         [1, 2, 3],
       );
-      assert.strictEqual(report.highlights.length, 6);
+      assert.strictEqual(report.stories.length, 6);
       assert.deepStrictEqual(
         report.contributors.map(({ status }) => status),
         [
@@ -78,19 +78,25 @@ layer(NodeServices.layer)("Report", (it) => {
       }
     }),
   );
+});
 
-  it.effect("lists the rest areas of every level after the other areas", () =>
-    Effect.gen(function* () {
-      const { levels } = decode(yield* readSample).knowledge.areas;
+layer(NodeServices.layer)("Report sample territories", (it) => {
+  it.effect(
+    "lists the other-files territories of every detail after the other territories",
+    () =>
+      Effect.gen(function* () {
+        const { details } = decode(yield* readSample).knowledge.territories;
 
-      for (const { areas } of levels) {
-        const kinds = areas.map(({ kind }) => kind);
-        assert.deepStrictEqual(
-          kinds,
-          kinds.toSorted((a, b) => Number(a === "rest") - Number(b === "rest")),
-        );
-      }
-    }),
+        for (const { territories } of details) {
+          const kinds = territories.map(({ kind }) => kind);
+          assert.deepStrictEqual(
+            kinds,
+            kinds.toSorted(
+              (a, b) => Number(a === "other") - Number(b === "other"),
+            ),
+          );
+        }
+      }),
   );
 });
 
@@ -216,37 +222,37 @@ layer(NodeServices.layer)("Report rejects story data with", (it) => {
     }),
   );
 
-  it.effect("more than six highlights", () =>
+  it.effect("more than six stories", () =>
     Effect.gen(function* () {
       const sample = decode(yield* readSample);
-      const [first] = sample.highlights;
-      const highlights = Array.from({ length: 7 }, () => first);
+      const [first] = sample.stories;
+      const stories = Array.from({ length: 7 }, () => first);
 
       assert.throws(() => {
-        decode({ ...sample, highlights });
-      }, /highlights/u);
+        decode({ ...sample, stories });
+      }, /stories/u);
     }),
   );
 
-  it.effect("a knowledge section without areas", () =>
+  it.effect("a knowledge section without territories", () =>
     Effect.gen(function* () {
       const { knowledge, ...rest } = decode(yield* readSample);
-      const { areas: _removed, ...withoutAreas } = knowledge;
+      const { territories: _removed, ...withoutTerritories } = knowledge;
 
       assert.throws(() => {
-        decode({ ...rest, knowledge: withoutAreas });
-      }, /areas/u);
+        decode({ ...rest, knowledge: withoutTerritories });
+      }, /territories/u);
     }),
   );
 
-  it.effect("an area section without levels", () =>
+  it.effect("a territory section without details", () =>
     Effect.gen(function* () {
       const { knowledge, ...rest } = decode(yield* readSample);
-      const areas = { ...knowledge.areas, levels: [] };
+      const territories = { ...knowledge.territories, details: [] };
 
       assert.throws(() => {
-        decode({ ...rest, knowledge: { ...knowledge, areas } });
-      }, /levels/u);
+        decode({ ...rest, knowledge: { ...knowledge, territories } });
+      }, /details/u);
     }),
   );
 });

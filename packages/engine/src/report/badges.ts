@@ -1,90 +1,98 @@
-// Owns the badge schemas of the report: the achievements of an area and of a contributor.
+// Owns the badge schemas of the report: the badges of a territory and of a contributor.
 // Both share one shape and differ in their kinds, so a consumer picks the icon from `kind` and the text from `label`.
 // A new kind is an additive change; renaming or removing one bumps the schema version.
 import { Schema } from "effect";
 
 /**
- * An achievement of a knowledge area. Never comparative: each badge states a
- * fact about the area and the rule that produced it.
+ * A badge of a territory. Never comparative: each badge states a fact about the
+ * territory and the rule that produced it.
  */
-export const AreaBadge = Schema.Struct({
+export const TerritoryBadge = Schema.Struct({
   /**
    * `island`: one person is the sole expert on at least `thresholds.islandShare`
    * of the files. `orphaned`: more than `thresholds.orphanedShare` of the files
-   * have no active expert. `single-expert`: exactly one person is an active expert of the area.
+   * have no active expert. `one-expert`: exactly one person is an active expert of the territory.
    * `shared-knowledge`: at least `thresholds.badges.sharedActiveExperts` active
    * experts and a truck factor of at least `thresholds.badges.sharedTruckFactor`.
    * `knowledge-fading`: the main expert has been silent for
    * `thresholds.badges.fadingFromDays` to `fadingToDays` days. `handover`: the
    * previous main expert (the dormant expert on the most files) is replaced by
-   * an active main expert whose first commit to the area is at most
-   * `thresholds.badges.handoverDays` days old. `new`: the area's first commit
-   * is at most `thresholds.badges.newDays` days old and at least
-   * `thresholds.badges.newAfterStartDays` days after the repository's first
-   * commit, so the areas of a young repository are not new one by one. `in-focus`: the
-   * area with the most human and agent-assisted commits in the last
-   * `thresholds.badges.inFocusDays` days, whatever the window of the analysis. `quiet`: unchanged for at least
-   * `thresholds.badges.quietDays` days. `newcomer-friendly`: at least
+   * an active main expert whose first commit to the territory is at most
+   * `thresholds.badges.handoverDays` days old. `newcomer-friendly`: at least
    * `thresholds.badges.newcomerFriendlyFirstCommits` people made their first
-   * commit here in the last `newcomerFriendlyDays` days. `well-tested`: at
-   * least `thresholds.badges.wellTestedShare` of the files are tests; never
-   * awarded to an area whose own path is inside a test directory.
+   * commit here in the last `newcomerFriendlyDays` days. `new-territory`: the
+   * territory's first commit is at most `thresholds.badges.newTerritoryDays`
+   * days old and at least `thresholds.badges.newTerritoryAfterStartDays` days
+   * after the repository's first commit, so the territories of a young
+   * repository are not new one by one. `in-focus`: the territory with the most
+   * human and agent-assisted commits in the last `thresholds.badges.inFocusDays`
+   * days, whatever the window of the analysis. `quiet`: unchanged for at least
+   * `thresholds.badges.quietDays` days. `well-tested`: at least
+   * `thresholds.badges.wellTestedShare` of the files are tests; never awarded to
+   * a territory whose own path is inside a test directory.
    */
   kind: Schema.Literals([
     "island",
     "orphaned",
-    "single-expert",
+    "one-expert",
     "shared-knowledge",
     "knowledge-fading",
     "handover",
-    "new",
+    "newcomer-friendly",
+    "new-territory",
     "in-focus",
     "quiet",
-    "newcomer-friendly",
     "well-tested",
   ]),
+  /**
+   * What the badge is about: `knowledge` (`island`, `orphaned`, `one-expert`,
+   * `shared-knowledge`, `knowledge-fading`, `handover`, `newcomer-friendly`),
+   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`well-tested`).
+   * Determined by `kind`.
+   */
+  category: Schema.Literals(["knowledge", "code", "activity"]),
   /** Short text for the badge itself, such as "Knowledge island". */
   label: Schema.String,
   /** The rule and the numbers behind the badge, for a tooltip: "One person is sole expert on 41 of 48 files." */
   evidence: Schema.String,
 });
-export type AreaBadge = typeof AreaBadge.Type;
+export type TerritoryBadge = typeof TerritoryBadge.Type;
 
 /**
- * An achievement of a contributor: positive or neutral, never comparative, and
+ * A badge of a contributor: positive or neutral, never comparative, and
  * never about working hours. Reviewing needs `--github`.
  */
 export const ContributorBadge = Schema.Struct({
   /**
-   * `all-rounder`: commits in at least `thresholds.badges.allRounderAreaShare`
-   * of the areas, and in at least `allRounderMinAreas`; never awarded when
+   * `all-rounder`: commits in at least `thresholds.badges.allRounderTerritoryShare`
+   * of the territories, and in at least `allRounderMinTerritories`; never awarded when
    * the full history has a single contributor. `specialist`: at least
-   * `specialistShare` of the commits fall into one area. `cleaner`: net
-   * deletions of at least `cleanerNetDeletedLines` code lines. `founder`: first
+   * `specialistShare` of the commits fall into one territory. `tidier`: net
+   * deletions of at least `tidierNetDeletedLines` code lines. `founder`: first
    * author of at least `founderShare` of today's files. `keeper`: the only
-   * active expert of an area; never awarded when the full history has a single
+   * active expert of a territory; never awarded when the full history has a single
    * contributor. `tester`: at least `testerShare` of the changed
    * files are tests. `documenter`: at least `documenterShare` of the commits
    * touch documentation. `steady`: a commit in each of the last
-   * `steadyMonths` months. `welcome`: the first commit lies at most
-   * `welcomeDays` days back. `returning`: active again after a pause of at
-   * least `returningGapDays` days. `reviewer`: at least `reviewerReviews`
+   * `steadyMonths` months. `new-here`: the first commit lies at most
+   * `newHereDays` days back. `back-again`: active again after a pause of at
+   * least `backAgainGapDays` days. `reviewer`: at least `reviewerReviews`
    * reviews; only with `--github`.
    */
   kind: Schema.Literals([
     "all-rounder",
     "specialist",
-    "cleaner",
+    "tidier",
     "founder",
     "keeper",
     "tester",
     "documenter",
     "steady",
-    "welcome",
-    "returning",
+    "new-here",
+    "back-again",
     "reviewer",
   ]),
-  /** Short text for the badge itself, such as "Specialist: engine". */
+  /** Short text for the badge itself, such as "engine specialist". */
   label: Schema.String,
   /** The rule and the numbers behind the badge, for a tooltip. */
   evidence: Schema.String,

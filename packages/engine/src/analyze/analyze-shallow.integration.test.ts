@@ -19,13 +19,16 @@ const linus = { name: "Linus", email: "linus@example.com" };
 
 /**
  * Five commits; a clone of depth 4 shows the last three, with Grace's one
- * exactly a year before 2026-03-12 and the area `web` first changed by Linus.
+ * exactly a year before 2026-03-12 and the territory `web` first changed by Linus.
  */
 const commitHistory = (repo: TempRepository) =>
   Effect.gen(function* () {
     const files = Object.fromEntries(
-      ["api", "web"].flatMap((area) =>
-        ["a", "b", "c"].map((name) => [`${area}/${name}.ts`, lines(name, 2)]),
+      ["api", "web"].flatMap((territory) =>
+        ["a", "b", "c"].map((name) => [
+          `${territory}/${name}.ts`,
+          lines(name, 2),
+        ]),
       ),
     );
     yield* repo.commit("2024-01-01T09:00:00Z", files, { author: ada });
@@ -77,30 +80,30 @@ layer(NodeServices.layer)("analyze a shallow clone's story", (it) => {
           statuses: Object.fromEntries(
             report.contributors.map(({ name, status }) => [name, status]),
           ),
-          welcomed: report.contributors
+          newHere: report.contributors
             .filter(({ badges }) =>
-              badges.some(({ kind }) => kind === "welcome"),
+              badges.some(({ kind }) => kind === "new-here"),
             )
             .map(({ name }) => name),
-          firstCommitHighlights: report.highlights
+          firstCommitStories: report.stories
             .map(({ kind }) => kind)
             .filter((kind) => kind === "newcomers" || kind === "anniversary"),
-          webIsNew: report.knowledge.areas?.levels[0]?.areas
+          webIsNew: report.knowledge.territories?.details[0]?.territories
             .find(({ path }) => path === "web")
-            ?.badges.some(({ kind }) => kind === "new"),
+            ?.badges.some(({ kind }) => kind === "new-territory"),
         });
 
         assert.isTrue(shallow.repository.shallow);
         assert.deepStrictEqual(storyOf(complete), {
           statuses: { Ada: "active", Linus: "new", Grace: "dormant" },
-          welcomed: ["Linus"],
-          firstCommitHighlights: [],
+          newHere: ["Linus"],
+          firstCommitStories: [],
           webIsNew: false,
         });
         assert.deepStrictEqual(storyOf(shallow), {
           statuses: { Ada: "active", Linus: "active", Grace: "dormant" },
-          welcomed: [],
-          firstCommitHighlights: [],
+          newHere: [],
+          firstCommitStories: [],
           webIsNew: false,
         });
       }),

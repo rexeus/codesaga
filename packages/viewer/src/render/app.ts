@@ -1,13 +1,14 @@
 import type { Report } from "@codesaga/engine";
 
 import { renderActivity } from "./activity-view.js";
-import { renderKnowledge } from "./areas-view.js";
+import { renderBots } from "./bots-view.js";
 import { renderContributors } from "./contributors-view.js";
 import { h } from "./dom.js";
 import { renderHeader } from "./header.js";
-import { renderHighlights } from "./highlights-view.js";
+import { renderKnowledge } from "./knowledge-view.js";
 import { renderKeyFigures } from "./kpis-view.js";
 import { renderPullRequests } from "./pull-requests-view.js";
+import { renderStories } from "./stories-view.js";
 
 const footer = ({ tool, generatedAt }: Report): HTMLElement =>
   h(
@@ -22,19 +23,21 @@ const footer = ({ tool, generatedAt }: Report): HTMLElement =>
 
 /** Renders the whole dashboard for `report` into `root`. */
 export const mountApp = (report: Report, root: HTMLElement): void => {
-  const highlights = renderHighlights(report);
+  const stories = renderStories(report);
   const pullRequests = renderPullRequests(report);
+  const bots = renderBots(report);
   root.replaceChildren(
     renderHeader(report),
     h(
       "main",
       "wrap",
       renderKeyFigures(report),
-      ...(highlights === null ? [] : [highlights]),
+      ...(stories === null ? [] : [stories]),
       renderActivity(report),
       ...(pullRequests === null ? [] : [pullRequests]),
       renderKnowledge(report),
       renderContributors(report),
+      ...(bots === null ? [] : [bots]),
       footer(report),
     ),
   );

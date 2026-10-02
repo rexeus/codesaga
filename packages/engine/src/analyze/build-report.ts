@@ -5,21 +5,21 @@
 import { activity } from "../activity/activity.js";
 import { punchcard } from "../activity/punchcard.js";
 import { automation } from "../automation/automation.js";
-import { AREA_BADGE_THRESHOLDS } from "../badges/area-badge-thresholds.js";
 import { CONTRIBUTOR_BADGE_THRESHOLDS } from "../badges/contributor-badges.js";
+import { TERRITORY_BADGE_THRESHOLDS } from "../badges/territory-badge-thresholds.js";
 import { comparison } from "../compare/comparison.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import { contributors } from "../contributors/contributors.js";
-import { highlights } from "../highlights/highlights.js";
-import type { HighlightFacts } from "../highlights/highlights.js";
-import { HIGHLIGHT_THRESHOLDS } from "../highlights/thresholds.js";
 import {
-  AREA_THRESHOLDS,
+  TERRITORY_THRESHOLDS,
   KNOWLEDGE_THRESHOLDS,
   knowledge,
 } from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import type { Report } from "../report/report.js";
+import { stories } from "../stories/stories.js";
+import type { StoryFacts } from "../stories/stories.js";
+import { STORY_THRESHOLDS } from "../stories/thresholds.js";
 import type { RepositoryFacts } from "./gather.js";
 import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
@@ -27,24 +27,24 @@ import type { Analysis } from "./prepare.js";
 const THRESHOLDS: Report["thresholds"] = {
   activeDays: ACTIVE_DAYS,
   ...KNOWLEDGE_THRESHOLDS,
-  areas: AREA_THRESHOLDS,
-  highlights: HIGHLIGHT_THRESHOLDS,
-  badges: { ...AREA_BADGE_THRESHOLDS, ...CONTRIBUTOR_BADGE_THRESHOLDS },
+  territories: TERRITORY_THRESHOLDS,
+  stories: STORY_THRESHOLDS,
+  badges: { ...TERRITORY_BADGE_THRESHOLDS, ...CONTRIBUTOR_BADGE_THRESHOLDS },
 };
 
-const highlightsOf = (
+const storiesOf = (
   { now, isCodePath, repository }: RepositoryFacts,
   commits: Analysis["scoped"],
   knowledgeSection: Report["knowledge"],
-  areas: HighlightFacts["areas"],
-): Report["highlights"] =>
-  highlights({
+  territories: StoryFacts["territories"],
+): Report["stories"] =>
+  stories({
     commits,
     now,
     shallow: repository.shallow,
     isCodePath,
     knowledge: knowledgeSection,
-    ...(areas === undefined ? {} : { areas }),
+    ...(territories === undefined ? {} : { territories }),
   });
 
 const comparisonField = (
@@ -67,12 +67,12 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     firstCommitAt,
     lastCommitAt,
   } = prepareAnalysis(facts);
-  const { section: knowledgeSection, recommendedAreas } = knowledge({
+  const { section: knowledgeSection, recommendedTerritories } = knowledge({
     commits: scoped,
     universe: facts.universe,
     scope: facts.repository.scope,
     packageRoots: facts.packageRoots,
-    depth: facts.depth,
+    detail: facts.detail,
     shallow: facts.repository.shallow,
     headTime,
     now: facts.now,
@@ -87,7 +87,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     shallow: facts.repository.shallow,
     isCodePath: facts.isCodePath,
     universePaths: facts.universe.map(({ path }) => path),
-    areas: recommendedAreas,
+    territories: recommendedTerritories,
   });
   return {
     schemaVersion: 1,
@@ -111,7 +111,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     contributors: people,
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
-    highlights: highlightsOf(facts, scoped, knowledgeSection, recommendedAreas),
+    stories: storiesOf(facts, scoped, knowledgeSection, recommendedTerritories),
     ...comparisonField(facts, commits, previous),
   };
 };

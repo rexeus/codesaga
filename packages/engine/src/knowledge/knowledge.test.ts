@@ -250,11 +250,11 @@ describe("knowledge chain rule and scope", () => {
       withoutActiveExpert: 0,
       truckFactor: { value: 0, people: [] },
       directories: [],
-      areas: {
-        depth: 1,
-        recommendedDepth: 1,
-        reason: "level 1: 0 areas with 3+ files for 0 contributors",
-        levels: [{ depth: 1, totalAreas: 0, areas: [] }],
+      territories: {
+        detail: 1,
+        recommendedDetail: 1,
+        reason: "detail 1: 0 territories with 3+ files for 0 contributors",
+        details: [{ detail: 1, totalTerritories: 0, territories: [] }],
       },
     });
   });

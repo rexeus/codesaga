@@ -25,17 +25,17 @@
     "minDirectoryFiles": 3,
     "islandShare": 0.8,
     "orphanedShare": 0.5,
-    "areas": {
+    "territories": {
       "minFiles": 3,
-      "maxDepth": 6,
+      "maxDetail": 6,
       "giantShare": 0.4,
       "giantSplitSteps": 2,
       "recommendationActiveDays": 90,
-      "areasPerContributor": 2,
-      "minTargetAreas": 4,
-      "maxTargetAreas": 25
+      "territoriesPerContributor": 2,
+      "minTargetTerritories": 4,
+      "maxTargetTerritories": 25
     },
-    "highlights": {
+    "stories": {
       "streakMinDays": 7,
       "busiestDayMinCommits": 5,
       "rhythmMinCommits": 20,
@@ -43,7 +43,7 @@
       "nightFromHour": 22,
       "nightToHour": 5,
       "weekendShare": 0.25,
-      "quietAreaMonths": 6,
+      "quietTerritoryMonths": 6,
       "newcomersMinPeople": 2,
       "newcomerDays": 90,
       "anniversaryWindowDays": 7,
@@ -55,8 +55,8 @@
       "sharedTruckFactor": 4,
       "fadingFromDays": 90,
       "fadingToDays": 183,
-      "newDays": 90,
-      "newAfterStartDays": 180,
+      "newTerritoryDays": 90,
+      "newTerritoryAfterStartDays": 180,
       "handoverDays": 180,
       "inFocusDays": 90,
       "quietDays": 183,
@@ -64,16 +64,16 @@
       "newcomerFriendlyDays": 180,
       "wellTestedShare": 0.4,
       "minCommitsForShare": 10,
-      "allRounderAreaShare": 0.5,
-      "allRounderMinAreas": 4,
+      "allRounderTerritoryShare": 0.5,
+      "allRounderMinTerritories": 4,
       "specialistShare": 0.8,
-      "cleanerNetDeletedLines": 500,
+      "tidierNetDeletedLines": 500,
       "founderShare": 0.25,
       "testerShare": 0.4,
       "documenterShare": 0.4,
       "steadyMonths": 6,
-      "welcomeDays": 90,
-      "returningGapDays": 183,
+      "newHereDays": 90,
+      "backAgainGapDays": 183,
       "reviewerReviews": 10
     }
   },
@@ -1312,7 +1312,7 @@
         {
           "kind": "all-rounder",
           "label": "All-rounder",
-          "evidence": "Commits in 7 of 11 areas."
+          "evidence": "Commits in 7 of 11 territories."
         },
         {
           "kind": "founder",
@@ -1509,8 +1509,8 @@
       "status": "new",
       "badges": [
         {
-          "kind": "welcome",
-          "label": "Welcome",
+          "kind": "new-here",
+          "label": "New here",
           "evidence": "First commit on 2026-07-08, 84 days ago."
         }
       ]
@@ -2234,15 +2234,15 @@
         "reasons": []
       }
     ],
-    "areas": {
-      "depth": 1,
-      "recommendedDepth": 1,
-      "reason": "level 1: 11 areas with 3+ files for 4 active contributors",
-      "levels": [
+    "territories": {
+      "detail": 1,
+      "recommendedDetail": 1,
+      "reason": "detail 1: 11 territories with 3+ files for 4 active contributors",
+      "details": [
         {
-          "depth": 1,
-          "totalAreas": 11,
-          "areas": [
+          "detail": 1,
+          "totalTerritories": 11,
+          "territories": [
             {
               "path": "docs",
               "files": 14,
@@ -2273,22 +2273,25 @@
                 "Lena Fischer is the only expert on 12 of 14 files",
                 "no active expert for 12 of 14 files (last expert commit 2025-11-14)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Lena Fischer is the only expert on 12 of 14 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "12 of 14 files have no active expert."
                 },
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Maya Lindqvist is the only active expert."
                 }
               ],
@@ -2363,11 +2366,13 @@
               "badges": [
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "30 of 52 files have no active expert."
                 },
                 {
                   "kind": "handover",
+                  "category": "knowledge",
                   "label": "Handover",
                   "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
                 }
@@ -2432,11 +2437,13 @@
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Jonas Weber is the only expert on 17 of 19 files."
                 },
                 {
                   "kind": "knowledge-fading",
+                  "category": "knowledge",
                   "label": "Knowledge fading",
                   "evidence": "Jonas Weber, expert on 18 of 19 files, last committed 102 days ago."
                 }
@@ -2474,6 +2481,7 @@
               "badges": [
                 {
                   "kind": "knowledge-fading",
+                  "category": "knowledge",
                   "label": "Knowledge fading",
                   "evidence": "Aiko Tanaka, expert on 42 of 58 files, last committed 148 days ago."
                 }
@@ -2506,7 +2514,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -2537,7 +2545,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -2568,7 +2576,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -2599,12 +2607,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "new",
-                  "label": "New",
+                  "kind": "new-territory",
+                  "category": "activity",
+                  "label": "New territory",
                   "evidence": "Created on 2026-08-19, 42 days ago."
                 }
               ]
@@ -2659,11 +2668,13 @@
               "badges": [
                 {
                   "kind": "in-focus",
+                  "category": "activity",
                   "label": "In focus",
-                  "evidence": "521 commits in the window, the most of any area."
+                  "evidence": "521 commits in the window, the most of any territory."
                 },
                 {
                   "kind": "newcomer-friendly",
+                  "category": "knowledge",
                   "label": "Newcomer-friendly",
                   "evidence": "2 people made their first commit here in the last 180 days."
                 }
@@ -2719,6 +2730,7 @@
               "badges": [
                 {
                   "kind": "well-tested",
+                  "category": "code",
                   "label": "Well tested",
                   "evidence": "46% of the files are tests (33 of 71)."
                 }
@@ -2774,6 +2786,7 @@
               "badges": [
                 {
                   "kind": "shared-knowledge",
+                  "category": "knowledge",
                   "label": "Shared knowledge",
                   "evidence": "4 active experts and a truck factor of 4."
                 }
@@ -2782,9 +2795,9 @@
           ]
         },
         {
-          "depth": 2,
-          "totalAreas": 27,
-          "areas": [
+          "detail": 2,
+          "totalTerritories": 27,
+          "territories": [
             {
               "path": "packages/db/migrations",
               "files": 30,
@@ -2806,16 +2819,18 @@
                 "Dmitri Volkov is the only expert on 27 of 30 files",
                 "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-04-22T08:14:50.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Dmitri Volkov is the only expert on 27 of 30 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "27 of 30 files have no active expert."
                 }
@@ -2842,21 +2857,24 @@
                 "Lena Fischer is the only expert on 8 of 9 files",
                 "no active expert for 8 of 9 files (last expert commit 2025-11-14)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-01-12T11:03:27.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Lena Fischer is the only expert on 8 of 9 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "8 of 9 files have no active expert."
                 },
                 {
                   "kind": "quiet",
+                  "category": "activity",
                   "label": "Quiet",
                   "evidence": "Unchanged since 2026-01-12, 261 days."
                 }
@@ -2892,22 +2910,25 @@
                 "Lena Fischer is the only expert on 4 of 5 files",
                 "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Lena Fischer is the only expert on 4 of 5 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "4 of 5 files have no active expert."
                 },
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Maya Lindqvist is the only active expert."
                 }
               ]
@@ -2939,16 +2960,18 @@
                 }
               ],
               "reasons": ["Jonas Weber is the only expert on 13 of 16 files"],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Jonas Weber is the only expert on 13 of 16 files."
                 },
                 {
                   "kind": "knowledge-fading",
+                  "category": "knowledge",
                   "label": "Knowledge fading",
                   "evidence": "Jonas Weber, expert on 14 of 16 files, last committed 102 days ago."
                 }
@@ -2986,6 +3009,7 @@
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Aiko Tanaka is the only expert on 5 of 6 files."
                 }
@@ -3014,12 +3038,14 @@
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Jonas Weber is the only expert on 3 of 3 files."
                 },
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Jonas Weber is the only active expert."
                 }
               ]
@@ -3051,11 +3077,12 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "knowledge-fading",
+                  "category": "knowledge",
                   "label": "Knowledge fading",
                   "evidence": "Aiko Tanaka, expert on 33 of 44 files, last committed 148 days ago."
                 }
@@ -3088,7 +3115,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -3150,7 +3177,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -3176,8 +3203,9 @@
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Priya Raman is the only active expert."
                 }
               ]
@@ -3209,12 +3237,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "new",
-                  "label": "New",
+                  "kind": "new-territory",
+                  "category": "activity",
+                  "label": "New territory",
                   "evidence": "Created on 2026-08-19, 42 days ago."
                 }
               ]
@@ -3246,7 +3275,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -3272,8 +3301,9 @@
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -3300,8 +3330,9 @@
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -3324,12 +3355,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-28T19:02:26.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Sam Okafor is the only active expert."
                 }
               ]
@@ -3352,12 +3384,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -3407,13 +3440,14 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "in-focus",
+                  "category": "activity",
                   "label": "In focus",
-                  "evidence": "448 commits in the window, the most of any area."
+                  "evidence": "448 commits in the window, the most of any territory."
                 }
               ]
             },
@@ -3462,7 +3496,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -3493,7 +3527,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -3533,11 +3567,12 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "handover",
+                  "category": "knowledge",
                   "label": "Handover",
                   "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
                 }
@@ -3570,7 +3605,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -3601,7 +3636,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -3632,7 +3667,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -3663,7 +3698,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             },
@@ -3712,11 +3747,12 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "shared-knowledge",
+                  "category": "knowledge",
                   "label": "Shared knowledge",
                   "evidence": "4 active experts and a truck factor of 4."
                 }
@@ -3740,16 +3776,16 @@
                 }
               ],
               "reasons": [],
-              "kind": "rest",
+              "kind": "other",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             }
           ]
         },
         {
-          "depth": 3,
-          "totalAreas": 41,
-          "areas": [
+          "detail": 3,
+          "totalTerritories": 41,
+          "territories": [
             {
               "path": "packages/db/migrations",
               "files": 30,
@@ -3771,16 +3807,18 @@
                 "Dmitri Volkov is the only expert on 27 of 30 files",
                 "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-04-22T08:14:50.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Dmitri Volkov is the only expert on 27 of 30 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "27 of 30 files have no active expert."
                 }
@@ -3807,21 +3845,24 @@
                 "Lena Fischer is the only expert on 8 of 9 files",
                 "no active expert for 8 of 9 files (last expert commit 2025-11-14)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-01-12T11:03:27.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Lena Fischer is the only expert on 8 of 9 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "8 of 9 files have no active expert."
                 },
                 {
                   "kind": "quiet",
+                  "category": "activity",
                   "label": "Quiet",
                   "evidence": "Unchanged since 2026-01-12, 261 days."
                 }
@@ -3857,22 +3898,25 @@
                 "Lena Fischer is the only expert on 4 of 5 files",
                 "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
               ],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Lena Fischer is the only expert on 4 of 5 files."
                 },
                 {
                   "kind": "orphaned",
+                  "category": "knowledge",
                   "label": "Orphaned",
                   "evidence": "4 of 5 files have no active expert."
                 },
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Maya Lindqvist is the only active expert."
                 }
               ]
@@ -3895,21 +3939,24 @@
                 }
               ],
               "reasons": ["Jonas Weber is the only expert on 8 of 9 files"],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Jonas Weber is the only expert on 8 of 9 files."
                 },
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Jonas Weber is the only active expert."
                 },
                 {
                   "kind": "knowledge-fading",
+                  "category": "knowledge",
                   "label": "Knowledge fading",
                   "evidence": "Jonas Weber, expert on 9 of 9 files, last committed 102 days ago."
                 }
@@ -3947,6 +3994,7 @@
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Aiko Tanaka is the only expert on 5 of 6 files."
                 }
@@ -3975,12 +4023,14 @@
               "badges": [
                 {
                   "kind": "island",
+                  "category": "knowledge",
                   "label": "Knowledge island",
                   "evidence": "Jonas Weber is the only expert on 3 of 3 files."
                 },
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Jonas Weber is the only active expert."
                 }
               ]
@@ -4012,11 +4062,12 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "knowledge-fading",
+                  "category": "knowledge",
                   "label": "Knowledge fading",
                   "evidence": "Aiko Tanaka, expert on 21 of 26 files, last committed 148 days ago."
                 }
@@ -4049,7 +4100,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -4080,7 +4131,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -4142,7 +4193,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4173,7 +4224,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4199,8 +4250,9 @@
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Priya Raman is the only active expert."
                 }
               ]
@@ -4232,12 +4284,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "new",
-                  "label": "New",
+                  "kind": "new-territory",
+                  "category": "activity",
+                  "label": "New territory",
                   "evidence": "Created on 2026-08-19, 42 days ago."
                 }
               ]
@@ -4269,7 +4322,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4291,12 +4344,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Maya Lindqvist is the only active expert."
                 }
               ]
@@ -4319,12 +4373,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Jonas Weber is the only active expert."
                 }
               ]
@@ -4347,12 +4402,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -4379,8 +4435,9 @@
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -4407,8 +4464,9 @@
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -4431,12 +4489,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-28T19:02:26.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Sam Okafor is the only active expert."
                 }
               ]
@@ -4459,12 +4518,13 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "single-expert",
-                  "label": "Single expert",
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
@@ -4496,13 +4556,14 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "in-focus",
+                  "category": "activity",
                   "label": "In focus",
-                  "evidence": "301 commits in the window, the most of any area."
+                  "evidence": "301 commits in the window, the most of any territory."
                 }
               ]
             },
@@ -4551,11 +4612,12 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "newcomer-friendly",
+                  "category": "knowledge",
                   "label": "Newcomer-friendly",
                   "evidence": "2 people made their first commit here in the last 180 days."
                 }
@@ -4588,7 +4650,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4619,7 +4681,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -4659,7 +4721,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4690,7 +4752,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -4721,7 +4783,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4752,7 +4814,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             },
@@ -4783,7 +4845,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4823,7 +4885,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4854,7 +4916,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -4885,7 +4947,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -4916,7 +4978,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             },
@@ -4947,7 +5009,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -4996,11 +5058,12 @@
                 }
               ],
               "reasons": [],
-              "kind": "directory",
+              "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "shared-knowledge",
+                  "category": "knowledge",
                   "label": "Shared knowledge",
                   "evidence": "4 active experts and a truck factor of 4."
                 }
@@ -5024,7 +5087,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "rest",
+              "kind": "other",
               "lastChangedAt": "2026-05-05T08:33:51.000Z",
               "badges": []
             },
@@ -5046,7 +5109,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "rest",
+              "kind": "other",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
@@ -5068,7 +5131,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "rest",
+              "kind": "other",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
@@ -5090,7 +5153,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "rest",
+              "kind": "other",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             }
@@ -5099,7 +5162,7 @@
       ]
     }
   },
-  "highlights": [
+  "stories": [
     {
       "kind": "orphaned-knowledge",
       "title": "Orphaned knowledge",
@@ -5108,7 +5171,7 @@
       "path": "packages/db"
     },
     {
-      "kind": "quiet-area",
+      "kind": "quiet-territory",
       "title": "Quiet corner",
       "detail": "docs/guides has not changed since 2026-01-12.",
       "value": 8,

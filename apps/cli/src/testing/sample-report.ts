@@ -13,23 +13,23 @@ const sampleUrl = new URL(
 export const sampleReport = (): Report =>
   Schema.decodeUnknownSync(Report)(JSON.parse(readFileSync(sampleUrl, "utf8")));
 
-type Areas = Report["knowledge"]["areas"];
+type Territories = Report["knowledge"]["territories"];
 
-/** `report` with `change` applied to the areas of every level; `totalAreas` stays as it is. */
-export const mapAreas = (
+/** `report` with `change` applied to the territories of every detail; `totalTerritories` stays as it is. */
+export const mapTerritories = (
   report: Report,
   change: (
-    areas: Areas["levels"][number]["areas"],
-  ) => Areas["levels"][number]["areas"],
+    territories: Territories["details"][number]["territories"],
+  ) => Territories["details"][number]["territories"],
 ): Report => ({
   ...report,
   knowledge: {
     ...report.knowledge,
-    areas: {
-      ...report.knowledge.areas,
-      levels: Arr.map(report.knowledge.areas.levels, (level) => ({
-        ...level,
-        areas: change(level.areas),
+    territories: {
+      ...report.knowledge.territories,
+      details: Arr.map(report.knowledge.territories.details, (detail) => ({
+        ...detail,
+        territories: change(detail.territories),
       })),
     },
   },

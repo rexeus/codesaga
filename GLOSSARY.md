@@ -62,7 +62,7 @@ The words codesaga uses in the report, the terminal, the dashboard and the code.
 
 **Badge** — a labelled fact about a territory or a contributor that passes a fixed threshold in `thresholds.badges`; each carries its `kind`, `label`, and the `evidence` behind it. A badge is positive or neutral for people, never a score, and there are none about working hours. Territory badges also carry a `category`: _Knowledge_, _Code_ or _Activity_. A card shows three badges at most and counts the rest.
 
-Territory badges, in the order a card ranks them:
+Territory badges, grouped by category:
 
 - _Knowledge:_ **Knowledge island** (`island`) — a territory that is a knowledge island. **Orphaned** (`orphaned`) — a territory with orphaned knowledge. **One expert** (`one-expert`) — exactly one active expert, and not an island. **Shared knowledge** (`shared-knowledge`) — at least 4 active experts and a truck factor of at least 4. **Knowledge fading** (`knowledge-fading`) — the main expert has been silent for 90 to 183 days. **Handover** (`handover`) — the previous main expert (the dormant expert on the most files) is replaced by an active main expert whose first commit to the territory is at most 180 days old. **Newcomer-friendly** (`newcomer-friendly`) — at least 2 people made their first commit here in the last 180 days.
 - _Activity:_ **New territory** (`new-territory`) — the first commit is at most 90 days old and at least 180 days after the repository's own first commit, so the territories of a young repository are not new one by one. **In focus** (`in-focus`) — the most human and agent-assisted commits of any territory at this detail in the last 90 days, whatever the activity window. **Quiet** (`quiet`) — unchanged for at least 183 days.

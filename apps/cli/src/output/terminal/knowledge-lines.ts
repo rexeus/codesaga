@@ -1,4 +1,4 @@
-// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest areas at the chosen depth.
+// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest territories at the chosen detail.
 // Every name and path that came from git passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -13,27 +13,28 @@ import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 import type { Column } from "./table.js";
 
-const TOP_AREAS = 5;
+const TOP_TERRITORIES = 5;
 const MAX_PATH_WIDTH = 24;
 const MAX_TRUCK_FACTOR_NAMES = 3;
 
 type Knowledge = Report["knowledge"];
-type Area = Knowledge["areas"]["levels"][number]["areas"][number];
-type Expert = Area["experts"][number];
-type LineOwners = NonNullable<Area["lineOwners"]>;
+type Territory =
+  Knowledge["territories"]["details"][number]["territories"][number];
+type Expert = Territory["experts"][number];
+type LineOwners = NonNullable<Territory["lineOwners"]>;
 
 const LINE_OWNER_COLUMN: Column = {
   header: "leading line owner",
   align: "left",
 };
-const INACTIVE = " (inactive)";
+const DORMANT = " (dormant)";
 
 /** A person's name, escaped and cut to the name column. */
 export const nameOf = (person: { name: string }): string =>
   fitEscaped(person.name, MAX_NAME_WIDTH);
 
-const inactiveMark = (person: { active: boolean }): string =>
-  person.active ? "" : INACTIVE;
+const dormantMark = (person: { active: boolean }): string =>
+  person.active ? "" : DORMANT;
 
 const truckFactorLine = ({ truckFactor }: Knowledge): string => {
   if (truckFactor.value === 0) {
@@ -41,7 +42,7 @@ const truckFactorLine = ({ truckFactor }: Knowledge): string => {
   }
   const named = truckFactor.people
     .slice(0, MAX_TRUCK_FACTOR_NAMES)
-    .map((person) => `${nameOf(person)}${inactiveMark(person)}`);
+    .map((person) => `${nameOf(person)}${dormantMark(person)}`);
   const more = truckFactor.people.length - named.length;
   const people =
     more > 0 ? `${named.join(", ")} and ${more} more` : named.join(", ");
@@ -58,11 +59,11 @@ export const badgesOf = ({
 }): string =>
   [...(orphaned ? ["orphaned"] : []), ...(island ? ["island"] : [])].join(", ");
 
-const leadingExpert = (area: Area): string => {
-  const [top]: ReadonlyArray<Expert> = area.experts;
+const leadingExpert = (territory: Territory): string => {
+  const [top]: ReadonlyArray<Expert> = territory.experts;
   return top === undefined
     ? "no expert"
-    : `${nameOf(top)} ${share(top.files, area.files)}${inactiveMark(top)}`;
+    : `${nameOf(top)} ${share(top.files, territory.files)}${dormantMark(top)}`;
 };
 
 /** An owner's name, marked when the account is an agent or a bot. */
@@ -81,22 +82,24 @@ const leadingLineOwner = (lineOwners: LineOwners | undefined): string => {
 
 const OTHER_FILES = " (other)";
 
-/** The area's path, escaped and cut to the column; the small areas of a directory are marked as its other files. */
-const areaLabel = ({ path, kind }: Area): string =>
-  kind === "rest"
+/** The territory's path, escaped and cut to the column; the small territories of a directory are marked as its other files. */
+const territoryLabel = ({ path, kind }: Territory): string =>
+  kind === "other"
     ? `${fitEscaped(path, MAX_PATH_WIDTH - OTHER_FILES.length)}${OTHER_FILES}`
     : fitEscaped(path, MAX_PATH_WIDTH);
 
-const areaLines = (
-  { areas }: Knowledge,
+const territoryLines = (
+  { territories }: Knowledge,
   style: Style,
 ): ReadonlyArray<string> => {
-  const level = areas.levels.find(({ depth }) => depth === areas.depth);
-  const top = (level?.areas ?? []).slice(0, TOP_AREAS);
+  const shown = territories.details.find(
+    ({ detail }) => detail === territories.detail,
+  );
+  const top = (shown?.territories ?? []).slice(0, TOP_TERRITORIES);
   if (top.length === 0) {
     return [];
   }
-  const blamed = top.some((area) => area.lineOwners !== undefined);
+  const blamed = top.some((territory) => territory.lineOwners !== undefined);
   const columns: ReadonlyArray<Column> = [
     { header: "files", align: "right" },
     { header: "flags", align: "left" },
@@ -105,16 +108,18 @@ const areaLines = (
   ];
   return [
     ...labelledTable(
-      "Knowledge areas",
-      top.map((area) => areaLabel(area)),
+      "Knowledge territories",
+      top.map((territory) => territoryLabel(territory)),
       renderTable(
         columns,
-        top.map((area) =>
+        top.map((territory) =>
           [
-            plain(String(area.files)),
-            plain(badgesOf(area)),
-            plain(leadingExpert(area)),
-          ].concat(blamed ? [plain(leadingLineOwner(area.lineOwners))] : []),
+            plain(String(territory.files)),
+            plain(badgesOf(territory)),
+            plain(leadingExpert(territory)),
+          ].concat(
+            blamed ? [plain(leadingLineOwner(territory.lineOwners))] : [],
+          ),
         ),
         style,
       ),
@@ -124,9 +129,9 @@ const areaLines = (
       "",
       [
         style.dim(
-          `Areas at level ${areas.depth} of ${areas.levels.length} (recommended: ${areas.recommendedDepth})`,
+          `Territories at detail ${territories.detail} of ${territories.details.length} (recommended: ${territories.recommendedDetail})`,
         ),
-        style.dim(areas.reason),
+        style.dim(territories.reason),
       ],
       style,
     ),
@@ -143,12 +148,12 @@ const soleContributorLine = (report: Report): string | null => {
   return report.overview.contributors.total === 1 &&
     truckFactor.value === 1 &&
     only !== undefined
-    ? `one contributor — ${nameOf(only)}${inactiveMark(only)} is the only expert everywhere`
+    ? `one contributor — ${nameOf(only)}${dormantMark(only)} is the only expert everywhere`
     : null;
 };
 
 /**
- * The knowledge block: the truck factor, and the five riskiest areas of the chosen level when there are any.
+ * The knowledge block: the truck factor, and the five riskiest territories of the chosen detail when there are any.
  * A single-contributor repository gets one line instead.
  */
 export const knowledgeLines = (
@@ -161,6 +166,6 @@ export const knowledgeLines = (
   }
   return [
     ...section("Truck factor", [truckFactorLine(report.knowledge)], style),
-    ...areaLines(report.knowledge, style),
+    ...territoryLines(report.knowledge, style),
   ];
 };

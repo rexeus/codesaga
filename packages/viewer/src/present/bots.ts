@@ -19,7 +19,7 @@ type ToolView = {
   readonly counts: string;
 };
 
-/** The compact "Bots & agents" card: who wrote the commits, and which tools took part. */
+/** The Bots & Agents card: who wrote the commits, and which tools took part. */
 export type BotsCard = {
   readonly parts: readonly AuthorshipPart[];
   readonly tools: readonly ToolView[];

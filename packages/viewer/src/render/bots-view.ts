@@ -4,6 +4,7 @@ import { botsCard } from "../present/bots.js";
 import { formatCount } from "../present/format.js";
 import { h } from "./dom.js";
 import { icon } from "./icons.js";
+import { section } from "./section.js";
 import { bindTooltip } from "./tooltip.js";
 
 type Card = NonNullable<ReturnType<typeof botsCard>>;
@@ -57,29 +58,23 @@ const tools = ({ tools: detected }: Card): HTMLElement =>
     ),
   );
 
+const DESCRIPTION =
+  "Who wrote the commits. Detected in the history, not counted as contributors.";
+
 /**
- * The compact "Bots & agents" card: who wrote the commits as one bar and the
- * detected tools. Null when the history shows no bot or agent.
+ * The Bots & Agents section: who wrote the commits as one bar and the detected
+ * tools. Null when the history shows no bot or agent.
  */
 export const renderBots = (report: Report): HTMLElement | null => {
   const card = botsCard(report);
   if (card === null) {
     return null;
   }
-  return h(
-    "div",
-    "card bots",
-    h(
-      "div",
-      "",
-      h("h3", "", "Bots & agents"),
-      h(
-        "div",
-        "sub",
-        "Who wrote the commits. Detected in the history, not counted as contributors.",
-      ),
-    ),
-    authorship(card),
-    tools(card),
+  return section(
+    "bots",
+    "Bots & Agents",
+    "Who else commits",
+    DESCRIPTION,
+    h("div", "card bots", authorship(card), tools(card)),
   );
 };

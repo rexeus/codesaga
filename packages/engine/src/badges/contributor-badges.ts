@@ -1,22 +1,22 @@
 // Owns the badges of one contributor: which positive or neutral achievements their commits earn, in priority order.
-// Apart from the contributors section because the rules need the areas, the full history and the files each person founded.
-// Cost: a few passes over the contributor's own commits plus one lookup per changed path into the areas.
+// Apart from the contributors section because the rules need the territories, the full history and the files each person founded.
+// Cost: a few passes over the contributor's own commits plus one lookup per changed path into the territories.
 
 import type { DateTime } from "effect";
 
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { countCodeLines } from "../history/history.js";
 import type { ContributorBadge } from "../report/badges.js";
-import { areaNameOf, percentOf } from "../report/sentences.js";
+import { territoryNameOf, percentOf } from "../report/sentences.js";
 import { isDocPath, isTestPath } from "../universe/path-kinds.js";
 import { TENURE_BADGE_THRESHOLDS, tenureBadges } from "./contributor-tenure.js";
 
 /** The rules behind the contributor badges, for the report's `thresholds.badges`. */
 export const CONTRIBUTOR_BADGE_THRESHOLDS = {
-  allRounderAreaShare: 0.5,
-  allRounderMinAreas: 4,
+  allRounderTerritoryShare: 0.5,
+  allRounderMinTerritories: 4,
   specialistShare: 0.8,
-  cleanerNetDeletedLines: 500,
+  tidierNetDeletedLines: 500,
   founderShare: 0.25,
   testerShare: 0.4,
   documenterShare: 0.4,
@@ -27,22 +27,22 @@ export const CONTRIBUTOR_BADGE_THRESHOLDS = {
 };
 
 const {
-  allRounderAreaShare,
-  allRounderMinAreas,
+  allRounderTerritoryShare,
+  allRounderMinTerritories,
   specialistShare,
-  cleanerNetDeletedLines,
+  tidierNetDeletedLines,
   founderShare,
   testerShare,
   documenterShare,
   minCommitsForShare,
 } = CONTRIBUTOR_BADGE_THRESHOLDS;
 
-/** An area of the recommended level as the badges read it. */
-type ContributorBadgeArea = {
+/** A territory of the recommended detail as the badges read it. */
+type ContributorBadgeTerritory = {
   readonly path: string;
-  /** A `rest` area groups small leftovers and earns nobody a badge. */
-  readonly kind: "package" | "directory" | "rest";
-  /** The area's universe files, repository-relative. */
+  /** An `other` territory groups small leftovers and earns nobody a badge. */
+  readonly kind: "package" | "folder" | "other";
+  /** The territory's universe files, repository-relative. */
   readonly paths: ReadonlyArray<string>;
   /** Emails of the experts with a commit in the activity window of `thresholds.activeDays`. */
   readonly activeExperts: ReadonlyArray<string>;
@@ -54,15 +54,15 @@ export type ContributorBadgeFacts = {
   readonly now: DateTime.Utc;
   /**
    * The time of the first commit of anyone who counts as a contributor, over
-   * the full history; `welcome` needs someone earlier. Undefined when the
-   * history is incomplete, as in a shallow clone: then `welcome` is withheld.
+   * the full history; `new-here` needs someone earlier. Undefined when the
+   * history is incomplete, as in a shallow clone: then `new-here` is withheld.
    */
   readonly repositoryStart: number | undefined;
   /**
-   * The areas of the recommended level; they decide all-rounder, specialist
+   * The territories of the recommended detail; they decide all-rounder, specialist
    * and keeper, which are withheld without them.
    */
-  readonly areas?: ReadonlyArray<ContributorBadgeArea>;
+  readonly territories?: ReadonlyArray<ContributorBadgeTerritory>;
   /** How many people count as contributors over the full history; with one, `all-rounder` and `keeper` compare against nobody and are withheld. */
   readonly historyContributors: number;
   /** Whether a changed path counts toward code lines. */
@@ -75,83 +75,86 @@ type Context = ContributorBadgeFacts & {
   readonly email: string;
 };
 
-type AreaActivity = {
-  /** Commits per area, each commit counting once per area it touches; areas without a commit are absent. */
-  readonly perArea: ReadonlyMap<ContributorBadgeArea, number>;
-  /** Commits that touch at least one of the areas. */
-  readonly inAreas: number;
+type TerritoryActivity = {
+  /** Commits per territory, each commit counting once per territory it touches; territories without a commit are absent. */
+  readonly perTerritory: ReadonlyMap<ContributorBadgeTerritory, number>;
+  /** Commits that touch at least one of the territories. */
+  readonly inTerritories: number;
 };
 
-const areaActivity = (
+const territoryActivity = (
   commits: ReadonlyArray<ClassifiedCommit>,
-  areas: ReadonlyArray<ContributorBadgeArea>,
-): AreaActivity => {
-  const areaOfPath = new Map(
-    namedAreas(areas).flatMap((area) =>
-      area.paths.map((path) => [path, area] as const),
+  territories: ReadonlyArray<ContributorBadgeTerritory>,
+): TerritoryActivity => {
+  const territoryOfPath = new Map(
+    namedTerritories(territories).flatMap((territory) =>
+      territory.paths.map((path) => [path, territory] as const),
     ),
   );
-  const perArea = new Map<ContributorBadgeArea, number>();
-  let inAreas = 0;
+  const perTerritory = new Map<ContributorBadgeTerritory, number>();
+  let inTerritories = 0;
   for (const { changes } of commits) {
     const touched = new Set(
-      changes.flatMap(({ path }) => areaOfPath.get(path) ?? []),
+      changes.flatMap(({ path }) => territoryOfPath.get(path) ?? []),
     );
-    inAreas += touched.size > 0 ? 1 : 0;
-    for (const area of touched) {
-      perArea.set(area, (perArea.get(area) ?? 0) + 1);
+    inTerritories += touched.size > 0 ? 1 : 0;
+    for (const territory of touched) {
+      perTerritory.set(territory, (perTerritory.get(territory) ?? 0) + 1);
     }
   }
-  return { perArea, inAreas };
+  return { perTerritory, inTerritories };
 };
 
-const namedAreas = (
-  areas: ReadonlyArray<ContributorBadgeArea>,
-): ReadonlyArray<ContributorBadgeArea> =>
-  areas.filter(({ kind }) => kind !== "rest");
+const namedTerritories = (
+  territories: ReadonlyArray<ContributorBadgeTerritory>,
+): ReadonlyArray<ContributorBadgeTerritory> =>
+  territories.filter(({ kind }) => kind !== "other");
 
 /** With one contributor in the history there is nobody to set a person against. */
 const isSolo = ({ historyContributors }: Context): boolean =>
   historyContributors <= 1;
 
 const allRounder = (context: Context) => {
-  const { commits, areas = [] } = context;
-  const total = namedAreas(areas).length;
-  const touched = areaActivity(commits, areas).perArea.size;
+  const { commits, territories = [] } = context;
+  const total = namedTerritories(territories).length;
+  const touched = territoryActivity(commits, territories).perTerritory.size;
   return !isSolo(context) &&
-    touched >= allRounderMinAreas &&
-    touched / total >= allRounderAreaShare
+    touched >= allRounderMinTerritories &&
+    touched / total >= allRounderTerritoryShare
     ? {
         kind: "all-rounder" as const,
         label: "All-rounder",
-        evidence: `Commits in ${touched} of ${total} areas.`,
+        evidence: `Commits in ${touched} of ${total} territories.`,
       }
     : undefined;
 };
 
-const specialist = ({ commits, areas = [] }: Context) => {
-  const { perArea, inAreas } = areaActivity(commits, areas);
-  const [top] = [...perArea].toSorted(
+const specialist = ({ commits, territories = [] }: Context) => {
+  const { perTerritory, inTerritories } = territoryActivity(
+    commits,
+    territories,
+  );
+  const [top] = [...perTerritory].toSorted(
     ([a, countA], [b, countB]) =>
       countB - countA || a.path.localeCompare(b.path),
   );
   return top !== undefined &&
-    inAreas >= minCommitsForShare &&
-    top[1] / inAreas >= specialistShare
+    inTerritories >= minCommitsForShare &&
+    top[1] / inTerritories >= specialistShare
     ? {
         kind: "specialist" as const,
-        label: `Specialist: ${areaNameOf(top[0].path)}`,
-        evidence: `${percentOf(top[1] / inAreas)} of the commits fall into ${areaNameOf(top[0].path)}.`,
+        label: `${territoryNameOf(top[0].path, true)} specialist`,
+        evidence: `${percentOf(top[1] / inTerritories)} of the commits fall into ${territoryNameOf(top[0].path)}.`,
       }
     : undefined;
 };
 
-const cleaner = ({ commits, isCodePath }: Context) => {
+const tidier = ({ commits, isCodePath }: Context) => {
   const { added, deleted } = countCodeLines(commits, isCodePath);
-  return deleted - added >= cleanerNetDeletedLines
+  return deleted - added >= tidierNetDeletedLines
     ? {
-        kind: "cleaner" as const,
-        label: "Cleaner",
+        kind: "tidier" as const,
+        label: "Tidier",
         evidence: `Removed ${deleted - added} more code lines than added.`,
       }
     : undefined;
@@ -167,11 +170,11 @@ const founder = ({ founded }: Context) =>
     : undefined;
 
 const keeper = (context: Context) => {
-  const { email, areas = [] } = context;
+  const { email, territories = [] } = context;
   if (isSolo(context)) {
     return undefined;
   }
-  const [largest] = namedAreas(areas)
+  const [largest] = namedTerritories(territories)
     .filter(
       ({ activeExperts }) =>
         activeExperts.length === 1 && activeExperts[0] === email,
@@ -183,8 +186,8 @@ const keeper = (context: Context) => {
     ? undefined
     : {
         kind: "keeper" as const,
-        label: `Keeper of ${areaNameOf(largest.path)}`,
-        evidence: `The only active expert of ${areaNameOf(largest.path)}.`,
+        label: `Keeper of ${territoryNameOf(largest.path)}`,
+        evidence: `The only active expert of ${territoryNameOf(largest.path)}.`,
       };
 };
 
@@ -218,14 +221,14 @@ const documenter = ({ commits }: Context) => {
 };
 
 const RULES: ReadonlyArray<(context: Context) => ContributorBadge | undefined> =
-  [allRounder, specialist, cleaner, founder, keeper, tester, documenter];
+  [allRounder, specialist, tidier, founder, keeper, tester, documenter];
 
 /**
  * The badges the contributor earns, most important first. Positive or neutral
- * only, and none about working hours. `welcome` stands in for the "new" status
+ * only, and none about working hours. `new-here` stands in for the "new" status
  * pill. Each carries its rule and the numbers behind it as evidence.
  * `reviewer` is never awarded: GitHub reviews are not tied to identities yet.
- * Without `facts.areas` the three badges that need areas are withheld; in a
+ * Without `facts.territories` the three badges that need territories are withheld; in a
  * repository with one contributor over the full history `all-rounder` and
  * `keeper` are too, since they would compare the person with nobody.
  */

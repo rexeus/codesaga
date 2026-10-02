@@ -1,5 +1,5 @@
 // Owns calendar-month arithmetic in UTC: moving an instant by whole months and counting the whole months between two.
-// Badges and highlights measure "6 months" on the calendar, not as a fixed number of days.
+// Badges and stories measure "6 months" on the calendar, not as a fixed number of days.
 
 const MILLISECONDS_PER_SECOND = 1000;
 

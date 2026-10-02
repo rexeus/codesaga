@@ -147,14 +147,14 @@ table.people tbody tr:hover {
   opacity: 0.5;
 }
 
-.areachips {
+.folderchips {
   display: flex;
   flex-wrap: nowrap;
   gap: 6px;
   overflow: hidden;
 }
 
-.areachips span {
+.folderchips span {
   padding: 2px 8px;
   border: 1px solid var(--border);
   border-radius: 7px;
@@ -165,8 +165,8 @@ table.people tbody tr:hover {
   white-space: nowrap;
 }
 
-.areachips span.more,
-.areachips span.muted {
+.folderchips span.more,
+.folderchips span.muted {
   padding-left: 2px;
   border-color: transparent;
   background: none;
@@ -187,22 +187,10 @@ td.last small {
 
 .bots {
   display: grid;
-  grid-template-columns: 220px 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 28px;
   align-items: center;
-  margin-top: 20px;
   padding: 18px 22px;
-}
-
-.bots h3 {
-  font-size: 15px;
-  font-weight: 650;
-}
-
-.bots .sub {
-  margin-top: 2px;
-  color: var(--ink-3);
-  font-size: 13px;
 }
 
 .stack-bar {

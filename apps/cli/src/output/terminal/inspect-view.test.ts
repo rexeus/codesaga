@@ -67,7 +67,7 @@ describe("renderInspect", () => {
       "packages/db",
       "20 files · truck factor 1 · orphaned, island",
       "expert          files  share  sole  last commit",
-      "Dmitri Volkov      18    90%    17  1 year ago (inactive)",
+      "Dmitri Volkov      18    90%    17  1 year ago (dormant)",
       "Maya Lindqvist      4    20%     2  2 days ago",
       "32 commits in the window, last 2 days ago",
       "human 19 · agent-assisted 13",

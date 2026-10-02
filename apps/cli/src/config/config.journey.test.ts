@@ -7,7 +7,10 @@ import { Effect, Schema } from "effect";
 
 import type { GitRepository } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
-import { makeAreasProject, makeTeamProject } from "../testing/projects.js";
+import {
+  makeTerritoriesProject,
+  makeTeamProject,
+} from "../testing/projects.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -87,26 +90,32 @@ describe("codesaga defaults from a .codesaga.json", () => {
   );
 });
 
-describe("codesaga area depth from a .codesaga.json", () => {
+describe("codesaga territory detail from a .codesaga.json", () => {
   it.live(
-    "starts at the recommended level, the config's depth, or the --depth flag, in that order of precedence",
+    "starts at the recommended detail, the config's detail (or its deprecated depth), or the --detail flag, in that order of precedence",
     () =>
       Effect.gen(function* () {
-        const repo = yield* makeAreasProject;
-        const startLevel = (...flags: ReadonlyArray<string>) =>
+        const repo = yield* makeTerritoriesProject;
+        const startDetail = (...flags: ReadonlyArray<string>) =>
           Effect.map(analyzeJson(repo, ...flags), (report) => ({
-            depth: report.knowledge.areas.depth,
-            levels: report.knowledge.areas.levels.length,
+            detail: report.knowledge.territories.detail,
+            details: report.knowledge.territories.details.length,
           }));
 
-        const recommended = yield* startLevel();
+        const recommended = yield* startDetail();
+        writeConfig(repo, { detail: 2 });
+        const fromConfig = yield* startDetail();
+        const fromFlag = yield* startDetail("--detail", "1");
         writeConfig(repo, { depth: 2 });
-        const fromConfig = yield* startLevel();
-        const fromFlag = yield* startLevel("--depth", "1");
+        const fromDepthKey = yield* startDetail();
+        writeConfig(repo, { detail: 1, depth: 2 });
+        const detailOverDepth = yield* startDetail();
 
-        expect(recommended).toStrictEqual({ depth: 1, levels: 2 });
-        expect(fromConfig).toStrictEqual({ depth: 2, levels: 2 });
-        expect(fromFlag).toStrictEqual({ depth: 1, levels: 2 });
+        expect(recommended).toStrictEqual({ detail: 1, details: 2 });
+        expect(fromConfig).toStrictEqual({ detail: 2, details: 2 });
+        expect(fromFlag).toStrictEqual({ detail: 1, details: 2 });
+        expect(fromDepthKey).toStrictEqual({ detail: 2, details: 2 });
+        expect(detailOverDepth).toStrictEqual({ detail: 1, details: 2 });
       }).pipe(Effect.scoped),
   );
 });

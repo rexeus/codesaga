@@ -42,10 +42,10 @@ export const makeTeamProject = Effect.map(makeGitRepository, (repo) => {
 
 /**
  * Ada, 30 days ago, adds three files in each of `a/x`, `b/y` and `c/z`: the
- * knowledge areas have two levels, the top-level directories and the
- * directories below them, and level 1 is the recommended one.
+ * knowledge territories have two details, the top-level directories and the
+ * directories below them, and detail 1 is the recommended one.
  */
-export const makeAreasProject = Effect.map(makeGitRepository, (repo) => {
+export const makeTerritoriesProject = Effect.map(makeGitRepository, (repo) => {
   repo.commit(
     30,
     Object.fromEntries(

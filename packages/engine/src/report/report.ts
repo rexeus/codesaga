@@ -6,9 +6,9 @@ import { Schema } from "effect";
 import { AutomationTotals } from "./automation-totals.js";
 import { ContributorBadge } from "./badges.js";
 import { Comparison } from "./comparison.js";
-import { Highlight } from "./highlights.js";
 import { Knowledge } from "./knowledge-report.js";
 import { PullRequests } from "./pull-requests.js";
+import { Story } from "./stories.js";
 import { Thresholds } from "./thresholds.js";
 
 const Count = Schema.Natural;
@@ -28,9 +28,9 @@ const Repository = Schema.Struct({
    * counts undercount. `git fetch --unshallow` completes it. Everything that
    * needs a first commit is withheld, since the oldest commit shown is not the
    * first: no contributor has `status: "new"` (they are `active` or
-   * `dormant`) or the `welcome` badge, no area has the `new` or
+   * `dormant`) or the `new-here` badge, no territory has the `new-territory` or
    * `newcomer-friendly` badge, and there are no `anniversary` or `newcomers`
-   * highlights.
+   * stories.
    */
   shallow: Schema.Boolean,
   /** ISO timestamp of the oldest commit in scope over the full history; null without commits. */
@@ -131,7 +131,7 @@ const Contributor = Schema.Struct({
   lastCommitAt: Schema.String,
   /** A commit in the `thresholds.activeDays` days before now; `status` judges activity over 90 days. */
   active: Schema.Boolean,
-  /** The three directories with the most commits, at most two levels below the scope. */
+  /** The three directories with the most commits, at most two directories below the scope. */
   areas: Schema.Array(Schema.Struct({ path: Schema.String, commits: Count })),
   /**
    * Commits per week over the last 52 weeks before `window.until`, oldest
@@ -142,7 +142,7 @@ const Contributor = Schema.Struct({
   /**
    * `dormant`: no commit in the 90 days before now; `new`: not dormant, the
    * first commit over the full history lies at most
-   * `thresholds.badges.welcomeDays` days before now and someone committed
+   * `thresholds.badges.newHereDays` days before now and someone committed
    * before it (the founder of a young repository is `active`); otherwise
    * `active`. `new` and `active` together are the `overview.contributors.active90`
    * contributors; the `active` flag above, over 183 days, is wider.
@@ -208,7 +208,7 @@ export const Report = Schema.Struct({
    * Notable facts about the history and the team, most notable first, at most
    * six; empty when nothing passes a threshold.
    */
-  highlights: Schema.Array(Highlight).check(Schema.isMaxLength(6)),
+  stories: Schema.Array(Story).check(Schema.isMaxLength(6)),
   /** Only with `--compare`: the window against the span before it. */
   comparison: Schema.optionalKey(Comparison),
   /** Only with `--github`: pull requests and reviews read from GitHub. */

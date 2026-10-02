@@ -16,7 +16,6 @@ import type {
 import { formatCount } from "../present/format.js";
 import { showAllLabel, visibleRows } from "../present/row-limit.js";
 import { badgeChips } from "./badges.js";
-import { renderBots } from "./bots-view.js";
 import { h, s } from "./dom.js";
 import { icon } from "./icons.js";
 import { section } from "./section.js";
@@ -61,14 +60,14 @@ const weeklySparkline = (weekly: readonly number[]): SVGElement =>
     ),
   );
 
-const areaChips = ({ areas, moreAreas }: PersonRow): HTMLElement =>
+const folderChips = ({ folders, moreFolders }: PersonRow): HTMLElement =>
   h(
     "div",
-    "areachips",
-    ...(areas.length === 0
+    "folderchips",
+    ...(folders.length === 0
       ? [h("span", "muted", "—")]
-      : areas.map((path) => h("span", "", path))),
-    ...(moreAreas === 0 ? [] : [h("span", "more", `+${moreAreas}`)]),
+      : folders.map((path) => h("span", "", path))),
+    ...(moreFolders === 0 ? [] : [h("span", "more", `+${moreFolders}`)]),
   );
 
 const row = (person: PersonRow): HTMLElement => {
@@ -94,7 +93,7 @@ const row = (person: PersonRow): HTMLElement => {
     ),
     h("td", "", statusPill(person.status)),
     h("td", "", weeklySparkline(person.weekly)),
-    h("td", "", areaChips(person)),
+    h("td", "", folderChips(person)),
     h("td", "last", person.lastAgo, h("small", "", person.lastDate)),
   );
 };
@@ -158,7 +157,7 @@ const peopleHead = (filters: HTMLElement): HTMLElement =>
 
 /**
  * Everyone with a human or agent-assisted commit in the window as a list:
- * status, a sparkline of commits per week, main areas, badges and last activity.
+ * status, a sparkline of commits per week, main folders, badges and last activity.
  * Filters by status and "show all" past twelve redraw the list from the
  * report; the buttons themselves stay in place, so the keyboard focus stays
  * on the control that was used.
@@ -204,15 +203,13 @@ export const renderContributors = (report: Report): HTMLElement => {
   };
   paint();
 
-  const bots = renderBots(report);
   return section(
-    "contributors",
-    "People",
+    "team",
+    "Team",
     "Contributors",
     DESCRIPTION,
     ...(rows.length === 0
       ? [h("p", "empty", "No contributors in the window.")]
       : [peopleHead(filters), list, showAll, ...limitNote(report)]),
-    ...(bots === null ? [] : [bots]),
   );
 };

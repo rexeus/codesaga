@@ -29,6 +29,16 @@ import {
 
 const DEFAULT_HTML_FILE = "codesaga-report.html";
 
+/** `--detail`, and `--depth`, its hidden alias from before the glossary named the concept. */
+const detailFlag = (name: "detail" | "depth") =>
+  Flag.Int(name).pipe(
+    Flag.filter(
+      (value) => value >= 1,
+      (value) => `--${name} must be 1 or greater, got ${value}`,
+    ),
+    Flag.optional,
+  );
+
 export const analyzeCommand = Command.make(
   "analyze",
   {
@@ -79,19 +89,15 @@ export const analyzeCommand = Command.make(
       ),
       Flag.withDefault(true),
     ),
-    depth: Flag.Int("depth").pipe(
+    detail: detailFlag("detail").pipe(
       Flag.withDescription(
-        "Knowledge area level to start at, from 1 (packages) to deeper directories; a level beyond the deepest one means the deepest (default: the level recommended for the team)",
+        "Knowledge detail to start at, from 1 (packages) to finer folders; a detail beyond the finest one means the finest (default: the detail recommended for the team)",
       ),
-      Flag.filter(
-        (depth) => depth >= 1,
-        (depth) => `--depth must be 1 or greater, got ${depth}`,
-      ),
-      Flag.optional,
     ),
+    depth: detailFlag("depth").pipe(Flag.withHidden),
     limit: Flag.Int("limit").pipe(
       Flag.withDescription(
-        `Contributors and knowledge directories and areas (per level) to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
+        `Contributors and knowledge directories and territories (per detail) to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
       ),
       Flag.filter(
         (limit) => limit >= 0,
@@ -114,7 +120,10 @@ export const analyzeCommand = Command.make(
     // A path argument both locates the repository and narrows the scope,
     // so `codesaga analyze ../other-repo` works from anywhere.
     const target = yield* resolveAnalysisTarget(cwd, path);
-    const settings = yield* resolveSettings(target.cwd, flags);
+    const settings = yield* resolveSettings(target.cwd, {
+      ...flags,
+      detail: Option.orElse(flags.detail, () => flags.depth),
+    });
     const options: AnalyzeOptions = {
       ...target,
       ...engineOptions(settings),

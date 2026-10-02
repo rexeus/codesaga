@@ -1,4 +1,4 @@
-import type { Segment } from "../present/story.js";
+import type { Segment } from "../present/header.js";
 
 type Child = Node | string;
 type Attributes = Readonly<Record<string, string | number>>;

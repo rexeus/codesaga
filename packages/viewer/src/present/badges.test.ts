@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { areaBadges, contributorBadges } from "./badges.js";
+import { territoryBadges, contributorBadges } from "./badges.js";
 
 const badge = <Kind extends string>(kind: Kind, label: string = kind) => ({
   kind,
+  category: "knowledge" as const,
   label,
   evidence: `${label} because of the numbers`,
 });
 
-describe("areaBadges", () => {
+describe("territoryBadges", () => {
   it("shows up to three badges in the order of the report, with their rule as evidence", () => {
-    const row = areaBadges([
+    const row = territoryBadges([
       badge("orphaned", "Orphaned"),
       badge("island", "Knowledge island"),
     ]);
@@ -33,11 +34,11 @@ describe("areaBadges", () => {
   });
 
   it("folds the badges beyond the third into a count that names them", () => {
-    const row = areaBadges([
+    const row = territoryBadges([
       badge("orphaned", "Orphaned"),
       badge("island", "Island"),
       badge("quiet", "Quiet"),
-      badge("new", "New"),
+      badge("new-territory", "New territory"),
       badge("well-tested", "Well tested"),
     ]);
 
@@ -46,14 +47,17 @@ describe("areaBadges", () => {
       "Island",
       "Quiet",
     ]);
-    expect(row.more).toEqual({ count: 2, labels: "New, Well tested" });
+    expect(row.more).toEqual({
+      count: 2,
+      labels: "New territory, Well tested",
+    });
   });
 });
 
 describe("contributorBadges", () => {
-  it("draws welcome as news and the achievements plain", () => {
+  it("draws new here as news and the achievements plain", () => {
     const row = contributorBadges([
-      badge("welcome", "Welcome"),
+      badge("new-here", "New here"),
       badge("keeper", "Keeper of docs"),
     ]);
 

@@ -141,7 +141,7 @@ describe("contributors areas", () => {
 });
 
 describe("contributors activity", () => {
-  it("marks a contributor active with a commit exactly 183 days before now, and inactive one day earlier", () => {
+  it("marks a contributor active with a commit exactly 183 days before now, and not active one day earlier", () => {
     // 183 days before 2026-07-01T00:00:00Z is 2025-12-30T00:00:00Z
     const result = run([
       classifiedCommit({ time: at("2025-12-30T00:00:00Z") }),
@@ -181,7 +181,7 @@ describe("contributors activity", () => {
     expect(run([])).toStrictEqual([]);
   });
 
-  it("awards the badges the person's whole history earns, and welcome only after someone else started", () => {
+  it("awards the badges the person's whole history earns, and new here only after someone else started", () => {
     const first = classifiedCommit({
       time: at("2026-05-01T00:00:00Z"),
       changes: [{ path: "src/a.ts", added: 5, deleted: 0 }],
@@ -198,19 +198,19 @@ describe("contributors activity", () => {
       people.map(({ name, badges }) => [name, badges.map(({ kind }) => kind)]),
     ).toStrictEqual([
       ["Ada", ["founder"]],
-      ["Grace", ["founder", "welcome"]],
+      ["Grace", ["founder", "new-here"]],
     ]);
   });
 });
 
 describe("contributors badges in a solo repository", () => {
-  const areas = Array.from({ length: 4 }, (_, i) => ({
+  const territories = Array.from({ length: 4 }, (_, i) => ({
     path: `pkg${i}`,
     kind: "package" as const,
     paths: [`pkg${i}/a.ts`],
     activeExperts: ["ada@example.com"],
   }));
-  const ada = areas.map(({ path }) => touching(`${path}/a.ts`));
+  const ada = territories.map(({ path }) => touching(`${path}/a.ts`));
   const badgesOfAda = (history: Parameters<typeof run>[0]) =>
     contributors({
       commits: ada,
@@ -220,7 +220,7 @@ describe("contributors badges in a solo repository", () => {
       shallow: false,
       isCodePath: () => false,
       universePaths: [],
-      areas,
+      territories,
     })[0]?.badges.map(({ kind }) => kind);
 
   it("withholds all-rounder and keeper from the only contributor over the full history", () => {
@@ -255,10 +255,10 @@ describe("contributors in a shallow clone", () => {
       badges.map(({ kind }) => kind),
     ]);
 
-  it("calls nobody new and awards no welcome, though the same history in a complete clone does", () => {
+  it("calls nobody new and awards no new here, though the same history in a complete clone does", () => {
     expect(peopleOf(false)).toStrictEqual([
       ["Ada", "active", []],
-      ["Grace", "new", ["welcome"]],
+      ["Grace", "new", ["new-here"]],
     ]);
     expect(peopleOf(true)).toStrictEqual([
       ["Ada", "active", []],

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { samplePullRequests } from "../../testing/sample-pull-requests.js";
-import { mapAreas, sampleReport } from "../../testing/sample-report.js";
+import { mapTerritories, sampleReport } from "../../testing/sample-report.js";
 import { renderAnalysis } from "./analysis-view.js";
 import { makeStyle } from "./style.js";
 
@@ -20,7 +20,7 @@ describe("renderAnalysis", () => {
       "codesaga · aurora-web · main @ 9f3c2b1",
       "2 years · 2,246 commits · 8 contributors, 4 active in 90 days · 60,942 lines in 7 languages",
       "",
-      "Highlights                 Orphaned knowledge: 30 of 52 files in packages/db have no active expert.",
+      "Stories                    Orphaned knowledge: 30 of 52 files in packages/db have no active expert.",
       "                           Quiet corner: docs/guides has not changed since 2026-01-12.",
       '                           Biggest cleanup: One commit removed 4,120 more code lines than it added: "Drop the legacy checkout flow".',
       "Activity, last 12 months   █▆█▇▇▆▇▆▅▅▄▅  724 commits",
@@ -31,14 +31,14 @@ describe("renderAnalysis", () => {
       "  Jonas Weber                  205          175  3 months ago",
       "  Aiko Tanaka                  135          120  4 months ago",
       "Truck factor               2 · Maya Lindqvist, Tomás Herrera",
-      "Knowledge areas            files  flags             leading expert                leading line owner",
-      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Lena Fischer 86%",
-      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  Dmitri Volkov 67%",
+      "Knowledge territories      files  flags             leading expert               leading line owner",
+      "  docs                        14  orphaned, island  Lena Fischer 93% (dormant)   Lena Fischer 86%",
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (dormant)  Dmitri Volkov 67%",
       "  packages/auth               19  island            Jonas Weber 95%",
       "  apps/admin                  58                    Aiko Tanaka 72%",
       "  infra                       27                    Tomás Herrera 78%",
-      "                           Areas at level 1 of 3 (recommended: 1)",
-      "                           level 1: 11 areas with 3+ files for 4 active contributors",
+      "                           Territories at detail 1 of 3 (recommended: 1)",
+      "                           detail 1: 11 territories with 3+ files for 4 active contributors",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
@@ -48,16 +48,16 @@ describe("renderAnalysis", () => {
   });
 });
 
-describe("renderAnalysis highlights and automation", () => {
-  it("shows only the top 3 highlights and leaves the block out without any", () => {
+describe("renderAnalysis stories and automation", () => {
+  it("shows only the top 3 stories and leaves the block out without any", () => {
     const report = sampleReport();
 
     const withSix = renderAnalysis(report, plain);
-    const without = renderAnalysis({ ...report, highlights: [] }, plain);
+    const without = renderAnalysis({ ...report, stories: [] }, plain);
 
     expect(withSix.match(/^ {27}\S.*(?:cleanup|corner)/gmu)).toHaveLength(2);
     expect(withSix).not.toContain("Longest streak");
-    expect(without).not.toContain("Highlights");
+    expect(without).not.toContain("Stories");
   });
 
   it("shows the automation line only when a bot or an agent was detected", () => {
@@ -212,7 +212,7 @@ describe("renderAnalysis edge cases", () => {
     expect(lines[1]).toBe(
       "0 commits · 0 contributors, 0 active in 90 days · 0 lines in 0 languages",
     );
-    expect(lines.some((line) => line.startsWith("Highlights"))).toBe(true);
+    expect(lines.some((line) => line.startsWith("Stories"))).toBe(true);
     expect(lines.some((line) => line.startsWith("Automation"))).toBe(false);
     expect(lines).toContain("Languages                  no code files");
   });
@@ -220,8 +220,8 @@ describe("renderAnalysis edge cases", () => {
 
 describe("renderAnalysis escaping", () => {
   it("escapes control characters in names that came from git", () => {
-    const report = mapAreas(sampleReport(), (areas) =>
-      areas.map((area) => ({ ...area, path: "dir\u001B[31m" })),
+    const report = mapTerritories(sampleReport(), (territories) =>
+      territories.map((territory) => ({ ...territory, path: "dir\u001B[31m" })),
     );
     const hostile = {
       ...report,
@@ -234,7 +234,7 @@ describe("renderAnalysis escaping", () => {
         ...person,
         name: "\u001B[2Jevil",
       })),
-      highlights: [
+      stories: [
         { kind: "streak" as const, title: "T\u001B[31m", detail: "d\nx" },
       ],
       automation: {

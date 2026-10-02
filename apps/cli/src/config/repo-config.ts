@@ -23,12 +23,16 @@ const Signature = Schema.Struct({
   ),
 );
 
+const Detail = Schema.Int.check(Schema.isGreaterThanOrEqualTo(1));
+
 const RepoConfig = Schema.Struct({
   include: Schema.optionalKey(Schema.Array(Schema.String)),
   exclude: Schema.optionalKey(Schema.Array(Schema.String)),
   since: Schema.optionalKey(Schema.String),
   limit: Schema.optionalKey(Schema.Natural),
-  depth: Schema.optionalKey(Schema.Int.check(Schema.isGreaterThanOrEqualTo(1))),
+  detail: Schema.optionalKey(Detail),
+  /** Deprecated alias of `detail`, from before the glossary named the concept; `detail` wins when both are set. */
+  depth: Schema.optionalKey(Detail),
   blame: Schema.optionalKey(Schema.Boolean),
   signatures: Schema.optionalKey(
     Schema.Struct({

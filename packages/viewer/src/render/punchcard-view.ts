@@ -118,7 +118,7 @@ const stat = (value: string, label: string): HTMLElement =>
   h("div", "", h("strong", "", value), h("span", "", label));
 
 const rhythmStats = ({ punchcard, thresholds }: Report): HTMLElement[] => {
-  const night = thresholds.highlights;
+  const night = thresholds.stories;
   const rhythm = rhythmOf(punchcard, night);
   if (rhythm === null) {
     return [];

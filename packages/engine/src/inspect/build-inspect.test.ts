@@ -42,7 +42,7 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
   headTime: commits[0]?.time ?? 0,
   universe: [{ path: "src/a.ts", loc: 10 }],
   packageRoots: [],
-  depth: undefined,
+  detail: undefined,
   blame: undefined,
   isCodePath: () => true,
   signatures: SIGNATURES,

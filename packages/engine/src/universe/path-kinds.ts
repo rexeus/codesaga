@@ -1,4 +1,4 @@
-// Owns telling test files and documentation from other paths, for the badges and highlights that read what a commit changed.
+// Owns telling test files and documentation from other paths, for the badges and stories that read what a commit changed.
 // Judged by the path alone, so a file that no longer exists is classified like one that does.
 import { matchesAny } from "./globs.js";
 

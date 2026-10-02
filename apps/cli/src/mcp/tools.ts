@@ -57,11 +57,15 @@ const AnalyzeTool = Tool.make("analyze", {
     exclude,
     limit: optional(
       Schema.Natural,
-      `Contributors and knowledge directories and areas (per level) to return; 0 for no limit (default ${DEFAULT_LIMIT})`,
+      `Contributors and knowledge directories and territories (per detail) to return; 0 for no limit (default ${DEFAULT_LIMIT})`,
+    ),
+    detail: optional(
+      Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+      "Knowledge detail to start at, from 1 (packages) to finer folders; every detail is returned, this one is knowledge.territories.detail; a detail beyond the finest one means the finest. Default: the repository's .codesaga.json, else the detail recommended for the team",
     ),
     depth: optional(
       Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-      "Knowledge area level to start at, from 1 (packages) to deeper directories; every level is returned, this one is knowledge.areas.depth; a level beyond the deepest one means the deepest. Default: the repository's .codesaga.json, else the level recommended for the team",
+      "Deprecated alias of detail; detail wins when both are given",
     ),
     compare: optional(
       Schema.String,

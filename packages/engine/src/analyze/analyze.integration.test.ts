@@ -103,8 +103,8 @@ const graceBadges: Report["contributors"][number]["badges"] = [
     evidence: "First author of 50% of today's files.",
   },
   {
-    kind: "welcome",
-    label: "Welcome",
+    kind: "new-here",
+    label: "New here",
     evidence: "First commit on 2026-02-04, 33 days ago.",
   },
 ];

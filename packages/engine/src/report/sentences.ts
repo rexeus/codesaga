@@ -1,4 +1,4 @@
-// Owns the number and plural formatting of the report's sentences, so highlights and badges word counts alike.
+// Owns the number and plural formatting of the report's sentences, so stories and badges word counts alike.
 // Fixed to en-US: the report's text does not depend on the machine's locale.
 
 /** `4120` as "4,120". */
@@ -12,10 +12,10 @@ export const nounOf = (
 ) => `${countOf(value)} ${value === 1 ? singular : plural}`;
 
 /**
- * An area's path as a sentence names it: the path itself, or "the repository
- * root" for the area `"."`, capitalized at the start of a sentence.
+ * A territory's path as a sentence names it: the path itself, or "the repository
+ * root" for the territory `"."`, capitalized at the start of a sentence.
  */
-export const areaNameOf = (path: string, sentenceStart = false): string =>
+export const territoryNameOf = (path: string, sentenceStart = false): string =>
   path !== "." ? path : `${sentenceStart ? "The" : "the"} repository root`;
 
 /** A share from 0 to 1 as a whole percent, "27%". */

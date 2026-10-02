@@ -1,4 +1,4 @@
-// Owns the human view of `analyze`: one screen with the headline, highlights, activity, people, automation and languages.
+// Owns the human view of `analyze`: one screen with the headline, stories, activity, people, automation and languages.
 // Every name that came from git or the file system passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -16,7 +16,6 @@ import {
   span,
   sparkline,
 } from "./format.js";
-import { highlightLines } from "./highlight-lines.js";
 import { knowledgeLines } from "./knowledge-lines.js";
 import {
   fitEscaped,
@@ -25,6 +24,7 @@ import {
   section,
 } from "./layout.js";
 import { pullRequestLines } from "./pull-request-lines.js";
+import { storyLines } from "./story-lines.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
 
@@ -178,7 +178,7 @@ export const renderAnalysis = (report: Report, style: Style): string =>
       ? []
       : [comparisonLine(report.comparison)]),
     "",
-    ...highlightLines(report, style),
+    ...storyLines(report, style),
     ...activitySection(report, style),
     ...contributorLines(report, style),
     ...knowledgeLines(report, style),

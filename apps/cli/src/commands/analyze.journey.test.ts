@@ -10,7 +10,10 @@ import {
   makeTempDirectory,
 } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
-import { makeAreasProject, makeTeamProject } from "../testing/projects.js";
+import {
+  makeTerritoriesProject,
+  makeTeamProject,
+} from "../testing/projects.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -82,37 +85,41 @@ describe("codesaga analyze --json", () => {
   );
 });
 
-describe("codesaga analyze --depth", () => {
+describe("codesaga analyze --detail", () => {
   it.live(
-    "starts the areas at --depth and at the deepest level when it is beyond",
+    "starts the territories at --detail and at the deepest detail when it is beyond",
     () =>
       Effect.gen(function* () {
-        const repo = yield* makeAreasProject;
-        const startLevel = (depth: string) =>
+        const repo = yield* makeTerritoriesProject;
+        const startAt = (flag: "--detail" | "--depth", value: string) =>
           Effect.gen(function* () {
             const result = yield* journey({
-              args: ["analyze", "--json", "--depth", depth],
+              args: ["analyze", "--json", flag, value],
               cwd: repo.root,
             });
-            return (yield* decode(result.stdout)).knowledge.areas;
+            return (yield* decode(result.stdout)).knowledge.territories;
           });
 
-        const second = yield* startLevel("2");
-        const beyond = yield* startLevel("9");
+        const second = yield* startAt("--detail", "2");
+        const beyond = yield* startAt("--detail", "9");
+        const viaDepthAlias = yield* startAt("--depth", "2");
 
-        expect(second.depth).toBe(2);
-        expect(second.recommendedDepth).toBe(1);
-        expect(beyond.depth).toBe(2);
-        expect(beyond.levels.map(({ depth }) => depth)).toStrictEqual([1, 2]);
+        expect(second.detail).toBe(2);
+        expect(viaDepthAlias.detail).toBe(2);
+        expect(second.recommendedDetail).toBe(1);
+        expect(beyond.detail).toBe(2);
+        expect(beyond.details.map(({ detail }) => detail)).toStrictEqual([
+          1, 2,
+        ]);
       }).pipe(Effect.scoped),
   );
 
-  it.live("rejects a --depth below 1 as a usage error", () =>
+  it.live("rejects a --detail below 1 as a usage error", () =>
     Effect.gen(function* () {
-      const repo = yield* makeAreasProject;
+      const repo = yield* makeTerritoriesProject;
 
       const result = yield* journey({
-        args: ["analyze", "--json", "--depth", "0"],
+        args: ["analyze", "--json", "--detail", "0"],
         cwd: repo.root,
       });
 

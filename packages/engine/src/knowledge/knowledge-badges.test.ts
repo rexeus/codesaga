@@ -40,10 +40,14 @@ const run = (commits: ReadonlyArray<ClassifiedCommit>, shallow = false) =>
     now,
   });
 
-const kindsOf = (result: ReturnType<typeof run>, depth: number, path: string) =>
-  result.section.areas?.levels
-    .find((level) => level.depth === depth)
-    ?.areas.find((area) => area.path === path)
+const kindsOf = (
+  result: ReturnType<typeof run>,
+  detail: number,
+  path: string,
+) =>
+  result.section.territories?.details
+    .find((entry) => entry.detail === detail)
+    ?.territories.find((territory) => territory.path === path)
     ?.badges.map(({ kind }) => kind);
 
 // api: Ada since 2025; web: Grace, created in February
@@ -53,16 +57,19 @@ const history = [
   touching("2025-01-10T00:00:00Z", "packages/api", ada),
 ];
 
-describe("knowledge area badges", () => {
+describe("knowledge territory badges", () => {
   const result = run(history);
 
-  it("awards the badges the area's knowledge and history earn", () => {
-    expect(kindsOf(result, 1, "packages/web")).toStrictEqual(["island", "new"]);
+  it("awards the badges the territory's knowledge and history earn", () => {
+    expect(kindsOf(result, 1, "packages/web")).toStrictEqual([
+      "island",
+      "new-territory",
+    ]);
     expect(kindsOf(result, 1, "packages/api")).toStrictEqual(["island"]);
   });
 
-  it("awards in focus to the one area with the most commits in the last 90 days", () => {
-    // each area has one commit in the last 90 days: no area is in focus
+  it("awards in focus to the one territory with the most commits in the last 90 days", () => {
+    // each territory has one commit in the last 90 days: no territory is in focus
     expect(kindsOf(result, 1, "packages/web")).not.toContain("in-focus");
 
     const focused = run([
@@ -74,7 +81,7 @@ describe("knowledge area badges", () => {
     expect(kindsOf(focused, 1, "packages/api")).not.toContain("in-focus");
   });
 
-  it("does not count old commits or bot commits towards the area in focus", () => {
+  it("does not count old commits or bot commits towards the territory in focus", () => {
     const years = Array.from({ length: 5 }, (_, i) =>
       touching(`2025-0${i + 1}-10T00:00:00Z`, "packages/api", ada),
     );
@@ -101,12 +108,14 @@ describe("knowledge area badges", () => {
     expect(kindsOf(focused, 1, "packages/web")).toContain("in-focus");
     expect(kindsOf(focused, 1, "packages/api")).not.toContain("in-focus");
   });
+});
 
-  it("describes the recommended level's areas for the other sections", () => {
-    const { recommendedAreas } = result;
+describe("knowledge recommended territories", () => {
+  it("describes the recommended detail's territories for the other sections", () => {
+    const { recommendedTerritories } = run(history);
 
     expect(
-      recommendedAreas.map(({ path, orphaned, withoutActiveExpert }) => [
+      recommendedTerritories.map(({ path, orphaned, withoutActiveExpert }) => [
         path,
         orphaned,
         withoutActiveExpert,
@@ -116,12 +125,12 @@ describe("knowledge area badges", () => {
       ["packages/web", false, 0],
     ]);
     expect(
-      recommendedAreas.map(({ activeExperts }) => activeExperts),
+      recommendedTerritories.map(({ activeExperts }) => activeExperts),
     ).toStrictEqual([[ada.email], [grace.email]]);
   });
 });
 
-describe("knowledge area badges in a shallow clone", () => {
+describe("knowledge territory badges in a shallow clone", () => {
   it("awards no badge that needs the first commits in a shallow clone", () => {
     const newcomers = [
       touching("2026-02-20T00:00:00Z", "packages/web", grace),
@@ -135,10 +144,12 @@ describe("knowledge area badges in a shallow clone", () => {
     expect(kindsOf(run(newcomers), 1, "packages/web")).toEqual(
       expect.arrayContaining(["newcomer-friendly"]),
     );
-    expect(kindsOf(run(history), 1, "packages/web")).toContain("new");
+    expect(kindsOf(run(history), 1, "packages/web")).toContain("new-territory");
     expect(kindsOf(run(newcomers, true), 1, "packages/web")).not.toContain(
       "newcomer-friendly",
     );
-    expect(kindsOf(run(history, true), 1, "packages/web")).not.toContain("new");
+    expect(kindsOf(run(history, true), 1, "packages/web")).not.toContain(
+      "new-territory",
+    );
   });
 });

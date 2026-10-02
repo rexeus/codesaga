@@ -43,7 +43,7 @@ describe("the order of personRows", () => {
 });
 
 describe("personRows", () => {
-  it("writes the line under the name, the area chips and the last commit", () => {
+  it("writes the line under the name, the folder chips and the last commit", () => {
     const [row] = personRows(
       withPeople([
         {
@@ -63,8 +63,8 @@ describe("personRows", () => {
     expect(row).toMatchObject({
       initials: "ML",
       since: "since May 2025 · 1 commit",
-      areas: ["root", "src/github"],
-      moreAreas: 1,
+      folders: ["root", "src/github"],
+      moreFolders: 1,
       lastAgo: "7 weeks ago",
       lastDate: "14 Aug 2026",
     });
@@ -132,7 +132,7 @@ describe("the status filter", () => {
 describe("the badges of a solo repository", () => {
   const badges = [
     { kind: "keeper", label: "Keeper of src", evidence: "only expert" },
-    { kind: "all-rounder", label: "All-rounder", evidence: "all areas" },
+    { kind: "all-rounder", label: "All-rounder", evidence: "all territories" },
     { kind: "steady", label: "Steady", evidence: "every month" },
   ] as const;
 

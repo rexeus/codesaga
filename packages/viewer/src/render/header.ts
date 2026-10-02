@@ -1,8 +1,8 @@
 import type { Report } from "@codesaga/engine";
 
 import { layoutRidge } from "../layout/ridge.js";
-import { chips, generatedNote, lede, navItems } from "../present/story.js";
-import type { Chip } from "../present/story.js";
+import { chips, generatedNote, lede, navItems } from "../present/header.js";
+import type { Chip } from "../present/header.js";
 import { h, richText, s } from "./dom.js";
 import { icon } from "./icons.js";
 

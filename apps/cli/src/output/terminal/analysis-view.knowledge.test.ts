@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { mapAreas, sampleReport } from "../../testing/sample-report.js";
+import { mapTerritories, sampleReport } from "../../testing/sample-report.js";
 import { renderAnalysis } from "./analysis-view.js";
 import { makeStyle } from "./style.js";
 
 const plain = makeStyle(false);
 
 describe("renderAnalysis knowledge", () => {
-  it("prints no ANSI codes with plain style and marks an inactive person in the truck factor", () => {
+  it("prints no ANSI codes with plain style and marks an dormant person in the truck factor", () => {
     const report = sampleReport();
     const text = renderAnalysis(
       {
@@ -26,13 +26,13 @@ describe("renderAnalysis knowledge", () => {
     );
 
     expect(text).toContain(
-      "Truck factor               2 · Maya Lindqvist, Tomás Herrera (inactive)",
+      "Truck factor               2 · Maya Lindqvist, Tomás Herrera (dormant)",
     );
     expect(text).not.toContain("\u001B");
   });
 
-  it("says when most files have no expert and omits the area table without areas", () => {
-    const report = mapAreas(sampleReport(), () => []);
+  it("says when most files have no expert and omits the territory table without territories", () => {
+    const report = mapTerritories(sampleReport(), () => []);
     const lines = renderAnalysis(
       {
         ...report,
@@ -47,7 +47,7 @@ describe("renderAnalysis knowledge", () => {
     expect(lines).toContain(
       "Truck factor               0 · most files have no expert",
     );
-    expect(lines.some((line) => line.startsWith("Knowledge areas"))).toBe(
+    expect(lines.some((line) => line.startsWith("Knowledge territories"))).toBe(
       false,
     );
   });
@@ -134,7 +134,7 @@ describe("renderAnalysis in a single-author repository", () => {
       "Knowledge                  one contributor — Dennis Wentzien is the only expert everywhere",
     );
     expect(lines.some((line) => line.startsWith("Truck factor"))).toBe(false);
-    expect(lines.some((line) => line.startsWith("Knowledge areas"))).toBe(
+    expect(lines.some((line) => line.startsWith("Knowledge territories"))).toBe(
       false,
     );
     expect(lines.some((line) => line.includes("island"))).toBe(false);
@@ -142,19 +142,19 @@ describe("renderAnalysis in a single-author repository", () => {
 
   it("marks a sole contributor who is no longer active", () => {
     expect(renderAnalysis(soleAuthor(false), plain)).toContain(
-      "one contributor — Dennis Wentzien (inactive) is the only expert everywhere",
+      "one contributor — Dennis Wentzien (dormant) is the only expert everywhere",
     );
   });
 });
 
 describe("renderAnalysis line owners", () => {
-  it("shows the leading line owner per area, marking a bot", () => {
+  it("shows the leading line owner per territory, marking a bot", () => {
     const owner = { email: "a@example.com", kind: "human" } as const;
-    const report = mapAreas(sampleReport(), (areas) =>
-      areas.map((area) => {
-        if (area.path === "docs") {
+    const report = mapTerritories(sampleReport(), (territories) =>
+      territories.map((territory) => {
+        if (territory.path === "docs") {
           return {
-            ...area,
+            ...territory,
             lineOwners: {
               lines: 200,
               skippedFiles: 0,
@@ -162,9 +162,9 @@ describe("renderAnalysis line owners", () => {
             },
           };
         }
-        if (area.path === "packages/db") {
+        if (territory.path === "packages/db") {
           return {
-            ...area,
+            ...territory,
             lineOwners: {
               lines: 3,
               skippedFiles: 0,
@@ -180,57 +180,57 @@ describe("renderAnalysis line owners", () => {
             },
           };
         }
-        return area;
+        return territory;
       }),
     );
     const lines = renderAnalysis(report, plain).split("\n");
 
     expect(lines).toContain(
-      "Knowledge areas            files  flags             leading expert                leading line owner",
+      "Knowledge territories      files  flags             leading expert               leading line owner",
     );
     expect(lines).toContain(
-      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Ada 75%",
+      "  docs                        14  orphaned, island  Lena Fischer 93% (dormant)   Ada 75%",
     );
     expect(lines).toContain(
-      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  dependabot[bot] (bot) 33%",
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (dormant)  dependabot[bot] (bot) 33%",
     );
   });
 });
 
-describe("renderAnalysis areas", () => {
-  it("shows the areas of the chosen depth and says which level it is", () => {
+describe("renderAnalysis territories", () => {
+  it("shows the territories of the chosen detail and says which detail it is", () => {
     const report = sampleReport();
     const lines = renderAnalysis(
       {
         ...report,
         knowledge: {
           ...report.knowledge,
-          areas: { ...report.knowledge.areas, depth: 2 },
+          territories: { ...report.knowledge.territories, detail: 2 },
         },
       },
       plain,
     ).split("\n");
 
     expect(lines).toContain(
-      "  packages/db/migrations      30  orphaned, island  Dmitri Volkov 100% (inactive)",
+      "  packages/db/migrations      30  orphaned, island  Dmitri Volkov 100% (dormant)",
     );
     const note = lines.indexOf(
-      "                           Areas at level 2 of 3 (recommended: 1)",
+      "                           Territories at detail 2 of 3 (recommended: 1)",
     );
     expect(lines[note + 1]).toBe(
-      "                           level 1: 11 areas with 3+ files for 4 active contributors",
+      "                           detail 1: 11 territories with 3+ files for 4 active contributors",
     );
   });
 
-  it("marks the small areas of a directory as its other files", () => {
-    const report = mapAreas(sampleReport(), (areas) =>
-      areas.map((area, index) =>
-        index === 0 ? { ...area, kind: "rest", path: "apps" } : area,
+  it("marks the small territories of a directory as its other files", () => {
+    const report = mapTerritories(sampleReport(), (territories) =>
+      territories.map((territory, index) =>
+        index === 0 ? { ...territory, kind: "other", path: "apps" } : territory,
       ),
     );
 
     expect(renderAnalysis(report, plain).split("\n")).toContain(
-      "  apps (other)                14  orphaned, island  Lena Fischer 93% (inactive)   Lena Fischer 86%",
+      "  apps (other)                14  orphaned, island  Lena Fischer 93% (dormant)   Lena Fischer 86%",
     );
   });
 });

@@ -1,4 +1,4 @@
-// Owns the badges that read when a contributor committed rather than what: steady, welcome and returning.
+// Owns the badges that read when a contributor committed rather than what: steady, new here and back again.
 // Apart from `contributor-badges.ts` because they need only the commit times and the calendar.
 // Cost: one pass over the contributor's commit times per rule.
 
@@ -14,14 +14,14 @@ import {
 } from "../contributors/status.js";
 import type { ContributorBadge } from "../report/badges.js";
 
-/** The rules behind steady, welcome and returning, for the report's `thresholds.badges`. */
+/** The rules behind steady, new here and back again, for the report's `thresholds.badges`. */
 export const TENURE_BADGE_THRESHOLDS = {
   steadyMonths: 6,
-  welcomeDays: NEW_CONTRIBUTOR_DAYS,
-  returningGapDays: 183,
+  newHereDays: NEW_CONTRIBUTOR_DAYS,
+  backAgainGapDays: 183,
 };
 
-const { steadyMonths, returningGapDays } = TENURE_BADGE_THRESHOLDS;
+const { steadyMonths, backAgainGapDays } = TENURE_BADGE_THRESHOLDS;
 
 const SECONDS_PER_DAY = 86_400;
 
@@ -49,39 +49,39 @@ const steady = ({ times, nowSeconds }: Tenure) =>
     : undefined;
 
 /** The first commit is recent, and someone committed before it: the founder of a young repository is no newcomer. */
-const welcome = ({ times, repositoryStart, now, nowSeconds }: Tenure) => {
+const newHere = ({ times, repositoryStart, now, nowSeconds }: Tenure) => {
   const first = times.reduce((earliest, time) => Math.min(earliest, time));
   return isNewContributor(first, repositoryStart, now)
     ? {
-        kind: "welcome" as const,
-        label: "Welcome",
+        kind: "new-here" as const,
+        label: "New here",
         evidence: `First commit on ${dateOf(first)}, ${Math.floor((nowSeconds - first) / SECONDS_PER_DAY)} days ago.`,
       }
     : undefined;
 };
 
-/** The latest pause of at least `returningGapDays` days that ended with a commit in the activity window. */
-const returning = ({ times, now }: Tenure) => {
+/** The latest pause of at least `backAgainGapDays` days that ended with a commit in the activity window. */
+const backAgain = ({ times, now }: Tenure) => {
   const sorted = times.toSorted((a, b) => a - b);
   const back = sorted
     .map((time, index) => ({ time, gap: time - (sorted[index - 1] ?? time) }))
     .findLast(
       ({ time, gap }) =>
-        gap >= returningGapDays * SECONDS_PER_DAY &&
+        gap >= backAgainGapDays * SECONDS_PER_DAY &&
         isActiveWithin(time, now, ACTIVE_DAYS),
     );
   return back === undefined
     ? undefined
     : {
-        kind: "returning" as const,
-        label: "Returning",
+        kind: "back-again" as const,
+        label: "Back again",
         evidence: `Back on ${dateOf(back.time)} after ${Math.floor(back.gap / SECONDS_PER_DAY)} days without a commit.`,
       };
 };
 
 /**
- * Steady (a commit in each of the last 6 months), welcome (the first commit
- * is at most 90 days old, and someone committed earlier) and returning (active again after a pause of at
+ * Steady (a commit in each of the last 6 months), new here (the first commit
+ * is at most 90 days old, and someone committed earlier) and back again (active again after a pause of at
  * least 183 days), in that order, for the person's commits over the full
  * history.
  */
@@ -96,5 +96,5 @@ export const tenureBadges = (
     now,
     nowSeconds: DateTime.toEpochMillis(now) / 1000,
   };
-  return [steady, welcome, returning].flatMap((rule) => rule(tenure) ?? []);
+  return [steady, newHere, backAgain].flatMap((rule) => rule(tenure) ?? []);
 };

@@ -1,8 +1,8 @@
 import type { Report } from "@codesaga/engine";
 
-import type { Segment } from "./story.js";
+import type { Segment } from "./header.js";
 
-type Highlight = Report["highlights"][number];
+type Story = Report["stories"][number];
 
 const escapePattern = (text: string): string =>
   text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
@@ -21,7 +21,7 @@ const QUOTED = '"[^"]+"';
 export const emphasize = ({
   detail,
   path,
-}: Pick<Highlight, "detail" | "path">): Segment[] => {
+}: Pick<Story, "detail" | "path">): Segment[] => {
   const facts = isFindable(path) ? [escapePattern(path)] : [];
   const pattern = new RegExp([...facts, ISO_DATE, QUOTED].join("|"), "gu");
   const segments: Segment[] = [];

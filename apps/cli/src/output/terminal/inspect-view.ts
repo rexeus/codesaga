@@ -40,7 +40,7 @@ const expertLines = (
           plain(share(expert.files, entry.files)),
           plain(count(expert.soleFiles)),
           plain(
-            `${ago(expert.lastCommitAt, now)}${expert.active ? "" : " (inactive)"}`,
+            `${ago(expert.lastCommitAt, now)}${expert.active ? "" : " (dormant)"}`,
           ),
         ]),
         style,

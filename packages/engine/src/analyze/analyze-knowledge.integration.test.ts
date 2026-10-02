@@ -87,13 +87,13 @@ layer(NodeServices.layer)("analyze knowledge directories", (it) => {
 /** `in-focus` reads the window by definition; everything else in knowledge does not. */
 const withoutFocus = (section: Report["knowledge"]) => ({
   ...section,
-  areas: {
-    ...section.areas,
-    levels: section.areas.levels.map((level) => ({
-      ...level,
-      areas: level.areas.map((area) => ({
-        ...area,
-        badges: area.badges.filter(({ kind }) => kind !== "in-focus"),
+  territories: {
+    ...section.territories,
+    details: section.territories.details.map((detail) => ({
+      ...detail,
+      territories: detail.territories.map((territory) => ({
+        ...territory,
+        badges: territory.badges.filter(({ kind }) => kind !== "in-focus"),
       })),
     })),
   },

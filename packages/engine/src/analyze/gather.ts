@@ -52,8 +52,8 @@ export type RepositoryFacts = {
   readonly universe: ReadonlyArray<InventoryFile>;
   /** The directories of the scope that hold a package manifest; "." is the repository root. */
   readonly packageRoots: ReadonlyArray<string>;
-  /** The area level to start at, as requested; absent for the recommended one. */
-  readonly depth: number | undefined;
+  /** The territory detail to start at, as requested; absent for the recommended one. */
+  readonly detail: number | undefined;
   /** `git blame` of the universe files at HEAD; undefined unless `blame` was requested. */
   readonly blame: Blame | undefined;
   /** Whether a path counts as code, for files that no longer exist too. */
@@ -109,11 +109,11 @@ export type AnalyzeOptions = {
    */
   readonly blame?: boolean | undefined;
   /**
-   * The knowledge area level the report starts at, from 1; a level beyond the
-   * deepest one means the deepest. Absent, the level recommended for the
-   * team. Every level is reported either way.
+   * The knowledge territory detail the report starts at, from 1; a detail beyond the
+   * deepest one means the deepest. Absent, the detail recommended for the
+   * team. Every detail is reported either way.
    */
-  readonly depth?: number | undefined;
+  readonly detail?: number | undefined;
 };
 
 type Windows = Pick<RepositoryFacts, "since" | "previous">;
@@ -194,7 +194,7 @@ const gatherInRepository = (
       headTime,
       universe,
       packageRoots: packageRootsOf(tracked),
-      depth: options.depth,
+      detail: options.detail,
       blame,
       isCodePath: namedAsCode(options),
       signatures: withCustomSignatures(options.signatures),

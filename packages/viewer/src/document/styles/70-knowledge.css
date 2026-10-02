@@ -209,32 +209,32 @@
   vertical-align: -1px;
 }
 
-.areas {
+.territories {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
-.areas.solo {
+.territories.solo {
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
 }
 
-.area {
+.territory {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 16px 18px;
 }
 
-.area .top {
+.territory .top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
 
-.area .path {
+.territory .path {
   color: var(--ink-3);
   font-family: var(--mono);
   font-size: 13.5px;
@@ -242,23 +242,23 @@
   overflow-wrap: anywhere;
 }
 
-.area .path b {
+.territory .path b {
   color: var(--ink);
   font-weight: 650;
 }
 
-.area .path .loose {
+.territory .path .other {
   font-family: var(--sans);
   font-size: 12px;
 }
 
-.area .meta {
+.territory .meta {
   margin-top: -4px;
   color: var(--ink-3);
   font-size: 12.5px;
 }
 
-.area .meta b {
+.territory .meta b {
   color: var(--ink-2);
   font-weight: 600;
 }
@@ -419,15 +419,15 @@
     grid-template-columns: 1fr;
   }
 
-  .areas,
-  .areas.solo {
+  .territories,
+  .territories.solo {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .areas,
-  .areas.solo {
+  .territories,
+  .territories.solo {
     grid-template-columns: 1fr;
   }
 }

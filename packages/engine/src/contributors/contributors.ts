@@ -25,7 +25,7 @@ type ContributorsInput = {
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   /** The scope's commits of every class over the full history; a contributor is new by their first commit there, not in the window. */
   readonly history: ReadonlyArray<ClassifiedCommit>;
-  /** Repository-relative scope; "." for the whole repository. Areas are cut relative to it. */
+  /** Repository-relative scope; "." for the whole repository. The main folders are cut relative to it. */
   readonly scope: string;
   /** The `Clock` time that "active" is measured back from. */
   readonly now: DateTime.Utc;
@@ -35,8 +35,8 @@ type ContributorsInput = {
   readonly universePaths: ReadonlyArray<string>;
   /** A shallow clone lacks the history before its boundary, so nobody can be told to be new. */
   readonly shallow: boolean;
-  /** The areas of the recommended level; without them `all-rounder`, `specialist` and `keeper` are withheld. */
-  readonly areas?: ContributorBadgeFacts["areas"];
+  /** The territories of the recommended detail; without them `all-rounder`, `specialist` and `keeper` are withheld. */
+  readonly territories?: ContributorBadgeFacts["territories"];
 };
 
 type Contributor = Report["contributors"][number];
@@ -88,7 +88,7 @@ const contributorOf = (
     now,
     isCodePath,
     universePaths,
-    areas,
+    territories,
     created,
     historyContributors,
     repositoryStart,
@@ -129,7 +129,7 @@ const contributorOf = (
         files: created.get(email) ?? 0,
         ofFiles: universePaths.length,
       },
-      ...(areas === undefined ? {} : { areas }),
+      ...(territories === undefined ? {} : { territories }),
     }),
   };
 };
@@ -137,8 +137,10 @@ const contributorOf = (
 /**
  * The `contributors` section, sorted by commits descending, then name. `activeDays`
  * counts distinct local dates; `active` means a commit in the 183 days before
- * `now`, `status` is judged over 90 days, and nobody is `new` in a shallow clone; `areas` are the three directories with the most commits, cut at two
- * levels below the scope; `weekly`, `status` and `badges` serve the contributor card.
+ * `now`, `status` is judged over 90 days, and nobody is `new` in a shallow clone;
+ * `areas` are the three directories with the most commits, cut at two
+ * directories below the scope; `weekly`, `status` and `badges` serve the
+ * contributor card.
  */
 export const contributors = ({
   commits,

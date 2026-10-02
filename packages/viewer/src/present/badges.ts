@@ -2,8 +2,8 @@ import type { Report } from "@codesaga/engine";
 
 import type { IconName } from "./icons.js";
 
-type AreaBadge =
-  Report["knowledge"]["areas"]["levels"][number]["areas"][number]["badges"][number];
+type TerritoryBadge =
+  Report["knowledge"]["territories"]["details"][number]["territories"][number]["badges"][number];
 type ContributorBadge = Report["contributors"][number]["badges"][number];
 
 /** How a badge is tinted: a warning, something good, plain news, or nothing special. */
@@ -27,14 +27,17 @@ export type BadgeRow = {
 /** At most this many badges are drawn on a card. */
 const MAX_BADGES = 3;
 
-const AREA_LOOKS: Record<AreaBadge["kind"], { icon: IconName; tone: Tone }> = {
+const TERRITORY_LOOKS: Record<
+  TerritoryBadge["kind"],
+  { icon: IconName; tone: Tone }
+> = {
   island: { icon: "island", tone: "warn" },
   orphaned: { icon: "ghost", tone: "crit" },
-  "single-expert": { icon: "user", tone: "warn" },
+  "one-expert": { icon: "user", tone: "warn" },
   "shared-knowledge": { icon: "users", tone: "good" },
   "knowledge-fading": { icon: "hourglass", tone: "warn" },
   handover: { icon: "repeat", tone: "info" },
-  new: { icon: "spark", tone: "info" },
+  "new-territory": { icon: "spark", tone: "info" },
   "in-focus": { icon: "target", tone: "info" },
   quiet: { icon: "snow", tone: "plain" },
   "newcomer-friendly": { icon: "usersplus", tone: "good" },
@@ -47,14 +50,14 @@ const CONTRIBUTOR_LOOKS: Record<
 > = {
   "all-rounder": { icon: "layers", tone: "plain" },
   specialist: { icon: "target", tone: "plain" },
-  cleaner: { icon: "trash", tone: "plain" },
+  tidier: { icon: "trash", tone: "plain" },
   founder: { icon: "flag", tone: "plain" },
   keeper: { icon: "key", tone: "plain" },
   tester: { icon: "check", tone: "plain" },
   documenter: { icon: "book", tone: "plain" },
   steady: { icon: "calendar", tone: "plain" },
-  welcome: { icon: "spark", tone: "info" },
-  returning: { icon: "repeat", tone: "info" },
+  "new-here": { icon: "spark", tone: "info" },
+  "back-again": { icon: "repeat", tone: "info" },
   reviewer: { icon: "eye", tone: "plain" },
 };
 
@@ -73,13 +76,13 @@ const rowOf = (chips: readonly BadgeChip[]): BadgeRow => {
 };
 
 /**
- * The first three badges of an area, in the order the engine ranked them
+ * The first three badges of a territory, in the order the engine ranked them
  * (most important first), and a count of the others.
  */
-export const areaBadges = (badges: readonly AreaBadge[]): BadgeRow =>
+export const territoryBadges = (badges: readonly TerritoryBadge[]): BadgeRow =>
   rowOf(
     badges.map(({ kind, label, evidence }) => ({
-      ...AREA_LOOKS[kind],
+      ...TERRITORY_LOOKS[kind],
       label,
       evidence,
     })),
