@@ -1,4 +1,4 @@
-// Owns the human view of `analyze`: one screen with the headline, activity, people, automation and languages.
+// Owns the human view of `analyze`: one screen with the headline, highlights, activity, people, automation and languages.
 // Every name that came from git or the file system passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -16,6 +16,7 @@ import {
   span,
   sparkline,
 } from "./format.js";
+import { highlightLines } from "./highlight-lines.js";
 import { knowledgeLines } from "./knowledge-lines.js";
 import {
   fitEscaped,
@@ -131,6 +132,7 @@ const contributorLines = (
   );
 };
 
+/** The shares and top tools; the caller shows them only when a tool was detected. */
 const automationLines = (report: Report): ReadonlyArray<string> => {
   const { totals, tools } = report.automation;
   const all = totals.human + totals.agentAssisted + totals.agent + totals.bot;
@@ -147,10 +149,7 @@ const automationLines = (report: Report): ReadonlyArray<string> => {
       (tool) =>
         `${escapeForTerminal(tool.name)} ${count(tool.authored + tool.assisted)}`,
     );
-  return [
-    shares.length === 0 ? "none detected" : shares.join(SEPARATOR),
-    ...(toolNames.length === 0 ? [] : [toolNames.join(SEPARATOR)]),
-  ];
+  return [shares.join(SEPARATOR), toolNames.join(SEPARATOR)];
 };
 
 const languageLine = (report: Report): string => {
@@ -179,10 +178,13 @@ export const renderAnalysis = (report: Report, style: Style): string =>
       ? []
       : [comparisonLine(report.comparison)]),
     "",
+    ...highlightLines(report, style),
     ...activitySection(report, style),
     ...contributorLines(report, style),
     ...knowledgeLines(report, style),
-    ...section("Automation", automationLines(report), style),
+    ...(report.automation.tools.length === 0
+      ? []
+      : section("Automation", automationLines(report), style)),
     ...(report.pullRequests === undefined
       ? []
       : pullRequestLines(report.pullRequests, style)),

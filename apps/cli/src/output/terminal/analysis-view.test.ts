@@ -20,6 +20,9 @@ describe("renderAnalysis", () => {
       "codesaga · aurora-web · main @ 9f3c2b1",
       "2 years · 2,246 commits · 8 contributors, 4 active in 90 days · 60,942 lines in 7 languages",
       "",
+      "Highlights                 Orphaned knowledge: 30 of 52 files in packages/db have no active expert.",
+      "                           Quiet corner: docs/guides has not changed since 2026-01-12.",
+      '                           Biggest cleanup: One commit removed 4,120 more code lines than it added: "Drop the legacy checkout flow".',
       "Activity, last 12 months   █▆█▇▇▆▇▆▅▅▄▅  724 commits",
       "Contributors               commits  active days  last commit",
       "  Maya Lindqvist               690          486  today",
@@ -42,6 +45,30 @@ describe("renderAnalysis", () => {
       "",
       "--html for the dashboard, --json for agents",
     ]);
+  });
+});
+
+describe("renderAnalysis highlights and automation", () => {
+  it("shows only the top 3 highlights and leaves the block out without any", () => {
+    const report = sampleReport();
+
+    const withSix = renderAnalysis(report, plain);
+    const without = renderAnalysis({ ...report, highlights: [] }, plain);
+
+    expect(withSix.match(/^ {27}\S.*(?:cleanup|corner)/gmu)).toHaveLength(2);
+    expect(withSix).not.toContain("Longest streak");
+    expect(without).not.toContain("Highlights");
+  });
+
+  it("shows the automation line only when a bot or an agent was detected", () => {
+    const report = sampleReport();
+    const quiet = {
+      ...report,
+      automation: { ...report.automation, tools: [] },
+    };
+
+    expect(renderAnalysis(report, plain)).toContain("\nAutomation ");
+    expect(renderAnalysis(quiet, plain)).not.toContain("Automation");
   });
 });
 
@@ -179,7 +206,8 @@ describe("renderAnalysis edge cases", () => {
     expect(lines[1]).toBe(
       "0 commits · 0 contributors, 0 active in 90 days · 0 lines in 0 languages",
     );
-    expect(lines).toContain("Automation                 none detected");
+    expect(lines.some((line) => line.startsWith("Highlights"))).toBe(true);
+    expect(lines.some((line) => line.startsWith("Automation"))).toBe(false);
     expect(lines).toContain("Languages                  no code files");
   });
 });
@@ -200,6 +228,9 @@ describe("renderAnalysis escaping", () => {
         ...person,
         name: "\u001B[2Jevil",
       })),
+      highlights: [
+        { kind: "streak" as const, title: "T\u001B[31m", detail: "d\nx" },
+      ],
       automation: {
         ...report.automation,
         tools: [
@@ -221,6 +252,7 @@ describe("renderAnalysis escaping", () => {
     expect(text).toContain("\\u001b[2Jevil");
     expect(text).toContain("bot\\u0007[bot] 1");
     expect(text).toContain("dir\\u001b[31m");
+    expect(text).toContain("T\\u001b[31m: d\\u000ax");
   });
 
   it("bolds the headline and labels only when styled", () => {
