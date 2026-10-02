@@ -7,12 +7,9 @@ import { classifyCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import type { HistoryCommit } from "../history/history.js";
 import { buildIdentities } from "../people/identities.js";
-import { toEpochSeconds } from "./analysis-window.js";
+import { isoOfEpochSeconds, toEpochSeconds } from "./analysis-window.js";
 import type { TimeRange } from "./analysis-window.js";
 import type { RepositoryFacts } from "./gather.js";
-
-const isoOf = (seconds: number): string =>
-  DateTime.formatIso(DateTime.makeUnsafe(seconds * 1000));
 
 const isUnder = (path: string, scope: string): boolean =>
   path === scope || path.startsWith(`${scope}/`);
@@ -129,7 +126,9 @@ export const prepareAnalysis = (facts: RepositoryFacts): Analysis => {
   const extent = timeExtent(scoped);
   const until = DateTime.formatIso(facts.now);
   const window = {
-    since: facts.since ?? (extent === undefined ? until : isoOf(extent.first)),
+    since:
+      facts.since ??
+      (extent === undefined ? until : isoOfEpochSeconds(extent.first)),
     until,
   };
   const from = toEpochSeconds(window.since);
@@ -140,7 +139,8 @@ export const prepareAnalysis = (facts: RepositoryFacts): Analysis => {
     window,
     previous: previousOf(scoped, facts.previous, extent?.first),
     headTime: facts.headTime,
-    firstCommitAt: extent === undefined ? null : isoOf(extent.first),
-    lastCommitAt: extent === undefined ? null : isoOf(extent.last),
+    firstCommitAt:
+      extent === undefined ? null : isoOfEpochSeconds(extent.first),
+    lastCommitAt: extent === undefined ? null : isoOfEpochSeconds(extent.last),
   };
 };

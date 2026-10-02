@@ -2,9 +2,11 @@
 // Bots and agents are not contributors; automation reports them.
 // Returns every contributor; truncating for output belongs to the caller.
 
-import { DateTime, Order } from "effect";
+import { Order } from "effect";
+import type { DateTime } from "effect";
 
 import { localDayOf } from "../activity/buckets.js";
+import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { contributorBadges } from "../badges/contributor-badges.js";
@@ -36,9 +38,6 @@ type ContributorsInput = {
 };
 
 type Contributor = Report["contributors"][number];
-
-const isoOf = (time: number): string =>
-  DateTime.formatIso(DateTime.makeUnsafe(time * 1000));
 
 const byEmail = (
   commits: ReadonlyArray<ClassifiedCommit>,
@@ -104,8 +103,8 @@ const contributorOf = (
       commits.map((commit) => localDayOf(commit.time, commit.offsetMinutes)),
     ).size,
     ...countCodeLines(commits, isCodePath),
-    firstCommitAt: isoOf(times.reduce((a, b) => Math.min(a, b))),
-    lastCommitAt: isoOf(lastTime),
+    firstCommitAt: isoOfEpochSeconds(times.reduce((a, b) => Math.min(a, b))),
+    lastCommitAt: isoOfEpochSeconds(lastTime),
     active: isActiveWithin(lastTime, now, ACTIVE_DAYS),
     areas: topAreas(commits, scope),
     weekly: weeklyCommits(times, now),

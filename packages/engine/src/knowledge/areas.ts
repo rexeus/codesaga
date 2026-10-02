@@ -11,8 +11,8 @@ import { AREA_MIN_FILES } from "./area-tree.js";
 import { byRisk, describeDirectory } from "./directories.js";
 import type { KnowledgeModel } from "./model.js";
 
-/** An area with the universe files it holds, which the badges need and the report leaves out. */
-export type AreaWithFiles = Omit<AreaKnowledge, "badges"> & {
+/** An area with the universe files it holds, which the badges need and the report leaves out; badges and dates are added from the history. */
+export type AreaWithFiles = Omit<AreaKnowledge, "badges" | "lastChangedAt"> & {
   /** The area's universe files, repository-relative. */
   readonly paths: ReadonlyArray<string>;
 };

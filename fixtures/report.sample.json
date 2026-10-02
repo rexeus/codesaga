@@ -2272,6 +2272,7 @@
                 "no active expert for 12 of 14 files (last expert commit 2025-11-14)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2356,6 +2357,7 @@
                 "no active expert for 30 of 52 files (last expert commit 2024-12-03)"
               ],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "orphaned",
@@ -2424,6 +2426,7 @@
               ],
               "reasons": ["Jonas Weber is the only expert on 17 of 19 files"],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2465,6 +2468,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "knowledge-fading",
@@ -2501,6 +2505,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -2531,6 +2536,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -2561,6 +2567,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -2591,6 +2598,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "new",
@@ -2645,6 +2653,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "in-focus",
@@ -2704,6 +2713,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "well-tested",
@@ -2749,6 +2759,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "shared-knowledge",
@@ -2785,6 +2796,7 @@
                 "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-04-22T08:14:50.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2820,6 +2832,7 @@
                 "no active expert for 8 of 9 files (last expert commit 2025-11-14)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-01-12T11:03:27.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2869,6 +2882,7 @@
                 "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2915,6 +2929,7 @@
               ],
               "reasons": ["Jonas Weber is the only expert on 13 of 16 files"],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2956,6 +2971,7 @@
               ],
               "reasons": ["Aiko Tanaka is the only expert on 5 of 6 files"],
               "kind": "package",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -2983,6 +2999,7 @@
               ],
               "reasons": ["Jonas Weber is the only expert on 3 of 3 files"],
               "kind": "package",
+              "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3024,6 +3041,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "knowledge-fading",
@@ -3060,6 +3078,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -3090,6 +3109,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -3120,6 +3140,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -3141,6 +3162,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -3177,6 +3199,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "new",
@@ -3213,6 +3236,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -3234,6 +3258,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -3261,6 +3286,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -3288,6 +3314,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-28T19:02:26.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -3315,6 +3342,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -3369,6 +3397,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "in-focus",
@@ -3423,6 +3452,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -3453,6 +3483,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -3492,6 +3523,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "handover",
@@ -3528,6 +3560,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -3558,6 +3591,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -3588,6 +3622,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -3618,6 +3653,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             },
             {
@@ -3657,6 +3693,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "shared-knowledge",
@@ -3684,6 +3721,7 @@
               ],
               "reasons": [],
               "kind": "rest",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             }
           ]
@@ -3714,6 +3752,7 @@
                 "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-04-22T08:14:50.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3749,6 +3788,7 @@
                 "no active expert for 8 of 9 files (last expert commit 2025-11-14)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-01-12T11:03:27.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3798,6 +3838,7 @@
                 "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
               ],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3835,6 +3876,7 @@
               ],
               "reasons": ["Jonas Weber is the only expert on 8 of 9 files"],
               "kind": "directory",
+              "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3881,6 +3923,7 @@
               ],
               "reasons": ["Aiko Tanaka is the only expert on 5 of 6 files"],
               "kind": "package",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3908,6 +3951,7 @@
               ],
               "reasons": ["Jonas Weber is the only expert on 3 of 3 files"],
               "kind": "package",
+              "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
                   "kind": "island",
@@ -3949,6 +3993,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "knowledge-fading",
@@ -3985,6 +4030,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4015,6 +4061,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4045,6 +4092,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4075,6 +4123,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4105,6 +4154,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4126,6 +4176,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4162,6 +4213,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "new",
@@ -4198,6 +4250,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4219,6 +4272,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4246,6 +4300,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4273,6 +4328,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4300,6 +4356,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4327,6 +4384,7 @@
               ],
               "reasons": [],
               "kind": "package",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4354,6 +4412,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-28T19:02:26.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4381,6 +4440,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
                   "kind": "single-expert",
@@ -4417,6 +4477,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "in-focus",
@@ -4471,6 +4532,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "newcomer-friendly",
@@ -4507,6 +4569,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4537,6 +4600,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4576,6 +4640,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4606,6 +4671,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4636,6 +4702,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4666,6 +4733,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             },
             {
@@ -4696,6 +4764,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4735,6 +4804,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4765,6 +4835,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4795,6 +4866,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4825,6 +4897,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             },
             {
@@ -4855,6 +4928,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4894,6 +4968,7 @@
               ],
               "reasons": [],
               "kind": "directory",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
                   "kind": "shared-knowledge",
@@ -4921,6 +4996,7 @@
               ],
               "reasons": [],
               "kind": "rest",
+              "lastChangedAt": "2026-05-05T08:33:51.000Z",
               "badges": []
             },
             {
@@ -4942,6 +5018,7 @@
               ],
               "reasons": [],
               "kind": "rest",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": []
             },
             {
@@ -4963,6 +5040,7 @@
               ],
               "reasons": [],
               "kind": "rest",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": []
             },
             {
@@ -4984,6 +5062,7 @@
               ],
               "reasons": [],
               "kind": "rest",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": []
             }
           ]

@@ -85,6 +85,48 @@ layer(NodeServices.layer)("analyze knowledge areas", (it) => {
   );
 });
 
+layer(NodeServices.layer)("analyze area dates", (it) => {
+  const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
+
+  it.effect(
+    "dates each area by its newest commit, a bot's included, with a renamed file under its new path",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* commitTwoPackages(repo);
+        yield* repo.commit(
+          "2026-02-10T09:00:00Z",
+          { "packages/cli/p.ts": "p\n" },
+          { author: grace },
+        );
+        yield* repo.commit(
+          "2026-02-20T09:00:00Z",
+          { "packages/lib/x.ts": "x changed\n" },
+          { author: { name: "dependabot[bot]", email: "bot@example.com" } },
+        );
+        yield* repo.git("mv", "packages/cli/m.ts", "packages/lib/m.ts");
+        yield* repo.commit("2026-02-25T09:00:00Z");
+
+        const { knowledge } = yield* analyze(analyzeOptionsFor(repo));
+
+        assert.deepStrictEqual(
+          Object.fromEntries(
+            knowledge.areas.levels[0]?.areas.map(({ path, lastChangedAt }) => [
+              path,
+              lastChangedAt,
+            ]) ?? [],
+          ),
+          {
+            "apps/web": "2026-02-01T09:00:00.000Z",
+            "packages/cli": "2026-02-10T09:00:00.000Z",
+            "packages/lib": "2026-02-25T09:00:00.000Z",
+          },
+        );
+      }),
+  );
+});
+
 layer(NodeServices.layer)("analyze area badges", (it) => {
   it.effect(
     "awards the badges that need areas to the sole active expert of each",

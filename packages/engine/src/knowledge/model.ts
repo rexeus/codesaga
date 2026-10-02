@@ -1,8 +1,9 @@
 // Owns the knowledge model of one analysis: the humans and the experts of every universe file.
 // Knowledge is relative to the full history and to `now`, which decides who is still active.
 
-import { DateTime } from "effect";
+import type { DateTime } from "effect";
 
+import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { SIGNATURES } from "../automation/signatures.js";
 import type { Signature } from "../automation/signatures.js";
@@ -85,5 +86,5 @@ export const personOf = (human: Human, model: KnowledgeModel): Person => ({
   name: human.name,
   email: human.email,
   active: isActive(human, model),
-  lastCommitAt: DateTime.formatIso(DateTime.makeUnsafe(human.lastTime * 1000)),
+  lastCommitAt: isoOfEpochSeconds(human.lastTime),
 });

@@ -4,6 +4,7 @@
 
 import { Array as Arr } from "effect";
 
+import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
 import type { TimeRange } from "../analyze/analysis-window.js";
 import {
   areaBadgeInputs,
@@ -110,15 +111,19 @@ const areasSection = (
       recommendedDepth,
       reason,
       levels: Arr.map(levels, ({ depth, totalAreas, areas }) => {
-        const badges = areaBadgeInputs(areas, history, model).map((input) =>
-          areaBadges(input, facts.now),
-        );
+        const inputs = areaBadgeInputs(areas, history, model);
         return {
           depth,
           totalAreas,
           areas: areas.map(({ paths: _paths, ...area }, index) => ({
             ...area,
-            badges: badges[index] ?? [],
+            lastChangedAt: isoOfEpochSeconds(
+              inputs[index]?.lastChangeTime ?? facts.headTime,
+            ),
+            badges:
+              inputs[index] === undefined
+                ? []
+                : areaBadges(inputs[index], facts.now),
           })),
         };
       }),

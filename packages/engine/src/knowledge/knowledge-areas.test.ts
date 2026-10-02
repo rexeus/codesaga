@@ -94,7 +94,9 @@ describe("knowledge areas", () => {
       commit("2025-06-01T00:00:00Z", linus),
     ]);
 
-    expect(areas.reason).toBe("level 2: 5 areas with 3+ files for 3 contributors");
+    expect(areas.reason).toBe(
+      "level 2: 5 areas with 3+ files for 3 contributors",
+    );
   });
 
   it("starts at the requested depth and still reports the recommendation", () => {

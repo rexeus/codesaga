@@ -91,6 +91,13 @@ const AreaKnowledge = Schema.Struct({
    * `reasons` is empty.
    */
   kind: Schema.Literals(["package", "directory", "rest"]),
+  /**
+   * ISO timestamp of the newest commit that changed a file of the area, over
+   * the full history and by anyone, bots and agents included; a renamed file
+   * counts under its current path. A universe file always has a commit, so the
+   * area always has a date.
+   */
+  lastChangedAt: Schema.String,
   /** Achievements of the area, most important first; the dashboard shows the first three. */
   badges: Schema.Array(AreaBadge),
 });
