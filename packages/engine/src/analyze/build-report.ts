@@ -17,6 +17,7 @@ import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
 import { typescriptAnalysis } from "../typescript/deep-dive.js";
 import type { TypeScriptAnalysis } from "../typescript/deep-dive.js";
+import type { HistoryFacts } from "../typescript/history-facts.js";
 import type { RepositoryFacts } from "./gather.js";
 import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
@@ -143,8 +144,13 @@ const optionalSections = (
   ...deepDives,
 });
 
+/** The facts, and the parse of every historical TypeScript and JavaScript blob, which only `analyze` gathers. */
+type ReportFacts = RepositoryFacts & {
+  readonly historyFacts?: HistoryFacts | undefined;
+};
+
 /** Builds the report from the facts, each section over the commits it covers. */
-export const buildReport = (facts: RepositoryFacts): Report => {
+export const buildReport = (facts: ReportFacts): Report => {
   const {
     scoped,
     commits,
