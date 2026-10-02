@@ -306,3 +306,41 @@ layer(NodeServices.layer)("analyze since and scope", (it) => {
       }),
   );
 });
+
+layer(NodeServices.layer)("analyze contributor status", (it) => {
+  it.effect(
+    "judges a contributor as new by their first commit ever, not by the first in a narrowed window",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* repo.commit(
+          "2025-10-01T09:00:00Z",
+          { "src/a.ts": lines("a", 3) },
+          { author: ada },
+        );
+        yield* repo.commit(
+          "2026-03-02T09:00:00Z",
+          { "src/a.ts": lines("a", 5) },
+          { author: ada },
+        );
+        yield* repo.commit(
+          "2026-03-03T09:00:00Z",
+          { "src/b.ts": lines("b", 2) },
+          { author: grace },
+        );
+
+        const report = yield* analyze(
+          analyzeOptionsFor(repo, { since: "30d" }),
+        );
+
+        assert.deepStrictEqual(
+          report.contributors.map((c) => [c.name, c.status]),
+          [
+            ["Ada Lovelace", "active"],
+            ["Grace", "new"],
+          ],
+        );
+      }),
+  );
+});
