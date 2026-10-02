@@ -8,9 +8,13 @@ import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
 import { readCommits } from "./commit-log.js";
 import type { Commit } from "./parse-log.js";
+import type { BlobFields } from "./raw-entry.js";
 
-/** The lines one commit added to and deleted from one file. */
-export type FileChange = {
+/**
+ * The lines one commit added to and deleted from one file, with the blob ids
+ * and mode the commit gave it (see `BlobFields`).
+ */
+export type FileChange = BlobFields & {
   readonly path: string;
   readonly added: number;
   readonly deleted: number;
@@ -87,11 +91,14 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
         endedNames.push(change.renamedFrom);
       }
     }
-    const { added, deleted } = change;
+    const { added, deleted, oid, previousOid, mode } = change;
     return {
       path,
       added,
       deleted,
+      ...(oid === undefined ? {} : { oid }),
+      ...(previousOid === undefined ? {} : { previousOid }),
+      ...(mode === undefined ? {} : { mode }),
       ...(isPrevious ? { previousLife: true as const } : {}),
       ...(change.renamedFrom === undefined ? {} : { renamed: true as const }),
     };

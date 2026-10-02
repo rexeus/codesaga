@@ -84,8 +84,10 @@ layer(NodeServices.layer)("readHistory changes", (it) => {
       const commits = yield* history(repo, new Set([first]));
 
       assert.deepStrictEqual(
-        commits.map((commit) => commit.changes),
-        [[{ path: "a.ts", added: 1, deleted: 0 }]],
+        commits.map((commit) =>
+          commit.changes.map(({ path, added }) => [path, added]),
+        ),
+        [[["a.ts", 1]]],
       );
     }),
   );
@@ -99,9 +101,14 @@ layer(NodeServices.layer)("readHistory changes", (it) => {
 
       const [commit] = yield* history(repo);
 
-      assert.deepStrictEqual(commit?.changes, [
-        { path: "blob.ts", added: 0, deleted: 0 },
-      ]);
+      assert.deepStrictEqual(
+        commit?.changes.map(({ path, added, deleted }) => [
+          path,
+          added,
+          deleted,
+        ]),
+        [["blob.ts", 0, 0]],
+      );
     }),
   );
 });

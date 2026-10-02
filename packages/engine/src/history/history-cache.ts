@@ -26,6 +26,9 @@ const CachedCommit = Schema.Struct({
       path: Schema.String,
       renamedFrom: Schema.optionalKey(Schema.String),
       removed: Schema.optionalKey(Schema.Literal(true)),
+      oid: Schema.optionalKey(Schema.String),
+      previousOid: Schema.optionalKey(Schema.String),
+      mode: Schema.optionalKey(Schema.String),
       added: Schema.Finite,
       deleted: Schema.Finite,
     }),
@@ -37,7 +40,7 @@ const CachedCommit = Schema.Struct({
  * change the version and the file name together when this shape changes.
  */
 const CachedHistory = Schema.Struct({
-  version: Schema.Literal(1),
+  version: Schema.Literal(2),
   /** The commit `commits` was read from. */
   head: Schema.String,
   /** Everything besides `head` that changes what git prints for the same commits. */
@@ -106,7 +109,7 @@ export const cacheFile = (
     return path.join(
       path.resolve(root, common.trim()),
       "codesaga",
-      "history-v1.json",
+      "history-v2.json",
     );
   }).pipe(Effect.orElseSucceed(() => undefined));
 
@@ -170,7 +173,7 @@ export const storeCache = (
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
     const text = yield* Schema.encodeEffect(CacheDocument)({
-      version: 1,
+      version: 2,
       ...cache,
       commits: cache.commits.map((commit) => toCached(commit)),
     });

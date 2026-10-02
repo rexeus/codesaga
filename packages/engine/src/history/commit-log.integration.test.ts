@@ -9,7 +9,7 @@ import { readCommits } from "./commit-log.js";
 
 const cacheFileOf = (repo: TempRepository) =>
   Effect.map(Path.Path, (path) =>
-    path.join(repo.directory, ".git", "codesaga", "history-v1.json"),
+    path.join(repo.directory, ".git", "codesaga", "history-v2.json"),
   );
 
 /** Reads the commits of HEAD and reports the revisions every `git log` of the read was asked for. */

@@ -17,7 +17,7 @@ const tenLines = Array.from(
 ).join("");
 
 const cacheFileOf = (repo: TempRepository) =>
-  `${repo.directory}/.git/codesaga/history-v1.json`;
+  `${repo.directory}/.git/codesaga/history-v2.json`;
 
 /** Analyzes twice, with and without the cache, and requires the same report. */
 const analyzeBothWays = (repo: TempRepository) =>

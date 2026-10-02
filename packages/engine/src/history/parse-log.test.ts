@@ -218,11 +218,13 @@ describe("LogParser deletions", () => {
       "0\t7\tdir/gone.ts\0" +
       "1\t1\tedited.ts\0";
 
-    expect(parse([raw])[0]?.changes).toStrictEqual([
-      { path: "new.ts", renamedFrom: "old.ts", added: 0, deleted: 0 },
-      { path: "added.ts", added: 11, deleted: 0 },
-      { path: "dir/gone.ts", added: 0, deleted: 7, removed: true },
-      { path: "edited.ts", added: 1, deleted: 1 },
+    expect(
+      parse([raw])[0]?.changes.map(({ path, removed }) => ({ path, removed })),
+    ).toStrictEqual([
+      { path: "new.ts", removed: undefined },
+      { path: "added.ts", removed: undefined },
+      { path: "dir/gone.ts", removed: true },
+      { path: "edited.ts", removed: undefined },
     ]);
   });
 
@@ -233,9 +235,79 @@ describe("LogParser deletions", () => {
       `${header({ sha: "f" })}\n:000000 100644 0000000 587be6b A\0a.ts\0` +
       "3\t0\ta.ts\0";
 
-    expect(parse([raw]).map(({ changes }) => changes)).toStrictEqual([
-      [{ path: "a.ts", added: 0, deleted: 3, removed: true }],
-      [{ path: "a.ts", added: 3, deleted: 0 }],
+    expect(
+      parse([raw]).map(({ changes }) => changes.map(({ removed }) => removed)),
+    ).toStrictEqual([[true], [undefined]]);
+  });
+});
+
+const id = (digit: string, length = 40) => digit.repeat(length);
+const wide = (digit: string) => id(digit, 64);
+
+describe("LogParser blobs", () => {
+  const zero = id("0");
+
+  it("reads full blob ids and the new mode of an add, a modify, a delete, a rename and a symlink", () => {
+    const raw =
+      `${header({ sha: "b" })}\n` +
+      `:000000 100644 ${zero} ${id("a")} A\0added.ts\0` +
+      `:100644 100755 ${id("b")} ${id("c")} M\0edited.ts\0` +
+      `:100644 000000 ${id("d")} ${zero} D\0gone.ts\0` +
+      `:100644 100644 ${id("e")} ${id("f")} R087\0old.ts\0new.ts\0` +
+      `:000000 120000 ${zero} ${id("1")} A\0link.ts\0` +
+      "1\t0\tadded.ts\0" +
+      "1\t1\tedited.ts\0" +
+      "0\t4\tgone.ts\0" +
+      "2\t1\t\0old.ts\0new.ts\0" +
+      "1\t0\tlink.ts\0";
+
+    expect(parse([raw])[0]?.changes).toStrictEqual([
+      { path: "added.ts", added: 1, deleted: 0, oid: id("a"), mode: "100644" },
+      {
+        path: "edited.ts",
+        added: 1,
+        deleted: 1,
+        oid: id("c"),
+        previousOid: id("b"),
+        mode: "100755",
+      },
+      {
+        path: "gone.ts",
+        added: 0,
+        deleted: 4,
+        previousOid: id("d"),
+        removed: true,
+      },
+      {
+        path: "new.ts",
+        renamedFrom: "old.ts",
+        added: 2,
+        deleted: 1,
+        oid: id("f"),
+        previousOid: id("e"),
+        mode: "100644",
+      },
+      { path: "link.ts", added: 1, deleted: 0, oid: id("1"), mode: "120000" },
+    ]);
+  });
+});
+
+describe("LogParser blobs of a SHA-256 repository", () => {
+  it("reads 64-digit blob ids", () => {
+    const raw =
+      `${header({ sha: "s" })}\n` +
+      `:100644 100644 ${wide("a")} ${wide("b")} M\0a.ts\0` +
+      "1\t1\ta.ts\0";
+
+    expect(parse([raw])[0]?.changes).toStrictEqual([
+      {
+        path: "a.ts",
+        added: 1,
+        deleted: 1,
+        oid: wide("b"),
+        previousOid: wide("a"),
+        mode: "100644",
+      },
     ]);
   });
 });
