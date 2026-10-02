@@ -1,9 +1,8 @@
 // Owns the debt-marker facts of one file: the TODO-style markers and `@deprecated` tags of its comments, and how many exported declarations carry a JSDoc block.
 // Read from the parser's comments, never from the source text alone, so a marker inside a string or a template is not one.
 
-import type { Node } from "@oxc-project/types";
-
 import type { ParsedSource } from "../parsed-source.js";
+import { exportsOf } from "./export-docs.js";
 
 /** Counts of one file; additive across files. */
 export type MarkerFacts = {
@@ -22,70 +21,8 @@ export type MarkerFacts = {
 
 /** The marker at the start of a comment line, after the characters that decorate one. */
 const MARKER = /^[ \t*/#-]*(TODO|FIXME|HACK|XXX)\b/gmu;
-const DEPRECATED = /@deprecated(?![\w-])/u;
-/** A block that opens a file with legal text is not documentation of what follows it. */
-const LEGAL = /@license|@preserve|copyright/iu;
-
-type Comment = ParsedSource["comments"][number];
-
-const isJsdoc = ({ type, value }: Comment): boolean =>
-  type === "Block" && value.startsWith("*") && !LEGAL.test(value);
-
-/** Whether only whitespace with no blank line lies between the comment and the statement. */
-const isAttached = (
-  text: string,
-  comment: Comment,
-  statement: Node,
-): boolean => {
-  const gap = text.slice(comment.end, statement.start);
-  return /^[ \t]*\r?\n?[ \t]*$/u.test(gap);
-};
-
-/** The last comment that ends at or before `offset`, undefined when none does. */
-const commentBefore = (
-  comments: ParsedSource["comments"],
-  offset: number,
-): Comment | undefined => {
-  let low = 0;
-  let high = comments.length - 1;
-  let found: Comment | undefined;
-  while (low <= high) {
-    const middle = Math.floor((low + high) / 2);
-    const comment = comments[middle];
-    if (comment !== undefined && comment.end <= offset) {
-      found = comment;
-      low = middle + 1;
-    } else {
-      high = middle - 1;
-    }
-  }
-  return found;
-};
-
-const isExportedDeclaration = (statement: Node): boolean =>
-  statement.type === "ExportDefaultDeclaration" ||
-  (statement.type === "ExportNamedDeclaration" &&
-    statement.declaration !== null);
-
-const exportsOf = (
-  { program, comments }: ParsedSource,
-  text: string,
-): Pick<MarkerFacts, "exportedDeclarations" | "documentedExports"> => {
-  const exported = program.body.filter(isExportedDeclaration);
-  const documented = exported.filter((statement) => {
-    const comment = commentBefore(comments, statement.start);
-    return (
-      comment !== undefined &&
-      isJsdoc(comment) &&
-      isAttached(text, comment, statement)
-    );
-  });
-  return {
-    exportedDeclarations: exported.length,
-    documentedExports: documented.length,
-  };
-};
-
+/** An `@deprecated` tag at the start of a comment line, as a marker is; prose that mentions it does not count. */
+const DEPRECATED = /^[ \t*/#-]*@deprecated(?![\w-])/mu;
 /** The debt-marker facts of a parse and the text it read. */
 export const markersOf = (parsed: ParsedSource, text: string): MarkerFacts => {
   const found = { TODO: 0, FIXME: 0, HACK: 0, XXX: 0 };

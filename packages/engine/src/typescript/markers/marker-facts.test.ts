@@ -45,6 +45,25 @@ describe("marker facts: debt markers", () => {
   });
 });
 
+describe("marker facts: deprecated tags", () => {
+  it("counts only a tag that starts a comment line, not prose that mentions it", () => {
+    const facts = markersOf(
+      [
+        "// not @deprecated",
+        "/* the @deprecated tag is described here */",
+        "/**",
+        " * Old.",
+        " * @deprecated use b",
+        " */",
+        "export const a = 1;",
+        "// @deprecated",
+      ].join("\n"),
+    );
+
+    expect(facts.deprecated).toBe(2);
+  });
+});
+
 describe("marker facts: documented exports", () => {
   it("counts the exported declarations that a JSDoc block directly precedes", () => {
     const facts = markersOf(
@@ -106,6 +125,72 @@ describe("marker facts: documented exports", () => {
 
     expect(facts).toMatchObject({
       exportedDeclarations: 1,
+      documentedExports: 1,
+    });
+  });
+});
+
+describe("marker facts: where a documented export starts", () => {
+  it("measures the gap from the first decorator, before or after export", () => {
+    const facts = markersOf(
+      [
+        "/** Doc. */",
+        "@Component({})",
+        "export class A {}",
+        "/** Doc. */",
+        "export @Injectable() class B {}",
+        "/** Doc. */",
+        "",
+        "@Component({})",
+        "export class C {}",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({
+      exportedDeclarations: 3,
+      documentedExports: 2,
+    });
+  });
+
+  it("counts overload signatures and their implementation as one declaration, documented when a signature is", () => {
+    const facts = markersOf(
+      [
+        "/** Doc. */",
+        "export function f(a: string): string;",
+        "export function f(a: number): number;",
+        "export function f(a: unknown): unknown { return a; }",
+        "export function g(a: string): string;",
+        "export function g(a: number): number;",
+        "export function g(a: unknown): unknown { return a; }",
+        "export function f2() {}",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({
+      exportedDeclarations: 3,
+      documentedExports: 1,
+    });
+  });
+
+  it("looks through line comments between the block and the declaration, and not through a blank line or a block comment", () => {
+    const facts = markersOf(
+      [
+        "/** Doc. */",
+        "// eslint-disable-next-line no-restricted-syntax",
+        "// another pragma",
+        "export const a = 1;",
+        "/** Doc. */",
+        "// pragma",
+        "",
+        "export const b = 1;",
+        "/** Doc. */",
+        "/* plain */",
+        "export const c = 1;",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({
+      exportedDeclarations: 3,
       documentedExports: 1,
     });
   });
