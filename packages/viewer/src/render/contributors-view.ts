@@ -8,7 +8,11 @@ import {
   personRows,
   rowsWithFilter,
 } from "../present/contributors.js";
-import type { PersonRow, StatusFilter } from "../present/contributors.js";
+import type {
+  FilterOption,
+  PersonRow,
+  StatusFilter,
+} from "../present/contributors.js";
 import { formatCount } from "../present/format.js";
 import { showAllLabel, visibleRows } from "../present/row-limit.js";
 import { badgeChips } from "./badges.js";
@@ -123,20 +127,11 @@ const table = (rows: readonly PersonRow[]): HTMLElement =>
 const DESCRIPTION =
   "Listed active first, then new, then dormant; within a group by days with a commit.";
 
-const filterButtons = (
-  rows: readonly PersonRow[],
-  active: StatusFilter,
-  pick: (filter: StatusFilter) => void,
-): HTMLElement[] =>
-  filterOptions(rows).map(({ filter, label, count }) => {
-    const button = h("button", "", label, h("b", "", String(count)));
-    button.type = "button";
-    button.setAttribute("aria-pressed", String(filter === active));
-    button.addEventListener("click", () => {
-      pick(filter);
-    });
-    return button;
-  });
+const filterButton = ({ label, count }: FilterOption): HTMLButtonElement => {
+  const button = h("button", "", label, h("b", "", String(count)));
+  button.type = "button";
+  return button;
+};
 
 const limitNote = ({ contributors, totals }: Report): HTMLElement[] =>
   totals.contributors > contributors.length
@@ -149,10 +144,24 @@ const limitNote = ({ contributors, totals }: Report): HTMLElement[] =>
       ]
     : [];
 
+const peopleHead = (filters: HTMLElement): HTMLElement =>
+  h(
+    "div",
+    "people-head",
+    filters,
+    h(
+      "span",
+      "note",
+      "Counts are context, not a ranking. Each sparkline has its own scale.",
+    ),
+  );
+
 /**
  * Everyone with a human or agent-assisted commit in the window as a list:
  * status, a sparkline of commits per week, main areas, badges and last activity.
- * Filters by status and "show all" past twelve redraw from the report.
+ * Filters by status and "show all" past twelve redraw the list from the
+ * report; the buttons themselves stay in place, so the keyboard focus stays
+ * on the control that was used.
  */
 export const renderContributors = (report: Report): HTMLElement => {
   const rows = personRows(report);
@@ -161,31 +170,37 @@ export const renderContributors = (report: Report): HTMLElement => {
   filters.setAttribute("role", "group");
   filters.setAttribute("aria-label", "Filter by status");
   const list = h("div", "");
-  const more = h("div", "showall");
+  const more = h("button", "btn");
+  more.type = "button";
+  const showAll = h("div", "showall", more);
   let filter: StatusFilter = "all";
   let all = false;
 
-  const paint = (): void => {
-    filters.replaceChildren(
-      ...filterButtons(rows, filter, (picked) => {
-        filter = picked;
-        all = false;
-        paint();
-      }),
-    );
-    const matching = rowsWithFilter(rows, filter);
-    list.replaceChildren(table(visibleRows(matching, limit, all)));
-    const button = h(
-      "button",
-      "btn",
-      all ? "Show fewer" : showAllLabel(matching.length, limit),
-    );
-    button.type = "button";
+  const buttons = filterOptions(rows).map((option) => {
+    const button = filterButton(option);
     button.addEventListener("click", () => {
-      all = !all;
+      filter = option.filter;
+      all = false;
       paint();
     });
-    more.replaceChildren(...(matching.length > PEOPLE_SHOWN ? [button] : []));
+    return { button, filter: option.filter };
+  });
+  filters.append(...buttons.map(({ button }) => button));
+  more.addEventListener("click", () => {
+    all = !all;
+    paint();
+  });
+
+  const paint = (): void => {
+    for (const { button, filter: filterOf } of buttons) {
+      button.setAttribute("aria-pressed", String(filterOf === filter));
+    }
+    const matching = rowsWithFilter(rows, filter);
+    list.replaceChildren(table(visibleRows(matching, limit, all)));
+    more.textContent = all
+      ? "Show fewer"
+      : showAllLabel(matching.length, limit);
+    showAll.hidden = matching.length <= PEOPLE_SHOWN;
   };
   paint();
 
@@ -197,21 +212,7 @@ export const renderContributors = (report: Report): HTMLElement => {
     DESCRIPTION,
     ...(rows.length === 0
       ? [h("p", "empty", "No contributors in the window.")]
-      : [
-          h(
-            "div",
-            "people-head",
-            filters,
-            h(
-              "span",
-              "note",
-              "Counts are context, not a ranking. Each sparkline has its own scale.",
-            ),
-          ),
-          list,
-          more,
-          ...limitNote(report),
-        ]),
+      : [peopleHead(filters), list, showAll, ...limitNote(report)]),
     ...(bots === null ? [] : [bots]),
   );
 };

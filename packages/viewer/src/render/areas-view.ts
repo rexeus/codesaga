@@ -93,7 +93,9 @@ export const renderKnowledge = (report: Report): HTMLElement => {
   const solo = isSolo(report);
   const summary = h("div", "");
   const grid = h("div", "");
-  const more = h("div", "showall");
+  const more = h("button", "btn");
+  more.type = "button";
+  const showAll = h("div", "showall", more);
   const notes = h("div", "");
   let current = startLevel(areas);
   let expanded = false;
@@ -115,18 +117,16 @@ export const renderKnowledge = (report: Report): HTMLElement => {
     notes.replaceChildren(
       ...(facts.truncated === null ? [] : [h("p", "note", facts.truncated)]),
     );
-    const button = h(
-      "button",
-      "btn",
-      expanded ? "Show fewer areas" : showAllLabel(cards.length, limit),
-    );
-    button.type = "button";
-    button.addEventListener("click", () => {
-      expanded = !expanded;
-      paint();
-    });
-    more.replaceChildren(...(cards.length > AREA_CARDS_SHOWN ? [button] : []));
+    more.textContent = expanded
+      ? "Show fewer areas"
+      : showAllLabel(cards.length, limit);
+    showAll.hidden = cards.length <= AREA_CARDS_SHOWN;
   };
+
+  more.addEventListener("click", () => {
+    expanded = !expanded;
+    paint();
+  });
 
   const slider = depthSlider(areas, current, (index) => {
     current = index;
@@ -142,7 +142,7 @@ export const renderKnowledge = (report: Report): HTMLElement => {
     slider,
     summary,
     grid,
-    more,
+    showAll,
     notes,
   );
 };
