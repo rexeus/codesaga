@@ -34,5 +34,15 @@ export const TerritoryTypeScript = Schema.Struct({
   esmShare: Schema.optionalKey(
     Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 })),
   ),
+  /**
+   * The share of the territory's production functions with a cognitive
+   * complexity of 15 or more, as `deepDives.typescript.functions` counts
+   * them. Absent when the territory has no production function.
+   */
+  over15Share: Schema.optionalKey(
+    Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 })),
+  ),
+  /** The highest cognitive complexity of a production function of the territory; absent with `over15Share`. */
+  maxComplexity: Schema.optionalKey(Schema.Natural),
 });
 export type TerritoryTypeScript = typeof TerritoryTypeScript.Type;

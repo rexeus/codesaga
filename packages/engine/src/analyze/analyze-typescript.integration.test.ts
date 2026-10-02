@@ -182,6 +182,107 @@ layer(analyzeServices)(
   },
 );
 
+const HARD = [
+  "/** Hard. */",
+  "export function hard(c: boolean) {",
+  ...Array.from({ length: 16 }, () => "  if (c) {}"),
+  "}",
+  "// TODO: split",
+].join("\n");
+
+const commitThreeTimes = Effect.gen(function* () {
+  yield* setNow;
+  const repo = yield* makeTempRepository;
+  yield* repo.commit("2026-02-01T09:00:00Z", {
+    "package.json": '{ "devDependencies": { "vitest": "^3" } }',
+    "src/hard.ts": `${HARD}\n`,
+    "src/easy.ts": "export const easy = () => 1;\n",
+    "src/hard.test.ts":
+      'import { it } from "vitest";\nit.only("hard", () => { expect(1).toBe(1); });\n',
+  });
+  yield* repo.commit("2026-02-02T09:00:00Z", {
+    "src/hard.ts": `${HARD}\n// second\n`,
+    "src/easy.ts": "export const easy = () => 2;\n",
+  });
+  yield* repo.commit("2026-02-03T09:00:00Z", {
+    "src/hard.ts": `${HARD}\n// third\n`,
+  });
+  return repo;
+});
+
+layer(analyzeServices)("analyze the TypeScript deep dive's functions", (it) => {
+  it.effect(
+    "joins the revisions of three commits to the hardest function of each file",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* commitThreeTimes;
+
+        const { deepDives } = yield* analyze(analyzeOptionsFor(repo));
+
+        const typescript = deepDives?.typescript;
+        assert.deepStrictEqual(typescript?.complexityAndChange, {
+          files: 2,
+          revisions: 5,
+          complexFiles: 1,
+          complexRevisions: 3,
+          complexRevisionShare: 0.6,
+          hotspots: [{ path: "src/hard.ts", complexity: 16, revisions: 3 }],
+        });
+        assert.deepStrictEqual(typescript?.functions?.production.top, [
+          {
+            name: "hard",
+            path: "src/hard.ts",
+            line: 2,
+            complexity: 16,
+            lines: 18,
+          },
+        ]);
+        assert.deepStrictEqual(
+          typescript?.functions?.production.complexity.bands,
+          [1, 0, 0, 1, 0],
+        );
+      }),
+  );
+});
+
+layer(analyzeServices)("analyze the TypeScript deep dive's tests", (it) => {
+  it.effect("reports the tests and the markers of a repository", () =>
+    Effect.gen(function* () {
+      const repo = yield* commitThreeTimes;
+
+      const report = yield* analyze(analyzeOptionsFor(repo));
+
+      const typescript = report.deepDives?.typescript;
+      assert.deepStrictEqual(typescript?.tests, {
+        files: 1,
+        frameworks: ["Vitest"],
+        cases: 1,
+        parameterized: 0,
+        skipped: 0,
+        focused: 1,
+        todo: 0,
+        focusedFiles: ["src/hard.test.ts"],
+        assertions: [0, 1, 0, 0],
+        snapshots: 0,
+        typeTests: 0,
+      });
+      assert.deepStrictEqual(typescript?.markers, {
+        files: 2,
+        lines: 22,
+        todo: 1,
+        fixme: 0,
+        hack: 0,
+        xxx: 0,
+        deprecated: 0,
+        exportedDeclarations: 2,
+        documentedExports: 1,
+        documentedShare: 0.5,
+      });
+      assert.strictEqual(report.thresholds.typescript?.complexityLimit, 15);
+    }),
+  );
+});
+
 layer(analyzeServices)("analyze the TypeScript deep dive without it", (it) => {
   it.effect(
     "has no deep dive for a repository without TypeScript or JavaScript",

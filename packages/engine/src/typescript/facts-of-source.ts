@@ -56,7 +56,7 @@ export const factsOfSource = (
     const parsed = parse(path, text, parseOptionsOf(path));
     return isFatal(parsed, text)
       ? skipped("syntax-error")
-      : { kind: "parsed", facts: fileFactsOf(parsed) };
+      : { kind: "parsed", facts: fileFactsOf(parsed, text) };
   } catch (error) {
     return skipped(error instanceof RangeError ? "too-deep" : "parser-error");
   }

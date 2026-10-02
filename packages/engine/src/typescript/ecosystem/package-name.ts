@@ -76,8 +76,14 @@ const targetOf = (specifier: string): SpecifierTarget | undefined => {
   return PACKAGE_NAME.test(name) ? { kind: "package", name } : undefined;
 };
 
-/** The name the ecosystem table matches a specifier by: `node:test` for a built-in with its prefix, else the package name. */
+/** Bun's built-in modules, such as `bun:test`, which are no package and no Node built-in. */
+const BUN_MODULE = /^bun:[a-z]+$/u;
+
+/** The name the ecosystem table matches a specifier by: `node:test` for a built-in with its prefix, `bun:test` for Bun's, else the package name. */
 export const tableKeyOf = (specifier: string): string | undefined => {
+  if (BUN_MODULE.test(specifier)) {
+    return specifier;
+  }
   const target = targetOf(specifier);
   if (target === undefined) {
     return undefined;

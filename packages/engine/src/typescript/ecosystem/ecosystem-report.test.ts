@@ -74,6 +74,21 @@ describe("ecosystemOf tools", () => {
   });
 });
 
+describe("ecosystemOf Bun", () => {
+  it("detects the bun:test runner from its prefixed import, and lists it as no package", () => {
+    const ecosystem = ecosystemOf(
+      [file("a.test.ts", ["bun:test"])],
+      [manifest()],
+    );
+
+    expect(ecosystem.tools).toStrictEqual([
+      { name: "bun:test", category: "test", files: 1, declaredIn: 0 },
+    ]);
+    expect(ecosystem.packages).toStrictEqual([]);
+    expect(ecosystem.undeclared).toBe(0);
+  });
+});
+
 describe("ecosystemOf imports", () => {
   it("lists the packages a manifest declares or that are workspace packages, most importing files first, and the built-ins apart", () => {
     const ecosystem = ecosystemOf(

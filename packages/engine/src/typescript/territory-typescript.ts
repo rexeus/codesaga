@@ -3,6 +3,7 @@
 import type { TerritoryStrict } from "../report/typescript-strictness.js";
 import type { TerritoryTypeScript } from "../report/typescript-territory.js";
 import { sum } from "../stats/measures.js";
+import { productionFunctionFigures } from "./functions/function-report.js";
 import { esmShareOf } from "./modules/module-report.js";
 import type { ParsedFile } from "./parsed-file.js";
 import { productionEscapesPer1000 } from "./type-safety/type-safety-report.js";
@@ -17,11 +18,13 @@ export const territoryTypeScriptOf = (
   }
   const escapesPer1000 = productionEscapesPer1000(files);
   const esmShare = esmShareOf(files);
+  const functions = productionFunctionFigures(files);
   return {
     files: files.length,
     codeLines: sum(files.map((file) => file.lines)),
     ...(escapesPer1000 === undefined ? {} : { escapesPer1000 }),
     ...(strict === undefined ? {} : { strict }),
     ...(esmShare === undefined ? {} : { esmShare }),
+    ...functions,
   };
 };

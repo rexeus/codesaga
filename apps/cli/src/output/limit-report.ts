@@ -16,26 +16,67 @@ const limitTerritories = (
     }),
   );
 
-/** The `tsconfig` postures cut to the first `limit`, most governed files first; `totalConfigs` keeps their count. */
+type TypeScriptDeepDive = NonNullable<
+  NonNullable<Report["deepDives"]>["typescript"]
+>;
+
+type FunctionsPart = NonNullable<TypeScriptDeepDive["functions"]>["tests"];
+
+const limitFunctions = (part: FunctionsPart, limit: number): FunctionsPart => ({
+  ...part,
+  top: part.top.slice(0, limit),
+});
+
+/** The lists of the TypeScript deep dive cut to the first `limit`: the `tsconfig` postures (`totalConfigs` keeps their count), the hardest functions, the hotspot files and the focused test files. */
+const limitTypeScript = (
+  typescript: TypeScriptDeepDive,
+  limit: number,
+): TypeScriptDeepDive => {
+  const { strictness, functions, complexityAndChange, tests } = typescript;
+  return {
+    ...typescript,
+    ...(strictness === undefined
+      ? {}
+      : {
+          strictness: {
+            ...strictness,
+            configs: strictness.configs.slice(0, limit),
+          },
+        }),
+    ...(functions === undefined
+      ? {}
+      : {
+          functions: {
+            production: limitFunctions(functions.production, limit),
+            tests: limitFunctions(functions.tests, limit),
+          },
+        }),
+    ...(complexityAndChange === undefined
+      ? {}
+      : {
+          complexityAndChange: {
+            ...complexityAndChange,
+            hotspots: complexityAndChange.hotspots.slice(0, limit),
+          },
+        }),
+    ...(tests === undefined
+      ? {}
+      : {
+          tests: { ...tests, focusedFiles: tests.focusedFiles.slice(0, limit) },
+        }),
+  };
+};
+
 const limitDeepDives = (
   deepDives: NonNullable<Report["deepDives"]>,
   limit: number,
-): NonNullable<Report["deepDives"]> => {
-  const { typescript } = deepDives;
-  if (typescript?.strictness === undefined) {
-    return deepDives;
-  }
-  return {
-    ...deepDives,
-    typescript: {
-      ...typescript,
-      strictness: {
-        ...typescript.strictness,
-        configs: typescript.strictness.configs.slice(0, limit),
-      },
-    },
-  };
-};
+): NonNullable<Report["deepDives"]> =>
+  deepDives.typescript === undefined
+    ? deepDives
+    : {
+        ...deepDives,
+        typescript: limitTypeScript(deepDives.typescript, limit),
+      };
 
 /**
  * Applies `--limit` to a report: `contributors` is cut to its first `limit`
@@ -44,8 +85,9 @@ const limitDeepDives = (
  * keeps the full count of each list), `0`
  * keeps everything, and `totals` still describes the untruncated size.
  * The pull request authors and reviewers are cut the same way, with their
- * sizes in `pullRequests.totals`, and so are the `tsconfig` postures of the
- * TypeScript deep dive, with their number in `strictness.totalConfigs`. Time
+ * sizes in `pullRequests.totals`, and so are the lists of the TypeScript deep
+ * dive: the `tsconfig` postures, with their number in `strictness.totalConfigs`,
+ * the hardest functions, the hotspot files and the focused test files. Time
  * series are never cut.
  */
 export const limitReport = (report: Report, limit: number): Report =>

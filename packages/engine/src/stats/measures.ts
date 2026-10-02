@@ -15,6 +15,15 @@ export const sum = (values: Iterable<number>): number => {
   return total;
 };
 
+/** The column sums of `rows`, each of `width` counts: the bucket counts of many sets added up. */
+export const sumColumns = (
+  rows: ReadonlyArray<ReadonlyArray<number>>,
+  width: number,
+): ReadonlyArray<number> =>
+  Array.from({ length: width }, (_, column) =>
+    sum(rows.map((row) => row[column] ?? 0)),
+  );
+
 /**
  * The item with the highest `measure`; on a tie the earliest, so callers that
  * sort their items by path get the first path. Undefined for no items.

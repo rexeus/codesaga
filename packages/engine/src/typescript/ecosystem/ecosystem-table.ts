@@ -1,5 +1,5 @@
 // Owns which packages mean which framework or tool: a table of data, not logic.
-// Add a row to teach codesaga a tool. A package ending in `/*` names every package of a scope; `node:test` is the built-in test runner, matched on its prefixed specifier.
+// Add a row to teach codesaga a tool. A package ending in `/*` names every package of a scope; `node:test` and `bun:test` are the built-in test runners, matched on their prefixed specifiers.
 
 import type { Ecosystem } from "../../report/typescript-ecosystem.js";
 
@@ -34,6 +34,7 @@ export const ECOSYSTEM_TABLE: ReadonlyArray<EcosystemEntry> = [
   { name: "Jest", category: "test", packages: ["jest", "@jest/*"] },
   { name: "Mocha", category: "test", packages: ["mocha"] },
   { name: "node:test", category: "test", packages: ["node:test"] },
+  { name: "bun:test", category: "test", packages: ["bun:test"] },
   {
     name: "Playwright",
     category: "test",
