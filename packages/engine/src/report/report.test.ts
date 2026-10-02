@@ -78,6 +78,20 @@ layer(NodeServices.layer)("Report", (it) => {
       }
     }),
   );
+
+  it.effect("lists the rest areas of every level after the other areas", () =>
+    Effect.gen(function* () {
+      const { levels } = decode(yield* readSample).knowledge.areas;
+
+      for (const { areas } of levels) {
+        const kinds = areas.map(({ kind }) => kind);
+        assert.deepStrictEqual(
+          kinds,
+          kinds.toSorted((a, b) => Number(a === "rest") - Number(b === "rest")),
+        );
+      }
+    }),
+  );
 });
 
 layer(NodeServices.layer)("Report rejects", (it) => {

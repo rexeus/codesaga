@@ -3198,27 +3198,6 @@
               "badges": []
             },
             {
-              "path": "apps/web",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 4,
-                  "soleFiles": 3,
-                  "share": 0.8
-                }
-              ],
-              "reasons": [],
-              "kind": "rest",
-              "badges": []
-            },
-            {
               "path": "packages/api",
               "files": 5,
               "truckFactor": 1,
@@ -3667,6 +3646,27 @@
                   "evidence": "3 active experts and a truck factor of 3."
                 }
               ]
+            },
+            {
+              "path": "apps/web",
+              "files": 5,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Maya Lindqvist",
+                  "email": "maya.lindqvist@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                  "files": 4,
+                  "soleFiles": 3,
+                  "share": 0.8
+                }
+              ],
+              "reasons": [],
+              "kind": "rest",
+              "badges": []
             }
           ]
         },
@@ -4183,27 +4183,6 @@
               "badges": []
             },
             {
-              "path": "apps/admin/src",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 0.8333
-                }
-              ],
-              "reasons": [],
-              "kind": "rest",
-              "badges": []
-            },
-            {
               "path": "apps/web/src",
               "files": 6,
               "truckFactor": 1,
@@ -4283,27 +4262,6 @@
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
-            },
-            {
-              "path": "apps/web",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 4,
-                  "soleFiles": 3,
-                  "share": 0.8
-                }
-              ],
-              "reasons": [],
-              "kind": "rest",
-              "badges": []
             },
             {
               "path": "packages/api",
@@ -4412,48 +4370,6 @@
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ]
-            },
-            {
-              "path": "packages/api/src",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "rest",
-              "badges": []
-            },
-            {
-              "path": "packages/ui/src",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "rest",
-              "badges": []
             },
             {
               "path": "apps/web/src/routes",
@@ -4967,6 +4883,90 @@
                   "evidence": "3 active experts and a truck factor of 3."
                 }
               ]
+            },
+            {
+              "path": "apps/admin/src",
+              "files": 6,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Aiko Tanaka",
+                  "email": "aiko.tanaka@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                  "files": 5,
+                  "soleFiles": 3,
+                  "share": 0.8333
+                }
+              ],
+              "reasons": [],
+              "kind": "rest",
+              "badges": []
+            },
+            {
+              "path": "apps/web",
+              "files": 5,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Maya Lindqvist",
+                  "email": "maya.lindqvist@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                  "files": 4,
+                  "soleFiles": 3,
+                  "share": 0.8
+                }
+              ],
+              "reasons": [],
+              "kind": "rest",
+              "badges": []
+            },
+            {
+              "path": "packages/api/src",
+              "files": 3,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Tomás Herrera",
+                  "email": "tomas.herrera@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                  "files": 3,
+                  "soleFiles": 2,
+                  "share": 1.0
+                }
+              ],
+              "reasons": [],
+              "kind": "rest",
+              "badges": []
+            },
+            {
+              "path": "packages/ui/src",
+              "files": 3,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Priya Raman",
+                  "email": "priya.raman@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                  "files": 3,
+                  "soleFiles": 2,
+                  "share": 1.0
+                }
+              ],
+              "reasons": [],
+              "kind": "rest",
+              "badges": []
             }
           ]
         }
