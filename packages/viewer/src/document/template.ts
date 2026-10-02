@@ -26,7 +26,7 @@ export const renderReportHtml = (report: Report): string => `<!doctype html>
 <body>
 <svg id="svg-root" width="0" height="0" aria-hidden="true"></svg>
 <div id="app" class="app"><noscript>The dashboard needs JavaScript; the report is embedded as JSON in this file.</noscript></div>
-<div id="tooltip" class="tooltip" hidden></div>
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
 <div id="chart-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 <script type="application/json" id="${REPORT_ELEMENT_ID}">${serializeReport(report)}</script>
 <script>${viewerScript}</script>

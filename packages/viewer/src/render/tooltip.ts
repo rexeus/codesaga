@@ -15,6 +15,7 @@ export type TooltipContent = {
 };
 
 const POINTER_OFFSET = 14;
+const TOOLTIP_ID = "tooltip";
 
 const row = ({ label, value, key }: TooltipRow): HTMLElement =>
   h(
@@ -43,7 +44,7 @@ export const showTooltip = (
   { title, rows, text }: TooltipContent,
   event: { readonly clientX: number; readonly clientY: number },
 ): void => {
-  const tooltip = byId("tooltip", HTMLElement);
+  const tooltip = byId(TOOLTIP_ID, HTMLElement);
   tooltip.replaceChildren(
     h("div", "tooltip-title", title),
     ...rows.map((entry) => row(entry)),
@@ -54,17 +55,23 @@ export const showTooltip = (
 };
 
 export const hideTooltip = (): void => {
-  byId("tooltip", HTMLElement).hidden = true;
+  byId(TOOLTIP_ID, HTMLElement).hidden = true;
 };
 
 /**
  * Makes `target` show `content` while the pointer is over it, and, for a
- * focusable target, while it has the keyboard focus.
+ * focusable target, while it has the keyboard focus: the tooltip then
+ * describes the target to assistive technology, and Escape dismisses it
+ * without moving the focus.
  */
 export const bindTooltip = (
   target: SVGElement | HTMLElement,
   content: TooltipContent,
 ): void => {
+  const dismiss = (): void => {
+    target.removeAttribute("aria-describedby");
+    hideTooltip();
+  };
   target.addEventListener("pointermove", (event) => {
     if (event instanceof PointerEvent) {
       showTooltip(content, event);
@@ -73,10 +80,16 @@ export const bindTooltip = (
   target.addEventListener("pointerleave", hideTooltip);
   target.addEventListener("focus", () => {
     const box = target.getBoundingClientRect();
+    target.setAttribute("aria-describedby", TOOLTIP_ID);
     showTooltip(content, {
       clientX: box.left + box.width / 2,
       clientY: box.top + box.height / 2,
     });
   });
-  target.addEventListener("blur", hideTooltip);
+  target.addEventListener("blur", dismiss);
+  target.addEventListener("keydown", (event) => {
+    if (event instanceof KeyboardEvent && event.key === "Escape") {
+      dismiss();
+    }
+  });
 };
