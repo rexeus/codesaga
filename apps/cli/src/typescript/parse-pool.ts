@@ -1,11 +1,11 @@
-// Owns spreading sources over parse workers and surviving a worker that dies.
+// Owns spreading sources over parse workers and surviving a worker that dies or hangs.
 // A parser that crashes its process cannot say which file did it, so the pool bisects the failed batch on a replacement worker: only the culprits are lost and everything else is still parsed.
-// The pool knows nothing of processes; a `PoolWorker` is whatever can parse a batch or die trying.
+// The pool knows nothing of processes; a `PoolWorker` is whatever can parse a batch or die trying; one that stays silent past a timeout that grows with the batch's text is treated as dead.
 import type { FactsResult, SourceText } from "@codesaga/engine";
 
 /** A parser that answers a batch of sources. */
 export type PoolWorker = {
-  /** One verdict per source in order, or undefined when the worker died while parsing them. Never rejects. */
+  /** One verdict per source in order, or undefined when the worker died while parsing them. Never rejects; the pool gives up on one that stays silent. */
   readonly run: (
     sources: ReadonlyArray<SourceText>,
   ) => Promise<ReadonlyArray<FactsResult> | undefined>;
@@ -44,6 +44,10 @@ const BATCH_CHARACTERS = 32_000_000;
 /** Worker deaths one batch may cause before the rest of it is given up; bisecting one culprit takes about two per level. */
 const MAX_CRASHES_PER_BATCH = 40;
 
+/** A batch may take this long however small, and a further second per megabyte of its text; a worker that is silent for longer counts as dead. */
+const BATCH_TIMEOUT_MS = 30_000;
+const BATCH_TIMEOUT_MS_PER_MEGABYTE = 1_000;
+
 const CRASHED: FactsResult = { kind: "skipped", reason: "parser-crashed" };
 
 const batchesOf = (
@@ -66,6 +70,30 @@ const batchesOf = (
     }
   }
   return batches;
+};
+
+const timeoutOf = (sources: Batch): number =>
+  BATCH_TIMEOUT_MS +
+  (BATCH_TIMEOUT_MS_PER_MEGABYTE *
+    sources.reduce((sum, { text }) => sum + text.length, 0)) /
+    1_000_000;
+
+/** The work's answer, or undefined once `milliseconds` pass without one. */
+const within = async <A>(
+  work: Promise<A>,
+  milliseconds: number,
+): Promise<A | undefined> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const silence = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => {
+      resolve(undefined);
+    }, milliseconds);
+  });
+  try {
+    return await Promise.race([work, silence]);
+  } finally {
+    clearTimeout(timer);
+  }
 };
 
 /** The worker a lane parses with, which it replaces when it dies. */
@@ -165,7 +193,7 @@ class WorkerPool implements Pool {
     if (lane.worker === undefined) {
       return sources.map(() => CRASHED);
     }
-    const results = await lane.worker.run(sources);
+    const results = await within(lane.worker.run(sources), timeoutOf(sources));
     if (results !== undefined) {
       return results;
     }

@@ -1,5 +1,5 @@
 import type { FactsResult, SourceText } from "@codesaga/engine";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { makePool } from "./parse-pool.js";
 import type { PoolWorker, WorkerStart } from "./parse-pool.js";
@@ -229,5 +229,66 @@ describe("makePool starting and stopping", () => {
     pool.stop();
 
     expect(stopped()).toBe(1);
+  });
+});
+
+/** Workers that never answer a batch holding a path in `hang`. */
+const hanging = (hang: ReadonlyArray<string>) => {
+  const stopped: Array<number> = [];
+  let started = 0;
+  const start = (): Promise<WorkerStart> => {
+    started += 1;
+    const number = started;
+    return Promise.resolve({
+      kind: "ready",
+      version: "1.2.3",
+      worker: {
+        run: (batch) =>
+          batch.some(({ path }) => hang.includes(path))
+            ? new Promise<never>(() => {
+                // never answers
+              })
+            : Promise.resolve(batch.map(() => PARSED)),
+        stop: () => {
+          stopped.push(number);
+        },
+      },
+    });
+  };
+  return { start, stopped };
+};
+
+describe("makePool with a worker that hangs", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("treats a silent worker as dead and loses only the file that hangs it", async () => {
+    vi.useFakeTimers();
+    const { start, stopped } = hanging(["b"]);
+    const pool = makePool(start, 1);
+
+    const answer = pool.factsOf(sources("a", "b", "c"));
+    await vi.runAllTimersAsync();
+
+    expect(await answer).toStrictEqual([PARSED, CRASHED, PARSED]);
+    // silent on "abc", on "bc" and on "b"; the fourth parses "c"
+    expect(stopped).toStrictEqual([1, 2, 3]);
+  });
+
+  it("waits 30 s plus a second per megabyte of text before it gives up", async () => {
+    vi.useFakeTimers();
+    const { start, stopped } = hanging(["big"]);
+    const pool = makePool(start, 1);
+
+    const answer = pool.factsOf([
+      { path: "big", text: "x".repeat(20_000_000) },
+    ]);
+    await vi.advanceTimersByTimeAsync(49_999);
+    expect(stopped).toStrictEqual([]);
+    await vi.advanceTimersByTimeAsync(2);
+
+    expect(await answer).toStrictEqual([CRASHED]);
+    expect(stopped).toStrictEqual([1]);
   });
 });

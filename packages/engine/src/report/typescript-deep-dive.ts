@@ -34,8 +34,8 @@ const Coverage = Schema.Struct({
    * over 1 MiB, `minified` has lines averaging over 300 characters, `too-deep`
    * is a tree nested deeper than the stack allows, `syntax-error` is a fatal
    * parse error, `parser-error` an unexpected failure of the parser,
-   * `parser-crashed` a file that killed the parser's process (found by
-   * bisecting, so the others of its batch were still parsed), `unreadable` a
+   * `parser-crashed` a file that killed or hung the parser's process (found
+   * by bisecting, so the others of its batch were still parsed), `unreadable` a
    * file that could not be read, and `parser-unavailable` says the parser did
    * not load.
    */
