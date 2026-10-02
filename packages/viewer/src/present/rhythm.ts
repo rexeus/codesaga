@@ -4,12 +4,28 @@ type Punchcard = Report["punchcard"];
 
 const HOURS = 24;
 const SATURDAY = 5;
-const NIGHT_FROM = 22;
-const NIGHT_TO = 5;
 
-/** Hours between 22:00 and 05:00 local time, the night of the highlights. */
-export const isNightHour = (hour: number): boolean =>
-  hour >= NIGHT_FROM || hour < NIGHT_TO;
+/** The night as the report defines it: from this local hour up to, not including, that one. */
+export type NightWindow = {
+  readonly nightFromHour: number;
+  readonly nightToHour: number;
+};
+
+/** A test for the local hours of the night; the window may cross midnight. */
+export const isNightHour =
+  ({ nightFromHour, nightToHour }: NightWindow) =>
+  (hour: number): boolean =>
+    nightFromHour <= nightToHour
+      ? hour >= nightFromHour && hour < nightToHour
+      : hour >= nightFromHour || hour < nightToHour;
+
+const clock = (hour: number): string => `${String(hour).padStart(2, "0")}:00`;
+
+/** The night as clock times, such as "22:00 to 05:00". */
+export const nightLabel = ({
+  nightFromHour,
+  nightToHour,
+}: NightWindow): string => `${clock(nightFromHour)} to ${clock(nightToHour)}`;
 
 /** Whether a punchcard row (0 = Monday) is a Saturday or a Sunday. */
 export const isWeekend = (weekday: number): boolean => weekday >= SATURDAY;
@@ -31,13 +47,16 @@ export const hourTotals = (punchcard: Punchcard): number[] =>
 export type Rhythm = {
   /** Share (0 to 1) of the commits on a Saturday or Sunday. */
   readonly weekendShare: number;
-  /** Share (0 to 1) of the commits from 22:00 to 05:00. */
+  /** Share (0 to 1) of the commits in the night window. */
   readonly nightShare: number;
   readonly busiestHour: number;
 };
 
-/** The rhythm of a punchcard, or null without any commit. */
-export const rhythmOf = (punchcard: Punchcard): Rhythm | null => {
+/** The rhythm of a punchcard against the report's night window, or null without any commit. */
+export const rhythmOf = (
+  punchcard: Punchcard,
+  night: NightWindow,
+): Rhythm | null => {
   const hours = hourTotals(punchcard);
   const total = sum(hours);
   if (total === 0) {
@@ -46,10 +65,11 @@ export const rhythmOf = (punchcard: Punchcard): Rhythm | null => {
   const weekend = sum(
     weekdayTotals(punchcard).filter((_, weekday) => isWeekend(weekday)),
   );
-  const night = sum(hours.filter((_, hour) => isNightHour(hour)));
+  const isNight = isNightHour(night);
+  const nightCommits = sum(hours.filter((_, hour) => isNight(hour)));
   return {
     weekendShare: weekend / total,
-    nightShare: night / total,
+    nightShare: nightCommits / total,
     busiestHour: hours.indexOf(Math.max(...hours)),
   };
 };

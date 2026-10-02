@@ -63,6 +63,7 @@ describe("the figures of a card", () => {
       title: "Anniversary",
       detail: "Turned two.",
       value: 2,
+      unit: "years",
       date: "2025-10-10",
     });
 
@@ -77,6 +78,26 @@ describe("the figures of a card", () => {
     expect(card.viz?.kind === "timeline" && card.viz.anniversaries).toEqual([
       365 / 1086,
       730 / 1086,
+    ]);
+  });
+
+  it("counts the days of a day milestone, not years, with a single marker on the timeline", () => {
+    const card = cardFor({
+      kind: "anniversary",
+      title: "Anniversary",
+      detail: "The first commit turns 500 days old on 2026-10-02.",
+      value: 500,
+      unit: "days",
+      date: "2026-10-02",
+    });
+
+    // 10 Oct 2023 to 30 Sep 2026 is 1,086 days
+    expect(card).toMatchObject({
+      big: "500 days",
+      evidence: "first commit 2023-10-10 · 1,086 days of history",
+    });
+    expect(card.viz?.kind === "timeline" && card.viz.anniversaries).toEqual([
+      500 / 1086,
     ]);
   });
 
@@ -205,5 +226,32 @@ describe("the words of a card", () => {
       unit: "months untouched",
       viz: { kind: "path", text: "docs/guides" },
     });
+  });
+});
+
+describe("the night of a card", () => {
+  it("highlights the night hours of the report's thresholds", () => {
+    const report = sampleReport();
+    const early: Report = {
+      ...report,
+      thresholds: {
+        ...report.thresholds,
+        highlights: {
+          ...report.thresholds.highlights,
+          nightFromHour: 1,
+          nightToHour: 6,
+        },
+      },
+    };
+    const card = cardFor(
+      { kind: "night-owls", title: "Night owls", detail: "...", value: 0.2 },
+      early,
+    );
+
+    expect(
+      card.viz?.kind === "bars" &&
+        card.viz.bars.flatMap(({ on }, hour) => (on ? [hour] : [])),
+    ).toEqual([1, 2, 3, 4, 5]);
+    expect(card.evidence).toBe("commits by hour, 01:00 to 06:00 highlighted");
   });
 });

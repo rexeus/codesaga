@@ -3,7 +3,7 @@ import type { Report } from "@codesaga/engine";
 import { HEAT_LEVELS, hourSpan, layoutPunchcard } from "../layout/punchcard.js";
 import type { PunchcardLayout } from "../layout/punchcard.js";
 import { formatCount, formatPercent } from "../present/format.js";
-import { rhythmOf } from "../present/rhythm.js";
+import { nightLabel, rhythmOf } from "../present/rhythm.js";
 import { chartFigure, chartSvg, responsiveChart } from "./chart-frame.js";
 import type { Plot } from "./chart-frame.js";
 import { h, s } from "./dom.js";
@@ -117,8 +117,9 @@ const scale = (): HTMLElement =>
 const stat = (value: string, label: string): HTMLElement =>
   h("div", "", h("strong", "", value), h("span", "", label));
 
-const rhythmStats = ({ punchcard }: Report): HTMLElement[] => {
-  const rhythm = rhythmOf(punchcard);
+const rhythmStats = ({ punchcard, thresholds }: Report): HTMLElement[] => {
+  const night = thresholds.highlights;
+  const rhythm = rhythmOf(punchcard, night);
   if (rhythm === null) {
     return [];
   }
@@ -127,7 +128,7 @@ const rhythmStats = ({ punchcard }: Report): HTMLElement[] => {
       "div",
       "rhythm",
       stat(formatPercent(rhythm.weekendShare), "on weekends"),
-      stat(formatPercent(rhythm.nightShare), "22:00 to 05:00"),
+      stat(formatPercent(rhythm.nightShare), nightLabel(night)),
       stat(`${String(rhythm.busiestHour).padStart(2, "0")}:00`, "busiest hour"),
     ),
   ];

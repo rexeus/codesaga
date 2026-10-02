@@ -9,7 +9,13 @@ import {
 } from "./format.js";
 import type { IconName } from "./icons.js";
 import { initialsOf, slotOf } from "./people.js";
-import { hourTotals, isNightHour, isWeekend, weekdayTotals } from "./rhythm.js";
+import {
+  hourTotals,
+  isNightHour,
+  isWeekend,
+  nightLabel,
+  weekdayTotals,
+} from "./rhythm.js";
 import type { Segment } from "./story.js";
 
 type Highlight = Report["highlights"][number];
@@ -127,17 +133,19 @@ const anniversary: Build = (highlight, { repository, generatedAt }) => {
   const days = Math.round(
     (dayNumber(generatedAt) - dayNumber(since)) / MS_PER_DAY,
   );
-  const years = valueOf(highlight);
+  const count = valueOf(highlight);
+  const unit = highlight.unit ?? "years";
+  const marks =
+    unit === "years"
+      ? Array.from({ length: count }, (_, i) => DAYS_PER_YEAR * (i + 1))
+      : [count];
   const months = formatAge(since, generatedAt).split(" and ")[1];
   return {
-    big: `${years} ${noun(years, "year", "years")}`,
-    unit: months === undefined ? "" : `+ ${months}`,
+    big: `${formatCount(count)} ${noun(count, unit.slice(0, -1), unit)}`,
+    unit: unit === "years" && months !== undefined ? `+ ${months}` : "",
     viz: {
       kind: "timeline",
-      anniversaries: Array.from(
-        { length: years },
-        (_, index) => (DAYS_PER_YEAR * (index + 1)) / Math.max(1, days),
-      ),
+      anniversaries: marks.map((day) => day / Math.max(1, days)),
     },
     evidence: `first commit ${formatDate(since)} · ${formatCount(days)} days of history`,
   };
@@ -178,11 +186,11 @@ const busiestDay: Build = (highlight, { activity }) => {
   };
 };
 
-const nightOwls: Build = (highlight, { punchcard }) => ({
+const nightOwls: Build = (highlight, { punchcard, thresholds }) => ({
   big: formatPercent(valueOf(highlight)),
   unit: "after dark",
-  viz: barsViz(hourTotals(punchcard), isNightHour),
-  evidence: "commits by hour, night hours highlighted",
+  viz: barsViz(hourTotals(punchcard), isNightHour(thresholds.highlights)),
+  evidence: `commits by hour, ${nightLabel(thresholds.highlights)} highlighted`,
 });
 
 const weekend: Build = (highlight, { punchcard }) => ({

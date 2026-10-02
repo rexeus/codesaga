@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { hourTotals, isNightHour, rhythmOf, weekdayTotals } from "./rhythm.js";
+import {
+  hourTotals,
+  isNightHour,
+  nightLabel,
+  rhythmOf,
+  weekdayTotals,
+} from "./rhythm.js";
+
+const NIGHT = { nightFromHour: 22, nightToHour: 5 };
+
+const nightOf = (hours: readonly number[], window: typeof NIGHT): boolean[] => {
+  const isNight = isNightHour(window);
+  return hours.map((hour) => isNight(hour));
+};
 
 const punchcard = (cells: Record<string, number>): number[][] =>
   Array.from({ length: 7 }, (_row, row) =>
@@ -12,6 +25,7 @@ describe("rhythmOf", () => {
     // Monday 10:00 (6), Tuesday 23:00 (2), Saturday 03:00 (1), Sunday 10:00 (1)
     const rhythm = rhythmOf(
       punchcard({ "0:10": 6, "1:23": 2, "5:3": 1, "6:10": 1 }),
+      NIGHT,
     );
 
     expect(rhythm).toEqual({
@@ -22,7 +36,7 @@ describe("rhythmOf", () => {
   });
 
   it("has no rhythm without commits", () => {
-    expect(rhythmOf(punchcard({}))).toBeNull();
+    expect(rhythmOf(punchcard({}), NIGHT)).toBeNull();
   });
 });
 
@@ -35,7 +49,7 @@ describe("the sums of a punchcard", () => {
   });
 
   it("counts 22:00 to 04:59 as night", () => {
-    expect([21, 22, 23, 0, 4, 5].map((hour) => isNightHour(hour))).toEqual([
+    expect(nightOf([21, 22, 23, 0, 4, 5], NIGHT)).toEqual([
       false,
       true,
       true,
@@ -43,5 +57,29 @@ describe("the sums of a punchcard", () => {
       true,
       false,
     ]);
+  });
+});
+
+describe("the night window of the report", () => {
+  it("follows the thresholds and also reads a night that does not cross midnight", () => {
+    const early = { nightFromHour: 1, nightToHour: 6 };
+
+    expect(nightOf([0, 1, 5, 6, 23], early)).toEqual([
+      false,
+      true,
+      true,
+      false,
+      false,
+    ]);
+    expect(nightLabel(early)).toBe("01:00 to 06:00");
+    expect(nightLabel(NIGHT)).toBe("22:00 to 05:00");
+  });
+
+  it("shares the commits of the configured night", () => {
+    const cells = punchcard({ "0:2": 1, "0:23": 3 });
+
+    expect(
+      rhythmOf(cells, { nightFromHour: 1, nightToHour: 6 })?.nightShare,
+    ).toBe(0.25);
   });
 });
