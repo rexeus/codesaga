@@ -37,8 +37,8 @@ export const Idioms = Schema.Struct({
   /**
    * Calls that mutate (`push`, `pop`, `shift`, `unshift`, `splice`, `sort`,
    * `reverse`, `fill`, `copyWithin`) against calls that return a new value
-   * (`map`, `filter`, `reduce`, `reduceRight`, `flatMap`, `flat`, `slice`,
-   * `concat`, `toSorted`, `toReversed`, `toSpliced`) and spread elements in
+   * (`map`, `filter`, `reduce`, `reduceRight`, `flatMap`, `flat`,
+   * `toSorted`, `toReversed`, `toSpliced`) and spread elements in
    * array and object literals.
    */
   mutation: Schema.Struct({

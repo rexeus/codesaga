@@ -79,6 +79,17 @@ describe("idiom facts: declarations and exports", () => {
     expect(facts).toMatchObject({ defaultExports: 2, namedExports: 5 });
   });
 
+  it("does not count the exports of a namespace as exports of the module", () => {
+    const facts = idioms(
+      [
+        "export namespace N { export const a = 1; export function b() {} }",
+        "export const c = 1;",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({ namedExports: 2, defaultExports: 0 });
+  });
+
   it("counts const, let and var declarations", () => {
     const facts = idioms(
       "const a = 1, b = 2;\nlet c;\nvar d, e;\nfor (let i = 0; ; ) {}\n",
@@ -128,6 +139,19 @@ describe("idiom facts: expressions", () => {
       transformCalls: 2,
       spreads: 2,
     });
+  });
+
+  it("leaves out calls on a PascalCase namespace, a string or a template, and the string-ambiguous slice and concat", () => {
+    const facts = idioms(
+      [
+        "const a = Effect.map(f); const b = Arr.filter(g); const c = Array.from(h);",
+        'const d = "a-b".toSorted(); const e = `x`.fill(1);',
+        "const f2 = xs.slice(1).concat(ys);",
+        "const g2 = this.items.map(m); const h2 = effect.map(m); xs.push(1);",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({ transformCalls: 2, mutationCalls: 1 });
   });
 
   it("counts optional chains once each and nullish coalescing, assignment included", () => {

@@ -23,7 +23,7 @@ export type IdiomFacts = {
   /** Class members named `#x`, and members marked `private` (parameter properties included). */
   readonly hashPrivate: number;
   readonly privateModifiers: number;
-  /** `export default` declarations and `export { x as default }`, and every other exported name. */
+  /** `export default` declarations and `export { x as default }`, and every other exported name, at the top level of the file: the `export` of a namespace member is not an export of the module. */
   readonly defaultExports: number;
   readonly namedExports: number;
   /** `const`, `let` and `var` declarations. */
@@ -35,7 +35,7 @@ export type IdiomFacts = {
   readonly forEachCalls: number;
   /** `.push(`, `.pop(`, `.shift(`, `.unshift(`, `.splice(`, `.sort(`, `.reverse(`, `.fill(` and `.copyWithin(` calls. */
   readonly mutationCalls: number;
-  /** `.map(`, `.filter(`, `.reduce(`, `.reduceRight(`, `.flatMap(`, `.flat(`, `.slice(`, `.concat(`, `.toSorted(`, `.toReversed(` and `.toSpliced(` calls. */
+  /** `.map(`, `.filter(`, `.reduce(`, `.reduceRight(`, `.flatMap(`, `.flat(`, `.toSorted(`, `.toReversed(` and `.toSpliced(` calls. Neither list counts a call on a PascalCase name (`Effect.map`) or on a string; `slice` and `concat` are left out, since strings have them too. */
   readonly transformCalls: number;
   /** Spread elements in array and object literals, which transform without mutating. */
   readonly spreads: number;
