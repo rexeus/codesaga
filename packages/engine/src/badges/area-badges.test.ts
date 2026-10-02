@@ -236,3 +236,15 @@ describe("areaBadges evidence and order", () => {
     ).toStrictEqual([]);
   });
 });
+
+describe("areaBadges on a huge area", () => {
+  it("judges the creation of an area with hundreds of thousands of files", () => {
+    const files = Array.from({ length: 300_000 }, (_, i) =>
+      daysAgo(10 + (i % 60)),
+    );
+
+    expect(
+      kindsOf({ fileFirstCommits: files, startTime: daysAgo(1_000_000) }),
+    ).toContain("new");
+  });
+});

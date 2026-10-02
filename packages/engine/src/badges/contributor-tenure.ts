@@ -50,7 +50,7 @@ const steady = ({ times, nowSeconds }: Tenure) =>
 
 /** The first commit is recent, and someone committed before it: the founder of a young repository is no newcomer. */
 const welcome = ({ times, repositoryStart, now, nowSeconds }: Tenure) => {
-  const first = Math.min(...times);
+  const first = times.reduce((earliest, time) => Math.min(earliest, time));
   return isNewContributor(first, repositoryStart, now)
     ? {
         kind: "welcome" as const,

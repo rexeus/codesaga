@@ -256,6 +256,14 @@ describe("contributorBadges steady, welcome and returning", () => {
     expect(kindsOf([commit(daysAgo(91))])).not.toContain("welcome");
   });
 
+  it("judges the first commit of a person with hundreds of thousands of commits", () => {
+    const many = Array.from({ length: 300_000 }, (_, i) =>
+      commit(daysAgo(1 + (i % 60))),
+    );
+
+    expect(kindsOf(many)).toContain("welcome");
+  });
+
   it("withholds welcome from the one who started the repository", () => {
     const first = commit(daysAgo(30));
 

@@ -98,7 +98,7 @@ const island = ({ island: isIsland, paths, experts }: Context) =>
     ? {
         kind: "island" as const,
         label: "Knowledge island",
-        evidence: `One person is sole expert on ${Math.max(0, ...experts.map(({ soleFiles }) => soleFiles))} of ${paths.length} files.`,
+        evidence: `One person is sole expert on ${experts.reduce((most, { soleFiles }) => Math.max(most, soleFiles), 0)} of ${paths.length} files.`,
       }
     : undefined;
 
@@ -170,7 +170,10 @@ const handover = ({ experts, now, nowSeconds }: Context) => {
 };
 
 const newArea = ({ fileFirstCommits, startTime, now, nowSeconds }: Context) => {
-  const created = Math.min(...fileFirstCommits);
+  const created = fileFirstCommits.reduce(
+    (earliest, time) => Math.min(earliest, time),
+    Infinity,
+  );
   return fileFirstCommits.length > 0 &&
     created - startTime >= newAfterStartDays * SECONDS_PER_DAY &&
     isActiveWithin(created, now, newDays)
