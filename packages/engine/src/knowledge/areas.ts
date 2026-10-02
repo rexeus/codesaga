@@ -5,8 +5,9 @@
 import { Array as Arr, Order } from "effect";
 
 import type { AreaKnowledge, AreaLevel } from "../report/knowledge-report.js";
-import { AREA_MIN_FILES, partitionLevels } from "./area-partition.js";
+import { partitionLevels } from "./area-partition.js";
 import type { PartitionArea, PartitionInput } from "./area-partition.js";
+import { AREA_MIN_FILES } from "./area-tree.js";
 import { byRisk, describeDirectory } from "./directories.js";
 import type { KnowledgeModel } from "./model.js";
 

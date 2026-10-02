@@ -6,18 +6,11 @@ import { Array as Arr, Order } from "effect";
 
 import { groupBy } from "../collections/group-by.js";
 import { ancestorsOf } from "../universe/ancestors.js";
-
-/** An area with fewer universe files is grouped with its siblings as "other files". */
-export const AREA_MIN_FILES = 3;
+import { AREA_MIN_FILES, cutSteps, treeSizes } from "./area-tree.js";
+import type { TreeFile, TreeSizes } from "./area-tree.js";
 
 /** The deepest level reported. */
 export const MAX_AREA_DEPTH = 6;
-
-/** An area with more than this share of the universe files, and subdirectories, is split further. */
-export const GIANT_AREA_SHARE = 0.4;
-
-/** A giant area is split at most this many directory steps beyond its level. */
-export const GIANT_SPLIT_STEPS = 2;
 
 type AreaKind = "package" | "directory" | "rest";
 
@@ -45,17 +38,9 @@ export type PartitionInput = {
 };
 
 /** A file placed below its anchor: the root of its package, else the scope. */
-type Placed = {
+type Placed = TreeFile & {
   readonly path: string;
-  readonly anchor: string;
   readonly inPackage: boolean;
-  /** The directories between the anchor and the file. */
-  readonly dirs: ReadonlyArray<string>;
-};
-
-type NodeSizes = {
-  readonly subtree: ReadonlyMap<string, number>;
-  readonly direct: ReadonlyMap<string, number>;
 };
 
 const joinPath = (anchor: string, dirs: ReadonlyArray<string>): string => {
@@ -105,69 +90,17 @@ const placeFiles = (input: PartitionInput): ReadonlyArray<Placed> => {
   });
 };
 
-const nodeKey = (file: Placed, depth: number): string =>
-  `${file.anchor}\0${file.dirs.slice(0, depth).join("/")}`;
-
-const increment = (counts: Map<string, number>, key: string): void => {
-  counts.set(key, (counts.get(key) ?? 0) + 1);
-};
-
-/** The files below each directory of each anchor, and those directly in it. */
-const nodeSizes = (files: ReadonlyArray<Placed>): NodeSizes => {
-  const subtree = new Map<string, number>();
-  const direct = new Map<string, number>();
-  for (const file of files) {
-    for (let depth = 0; depth <= file.dirs.length; depth += 1) {
-      increment(subtree, nodeKey(file, depth));
-    }
-    increment(direct, nodeKey(file, file.dirs.length));
-  }
-  return { subtree, direct };
-};
-
-/**
- * The directory steps below the anchor at which the file's area is cut: the
- * level's own steps, plus one for every giant area on the way down, at most
- * `GIANT_SPLIT_STEPS`. A giant area holds more than `GIANT_AREA_SHARE` of the
- * files and has subdirectories. Splitting depends only on the tree, so a
- * deeper level never cuts a file less deeply than a shallower one.
- */
-const stepsOf = (
-  file: Placed,
-  base: number,
-  total: number,
-  sizes: NodeSizes,
-): number => {
-  const isGiant = (depth: number): boolean => {
-    const key = nodeKey(file, depth);
-    const subtree = sizes.subtree.get(key) ?? 0;
-    return (
-      subtree > GIANT_AREA_SHARE * total &&
-      subtree > (sizes.direct.get(key) ?? 0)
-    );
-  };
-  let steps = base;
-  while (
-    steps < base + GIANT_SPLIT_STEPS &&
-    steps < file.dirs.length &&
-    isGiant(steps)
-  ) {
-    steps += 1;
-  }
-  return steps;
-};
-
 /** The level's areas before small ones are grouped. */
 const cutAt = (
   files: ReadonlyArray<Placed>,
   depth: number,
-  sizes: NodeSizes,
+  sizes: TreeSizes,
 ): ReadonlyArray<PartitionArea> => {
   const areas = new Map<string, PartitionArea & { paths: Array<string> }>();
   for (const file of files) {
     const base = file.inPackage ? depth - 1 : depth;
     const steps = Math.min(
-      stepsOf(file, base, files.length, sizes),
+      cutSteps(file, base, files.length, sizes),
       file.dirs.length,
     );
     const kind = steps === 0 && file.inPackage ? "package" : "directory";
@@ -221,7 +154,9 @@ const signatureOf = (areas: ReadonlyArray<PartitionArea>): string =>
  * every package is cut k directory steps below the scope. A file directly in a
  * root belongs to that root's own area. Within every level an area holding
  * more than `GIANT_AREA_SHARE` of the files is split up to `GIANT_SPLIT_STEPS`
- * directories further, so one package cannot become one giant area. Areas with
+ * directories further, stopping once a split yields two areas of at least
+ * `AREA_MIN_FILES` files (see `cutSteps`), so one package cannot become one
+ * giant area. Areas with
  * fewer than `AREA_MIN_FILES` files are grouped per parent as one `rest` area.
  * Level 1 is always returned, with no areas for no files.
  */
@@ -229,7 +164,7 @@ export const partitionLevels = (
   input: PartitionInput,
 ): Arr.NonEmptyReadonlyArray<PartitionLevel> => {
   const files = placeFiles(input);
-  const sizes = nodeSizes(files);
+  const sizes = treeSizes(files);
   const cuts = Arr.makeBy(MAX_AREA_DEPTH, (index) =>
     cutAt(files, index + 1, sizes),
   );

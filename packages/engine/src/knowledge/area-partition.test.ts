@@ -213,18 +213,17 @@ describe("partitionLevels with a giant area", () => {
     scope: ".",
   });
 
-  it("splits an area above 40% of the files, down to two directories further", () => {
+  it("splits an area above 40% of the files once when that yields two areas of at least 3 files", () => {
     expect(summarize(levels[0])).toStrictEqual([
       "rest packages 1",
-      "directory packages/core/src/a 5",
-      "directory packages/core/src/b 4",
+      "directory packages/core/src 9",
       "directory packages/core/test 4",
       "package packages/db 4",
       "package packages/ui 4",
     ]);
   });
 
-  it("cuts the packages beside the giant one step deeper at the next level, while the giant stays split", () => {
+  it("cuts the packages beside the giant one step deeper at the next level, and splits the giant src", () => {
     expect(levels.map((level) => summarize(level))[1]).toStrictEqual([
       "rest packages 1",
       "directory packages/core/src/a 5",
@@ -237,5 +236,82 @@ describe("partitionLevels with a giant area", () => {
 
   it("drops a level that has the same areas as the one before", () => {
     expect(levels).toHaveLength(2);
+  });
+});
+
+/** Level 1 of 25 files: a package of `giantFiles` (src 5, test the rest) beside two packages of the other files. */
+const levelOneWithGiant = (giantFiles: number) => {
+  const others = 25 - giantFiles;
+  const [level] = partitionLevels({
+    paths: [
+      ...filesIn("packages/big/src", 5),
+      ...filesIn("packages/big/test", giantFiles - 5),
+      ...filesIn("packages/p2", Math.ceil(others / 2)),
+      ...filesIn("packages/p3", Math.floor(others / 2)),
+    ],
+    packageRoots: ["packages/big", "packages/p2", "packages/p3"],
+    scope: ".",
+  });
+  return summarize(level);
+};
+
+describe("partitionLevels at the share of a giant area", () => {
+  it("keeps an area of exactly 40% of the files whole", () => {
+    expect(levelOneWithGiant(10)).toStrictEqual([
+      "package packages/big 10",
+      "package packages/p2 8",
+      "package packages/p3 7",
+    ]);
+  });
+
+  it("splits an area just above 40% of the files", () => {
+    expect(levelOneWithGiant(11)).toStrictEqual([
+      "directory packages/big/src 5",
+      "directory packages/big/test 6",
+      "package packages/p2 7",
+      "package packages/p3 7",
+    ]);
+  });
+});
+
+describe("partitionLevels splitting a giant area further", () => {
+  it("splits a single package into its src and test directories at level 1", () => {
+    const [level] = partitionLevels({
+      paths: [
+        ...filesIn("src/core", 4),
+        ...filesIn("src/util", 3),
+        ...filesIn("test", 5),
+        "main.ts",
+        "index.ts",
+        "config.ts",
+      ],
+      packageRoots: ["."],
+      scope: ".",
+    });
+
+    expect(summarize(level)).toStrictEqual([
+      "package . 3",
+      "directory src 7",
+      "directory test 5",
+    ]);
+  });
+
+  it("keeps splitting while a split leaves only one area of 3 files, at most two steps", () => {
+    const [level] = partitionLevels({
+      paths: [
+        "packages/core/index.ts",
+        ...filesIn("packages/core/src/a/deep/er", 4),
+        ...filesIn("packages/core/src/a/b", 4),
+        ...filesIn("packages/ui", 5),
+      ],
+      packageRoots: ["packages/core", "packages/ui"],
+      scope: ".",
+    });
+
+    expect(summarize(level)).toStrictEqual([
+      "rest packages 1",
+      "directory packages/core/src/a 8",
+      "package packages/ui 5",
+    ]);
   });
 });

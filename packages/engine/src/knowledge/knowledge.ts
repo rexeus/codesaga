@@ -8,12 +8,12 @@ import { lineOwnersField } from "../blame/line-owners.js";
 import { isActiveWithin } from "../contributors/activeness.js";
 import { countContributors } from "../contributors/count-contributors.js";
 import type { Report } from "../report/report.js";
+import { MAX_AREA_DEPTH } from "./area-partition.js";
 import {
   AREA_MIN_FILES,
   GIANT_AREA_SHARE,
   GIANT_SPLIT_STEPS,
-  MAX_AREA_DEPTH,
-} from "./area-partition.js";
+} from "./area-tree.js";
 import { areaLevels } from "./areas.js";
 import { MIN_DIRECTORY_FILES, directoryKnowledge } from "./directories.js";
 import { EXPERT_RATIO } from "./doe.js";
