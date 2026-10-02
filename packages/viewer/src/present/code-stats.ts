@@ -5,9 +5,9 @@ import { formatCount, formatPercent } from "./format.js";
 /** The code stats of the repository or of one territory. */
 export type CodeStats = Report["stats"];
 
-/** A whole number with thousands separators, any other with one decimal: `121`, `2.5`, `1,200`. */
-export const formatFigure = (value: number): string =>
-  Number.isInteger(value) ? formatCount(value) : value.toFixed(1);
+/** A count that interpolation may have left fractional, to the nearest whole with separators: `121`, `1,200`. */
+export const formatWhole = (value: number): string =>
+  formatCount(Math.round(value));
 
 /** Levels per line with two decimals: `2.04`. */
 export const formatLevels = (value: number): string => value.toFixed(2);

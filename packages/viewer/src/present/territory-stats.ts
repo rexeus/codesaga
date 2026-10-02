@@ -1,6 +1,6 @@
 import {
   compareOnBar,
-  formatFigure,
+  formatWhole,
   formatLevels,
   formatShare,
   indentationOf,
@@ -117,7 +117,7 @@ export const territoryStats = (
     lines: formatCount(stats.codeLines),
     fileLength: {
       min: formatCount(fileLength.min),
-      median: formatFigure(fileLength.median),
+      median: formatWhole(fileLength.median),
       max: formatCount(fileLength.max),
       position: rangePosition(
         fileLength.min,
@@ -132,9 +132,9 @@ export const territoryStats = (
       otherFiles: stats.files - tests.files,
     },
     churn: {
-      figure: formatFigure(churn.median),
+      figure: formatWhole(churn.median),
       comparison: compareOnBar(churn.median, repository.churn.median),
-      p90: formatFigure(churn.p90),
+      p90: formatWhole(churn.p90),
       mostChanged: mostChangedOf(stats),
     },
     complexity: {
@@ -149,8 +149,8 @@ export const territoryStats = (
     style: {
       indentation: indentationOf(style.indent),
       lineLength: {
-        median: formatFigure(style.lineLength.median),
-        p90: formatFigure(style.lineLength.p90),
+        median: formatWhole(style.lineLength.median),
+        p90: formatWhole(style.lineLength.p90),
       },
       comments: formatShare(style.commentLines.lines, stats.codeLines),
     },

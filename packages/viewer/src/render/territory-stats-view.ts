@@ -1,7 +1,7 @@
 import type { Comparison } from "../present/code-stats.js";
 import type { IconName } from "../present/icons.js";
 import type { TerritoryStatsView } from "../present/territory-stats.js";
-import { h } from "./dom.js";
+import { h, mono } from "./dom.js";
 import { icon } from "./icons.js";
 import { languageBar } from "./language-bar.js";
 
@@ -18,12 +18,6 @@ const item = (
 
 const caption = (...content: readonly (Node | string)[]): HTMLElement =>
   h("div", "cap", ...content);
-
-const mono = (text: string, title: string): HTMLElement => {
-  const element = h("span", "mono", text);
-  element.title = title;
-  return element;
-};
 
 const percentOf = (fraction: number): string => `${fraction * 100}%`;
 

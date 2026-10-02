@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import {
   compareOnBar,
-  formatFigure,
+  formatWhole,
   formatShare,
   indentationOf,
   pathTail,
   rangePosition,
 } from "./code-stats.js";
 
-describe("formatFigure", () => {
-  it("writes a whole number with separators and any other with one decimal", () => {
-    expect([formatFigure(121), formatFigure(1200), formatFigure(2.46)]).toEqual(
-      ["121", "1,200", "2.5"],
+describe("formatWhole", () => {
+  it("rounds to the nearest whole number and separates thousands", () => {
+    expect([formatWhole(121), formatWhole(1199.6), formatWhole(131.5)]).toEqual(
+      ["121", "1,200", "132"],
     );
   });
 });

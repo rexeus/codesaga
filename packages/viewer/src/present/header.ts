@@ -4,6 +4,9 @@ import { botsCard } from "./bots.js";
 import { describeComparison } from "./comparison-note.js";
 import { formatAge, formatCount, formatDateLong } from "./format.js";
 import type { IconName } from "./icons.js";
+import { SECTION_ICONS } from "./sections.js";
+import type { SectionId } from "./sections.js";
+import { hasStats } from "./stats.js";
 
 /** A run of text of the header; `strong` runs are set in the primary ink. */
 export type Segment = { readonly text: string; readonly strong: boolean };
@@ -128,20 +131,29 @@ export const chips = ({
 ];
 
 /** A link of the section navigation. */
-export type NavItem = { readonly id: string; readonly label: string };
+export type NavItem = {
+  readonly id: SectionId;
+  readonly label: string;
+  readonly icon: IconName;
+};
 
-/** The sections the page has, in page order; Stories and Bots & Agents only exist when the report has something for them. */
+const link = (id: SectionId, label: string): NavItem => ({
+  id,
+  label,
+  icon: SECTION_ICONS[id],
+});
+
+/** The sections the page has, in page order; Stories, Stats and Bots & Agents only exist when the report has something for them. */
 export const navItems = (report: Report): NavItem[] => [
-  ...(report.stories.length === 0 ? [] : [{ id: "stories", label: "Stories" }]),
-  { id: "activity", label: "Activity" },
+  ...(report.stories.length === 0 ? [] : [link("stories", "Stories")]),
+  link("activity", "Activity"),
   ...(report.pullRequests === undefined
     ? []
-    : [{ id: "pull-requests", label: "Pull requests" }]),
-  { id: "knowledge", label: "Knowledge" },
-  { id: "team", label: "Team" },
-  ...(botsCard(report) === null
-    ? []
-    : [{ id: "bots", label: "Bots & Agents" }]),
+    : [link("pull-requests", "Pull requests")]),
+  link("knowledge", "Knowledge"),
+  ...(hasStats(report.stats) ? [link("stats", "Stats")] : []),
+  link("team", "Team"),
+  ...(botsCard(report) === null ? [] : [link("bots", "Bots & Agents")]),
 ];
 
 /** "Generated 2 Oct 2026". */

@@ -110,7 +110,7 @@ describe("chips", () => {
 });
 
 describe("navItems", () => {
-  it("links the sections the report has, Stories only with stories and Bots & Agents only with automation", () => {
+  it("links the sections the report has, Stories only with stories, Stats only with code files and Bots & Agents only with automation", () => {
     const report = sampleReport();
     const withoutAutomation: Report = {
       ...report,
@@ -125,6 +125,7 @@ describe("navItems", () => {
       ["stories", "Stories"],
       ["activity", "Activity"],
       ["knowledge", "Knowledge"],
+      ["stats", "Stats"],
       ["team", "Team"],
       ["bots", "Bots & Agents"],
     ]);

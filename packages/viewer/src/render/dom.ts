@@ -56,3 +56,10 @@ export const s = (
 /** Text with its strong runs wrapped in `<b>`; every run is a text node, so nothing parses as markup. */
 export const richText = (segments: readonly Segment[]): Child[] =>
   segments.map(({ text, strong }) => (strong ? h("b", "", text) : text));
+
+/** A file name or path in monospace; `title` holds the whole path when the text is a tail of it. */
+export const mono = (text: string, title = text): HTMLElement => {
+  const element = h("span", "mono", text);
+  element.title = title;
+  return element;
+};

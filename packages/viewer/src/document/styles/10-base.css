@@ -71,6 +71,9 @@ svg {
 }
 
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.08em;

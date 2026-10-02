@@ -4,6 +4,7 @@
  * means adding its Lucide name here.
  */
 export const ICON_NAMES = [
+  "activity",
   "align-left",
   "arrow-down-right",
   "arrow-left-right",
@@ -11,6 +12,7 @@ export const ICON_NAMES = [
   "arrow-up-right",
   "book-open",
   "bot",
+  "brain",
   "cake",
   "calendar",
   "chart-column",
@@ -26,6 +28,9 @@ export const ICON_NAMES = [
   "folder",
   "ghost",
   "git-branch",
+  "git-commit-horizontal",
+  "git-merge",
+  "git-pull-request",
   "hash",
   "history",
   "hourglass",
@@ -50,6 +55,7 @@ export const ICON_NAMES = [
   "text",
   "trash-2",
   "tree-palm",
+  "trophy",
   "truck",
   "user",
   "user-plus",

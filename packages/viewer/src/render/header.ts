@@ -91,8 +91,8 @@ const nav = (report: Report): HTMLElement => {
   const element = h(
     "nav",
     "nav",
-    ...navItems(report).map(({ id, label }) => {
-      const link = h("a", "", label);
+    ...navItems(report).map(({ id, label, icon: glyph }) => {
+      const link = h("a", "", icon(glyph, 15, 1.9), label);
       link.href = `#${id}`;
       return link;
     }),

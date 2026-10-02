@@ -157,16 +157,35 @@
 .nav {
   display: flex;
   gap: 4px;
-  margin-top: 34px;
+  margin: 34px -12px 0;
+  padding: 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
 }
 
 .nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 6px 12px;
+  white-space: nowrap;
   border-radius: 8px;
   color: var(--ink-2);
   font-size: 13px;
   font-weight: 550;
   text-decoration: none;
+}
+
+.nav a svg {
+  color: var(--ink-3);
+}
+
+.nav a:hover svg {
+  color: var(--accent-ink);
 }
 
 .nav a:hover {

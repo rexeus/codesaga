@@ -1,8 +1,11 @@
+import { SECTION_ICONS } from "../present/sections.js";
+import type { SectionId } from "../present/sections.js";
 import { h } from "./dom.js";
+import { icon } from "./icons.js";
 
 /** A section of the page: an eyebrow, a title and a line, then its content. */
 export const section = (
-  id: string,
+  id: SectionId,
   eyebrow: string,
   title: string,
   description: string,
@@ -14,7 +17,12 @@ export const section = (
     h(
       "div",
       "sec-head",
-      h("div", "", h("div", "eyebrow", eyebrow), h("h2", "", title)),
+      h(
+        "div",
+        "",
+        h("div", "eyebrow", icon(SECTION_ICONS[id], 15, 2), eyebrow),
+        h("h2", "", title),
+      ),
       h("p", "", description),
     ),
     ...content,
