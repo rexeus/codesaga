@@ -2,4 +2,4 @@
 "codesaga": patch
 ---
 
-The history cache now keeps the full blob id and mode of every changed file, so the file is `.git/codesaga/history-v2.json` and the first run after the update reads the log once more. The cache is about twice as large (about 2.3 KB per commit instead of 1.2 KB); `rm .git/codesaga/history-v1.json` removes the old file.
+`analyze` now parses every historical version of the repository's TypeScript and JavaScript files once and keeps the facts in `.git/codesaga/syntax-v1.json`, keyed by blob id. The first run reads the whole history (about 30 to 60 seconds on a repository of Effect's size) and shows `Reading TypeScript history: n / total file versions` on a terminal's stderr; later runs parse only new blobs. `--no-cache` skips the file. The history cache now keeps the full blob id and mode of every changed file, so it is `.git/codesaga/history-v2.json`, about twice as large (about 2.3 KB per commit instead of 1.2 KB), and the first run after the update reads the log once more; `rm .git/codesaga/history-v1.json` removes the old file.
