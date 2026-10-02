@@ -105,31 +105,36 @@ const areasSection = (
     historyContributors: countContributors(facts.commits),
   });
   const history = areaHistoryOf(facts.commits, facts.window);
+  const inputs = levels.map(({ areas }) =>
+    areaBadgeInputs(areas, history, model),
+  );
   return {
     section: {
       depth: Math.min(startDepth(facts.depth, recommendedDepth), levels.length),
       recommendedDepth,
       reason,
-      levels: Arr.map(levels, ({ depth, totalAreas, areas }) => {
-        const inputs = areaBadgeInputs(areas, history, model);
-        return {
-          depth,
-          totalAreas,
-          areas: areas.map(({ paths: _paths, ...area }, index) => ({
+      levels: Arr.map(levels, ({ depth, totalAreas, areas }, level) => ({
+        depth,
+        totalAreas,
+        areas: areas.map(({ paths: _paths, ...area }, index) => {
+          const input = inputs[level]?.[index];
+          return {
             ...area,
             lastChangedAt: isoOfEpochSeconds(
-              inputs[index]?.lastChangeTime ?? facts.headTime,
+              input?.lastChangeTime ?? facts.headTime,
             ),
-            badges:
-              inputs[index] === undefined
-                ? []
-                : areaBadges(inputs[index], facts.now),
-          })),
-        };
-      }),
+            badges: input === undefined ? [] : areaBadges(input, facts.now),
+          };
+        }),
+      })),
     },
-    recommended: (levels[recommendedDepth - 1]?.areas ?? []).map((area) =>
-      storyAreaOf(area, model),
+    recommended: (levels[recommendedDepth - 1]?.areas ?? []).map(
+      (area, index) =>
+        storyAreaOf(
+          area,
+          model,
+          inputs[recommendedDepth - 1]?.[index]?.lastChangeTime,
+        ),
     ),
   };
 };

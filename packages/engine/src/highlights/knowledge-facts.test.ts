@@ -14,14 +14,9 @@ const area = (overrides: Partial<HighlightArea> = {}): HighlightArea => ({
   paths: ["packages/db/a.ts", "packages/db/b.ts", "packages/db/c.ts"],
   orphaned: false,
   withoutActiveExpert: 0,
+  lastChangeTime: undefined,
   ...overrides,
 });
-
-const touch = (path: string, time: string) =>
-  classifiedCommit({
-    time: at(time),
-    changes: [{ path, added: 1, deleted: 0 }],
-  });
 
 const alone = {
   value: 1,
@@ -127,11 +122,10 @@ describe("knowledgeHighlights orphaned knowledge", () => {
 const runQuiet = (lastChange: string, areas = [area()]) =>
   knowledgeHighlights(
     highlightFacts({
-      areas,
-      commits: [
-        touch("packages/db/a.ts", lastChange),
-        touch("packages/db/b.ts", "2025-01-01T00:00:00Z"),
-      ],
+      areas: areas.map((each) => ({
+        ...each,
+        lastChangeTime: each.lastChangeTime ?? at(lastChange),
+      })),
     }),
   );
 
@@ -153,20 +147,19 @@ describe("knowledgeHighlights quiet area", () => {
     expect(runQuiet("2026-01-01T00:00:01Z")).toStrictEqual([]);
   });
 
-  it("reports the area untouched longest, and skips rest areas", () => {
-    const other = area({ path: "packages/ui", paths: ["packages/ui/a.ts"] });
-    const rest = area({
-      kind: "rest",
-      path: "packages/old",
-      paths: ["packages/old/a.ts"],
-    });
+  it("reports the area untouched longest, and skips rest areas and areas without a known change", () => {
+    const changed = (
+      path: string,
+      time: string,
+      kind: HighlightArea["kind"] = "package",
+    ) => area({ path, kind, lastChangeTime: at(time) });
     const found = knowledgeHighlights(
       highlightFacts({
-        areas: [area(), other, rest],
-        commits: [
-          touch("packages/db/a.ts", "2025-09-01T00:00:00Z"),
-          touch("packages/ui/a.ts", "2025-03-01T00:00:00Z"),
-          touch("packages/old/a.ts", "2020-01-01T00:00:00Z"),
+        areas: [
+          changed("packages/db", "2025-09-01T00:00:00Z"),
+          changed("packages/ui", "2025-03-01T00:00:00Z"),
+          changed("packages/old", "2020-01-01T00:00:00Z", "rest"),
+          area({ path: "packages/unknown" }),
         ],
       }),
     );

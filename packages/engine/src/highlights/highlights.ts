@@ -43,6 +43,8 @@ export type HighlightArea = {
   readonly orphaned: boolean;
   /** Files of the area with no active expert. */
   readonly withoutActiveExpert: number;
+  /** The newest commit that touched any file of the area, in seconds since the epoch; undefined when none is known. */
+  readonly lastChangeTime: number | undefined;
 };
 
 /** Everything the families read; all of it is already computed by the other sections. */

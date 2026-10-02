@@ -190,9 +190,14 @@ export const areaBadgeInputs = (
 
 /**
  * An area as the contributor badges and the highlights read it: its files, the
- * emails of its active experts and how many files have none.
+ * emails of its active experts, how many files have none and when it last
+ * changed, as `areaBadgeInputs` found it.
  */
-export const storyAreaOf = (area: AreaWithFiles, model: KnowledgeModel) => {
+export const storyAreaOf = (
+  area: AreaWithFiles,
+  model: KnowledgeModel,
+  lastChangeTime: number | undefined,
+) => {
   const active = new Set<string>();
   let withoutActiveExpert = 0;
   for (const path of area.paths) {
@@ -211,5 +216,6 @@ export const storyAreaOf = (area: AreaWithFiles, model: KnowledgeModel) => {
     orphaned: area.orphaned,
     withoutActiveExpert,
     activeExperts: [...active],
+    lastChangeTime,
   };
 };

@@ -7,7 +7,6 @@ import { DateTime } from "effect";
 import { isoDateOfDay, localDayOf } from "../activity/buckets.js";
 import { monthsBetween } from "../activity/calendar.js";
 import { isContributorCommit } from "../automation/classify.js";
-import type { ClassifiedCommit } from "../automation/classify.js";
 import type { Highlight } from "../report/highlights.js";
 import { countOf, nounOf } from "../report/sentences.js";
 import type { HighlightArea, HighlightFacts } from "./highlights.js";
@@ -65,54 +64,32 @@ const orphanedKnowledge = (
       ];
 };
 
-/** The time of the newest commit that touched any file of each area, by area; areas without one are absent. */
-const lastChanges = (
-  areas: ReadonlyArray<HighlightArea>,
-  commits: ReadonlyArray<ClassifiedCommit>,
-): ReadonlyMap<HighlightArea, number> => {
-  const areaOfPath = new Map(
-    areas.flatMap((area) => area.paths.map((path) => [path, area] as const)),
-  );
-  const last = new Map<HighlightArea, number>();
-  for (const { time, changes } of commits) {
-    for (const { path } of changes) {
-      const area = areaOfPath.get(path);
-      if (area !== undefined && time > (last.get(area) ?? -Infinity)) {
-        last.set(area, time);
-      }
-    }
-  }
-  return last;
-};
-
 const quietArea = (
   areas: ReadonlyArray<HighlightArea>,
-  { commits, now }: HighlightFacts,
+  { now }: HighlightFacts,
 ): ReadonlyArray<Highlight> => {
   const nowSeconds = DateTime.toEpochMillis(now) / 1000;
-  const [quietest] = [
-    ...lastChanges(
-      areas.filter(({ kind }) => kind !== "rest"),
-      commits,
-    ),
-  ]
-    .filter(([, last]) => monthsBetween(last, nowSeconds) >= quietAreaMonths)
-    .toSorted(
-      ([a, lastA], [b, lastB]) => lastA - lastB || a.path.localeCompare(b.path),
-    );
+  const [quietest] = areas
+    .flatMap(({ kind, path, lastChangeTime }) =>
+      kind === "rest" || lastChangeTime === undefined
+        ? []
+        : [{ path, last: lastChangeTime }],
+    )
+    .filter(({ last }) => monthsBetween(last, nowSeconds) >= quietAreaMonths)
+    .toSorted((a, b) => a.last - b.last || a.path.localeCompare(b.path));
   if (quietest === undefined) {
     return [];
   }
-  const [area, last] = quietest;
+  const { path, last } = quietest;
   const date = isoDateOfDay(localDayOf(last, 0));
   return [
     {
       kind: "quiet-area",
       title: "Quiet corner",
-      detail: `${area.path} has not changed since ${date}.`,
+      detail: `${path} has not changed since ${date}.`,
       value: monthsBetween(last, nowSeconds),
       date,
-      path: area.path,
+      path,
     },
   ];
 };

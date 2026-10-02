@@ -50,6 +50,7 @@ const richFacts = () =>
         paths: ["legacy/a.ts"],
         orphaned: true,
         withoutActiveExpert: 1,
+        lastChangeTime: at("2026-06-25T12:00:00Z"),
       },
       {
         path: "old",
@@ -57,6 +58,7 @@ const richFacts = () =>
         paths: ["old/a.ts"],
         orphaned: false,
         withoutActiveExpert: 0,
+        lastChangeTime: at("2021-07-04T10:00:00Z"),
       },
     ],
   });
