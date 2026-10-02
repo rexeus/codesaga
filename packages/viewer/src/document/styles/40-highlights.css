@@ -1,0 +1,238 @@
+.hl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hl {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 214px;
+  padding: 20px 22px 18px;
+  --tint: var(--mark);
+  --tint-ink: color-mix(in srgb, var(--tint) 62%, var(--ink));
+}
+
+.hl::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--tint), transparent);
+  opacity: 0.22;
+}
+
+.hl > * {
+  position: relative;
+}
+
+.hl .row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hl .ico {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tint) 16%, transparent);
+  color: var(--tint-ink);
+}
+
+.hl .kind {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hl .big {
+  margin-top: 16px;
+  font-size: 36px;
+  font-weight: 720;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.hl .big small {
+  margin-left: 4px;
+  color: var(--ink-2);
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: 0;
+}
+
+.hl .txt {
+  margin-top: 6px;
+  color: var(--ink-2);
+}
+
+.hl .txt b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.hl .viz {
+  display: flex;
+  align-items: flex-end;
+  min-height: 38px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.hl .ev {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--grid);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hl .timeline {
+  width: 100%;
+  height: 34px;
+}
+
+.timeline .track {
+  stroke: var(--axis);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.timeline .done {
+  stroke: var(--tint);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.timeline .milestone {
+  fill: var(--surface);
+  stroke: var(--tint);
+  stroke-width: 2.5;
+}
+
+.timeline .start {
+  fill: var(--tint);
+}
+
+.timeline .now {
+  fill: var(--ink);
+}
+
+.timeline text {
+  fill: var(--ink-3);
+  font-size: 10.5px;
+}
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--tint);
+}
+
+.share-bar {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  height: 14px;
+}
+
+.share-bar i {
+  display: block;
+  min-width: 4px;
+  border-radius: 4px;
+  background: var(--other);
+}
+
+.share-bar i:first-child {
+  background: var(--tint);
+}
+
+.avatars {
+  display: flex;
+  align-items: center;
+}
+
+.avatars .avatar {
+  width: 34px;
+  height: 34px;
+  margin-left: -6px;
+  border: 2px solid var(--surface);
+  font-size: 11px;
+}
+
+.avatars .avatar:first-child {
+  margin-left: 0;
+}
+
+.avatars .more {
+  margin-left: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  height: 34px;
+}
+
+.bars i {
+  flex: 1;
+  min-height: 3px;
+  border-radius: 2px 2px 0 0;
+  background: var(--grid);
+}
+
+.bars i.on {
+  background: var(--tint);
+}
+
+.path-chip {
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1000px) {
+  .hl-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hl-grid {
+    grid-template-columns: 1fr;
+  }
+}

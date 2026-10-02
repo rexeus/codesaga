@@ -4,6 +4,7 @@ import { renderActivity } from "./activity-view.js";
 import { renderContributors } from "./contributors-view.js";
 import { h } from "./dom.js";
 import { renderHeader } from "./header.js";
+import { renderHighlights } from "./highlights-view.js";
 import { renderKnowledge } from "./knowledge-view.js";
 import { renderKeyFigures } from "./kpis-view.js";
 import { renderPullRequests } from "./pull-requests-view.js";
@@ -21,6 +22,7 @@ const footer = ({ tool, generatedAt }: Report): HTMLElement =>
 
 /** Renders the whole dashboard for `report` into `root`. */
 export const mountApp = (report: Report, root: HTMLElement): void => {
+  const highlights = renderHighlights(report);
   const pullRequests = renderPullRequests(report);
   root.replaceChildren(
     renderHeader(report),
@@ -28,6 +30,7 @@ export const mountApp = (report: Report, root: HTMLElement): void => {
       "main",
       "wrap",
       renderKeyFigures(report),
+      ...(highlights === null ? [] : [highlights]),
       renderActivity(report),
       ...(pullRequests === null ? [] : [pullRequests]),
       renderKnowledge(report),
