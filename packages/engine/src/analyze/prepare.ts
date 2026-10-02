@@ -3,7 +3,7 @@
 
 import { DateTime } from "effect";
 
-import { classifyCommit } from "../automation/classify.js";
+import { classifyCommit, humanCoAuthorsOf } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import type { HistoryCommit } from "../history/history.js";
 import { buildIdentities } from "../people/identities.js";
@@ -45,6 +45,7 @@ const classify = (
       offsetMinutes: commit.offsetMinutes,
       subject: commit.subject,
       author: identities.get(email) ?? { email, name: commit.author.name },
+      humanCoAuthors: humanCoAuthorsOf(commit, signatures),
       changes: commit.changes,
     };
   });
