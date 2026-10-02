@@ -44,6 +44,13 @@
   --cat-code: var(--s7);
   --cat-activity: var(--s4);
 
+  /* A person's badge categories: none uses the warning colors, and journey is neutral. */
+  --cat-focus: var(--s1);
+  --cat-craft: var(--s7);
+  --cat-rhythm: var(--s5);
+  --cat-collaboration: var(--s3);
+  --cat-journey: var(--ink-3);
+
   /* The sequential ramp of the weekday and hour heatmap, empty cell first. */
   --cell0: light-dark(#ecebe6, #242423);
   --h1: light-dark(#cde2fb, #104281);

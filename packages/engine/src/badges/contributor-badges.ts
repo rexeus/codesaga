@@ -9,6 +9,8 @@ import { countCodeLines } from "../history/history.js";
 import type { ContributorBadge } from "../report/badges.js";
 import { territoryNameOf, percentOf } from "../report/sentences.js";
 import { isDocPath, isTestPath } from "../universe/path-kinds.js";
+import { categorized } from "./contributor-badge-category.js";
+import type { EarnedContributorBadge } from "./contributor-badge-category.js";
 import { TENURE_BADGE_THRESHOLDS, tenureBadges } from "./contributor-tenure.js";
 
 /** The rules behind the contributor badges, for the report's `thresholds.badges`. */
@@ -220,12 +222,14 @@ const documenter = ({ commits }: Context) => {
     : undefined;
 };
 
-const RULES: ReadonlyArray<(context: Context) => ContributorBadge | undefined> =
-  [allRounder, specialist, tidier, founder, keeper, tester, documenter];
+const RULES: ReadonlyArray<
+  (context: Context) => EarnedContributorBadge | undefined
+> = [allRounder, specialist, tidier, founder, keeper, tester, documenter];
 
 /**
- * The badges the contributor earns, most important first. Positive or neutral
- * only, and none about working hours. `new-here` stands in for the "new" status
+ * The badges the contributor earns, ordered by category (focus, craft, rhythm,
+ * collaboration, journey) and by rule within a category. Positive or neutral
+ * only. `new-here` stands in for the "new" status
  * pill. Each carries its rule and the numbers behind it as evidence.
  * `reviewer` is never awarded: GitHub reviews are not tied to identities yet.
  * Without `facts.territories` the three badges that need territories are withheld; in a
@@ -240,8 +244,8 @@ export const contributorBadges = (
     return [];
   }
   const context = { ...facts, email };
-  return [
+  return categorized([
     ...RULES.flatMap((rule) => rule(context) ?? []),
     ...tenureBadges(facts.commits, facts.repositoryStart, facts.now),
-  ];
+  ]);
 };

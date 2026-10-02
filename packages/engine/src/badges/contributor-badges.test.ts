@@ -1,48 +1,14 @@
-import { DateTime } from "effect";
 import { describe, expect, it } from "vitest";
 
-import type { ClassifiedCommit } from "../automation/classify.js";
-import { at, classifiedCommit } from "../testing/classified-commit.js";
+import {
+  ada,
+  badgeFacts as facts,
+  commit,
+  daysAgo,
+  kindsOf,
+  old,
+} from "../testing/contributor-badge-facts.js";
 import { contributorBadges } from "./contributor-badges.js";
-import type { ContributorBadgeFacts } from "./contributor-badges.js";
-
-const now = DateTime.makeUnsafe("2026-07-01T00:00:00Z");
-const nowSeconds = at("2026-07-01T00:00:00Z");
-const ada = "ada@example.com";
-
-const daysAgo = (days: number): number => nowSeconds - days * 86_400;
-
-const commit = (
-  time: number,
-  paths: ReadonlyArray<string> = ["src/a.ts"],
-  deleted = 0,
-): ClassifiedCommit =>
-  classifiedCommit({
-    time,
-    changes: paths.map((path) => ({ path, added: 1, deleted })),
-  });
-
-/** `count` commits in 2025, the lazy kind: no badge besides what a test adds. */
-const old = (count: number, paths?: ReadonlyArray<string>) =>
-  Array.from({ length: count }, (_, i) => commit(daysAgo(400 + i), paths));
-
-const facts = (
-  commits: ReadonlyArray<ClassifiedCommit>,
-  overrides: Partial<ContributorBadgeFacts> = {},
-): ContributorBadgeFacts => ({
-  commits: commits.toSorted((a, b) => b.time - a.time),
-  now,
-  isCodePath: (path) => path.endsWith(".ts"),
-  repositoryStart: 0,
-  historyContributors: 2,
-  founded: { files: 0, ofFiles: 100 },
-  ...overrides,
-});
-
-const kindsOf = (
-  commits: ReadonlyArray<ClassifiedCommit>,
-  overrides: Partial<ContributorBadgeFacts> = {},
-) => contributorBadges(ada, facts(commits, overrides)).map(({ kind }) => kind);
 
 const territory = (
   path: string,
@@ -73,6 +39,7 @@ describe("contributorBadges all-rounder and specialist", () => {
 
     expect(badges).toContainEqual({
       kind: "all-rounder",
+      category: "focus",
       label: "All-rounder",
       evidence: "Commits in 4 of 8 territories.",
     });
@@ -99,6 +66,7 @@ describe("contributorBadges all-rounder and specialist", () => {
       contributorBadges(ada, facts(commits, { territories: territories8 })),
     ).toContainEqual({
       kind: "specialist",
+      category: "focus",
       label: "pkg0 specialist",
       evidence: "80% of the commits fall into pkg0.",
     });
@@ -153,6 +121,7 @@ describe("contributorBadges founder and keeper", () => {
     ).toStrictEqual([
       {
         kind: "founder",
+        category: "journey",
         label: "Founder",
         evidence: "First author of 25% of today's files.",
       },
@@ -173,6 +142,7 @@ describe("contributorBadges founder and keeper", () => {
       contributorBadges(ada, facts(old(1), { territories })),
     ).toContainEqual({
       kind: "keeper",
+      category: "focus",
       label: "Keeper of large",
       evidence: "The only active expert of large.",
     });
@@ -187,6 +157,7 @@ describe("contributorBadges founder and keeper", () => {
 
     expect(keeper).toStrictEqual({
       kind: "keeper",
+      category: "focus",
       label: "Keeper of the repository root",
       evidence: "The only active expert of the repository root.",
     });
@@ -215,6 +186,7 @@ describe("contributorBadges specialist of the root territory", () => {
       contributorBadges(ada, facts(commits, { territories: [root] })),
     ).toContainEqual({
       kind: "specialist",
+      category: "focus",
       label: "The repository root specialist",
       evidence: "100% of the commits fall into the repository root.",
     });
@@ -254,6 +226,7 @@ describe("contributorBadges tester and documenter", () => {
     ).toStrictEqual([
       {
         kind: "tester",
+        category: "craft",
         label: "Tester",
         evidence: "40% of the changed files are tests.",
       },
@@ -267,6 +240,7 @@ describe("contributorBadges tester and documenter", () => {
     ).toStrictEqual([
       {
         kind: "documenter",
+        category: "craft",
         label: "Documenter",
         evidence: "40% of the commits touch documentation.",
       },
@@ -280,80 +254,6 @@ describe("contributorBadges tester and documenter", () => {
     );
 
     expect(kindsOf(few)).toStrictEqual([]);
-  });
-});
-
-// the six months back from 2026-07-01 are (06-01, 07-01], (05-01, 06-01], ... (01-01, 02-01]
-const monthly = (...months: ReadonlyArray<string>) =>
-  months.map((month) => commit(at(`2026-${month}-15T12:00:00Z`)));
-const sixMonths = ["06", "05", "04", "03", "02", "01"];
-
-describe("contributorBadges steady, new here and back again", () => {
-  it("awards steady for a commit in each of the last 6 months", () => {
-    expect(contributorBadges(ada, facts(monthly(...sixMonths)))).toContainEqual(
-      {
-        kind: "steady",
-        label: "Steady",
-        evidence: "A commit in each of the last 6 months.",
-      },
-    );
-  });
-
-  it("withholds steady when one of the last 6 months has no commit", () => {
-    expect(kindsOf(monthly("06", "05", "04", "02", "01"))).not.toContain(
-      "steady",
-    );
-  });
-
-  it("awards new here to a first commit at most 90 days old, and withholds it at 91", () => {
-    expect(contributorBadges(ada, facts([commit(daysAgo(90))]))).toStrictEqual([
-      {
-        kind: "new-here",
-        label: "New here",
-        evidence: "First commit on 2026-04-02, 90 days ago.",
-      },
-    ]);
-    expect(kindsOf([commit(daysAgo(91))])).not.toContain("new-here");
-  });
-
-  it("judges the first commit of a person with hundreds of thousands of commits", () => {
-    const many = Array.from({ length: 300_000 }, (_, i) =>
-      commit(daysAgo(1 + (i % 60))),
-    );
-
-    expect(kindsOf(many)).toContain("new-here");
-  });
-
-  it("withholds new here from the one who started the repository", () => {
-    const first = commit(daysAgo(30));
-
-    expect(kindsOf([first], { repositoryStart: first.time })).not.toContain(
-      "new-here",
-    );
-    expect(kindsOf([first], { repositoryStart: first.time - 1 })).toContain(
-      "new-here",
-    );
-  });
-
-  it("awards back again after a pause of 6 months that ended in the last 6 months", () => {
-    const back = [commit(daysAgo(300)), commit(daysAgo(300 - 183))];
-
-    expect(contributorBadges(ada, facts(back))).toStrictEqual([
-      {
-        kind: "back-again",
-        label: "Back again",
-        evidence: "Back on 2026-03-06 after 183 days without a commit.",
-      },
-    ]);
-  });
-
-  it("withholds back again after a pause of 182 days, or one that ended long ago", () => {
-    expect(
-      kindsOf([commit(daysAgo(300)), commit(daysAgo(300 - 182))]),
-    ).not.toContain("back-again");
-    expect(kindsOf([commit(daysAgo(900)), commit(daysAgo(600))])).not.toContain(
-      "back-again",
-    );
   });
 });
 

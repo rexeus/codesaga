@@ -177,14 +177,24 @@
 /* Badges: a category color each, a warning ring for the risks. */
 .pill.tone-knowledge,
 .pill.tone-code,
-.pill.tone-activity {
+.pill.tone-activity,
+.pill.tone-focus,
+.pill.tone-craft,
+.pill.tone-rhythm,
+.pill.tone-collaboration,
+.pill.tone-journey {
   background: color-mix(in srgb, var(--tone) 15%, transparent);
   color: color-mix(in srgb, var(--tone) 52%, var(--ink));
 }
 
 .pill.tone-knowledge svg,
 .pill.tone-code svg,
-.pill.tone-activity svg {
+.pill.tone-activity svg,
+.pill.tone-focus svg,
+.pill.tone-craft svg,
+.pill.tone-rhythm svg,
+.pill.tone-collaboration svg,
+.pill.tone-journey svg {
   color: color-mix(in srgb, var(--tone) 85%, var(--ink));
 }
 
@@ -198,6 +208,26 @@
 
 .pill.tone-activity {
   --tone: var(--cat-activity);
+}
+
+.pill.tone-focus {
+  --tone: var(--cat-focus);
+}
+
+.pill.tone-craft {
+  --tone: var(--cat-craft);
+}
+
+.pill.tone-rhythm {
+  --tone: var(--cat-rhythm);
+}
+
+.pill.tone-collaboration {
+  --tone: var(--cat-collaboration);
+}
+
+.pill.tone-journey {
+  --tone: var(--cat-journey);
 }
 
 .pill.tone-warn {

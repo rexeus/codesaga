@@ -159,13 +159,13 @@ layer(NodeServices.layer)("analyze territory badges", (it) => {
           [
             [
               "Ada Lovelace",
-              ["founder: Founder", "keeper: Keeper of apps/web"],
+              ["keeper: Keeper of apps/web", "founder: Founder"],
             ],
             [
               "Grace",
               [
-                "founder: Founder",
                 "keeper: Keeper of packages/cli",
+                "founder: Founder",
                 "new-here: New here",
               ],
             ],

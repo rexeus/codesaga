@@ -78,15 +78,15 @@ describe("territoryBadges", () => {
 });
 
 describe("contributorBadges", () => {
-  it("draws new here as news and the achievements plain", () => {
+  it("draws each badge with the glyph of its kind and the tone of its category", () => {
     const row = contributorBadges([
-      badge("new-here", "New here"),
-      badge("keeper", "Keeper of docs"),
+      { ...badge("keeper", "Keeper of docs"), category: "focus" },
+      { ...badge("new-here", "New here"), category: "journey" },
     ]);
 
     expect(row.chips.map(({ tone, icon }) => [tone, icon])).toEqual([
-      ["info", "sparkles"],
-      ["plain", "key-round"],
+      ["focus", "key-round"],
+      ["journey", "sparkles"],
     ]);
   });
 

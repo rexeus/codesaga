@@ -78,8 +78,9 @@ export const TerritoryBadge = Schema.Struct({
 export type TerritoryBadge = typeof TerritoryBadge.Type;
 
 /**
- * A badge of a contributor: positive or neutral, never comparative, and
- * never about working hours. Reviewing needs `--github`.
+ * A badge of a contributor: positive or neutral, and never comparative. It
+ * describes what the person's commits show and never ranks them. Reviewing
+ * needs `--github`.
  */
 export const ContributorBadge = Schema.Struct({
   /**
@@ -110,6 +111,19 @@ export const ContributorBadge = Schema.Struct({
     "new-here",
     "back-again",
     "reviewer",
+  ]),
+  /**
+   * What the badge is about: `focus` (`all-rounder`, `specialist`, `keeper`),
+   * `craft` (`tidier`, `tester`, `documenter`), `rhythm`, `collaboration`
+   * (`reviewer`) or `journey` (`founder`, `steady`, `new-here`, `back-again`).
+   * Determined by `kind`. A person's badges are ordered by category in that order.
+   */
+  category: Schema.Literals([
+    "focus",
+    "craft",
+    "rhythm",
+    "collaboration",
+    "journey",
   ]),
   /** Short text for the badge itself, such as "engine specialist". */
   label: Schema.String,

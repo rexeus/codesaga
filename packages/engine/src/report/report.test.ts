@@ -253,7 +253,12 @@ layer(NodeServices.layer)("Report rejects story data with", (it) => {
     Effect.gen(function* () {
       const sample = decode(yield* readSample);
       const [first, ...others] = sample.contributors;
-      const badge = { kind: "night-owl", label: "Night owl", evidence: "" };
+      const badge = {
+        kind: "wizard",
+        category: "journey",
+        label: "Wizard",
+        evidence: "",
+      };
       const contributors = [{ ...first, badges: [badge] }, ...others];
 
       assert.throws(() => {
