@@ -7,7 +7,7 @@ import type { DateTime } from "effect";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { countCodeLines } from "../history/history.js";
 import type { ContributorBadge } from "../report/badges.js";
-import { percentOf } from "../report/sentences.js";
+import { areaNameOf, percentOf } from "../report/sentences.js";
 import { isDocPath, isTestPath } from "../universe/path-kinds.js";
 import { TENURE_BADGE_THRESHOLDS, tenureBadges } from "./contributor-tenure.js";
 
@@ -136,8 +136,8 @@ const specialist = ({ commits, areas = [] }: Context) => {
     top[1] / inAreas >= specialistShare
     ? {
         kind: "specialist" as const,
-        label: `Specialist: ${top[0].path}`,
-        evidence: `${percentOf(top[1] / inAreas)} of the commits fall into ${top[0].path}.`,
+        label: `Specialist: ${areaNameOf(top[0].path)}`,
+        evidence: `${percentOf(top[1] / inAreas)} of the commits fall into ${areaNameOf(top[0].path)}.`,
       }
     : undefined;
 };
@@ -179,8 +179,8 @@ const keeper = (context: Context) => {
     ? undefined
     : {
         kind: "keeper" as const,
-        label: `Keeper of ${largest.path}`,
-        evidence: `The only active expert of ${largest.path}.`,
+        label: `Keeper of ${areaNameOf(largest.path)}`,
+        evidence: `The only active expert of ${areaNameOf(largest.path)}.`,
       };
 };
 

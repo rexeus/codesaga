@@ -11,6 +11,13 @@ export const nounOf = (
   plural = `${singular}s`,
 ) => `${countOf(value)} ${value === 1 ? singular : plural}`;
 
+/**
+ * An area's path as a sentence names it: the path itself, or "the repository
+ * root" for the area `"."`, capitalized at the start of a sentence.
+ */
+export const areaNameOf = (path: string, sentenceStart = false): string =>
+  path !== "." ? path : `${sentenceStart ? "The" : "the"} repository root`;
+
 /** A share from 0 to 1 as a whole percent, "27%". */
 export const percentOf = (share: number): string =>
   `${Math.round(share * 100)}%`;

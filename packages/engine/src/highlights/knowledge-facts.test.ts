@@ -106,6 +106,17 @@ describe("knowledgeHighlights orphaned knowledge", () => {
     ]);
   });
 
+  it("calls the root area the repository root", () => {
+    const root = area({ path: ".", orphaned: true, withoutActiveExpert: 2 });
+
+    expect(runOrphaned([root])).toMatchObject([
+      {
+        detail: "2 of 3 files in the repository root have no active expert.",
+        path: ".",
+      },
+    ]);
+  });
+
   it("reports nothing when no area is orphaned, and never names a rest area", () => {
     expect(runOrphaned([area()])).toStrictEqual([]);
     expect(runOrphaned([area({ kind: "rest", orphaned: true })])).toStrictEqual(
@@ -139,6 +150,17 @@ describe("knowledgeHighlights quiet area", () => {
         value: 6,
         date: "2026-01-01",
         path: "packages/db",
+      },
+    ]);
+  });
+
+  it("starts the sentence with the repository root for the root area", () => {
+    expect(
+      runQuiet("2026-01-01T00:00:00Z", [area({ path: "." })]),
+    ).toMatchObject([
+      {
+        detail: "The repository root has not changed since 2026-01-01.",
+        path: ".",
       },
     ]);
   });

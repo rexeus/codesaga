@@ -8,7 +8,7 @@ import { isoDateOfDay, localDayOf } from "../activity/buckets.js";
 import { monthsBetween } from "../activity/calendar.js";
 import { isContributorCommit } from "../automation/classify.js";
 import type { Highlight } from "../report/highlights.js";
-import { countOf, nounOf } from "../report/sentences.js";
+import { areaNameOf, countOf, nounOf } from "../report/sentences.js";
 import type { HighlightArea, HighlightFacts } from "./highlights.js";
 import { HIGHLIGHT_THRESHOLDS } from "./thresholds.js";
 
@@ -57,7 +57,7 @@ const orphanedKnowledge = (
         {
           kind: "orphaned-knowledge",
           title: "Orphaned knowledge",
-          detail: `${countOf(largest.withoutActiveExpert)} of ${nounOf(largest.paths.length, "file")} in ${largest.path} have no active expert.`,
+          detail: `${countOf(largest.withoutActiveExpert)} of ${nounOf(largest.paths.length, "file")} in ${areaNameOf(largest.path)} have no active expert.`,
           value: largest.withoutActiveExpert,
           path: largest.path,
         },
@@ -86,7 +86,7 @@ const quietArea = (
     {
       kind: "quiet-area",
       title: "Quiet corner",
-      detail: `${path} has not changed since ${date}.`,
+      detail: `${areaNameOf(path, true)} has not changed since ${date}.`,
       value: monthsBetween(last, nowSeconds),
       date,
       path,

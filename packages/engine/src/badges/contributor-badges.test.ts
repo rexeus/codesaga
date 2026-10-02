@@ -170,6 +170,20 @@ describe("contributorBadges founder and keeper", () => {
     });
   });
 
+  it("calls the root area the repository root", () => {
+    const root = { ...area("."), paths: ["a.ts", "b.ts"] };
+    const keeper = contributorBadges(
+      ada,
+      facts(old(1), { areas: [root] }),
+    ).find(({ kind }) => kind === "keeper");
+
+    expect(keeper).toStrictEqual({
+      kind: "keeper",
+      label: "Keeper of the repository root",
+      evidence: "The only active expert of the repository root.",
+    });
+  });
+
   it("withholds keeper when someone else is the only active expert or the area is rest", () => {
     expect(
       kindsOf(old(1), { areas: [area("pkg", 5, ["grace@example.com"])] }),
@@ -177,6 +191,21 @@ describe("contributorBadges founder and keeper", () => {
     expect(
       kindsOf(old(1), { areas: [{ ...area("pkg"), kind: "rest" }] }),
     ).not.toContain("keeper");
+  });
+});
+
+describe("contributorBadges specialist of the root area", () => {
+  it("names the repository root rather than a dot", () => {
+    const root = { ...area("."), paths: ["a.ts", "b.ts"] };
+    const commits = old(10).map((c) => commit(c.time, ["a.ts"]));
+
+    expect(
+      contributorBadges(ada, facts(commits, { areas: [root] })),
+    ).toContainEqual({
+      kind: "specialist",
+      label: "Specialist: the repository root",
+      evidence: "100% of the commits fall into the repository root.",
+    });
   });
 });
 
