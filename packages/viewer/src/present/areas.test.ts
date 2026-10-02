@@ -62,7 +62,11 @@ const reportOf = (solo = false): Report => {
     knowledge: { ...report.knowledge, files: 100 },
     overview: {
       ...report.overview,
-      contributors: { ...report.overview.contributors, total: solo ? 1 : 8 },
+      contributors: {
+        ...report.overview.contributors,
+        total: solo ? 1 : 8,
+        allTime: solo ? 1 : 8,
+      },
     },
   };
 };
@@ -191,6 +195,20 @@ describe("the badges of a solo repository", () => {
       "well-tested",
       "quiet",
     ]);
+  });
+
+  it("keeps every badge of a team whose window shows one author", () => {
+    const report = reportOf();
+    const narrow: Report = {
+      ...report,
+      overview: {
+        ...report.overview,
+        contributors: { ...report.overview.contributors, total: 1 },
+      },
+    };
+    const [team] = areaViews(level(1, [withBadges]), narrow);
+
+    expect(team?.badges.chips).toHaveLength(3);
   });
 
   it("keeps every badge with a team", () => {

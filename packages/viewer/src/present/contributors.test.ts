@@ -128,3 +128,31 @@ describe("the status filter", () => {
     expect(rowsWithFilter(rows, "all")).toHaveLength(4);
   });
 });
+
+describe("the badges of a solo repository", () => {
+  const badges = [
+    { kind: "keeper", label: "Keeper of src", evidence: "only expert" },
+    { kind: "all-rounder", label: "All-rounder", evidence: "all areas" },
+    { kind: "steady", label: "Steady", evidence: "every month" },
+  ] as const;
+
+  const rowOf = (allTime: number) => {
+    const report = withPeople([{ badges: [...badges] }]);
+    const [row] = personRows({
+      ...report,
+      overview: {
+        ...report.overview,
+        contributors: { ...report.overview.contributors, allTime },
+      },
+    });
+    return row?.badges.chips.map(({ label }) => label);
+  };
+
+  it("hides keeper and all-rounder when one person did everything", () => {
+    expect(rowOf(1)).toEqual(["Steady"]);
+  });
+
+  it("keeps them in a team", () => {
+    expect(rowOf(8)).toEqual(["Keeper of src", "All-rounder", "Steady"]);
+  });
+});

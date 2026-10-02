@@ -1,5 +1,6 @@
 import type { Report } from "@codesaga/engine";
 
+import { isSolo } from "./areas.js";
 import { contributorBadges } from "./badges.js";
 import type { BadgeRow } from "./badges.js";
 import {
@@ -12,6 +13,7 @@ import { initialsOf, personEntities } from "./people.js";
 
 type Contributor = Report["contributors"][number];
 type Status = Contributor["status"];
+type Badge = Contributor["badges"][number];
 
 /**
  * The filter buttons above the list. `active` includes the new people, as the
@@ -67,9 +69,13 @@ const orderContributors = (
       left.name.localeCompare(right.name, "en", { sensitivity: "base" }),
   );
 
-/** The rows of the list, in list order. */
+/** The badges that compare a person with others; alone, nobody is the keeper or the all-rounder. */
+const SOLO_HIDDEN = new Set<Badge["kind"]>(["keeper", "all-rounder"]);
+
+/** The rows of the list, in list order. A solo repository's rows leave out the badges that need other people. */
 export const personRows = (report: Report): PersonRow[] => {
   const entityOf = personEntities(report.contributors);
+  const solo = isSolo(report);
   return orderContributors(report.contributors).map((person) => ({
     key: person.email,
     name: person.name,
@@ -82,7 +88,11 @@ export const personRows = (report: Report): PersonRow[] => {
       .slice(0, AREA_CHIPS_SHOWN)
       .map(({ path }) => areaName(path)),
     moreAreas: Math.max(0, person.areas.length - AREA_CHIPS_SHOWN),
-    badges: contributorBadges(person.badges),
+    badges: contributorBadges(
+      solo
+        ? person.badges.filter(({ kind }) => !SOLO_HIDDEN.has(kind))
+        : person.badges,
+    ),
     lastAgo: formatAgo(person.lastCommitAt, report.generatedAt),
     lastDate: formatDateLong(person.lastCommitAt),
   }));

@@ -84,9 +84,14 @@ const riskOf = (truckFactor: number): AreaView["risk"] => {
   return truckFactor === LOW_TRUCK_FACTOR ? "warn" : "none";
 };
 
-/** A repository with a single contributor: every area has the same one expert, so expertise and its risks say nothing. */
+/**
+ * A repository with one contributor in its whole history: every area has the
+ * same one expert, so expertise and its risks say nothing. The knowledge
+ * covers the full history, so a window that shows one author does not make
+ * a team solo.
+ */
 export const isSolo = ({ overview }: Report): boolean =>
-  overview.contributors.total === 1;
+  overview.contributors.allTime === 1;
 
 /** The achievements that still mean something when one person did everything. */
 const SOLO_BADGES = new Set(["new", "in-focus", "quiet", "well-tested"]);
