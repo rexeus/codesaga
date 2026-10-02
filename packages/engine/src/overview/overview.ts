@@ -2,7 +2,6 @@
 // It reads the universe as inventory already measured it and never touches files.
 // Languages come from the allow-list's extension map; one pass over the universe.
 
-import { Order } from "effect";
 import type { DateTime } from "effect";
 
 import { isContributorCommit } from "../automation/classify.js";
@@ -15,43 +14,20 @@ import {
 import { countContributors } from "../contributors/count-contributors.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
-import { languageOf } from "../universe/languages.js";
+import { languageBreakdown } from "../universe/languages.js";
 
 type OverviewInput = {
   /** The window's commits of every class. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   /** The scope's commits of every class over the full history, whatever the window. */
   readonly history: ReadonlyArray<ClassifiedCommit>;
-  readonly universe: ReadonlyArray<InventoryFile>;
+  readonly universe: ReadonlyArray<Pick<InventoryFile, "path" | "loc">>;
   /** The `Clock` time that the 30, 90 and 365 day counts are measured back from. */
   readonly now: DateTime.Utc;
 };
 
-/** The language of files whose extension is not on the allow-list; only `--include` admits them. */
-const OTHER_LANGUAGE = "Other";
-
-type Language = Report["overview"]["languages"][number];
-
-const byLinesThenName = Order.combine(
-  Order.flip(
-    Order.mapInput(Order.Number, (language: Language) => language.loc),
-  ),
-  Order.mapInput(Order.String, (language: Language) => language.name),
-);
-
-const sumOfLoc = (files: ReadonlyArray<InventoryFile>): number =>
+const sumOfLoc = (files: OverviewInput["universe"]): number =>
   files.reduce((sum, file) => sum + file.loc, 0);
-
-const languagesOf = (
-  universe: ReadonlyArray<InventoryFile>,
-): Report["overview"]["languages"] =>
-  [...groupBy(universe, (file) => languageOf(file.path) ?? OTHER_LANGUAGE)]
-    .map(([name, files]) => ({
-      name,
-      files: files.length,
-      loc: sumOfLoc(files),
-    }))
-    .toSorted(byLinesThenName);
 
 /** The last commit time of each contributor, in seconds since the epoch. */
 const lastCommitTimes = (
@@ -90,6 +66,6 @@ export const overview = ({
     },
     files: universe.length,
     loc: sumOfLoc(universe),
-    languages: languagesOf(universe),
+    languages: languageBreakdown(universe),
   };
 };

@@ -240,10 +240,13 @@ layer(NodeServices.layer)("inventory measures", (it) => {
 
       const files = yield* universeOf(repo);
 
-      assert.deepStrictEqual(files, [
-        { path: "a.ts", loc: 2 },
-        { path: "empty.ts", loc: 0 },
-      ]);
+      assert.deepStrictEqual(
+        files.map(({ path, loc }) => ({ path, loc })),
+        [
+          { path: "a.ts", loc: 2 },
+          { path: "empty.ts", loc: 0 },
+        ],
+      );
     }),
   );
 });

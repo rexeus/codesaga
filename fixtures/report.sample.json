@@ -2276,26 +2276,6 @@
           ],
           "kind": "folder",
           "lastChangedAt": "2026-09-29T15:41:07.000Z",
-          "badges": [
-            {
-              "kind": "island",
-              "category": "knowledge",
-              "label": "Knowledge island",
-              "evidence": "Lena Fischer is the only expert on 12 of 14 files."
-            },
-            {
-              "kind": "orphaned",
-              "category": "knowledge",
-              "label": "Orphaned",
-              "evidence": "12 of 14 files have no active expert."
-            },
-            {
-              "kind": "one-expert",
-              "category": "knowledge",
-              "label": "One expert",
-              "evidence": "Maya Lindqvist is the only active expert."
-            }
-          ],
           "lineOwners": {
             "skippedFiles": 0,
             "lines": 3420,
@@ -2323,112 +2303,171 @@
               }
             ]
           },
-          "territories": [
+          "stats": {
+            "files": 14,
+            "codeLines": 1542,
+            "fileLength": {
+              "min": 6,
+              "median": 83,
+              "max": 551,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 3
+                },
+                {
+                  "label": "51–100",
+                  "files": 3
+                },
+                {
+                  "label": "101–200",
+                  "files": 6
+                },
+                {
+                  "label": "201–400",
+                  "files": 2
+                },
+                {
+                  "label": "401–800",
+                  "files": 0
+                },
+                {
+                  "label": "800+",
+                  "files": 0
+                }
+              ],
+              "longestFile": "docs/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 14,
+                "lines": 1542
+              }
+            ],
+            "tests": {
+              "files": 2,
+              "lines": 220
+            },
+            "churn": {
+              "median": 4,
+              "p90": 24,
+              "revisions": 112,
+              "revisionLines": 9869,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 2
+                },
+                {
+                  "label": "2",
+                  "files": 2
+                },
+                {
+                  "label": "3–4",
+                  "files": 6
+                },
+                {
+                  "label": "5–9",
+                  "files": 3
+                },
+                {
+                  "label": "10–19",
+                  "files": 1
+                },
+                {
+                  "label": "20+",
+                  "files": 0
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "docs/file1.ts",
+                  "revisions": 40
+                },
+                {
+                  "path": "docs/file2.ts",
+                  "revisions": 23
+                },
+                {
+                  "path": "docs/file3.ts",
+                  "revisions": 17
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 1.9,
+              "medianFile": 1.71,
+              "deepestLevel": 8,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 0
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 0
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 5
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 4
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 3
+                },
+                {
+                  "label": "2+",
+                  "files": 2
+                }
+              ],
+              "deepestFile": {
+                "path": "docs/handler.ts",
+                "perLine": 3.4
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 28,
+                "p90": 73
+              },
+              "commentLines": {
+                "lines": 123,
+                "share": 0.08
+              }
+            }
+          },
+          "badges": [
             {
-              "path": "docs/guides",
-              "files": 9,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Lena Fischer",
-                  "email": "lena.fischer@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2025-11-14T14:48:10.000Z",
-                  "files": 9,
-                  "soleFiles": 8,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [
-                "Lena Fischer is the only expert on 8 of 9 files",
-                "no active expert for 8 of 9 files (last expert commit 2025-11-14)"
-              ],
-              "kind": "folder",
-              "lastChangedAt": "2026-01-12T11:03:27.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Lena Fischer is the only expert on 8 of 9 files."
-                },
-                {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "8 of 9 files have no active expert."
-                },
-                {
-                  "kind": "quiet",
-                  "category": "activity",
-                  "label": "Quiet",
-                  "evidence": "Unchanged since 2026-01-12, 261 days."
-                }
-              ],
-              "territories": [],
-              "totalTerritories": 0
+              "kind": "island",
+              "category": "knowledge",
+              "label": "Knowledge island",
+              "evidence": "Lena Fischer is the only expert on 12 of 14 files."
             },
             {
-              "path": "docs",
-              "files": 5,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Lena Fischer",
-                  "email": "lena.fischer@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2025-11-14T14:48:10.000Z",
-                  "files": 4,
-                  "soleFiles": 4,
-                  "share": 0.8
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.4
-                }
-              ],
-              "reasons": [
-                "Lena Fischer is the only expert on 4 of 5 files",
-                "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
-              ],
-              "kind": "other",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Lena Fischer is the only expert on 4 of 5 files."
-                },
-                {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "4 of 5 files have no active expert."
-                },
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Maya Lindqvist is the only active expert."
-                }
-              ],
-              "territories": [],
-              "totalTerritories": 0
+              "kind": "orphaned",
+              "category": "knowledge",
+              "label": "Orphaned",
+              "evidence": "12 of 14 files have no active expert."
+            },
+            {
+              "kind": "one-expert",
+              "category": "knowledge",
+              "label": "One expert",
+              "evidence": "Maya Lindqvist is the only active expert."
             }
           ],
-          "totalTerritories": 2,
-          "splitDetail": 2,
-          "splitReason": "big: 14 files"
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": "packages/db",
@@ -2470,20 +2509,6 @@
           ],
           "kind": "package",
           "lastChangedAt": "2026-09-18T16:05:44.000Z",
-          "badges": [
-            {
-              "kind": "orphaned",
-              "category": "knowledge",
-              "label": "Orphaned",
-              "evidence": "30 of 52 files have no active expert."
-            },
-            {
-              "kind": "handover",
-              "category": "knowledge",
-              "label": "Handover",
-              "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
-            }
-          ],
           "lineOwners": {
             "skippedFiles": 0,
             "lines": 6180,
@@ -2511,6 +2536,166 @@
               }
             ]
           },
+          "stats": {
+            "files": 52,
+            "codeLines": 5913,
+            "fileLength": {
+              "min": 5,
+              "median": 85,
+              "max": 455,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 12
+                },
+                {
+                  "label": "51–100",
+                  "files": 13
+                },
+                {
+                  "label": "101–200",
+                  "files": 15
+                },
+                {
+                  "label": "201–400",
+                  "files": 8
+                },
+                {
+                  "label": "401–800",
+                  "files": 3
+                },
+                {
+                  "label": "800+",
+                  "files": 1
+                }
+              ],
+              "longestFile": "packages/db/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 52,
+                "lines": 5913
+              }
+            ],
+            "tests": {
+              "files": 8,
+              "lines": 910
+            },
+            "churn": {
+              "median": 5,
+              "p90": 20,
+              "revisions": 468,
+              "revisionLines": 42574,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 10
+                },
+                {
+                  "label": "2",
+                  "files": 7
+                },
+                {
+                  "label": "3–4",
+                  "files": 12
+                },
+                {
+                  "label": "5–9",
+                  "files": 13
+                },
+                {
+                  "label": "10–19",
+                  "files": 7
+                },
+                {
+                  "label": "20+",
+                  "files": 3
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "packages/db/file1.ts",
+                  "revisions": 44
+                },
+                {
+                  "path": "packages/db/file2.ts",
+                  "revisions": 25
+                },
+                {
+                  "path": "packages/db/file3.ts",
+                  "revisions": 18
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 1.3,
+              "medianFile": 1.17,
+              "deepestLevel": 6,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 1
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 3
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 13
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 15
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 13
+                },
+                {
+                  "label": "2+",
+                  "files": 7
+                }
+              ],
+              "deepestFile": {
+                "path": "packages/db/handler.ts",
+                "perLine": 2.8
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 33,
+                "p90": 72
+              },
+              "commentLines": {
+                "lines": 473,
+                "share": 0.08
+              }
+            }
+          },
+          "badges": [
+            {
+              "kind": "orphaned",
+              "category": "knowledge",
+              "label": "Orphaned",
+              "evidence": "30 of 52 files have no active expert."
+            },
+            {
+              "kind": "handover",
+              "category": "knowledge",
+              "label": "Handover",
+              "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
+            }
+          ],
+          "totalTerritories": 3,
+          "splitReason": "big: 52 files",
+          "splitDetail": 2,
           "territories": [
             {
               "path": "packages/db/migrations",
@@ -2526,7 +2711,7 @@
                   "lastCommitAt": "2024-12-03T09:26:38.000Z",
                   "files": 30,
                   "soleFiles": 27,
-                  "share": 1.0
+                  "share": 1
                 }
               ],
               "reasons": [
@@ -2535,6 +2720,149 @@
               ],
               "kind": "folder",
               "lastChangedAt": "2026-04-22T08:14:50.000Z",
+              "stats": {
+                "files": 30,
+                "codeLines": 3319,
+                "fileLength": {
+                  "min": 8,
+                  "median": 83,
+                  "max": 664,
+                  "histogram": [
+                    {
+                      "label": "1–50",
+                      "files": 7
+                    },
+                    {
+                      "label": "51–100",
+                      "files": 7
+                    },
+                    {
+                      "label": "101–200",
+                      "files": 9
+                    },
+                    {
+                      "label": "201–400",
+                      "files": 5
+                    },
+                    {
+                      "label": "401–800",
+                      "files": 2
+                    },
+                    {
+                      "label": "800+",
+                      "files": 0
+                    }
+                  ],
+                  "longestFile": "packages/db/migrations/index.ts"
+                },
+                "languages": [
+                  {
+                    "name": "SQL",
+                    "files": 30,
+                    "lines": 3319
+                  }
+                ],
+                "tests": {
+                  "files": 5,
+                  "lines": 553
+                },
+                "churn": {
+                  "median": 6,
+                  "p90": 26,
+                  "revisions": 300,
+                  "revisionLines": 26552,
+                  "histogram": [
+                    {
+                      "label": "1",
+                      "files": 6
+                    },
+                    {
+                      "label": "2",
+                      "files": 4
+                    },
+                    {
+                      "label": "3–4",
+                      "files": 8
+                    },
+                    {
+                      "label": "5–9",
+                      "files": 7
+                    },
+                    {
+                      "label": "10–19",
+                      "files": 4
+                    },
+                    {
+                      "label": "20+",
+                      "files": 1
+                    }
+                  ],
+                  "mostChanged": [
+                    {
+                      "path": "packages/db/migrations/file1.ts",
+                      "revisions": 48
+                    },
+                    {
+                      "path": "packages/db/migrations/file2.ts",
+                      "revisions": 27
+                    },
+                    {
+                      "path": "packages/db/migrations/file3.ts",
+                      "revisions": 19
+                    }
+                  ]
+                },
+                "complexity": {
+                  "perLine": 2,
+                  "medianFile": 1.8,
+                  "deepestLevel": 6,
+                  "histogram": [
+                    {
+                      "label": "<0.25",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.25–0.5",
+                      "files": 2
+                    },
+                    {
+                      "label": "0.5–1",
+                      "files": 8
+                    },
+                    {
+                      "label": "1–1.5",
+                      "files": 9
+                    },
+                    {
+                      "label": "1.5–2",
+                      "files": 7
+                    },
+                    {
+                      "label": "2+",
+                      "files": 4
+                    }
+                  ],
+                  "deepestFile": {
+                    "path": "packages/db/migrations/handler.ts",
+                    "perLine": 3.5
+                  }
+                },
+                "style": {
+                  "indent": {
+                    "spacesShare": 0.96,
+                    "tabsShare": 0.04,
+                    "width": 2
+                  },
+                  "lineLength": {
+                    "median": 33,
+                    "p90": 75
+                  },
+                  "commentLines": {
+                    "lines": 266,
+                    "share": 0.08
+                  }
+                }
+              },
               "badges": [
                 {
                   "kind": "island",
@@ -2549,8 +2877,8 @@
                   "evidence": "27 of 30 files have no active expert."
                 }
               ],
-              "territories": [],
-              "totalTerritories": 0
+              "totalTerritories": 0,
+              "territories": []
             },
             {
               "path": "packages/db/src",
@@ -2590,6 +2918,149 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
+              "stats": {
+                "files": 18,
+                "codeLines": 2146,
+                "fileLength": {
+                  "min": 8,
+                  "median": 89,
+                  "max": 596,
+                  "histogram": [
+                    {
+                      "label": "1–50",
+                      "files": 4
+                    },
+                    {
+                      "label": "51–100",
+                      "files": 4
+                    },
+                    {
+                      "label": "101–200",
+                      "files": 6
+                    },
+                    {
+                      "label": "201–400",
+                      "files": 3
+                    },
+                    {
+                      "label": "401–800",
+                      "files": 1
+                    },
+                    {
+                      "label": "800+",
+                      "files": 0
+                    }
+                  ],
+                  "longestFile": "packages/db/src/index.ts"
+                },
+                "languages": [
+                  {
+                    "name": "TypeScript",
+                    "files": 18,
+                    "lines": 2146
+                  }
+                ],
+                "tests": {
+                  "files": 3,
+                  "lines": 358
+                },
+                "churn": {
+                  "median": 3,
+                  "p90": 23,
+                  "revisions": 126,
+                  "revisionLines": 12018,
+                  "histogram": [
+                    {
+                      "label": "1",
+                      "files": 3
+                    },
+                    {
+                      "label": "2",
+                      "files": 2
+                    },
+                    {
+                      "label": "3–4",
+                      "files": 6
+                    },
+                    {
+                      "label": "5–9",
+                      "files": 4
+                    },
+                    {
+                      "label": "10–19",
+                      "files": 2
+                    },
+                    {
+                      "label": "20+",
+                      "files": 1
+                    }
+                  ],
+                  "mostChanged": [
+                    {
+                      "path": "packages/db/src/file1.ts",
+                      "revisions": 36
+                    },
+                    {
+                      "path": "packages/db/src/file2.ts",
+                      "revisions": 21
+                    },
+                    {
+                      "path": "packages/db/src/file3.ts",
+                      "revisions": 15
+                    }
+                  ]
+                },
+                "complexity": {
+                  "perLine": 1.6,
+                  "medianFile": 1.44,
+                  "deepestLevel": 10,
+                  "histogram": [
+                    {
+                      "label": "<0.25",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.25–0.5",
+                      "files": 1
+                    },
+                    {
+                      "label": "0.5–1",
+                      "files": 6
+                    },
+                    {
+                      "label": "1–1.5",
+                      "files": 5
+                    },
+                    {
+                      "label": "1.5–2",
+                      "files": 4
+                    },
+                    {
+                      "label": "2+",
+                      "files": 2
+                    }
+                  ],
+                  "deepestFile": {
+                    "path": "packages/db/src/handler.ts",
+                    "perLine": 3.1
+                  }
+                },
+                "style": {
+                  "indent": {
+                    "spacesShare": 0.96,
+                    "tabsShare": 0.04,
+                    "width": 2
+                  },
+                  "lineLength": {
+                    "median": 30,
+                    "p90": 75
+                  },
+                  "commentLines": {
+                    "lines": 172,
+                    "share": 0.08
+                  }
+                }
+              },
               "badges": [
                 {
                   "kind": "handover",
@@ -2598,6 +3069,9 @@
                   "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
                 }
               ],
+              "totalTerritories": 2,
+              "splitReason": "big: 18 files",
+              "splitDetail": 3,
               "territories": [
                 {
                   "path": "packages/db/src/queries",
@@ -2637,9 +3111,152 @@
                   "reasons": [],
                   "kind": "folder",
                   "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "stats": {
+                    "files": 12,
+                    "codeLines": 1357,
+                    "fileLength": {
+                      "min": 11,
+                      "median": 85,
+                      "max": 452,
+                      "histogram": [
+                        {
+                          "label": "1–50",
+                          "files": 2
+                        },
+                        {
+                          "label": "51–100",
+                          "files": 3
+                        },
+                        {
+                          "label": "101–200",
+                          "files": 5
+                        },
+                        {
+                          "label": "201–400",
+                          "files": 2
+                        },
+                        {
+                          "label": "401–800",
+                          "files": 0
+                        },
+                        {
+                          "label": "800+",
+                          "files": 0
+                        }
+                      ],
+                      "longestFile": "packages/db/src/queries/index.ts"
+                    },
+                    "languages": [
+                      {
+                        "name": "TypeScript",
+                        "files": 12,
+                        "lines": 1357
+                      }
+                    ],
+                    "tests": {
+                      "files": 2,
+                      "lines": 226
+                    },
+                    "churn": {
+                      "median": 4,
+                      "p90": 14,
+                      "revisions": 96,
+                      "revisionLines": 8685,
+                      "histogram": [
+                        {
+                          "label": "1",
+                          "files": 2
+                        },
+                        {
+                          "label": "2",
+                          "files": 1
+                        },
+                        {
+                          "label": "3–4",
+                          "files": 5
+                        },
+                        {
+                          "label": "5–9",
+                          "files": 3
+                        },
+                        {
+                          "label": "10–19",
+                          "files": 1
+                        },
+                        {
+                          "label": "20+",
+                          "files": 0
+                        }
+                      ],
+                      "mostChanged": [
+                        {
+                          "path": "packages/db/src/queries/file1.ts",
+                          "revisions": 40
+                        },
+                        {
+                          "path": "packages/db/src/queries/file2.ts",
+                          "revisions": 23
+                        },
+                        {
+                          "path": "packages/db/src/queries/file3.ts",
+                          "revisions": 17
+                        }
+                      ]
+                    },
+                    "complexity": {
+                      "perLine": 1.9,
+                      "medianFile": 1.71,
+                      "deepestLevel": 10,
+                      "histogram": [
+                        {
+                          "label": "<0.25",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.25–0.5",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.5–1",
+                          "files": 5
+                        },
+                        {
+                          "label": "1–1.5",
+                          "files": 3
+                        },
+                        {
+                          "label": "1.5–2",
+                          "files": 3
+                        },
+                        {
+                          "label": "2+",
+                          "files": 1
+                        }
+                      ],
+                      "deepestFile": {
+                        "path": "packages/db/src/queries/handler.ts",
+                        "perLine": 3.4
+                      }
+                    },
+                    "style": {
+                      "indent": {
+                        "spacesShare": 0.96,
+                        "tabsShare": 0.04,
+                        "width": 2
+                      },
+                      "lineLength": {
+                        "median": 33,
+                        "p90": 78
+                      },
+                      "commentLines": {
+                        "lines": 109,
+                        "share": 0.08
+                      }
+                    }
+                  },
                   "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
+                  "totalTerritories": 0,
+                  "territories": []
                 },
                 {
                   "path": "packages/db/src",
@@ -2661,6 +3278,149 @@
                   "reasons": [],
                   "kind": "other",
                   "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "stats": {
+                    "files": 6,
+                    "codeLines": 826,
+                    "fileLength": {
+                      "min": 8,
+                      "median": 103,
+                      "max": 688,
+                      "histogram": [
+                        {
+                          "label": "1–50",
+                          "files": 1
+                        },
+                        {
+                          "label": "51–100",
+                          "files": 1
+                        },
+                        {
+                          "label": "101–200",
+                          "files": 3
+                        },
+                        {
+                          "label": "201–400",
+                          "files": 1
+                        },
+                        {
+                          "label": "401–800",
+                          "files": 0
+                        },
+                        {
+                          "label": "800+",
+                          "files": 0
+                        }
+                      ],
+                      "longestFile": "packages/db/src/index.ts"
+                    },
+                    "languages": [
+                      {
+                        "name": "TypeScript",
+                        "files": 6,
+                        "lines": 826
+                      }
+                    ],
+                    "tests": {
+                      "files": 1,
+                      "lines": 138
+                    },
+                    "churn": {
+                      "median": 3,
+                      "p90": 23,
+                      "revisions": 42,
+                      "revisionLines": 4626,
+                      "histogram": [
+                        {
+                          "label": "1",
+                          "files": 1
+                        },
+                        {
+                          "label": "2",
+                          "files": 0
+                        },
+                        {
+                          "label": "3–4",
+                          "files": 4
+                        },
+                        {
+                          "label": "5–9",
+                          "files": 1
+                        },
+                        {
+                          "label": "10–19",
+                          "files": 0
+                        },
+                        {
+                          "label": "20+",
+                          "files": 0
+                        }
+                      ],
+                      "mostChanged": [
+                        {
+                          "path": "packages/db/src/file1.ts",
+                          "revisions": 36
+                        },
+                        {
+                          "path": "packages/db/src/file2.ts",
+                          "revisions": 21
+                        },
+                        {
+                          "path": "packages/db/src/file3.ts",
+                          "revisions": 15
+                        }
+                      ]
+                    },
+                    "complexity": {
+                      "perLine": 1.6,
+                      "medianFile": 1.44,
+                      "deepestLevel": 10,
+                      "histogram": [
+                        {
+                          "label": "<0.25",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.25–0.5",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.5–1",
+                          "files": 4
+                        },
+                        {
+                          "label": "1–1.5",
+                          "files": 1
+                        },
+                        {
+                          "label": "1.5–2",
+                          "files": 1
+                        },
+                        {
+                          "label": "2+",
+                          "files": 0
+                        }
+                      ],
+                      "deepestFile": {
+                        "path": "packages/db/src/handler.ts",
+                        "perLine": 3.1
+                      }
+                    },
+                    "style": {
+                      "indent": {
+                        "spacesShare": 0.96,
+                        "tabsShare": 0.04,
+                        "width": 2
+                      },
+                      "lineLength": {
+                        "median": 30,
+                        "p90": 75
+                      },
+                      "commentLines": {
+                        "lines": 66,
+                        "share": 0.08
+                      }
+                    }
+                  },
                   "badges": [
                     {
                       "kind": "one-expert",
@@ -2669,13 +3429,10 @@
                       "evidence": "Tomás Herrera is the only active expert."
                     }
                   ],
-                  "territories": [],
-                  "totalTerritories": 0
+                  "totalTerritories": 0,
+                  "territories": []
                 }
-              ],
-              "totalTerritories": 2,
-              "splitDetail": 3,
-              "splitReason": "big: 18 files"
+              ]
             },
             {
               "path": "packages/db",
@@ -2691,12 +3448,155 @@
                   "lastCommitAt": "2026-09-18T16:05:44.000Z",
                   "files": 4,
                   "soleFiles": 2,
-                  "share": 1.0
+                  "share": 1
                 }
               ],
               "reasons": [],
               "kind": "other",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
+              "stats": {
+                "files": 4,
+                "codeLines": 633,
+                "fileLength": {
+                  "min": 5,
+                  "median": 119,
+                  "max": 633,
+                  "histogram": [
+                    {
+                      "label": "1–50",
+                      "files": 0
+                    },
+                    {
+                      "label": "51–100",
+                      "files": 1
+                    },
+                    {
+                      "label": "101–200",
+                      "files": 3
+                    },
+                    {
+                      "label": "201–400",
+                      "files": 0
+                    },
+                    {
+                      "label": "401–800",
+                      "files": 0
+                    },
+                    {
+                      "label": "800+",
+                      "files": 0
+                    }
+                  ],
+                  "longestFile": "packages/db/index.ts"
+                },
+                "languages": [
+                  {
+                    "name": "TypeScript",
+                    "files": 4,
+                    "lines": 633
+                  }
+                ],
+                "tests": {
+                  "files": 0,
+                  "lines": 0
+                },
+                "churn": {
+                  "median": 5,
+                  "p90": 20,
+                  "revisions": 36,
+                  "revisionLines": 4558,
+                  "histogram": [
+                    {
+                      "label": "1",
+                      "files": 0
+                    },
+                    {
+                      "label": "2",
+                      "files": 0
+                    },
+                    {
+                      "label": "3–4",
+                      "files": 3
+                    },
+                    {
+                      "label": "5–9",
+                      "files": 1
+                    },
+                    {
+                      "label": "10–19",
+                      "files": 0
+                    },
+                    {
+                      "label": "20+",
+                      "files": 0
+                    }
+                  ],
+                  "mostChanged": [
+                    {
+                      "path": "packages/db/file1.ts",
+                      "revisions": 44
+                    },
+                    {
+                      "path": "packages/db/file2.ts",
+                      "revisions": 25
+                    },
+                    {
+                      "path": "packages/db/file3.ts",
+                      "revisions": 18
+                    }
+                  ]
+                },
+                "complexity": {
+                  "perLine": 1.3,
+                  "medianFile": 1.17,
+                  "deepestLevel": 6,
+                  "histogram": [
+                    {
+                      "label": "<0.25",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.25–0.5",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.5–1",
+                      "files": 2
+                    },
+                    {
+                      "label": "1–1.5",
+                      "files": 1
+                    },
+                    {
+                      "label": "1.5–2",
+                      "files": 1
+                    },
+                    {
+                      "label": "2+",
+                      "files": 0
+                    }
+                  ],
+                  "deepestFile": {
+                    "path": "packages/db/handler.ts",
+                    "perLine": 2.8
+                  }
+                },
+                "style": {
+                  "indent": {
+                    "spacesShare": 0.96,
+                    "tabsShare": 0.04,
+                    "width": 2
+                  },
+                  "lineLength": {
+                    "median": 33,
+                    "p90": 72
+                  },
+                  "commentLines": {
+                    "lines": 51,
+                    "share": 0.08
+                  }
+                }
+              },
               "badges": [
                 {
                   "kind": "one-expert",
@@ -2705,13 +3605,10 @@
                   "evidence": "Tomás Herrera is the only active expert."
                 }
               ],
-              "territories": [],
-              "totalTerritories": 0
+              "totalTerritories": 0,
+              "territories": []
             }
-          ],
-          "totalTerritories": 3,
-          "splitDetail": 2,
-          "splitReason": "big: 52 files"
+          ]
         },
         {
           "path": "packages/auth",
@@ -2742,6 +3639,149 @@
           "reasons": ["Jonas Weber is the only expert on 17 of 19 files"],
           "kind": "package",
           "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "stats": {
+            "files": 19,
+            "codeLines": 2269,
+            "fileLength": {
+              "min": 4,
+              "median": 90,
+              "max": 717,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 4
+                },
+                {
+                  "label": "51–100",
+                  "files": 4
+                },
+                {
+                  "label": "101–200",
+                  "files": 7
+                },
+                {
+                  "label": "201–400",
+                  "files": 3
+                },
+                {
+                  "label": "401–800",
+                  "files": 1
+                },
+                {
+                  "label": "800+",
+                  "files": 0
+                }
+              ],
+              "longestFile": "packages/auth/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 19,
+                "lines": 2269
+              }
+            ],
+            "tests": {
+              "files": 3,
+              "lines": 358
+            },
+            "churn": {
+              "median": 6,
+              "p90": 16,
+              "revisions": 190,
+              "revisionLines": 18152,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 3
+                },
+                {
+                  "label": "2",
+                  "files": 2
+                },
+                {
+                  "label": "3–4",
+                  "files": 7
+                },
+                {
+                  "label": "5–9",
+                  "files": 4
+                },
+                {
+                  "label": "10–19",
+                  "files": 2
+                },
+                {
+                  "label": "20+",
+                  "files": 1
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "packages/auth/file1.ts",
+                  "revisions": 48
+                },
+                {
+                  "path": "packages/auth/file2.ts",
+                  "revisions": 27
+                },
+                {
+                  "path": "packages/auth/file3.ts",
+                  "revisions": 19
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 2.2,
+              "medianFile": 1.98,
+              "deepestLevel": 6,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 0
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 1
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 7
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 5
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 4
+                },
+                {
+                  "label": "2+",
+                  "files": 2
+                }
+              ],
+              "deepestFile": {
+                "path": "packages/auth/handler.ts",
+                "perLine": 3.7
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 29,
+                "p90": 71
+              },
+              "commentLines": {
+                "lines": 182,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [
             {
               "kind": "island",
@@ -2756,173 +3796,8 @@
               "evidence": "Jonas Weber, expert on 18 of 19 files, last committed 102 days ago."
             }
           ],
-          "territories": [
-            {
-              "path": "packages/auth/src",
-              "files": 16,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 14,
-                  "soleFiles": 13,
-                  "share": 0.875
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.125
-                }
-              ],
-              "reasons": ["Jonas Weber is the only expert on 13 of 16 files"],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Jonas Weber is the only expert on 13 of 16 files."
-                },
-                {
-                  "kind": "knowledge-fading",
-                  "category": "knowledge",
-                  "label": "Knowledge fading",
-                  "evidence": "Jonas Weber, expert on 14 of 16 files, last committed 102 days ago."
-                }
-              ],
-              "territories": [
-                {
-                  "path": "packages/auth/src/providers",
-                  "files": 9,
-                  "truckFactor": 1,
-                  "island": true,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Jonas Weber",
-                      "email": "jonas.weber@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                      "files": 9,
-                      "soleFiles": 8,
-                      "share": 1.0
-                    }
-                  ],
-                  "reasons": ["Jonas Weber is the only expert on 8 of 9 files"],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-06-20T13:10:03.000Z",
-                  "badges": [
-                    {
-                      "kind": "island",
-                      "category": "knowledge",
-                      "label": "Knowledge island",
-                      "evidence": "Jonas Weber is the only expert on 8 of 9 files."
-                    },
-                    {
-                      "kind": "one-expert",
-                      "category": "knowledge",
-                      "label": "One expert",
-                      "evidence": "Jonas Weber is the only active expert."
-                    },
-                    {
-                      "kind": "knowledge-fading",
-                      "category": "knowledge",
-                      "label": "Knowledge fading",
-                      "evidence": "Jonas Weber, expert on 9 of 9 files, last committed 102 days ago."
-                    }
-                  ],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/auth/src",
-                  "files": 7,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Jonas Weber",
-                      "email": "jonas.weber@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                      "files": 6,
-                      "soleFiles": 4,
-                      "share": 0.8571
-                    },
-                    {
-                      "name": "Tomás Herrera",
-                      "email": "tomas.herrera@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                      "files": 2,
-                      "soleFiles": 0,
-                      "share": 0.2857
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "other",
-                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                }
-              ],
-              "totalTerritories": 2,
-              "splitDetail": 3,
-              "splitReason": "big: 16 files"
-            },
-            {
-              "path": "packages/auth",
-              "files": 3,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 3,
-                  "soleFiles": 3,
-                  "share": 1.0
-                }
-              ],
-              "reasons": ["Jonas Weber is the only expert on 3 of 3 files"],
-              "kind": "other",
-              "lastChangedAt": "2026-06-20T13:10:03.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Jonas Weber is the only expert on 3 of 3 files."
-                },
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Jonas Weber is the only active expert."
-                }
-              ],
-              "territories": [],
-              "totalTerritories": 0
-            }
-          ],
-          "totalTerritories": 2,
-          "splitDetail": 2,
-          "splitReason": "big: 19 files"
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": "apps/admin",
@@ -2953,6 +3828,149 @@
           "reasons": [],
           "kind": "package",
           "lastChangedAt": "2026-08-12T11:22:19.000Z",
+          "stats": {
+            "files": 58,
+            "codeLines": 6469,
+            "fileLength": {
+              "min": 3,
+              "median": 84,
+              "max": 446,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 13
+                },
+                {
+                  "label": "51–100",
+                  "files": 14
+                },
+                {
+                  "label": "101–200",
+                  "files": 17
+                },
+                {
+                  "label": "201–400",
+                  "files": 9
+                },
+                {
+                  "label": "401–800",
+                  "files": 4
+                },
+                {
+                  "label": "800+",
+                  "files": 1
+                }
+              ],
+              "longestFile": "apps/admin/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 58,
+                "lines": 6469
+              }
+            ],
+            "tests": {
+              "files": 9,
+              "lines": 1004
+            },
+            "churn": {
+              "median": 6,
+              "p90": 21,
+              "revisions": 580,
+              "revisionLines": 51752,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 11
+                },
+                {
+                  "label": "2",
+                  "files": 8
+                },
+                {
+                  "label": "3–4",
+                  "files": 14
+                },
+                {
+                  "label": "5–9",
+                  "files": 14
+                },
+                {
+                  "label": "10–19",
+                  "files": 8
+                },
+                {
+                  "label": "20+",
+                  "files": 3
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "apps/admin/file1.ts",
+                  "revisions": 48
+                },
+                {
+                  "path": "apps/admin/file2.ts",
+                  "revisions": 27
+                },
+                {
+                  "path": "apps/admin/file3.ts",
+                  "revisions": 19
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 0.9,
+              "medianFile": 0.81,
+              "deepestLevel": 8,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 1
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 4
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 14
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 17
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 14
+                },
+                {
+                  "label": "2+",
+                  "files": 8
+                }
+              ],
+              "deepestFile": {
+                "path": "apps/admin/handler.ts",
+                "perLine": 2.4
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 31,
+                "p90": 70
+              },
+              "commentLines": {
+                "lines": 518,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [
             {
               "kind": "knowledge-fading",
@@ -2961,224 +3979,8 @@
               "evidence": "Aiko Tanaka, expert on 42 of 58 files, last committed 148 days ago."
             }
           ],
-          "territories": [
-            {
-              "path": "apps/admin/src",
-              "files": 44,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 33,
-                  "soleFiles": 20,
-                  "share": 0.75
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 22,
-                  "soleFiles": 7,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "knowledge-fading",
-                  "category": "knowledge",
-                  "label": "Knowledge fading",
-                  "evidence": "Aiko Tanaka, expert on 33 of 44 files, last committed 148 days ago."
-                }
-              ],
-              "territories": [
-                {
-                  "path": "apps/admin/src/pages",
-                  "files": 26,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Aiko Tanaka",
-                      "email": "aiko.tanaka@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                      "files": 21,
-                      "soleFiles": 13,
-                      "share": 0.8077
-                    },
-                    {
-                      "name": "Priya Raman",
-                      "email": "priya.raman@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                      "files": 10,
-                      "soleFiles": 2,
-                      "share": 0.3846
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-08-12T11:22:19.000Z",
-                  "badges": [
-                    {
-                      "kind": "knowledge-fading",
-                      "category": "knowledge",
-                      "label": "Knowledge fading",
-                      "evidence": "Aiko Tanaka, expert on 21 of 26 files, last committed 148 days ago."
-                    }
-                  ],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "apps/admin/src/components",
-                  "files": 12,
-                  "truckFactor": 2,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Aiko Tanaka",
-                      "email": "aiko.tanaka@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                      "files": 8,
-                      "soleFiles": 4,
-                      "share": 0.6667
-                    },
-                    {
-                      "name": "Priya Raman",
-                      "email": "priya.raman@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                      "files": 7,
-                      "soleFiles": 3,
-                      "share": 0.5833
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-08-12T11:22:19.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "apps/admin/src",
-                  "files": 6,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Aiko Tanaka",
-                      "email": "aiko.tanaka@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                      "files": 5,
-                      "soleFiles": 3,
-                      "share": 0.8333
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "other",
-                  "lastChangedAt": "2026-05-05T08:33:51.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                }
-              ],
-              "totalTerritories": 3,
-              "splitDetail": 3,
-              "splitReason": "big: 44 files"
-            },
-            {
-              "path": "apps/admin/test",
-              "files": 8,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 6,
-                  "soleFiles": 3,
-                  "share": 0.75
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 6,
-                  "soleFiles": 2,
-                  "share": 0.75
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [],
-              "territories": [],
-              "totalTerritories": 0
-            },
-            {
-              "path": "apps/admin",
-              "files": 6,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 6,
-                  "soleFiles": 5,
-                  "share": 1.0
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.3333
-                }
-              ],
-              "reasons": ["Aiko Tanaka is the only expert on 5 of 6 files"],
-              "kind": "other",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Aiko Tanaka is the only expert on 5 of 6 files."
-                }
-              ],
-              "territories": [],
-              "totalTerritories": 0
-            }
-          ],
-          "totalTerritories": 3,
-          "splitDetail": 2,
-          "splitReason": "big: 58 files"
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": "infra",
@@ -3209,178 +4011,152 @@
           "reasons": [],
           "kind": "folder",
           "lastChangedAt": "2026-09-18T16:05:44.000Z",
-          "badges": [],
-          "territories": [
-            {
-              "path": "infra/docker",
-              "files": 7,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
+          "stats": {
+            "files": 27,
+            "codeLines": 2995,
+            "fileLength": {
+              "min": 4,
+              "median": 83,
+              "max": 444,
+              "histogram": [
                 {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.8571
+                  "label": "1–50",
+                  "files": 6
                 },
                 {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.4286
+                  "label": "51–100",
+                  "files": 6
+                },
+                {
+                  "label": "101–200",
+                  "files": 10
+                },
+                {
+                  "label": "201–400",
+                  "files": 4
+                },
+                {
+                  "label": "401–800",
+                  "files": 1
+                },
+                {
+                  "label": "800+",
+                  "files": 0
                 }
               ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [],
-              "territories": [],
-              "totalTerritories": 0
+              "longestFile": "infra/index.ts"
             },
-            {
-              "path": "infra/terraform",
-              "files": 17,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 14,
-                  "soleFiles": 7,
-                  "share": 0.8235
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 8,
-                  "soleFiles": 2,
-                  "share": 0.4706
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [],
-              "territories": [
-                {
-                  "path": "infra/terraform/modules",
-                  "files": 12,
-                  "truckFactor": 2,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Tomás Herrera",
-                      "email": "tomas.herrera@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                      "files": 10,
-                      "soleFiles": 6,
-                      "share": 0.8333
-                    },
-                    {
-                      "name": "Sam Okafor",
-                      "email": "sam.okafor@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                      "files": 5,
-                      "soleFiles": 1,
-                      "share": 0.4167
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "infra/terraform",
-                  "files": 5,
-                  "truckFactor": 2,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Tomás Herrera",
-                      "email": "tomas.herrera@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                      "files": 4,
-                      "soleFiles": 2,
-                      "share": 0.8
-                    },
-                    {
-                      "name": "Sam Okafor",
-                      "email": "sam.okafor@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                      "files": 2,
-                      "soleFiles": 0,
-                      "share": 0.4
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "other",
-                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                }
-              ],
-              "totalTerritories": 2,
-              "splitDetail": 3,
-              "splitReason": "big: 17 files"
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 27,
+                "lines": 2995
+              }
+            ],
+            "tests": {
+              "files": 4,
+              "lines": 444
             },
-            {
-              "path": "infra",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
+            "churn": {
+              "median": 2,
+              "p90": 22,
+              "revisions": 162,
+              "revisionLines": 14376,
+              "histogram": [
                 {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
+                  "label": "1",
+                  "files": 5
+                },
+                {
+                  "label": "2",
+                  "files": 4
+                },
+                {
+                  "label": "3–4",
+                  "files": 8
+                },
+                {
+                  "label": "5–9",
+                  "files": 6
+                },
+                {
+                  "label": "10–19",
+                  "files": 3
+                },
+                {
+                  "label": "20+",
+                  "files": 1
                 }
               ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
+              "mostChanged": [
                 {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
+                  "path": "infra/file1.ts",
+                  "revisions": 32
+                },
+                {
+                  "path": "infra/file2.ts",
+                  "revisions": 19
+                },
+                {
+                  "path": "infra/file3.ts",
+                  "revisions": 14
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 1.1,
+              "medianFile": 0.99,
+              "deepestLevel": 7,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 0
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 1
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 8
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 8
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 6
+                },
+                {
+                  "label": "2+",
+                  "files": 4
                 }
               ],
-              "territories": [],
-              "totalTerritories": 0
+              "deepestFile": {
+                "path": "infra/handler.ts",
+                "perLine": 2.6
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 29,
+                "p90": 71
+              },
+              "commentLines": {
+                "lines": 240,
+                "share": 0.08
+              }
             }
-          ],
-          "totalTerritories": 3,
-          "splitDetail": 2,
-          "splitReason": "infra/docker and infra/terraform have different experts"
+          },
+          "badges": [],
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": ".github",
@@ -3411,76 +4187,152 @@
           "reasons": [],
           "kind": "folder",
           "lastChangedAt": "2026-09-18T16:05:44.000Z",
-          "badges": [],
-          "territories": [
-            {
-              "path": ".github/workflows",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
+          "stats": {
+            "files": 9,
+            "codeLines": 1096,
+            "fileLength": {
+              "min": 5,
+              "median": 91,
+              "max": 609,
+              "histogram": [
                 {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 5,
-                  "soleFiles": 2,
-                  "share": 0.8333
+                  "label": "1–50",
+                  "files": 2
                 },
                 {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.5
+                  "label": "51–100",
+                  "files": 2
+                },
+                {
+                  "label": "101–200",
+                  "files": 4
+                },
+                {
+                  "label": "201–400",
+                  "files": 1
+                },
+                {
+                  "label": "401–800",
+                  "files": 0
+                },
+                {
+                  "label": "800+",
+                  "files": 0
                 }
               ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [],
-              "territories": [],
-              "totalTerritories": 0
+              "longestFile": ".github/index.ts"
             },
-            {
-              "path": ".github",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 9,
+                "lines": 1096
+              }
+            ],
+            "tests": {
+              "files": 1,
+              "lines": 122
+            },
+            "churn": {
+              "median": 3,
+              "p90": 23,
+              "revisions": 63,
+              "revisionLines": 6138,
+              "histogram": [
                 {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
+                  "label": "1",
+                  "files": 1
+                },
+                {
+                  "label": "2",
+                  "files": 1
+                },
+                {
+                  "label": "3–4",
+                  "files": 4
+                },
+                {
+                  "label": "5–9",
+                  "files": 2
+                },
+                {
+                  "label": "10–19",
+                  "files": 1
+                },
+                {
+                  "label": "20+",
+                  "files": 0
                 }
               ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-08-28T19:02:26.000Z",
-              "badges": [
+              "mostChanged": [
                 {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Sam Okafor is the only active expert."
+                  "path": ".github/file1.ts",
+                  "revisions": 36
+                },
+                {
+                  "path": ".github/file2.ts",
+                  "revisions": 21
+                },
+                {
+                  "path": ".github/file3.ts",
+                  "revisions": 15
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 2.2,
+              "medianFile": 1.98,
+              "deepestLevel": 6,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 0
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 0
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 4
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 2
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 2
+                },
+                {
+                  "label": "2+",
+                  "files": 1
                 }
               ],
-              "territories": [],
-              "totalTerritories": 0
+              "deepestFile": {
+                "path": ".github/handler.ts",
+                "perLine": 3.7
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 30,
+                "p90": 72
+              },
+              "commentLines": {
+                "lines": 88,
+                "share": 0.08
+              }
             }
-          ],
-          "totalTerritories": 2,
-          "splitDetail": 2,
-          "splitReason": "big: 9 files"
+          },
+          "badges": [],
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": ".",
@@ -3511,9 +4363,152 @@
           "reasons": [],
           "kind": "folder",
           "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "stats": {
+            "files": 8,
+            "codeLines": 943,
+            "fileLength": {
+              "min": 5,
+              "median": 88,
+              "max": 707,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 1
+                },
+                {
+                  "label": "51–100",
+                  "files": 2
+                },
+                {
+                  "label": "101–200",
+                  "files": 4
+                },
+                {
+                  "label": "201–400",
+                  "files": 1
+                },
+                {
+                  "label": "401–800",
+                  "files": 0
+                },
+                {
+                  "label": "800+",
+                  "files": 0
+                }
+              ],
+              "longestFile": "index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 8,
+                "lines": 943
+              }
+            ],
+            "tests": {
+              "files": 1,
+              "lines": 118
+            },
+            "churn": {
+              "median": 5,
+              "p90": 20,
+              "revisions": 72,
+              "revisionLines": 6790,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 1
+                },
+                {
+                  "label": "2",
+                  "files": 1
+                },
+                {
+                  "label": "3–4",
+                  "files": 3
+                },
+                {
+                  "label": "5–9",
+                  "files": 2
+                },
+                {
+                  "label": "10–19",
+                  "files": 1
+                },
+                {
+                  "label": "20+",
+                  "files": 0
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "file1.ts",
+                  "revisions": 44
+                },
+                {
+                  "path": "file2.ts",
+                  "revisions": 25
+                },
+                {
+                  "path": "file3.ts",
+                  "revisions": 18
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 1.7,
+              "medianFile": 1.53,
+              "deepestLevel": 10,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 0
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 0
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 3
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 2
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 2
+                },
+                {
+                  "label": "2+",
+                  "files": 1
+                }
+              ],
+              "deepestFile": {
+                "path": "handler.ts",
+                "perLine": 3.2
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 33,
+                "p90": 72
+              },
+              "commentLines": {
+                "lines": 75,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [],
-          "territories": [],
-          "totalTerritories": 0
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": "scripts",
@@ -3544,6 +4539,149 @@
           "reasons": [],
           "kind": "folder",
           "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "stats": {
+            "files": 7,
+            "codeLines": 779,
+            "fileLength": {
+              "min": 3,
+              "median": 83,
+              "max": 445,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 1
+                },
+                {
+                  "label": "51–100",
+                  "files": 1
+                },
+                {
+                  "label": "101–200",
+                  "files": 4
+                },
+                {
+                  "label": "201–400",
+                  "files": 1
+                },
+                {
+                  "label": "401–800",
+                  "files": 0
+                },
+                {
+                  "label": "800+",
+                  "files": 0
+                }
+              ],
+              "longestFile": "scripts/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 7,
+                "lines": 779
+              }
+            ],
+            "tests": {
+              "files": 1,
+              "lines": 111
+            },
+            "churn": {
+              "median": 6,
+              "p90": 21,
+              "revisions": 70,
+              "revisionLines": 6232,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 1
+                },
+                {
+                  "label": "2",
+                  "files": 1
+                },
+                {
+                  "label": "3–4",
+                  "files": 4
+                },
+                {
+                  "label": "5–9",
+                  "files": 1
+                },
+                {
+                  "label": "10–19",
+                  "files": 0
+                },
+                {
+                  "label": "20+",
+                  "files": 0
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "scripts/file1.ts",
+                  "revisions": 48
+                },
+                {
+                  "path": "scripts/file2.ts",
+                  "revisions": 27
+                },
+                {
+                  "path": "scripts/file3.ts",
+                  "revisions": 19
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 2.2,
+              "medianFile": 1.98,
+              "deepestLevel": 6,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 0
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 0
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 3
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 2
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 1
+                },
+                {
+                  "label": "2+",
+                  "files": 1
+                }
+              ],
+              "deepestFile": {
+                "path": "scripts/handler.ts",
+                "perLine": 3.7
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 31,
+                "p90": 70
+              },
+              "commentLines": {
+                "lines": 62,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [
             {
               "kind": "new-territory",
@@ -3552,8 +4690,8 @@
               "evidence": "Created on 2026-08-19, 42 days ago."
             }
           ],
-          "territories": [],
-          "totalTerritories": 0
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": "apps/web",
@@ -3602,6 +4740,149 @@
           "reasons": [],
           "kind": "package",
           "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "stats": {
+            "files": 112,
+            "codeLines": 12478,
+            "fileLength": {
+              "min": 6,
+              "median": 84,
+              "max": 557,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 26
+                },
+                {
+                  "label": "51–100",
+                  "files": 28
+                },
+                {
+                  "label": "101–200",
+                  "files": 30
+                },
+                {
+                  "label": "201–400",
+                  "files": 19
+                },
+                {
+                  "label": "401–800",
+                  "files": 7
+                },
+                {
+                  "label": "800+",
+                  "files": 2
+                }
+              ],
+              "longestFile": "apps/web/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 112,
+                "lines": 12478
+              }
+            ],
+            "tests": {
+              "files": 18,
+              "lines": 2005
+            },
+            "churn": {
+              "median": 5,
+              "p90": 15,
+              "revisions": 1008,
+              "revisionLines": 89842,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 22
+                },
+                {
+                  "label": "2",
+                  "files": 16
+                },
+                {
+                  "label": "3–4",
+                  "files": 25
+                },
+                {
+                  "label": "5–9",
+                  "files": 28
+                },
+                {
+                  "label": "10–19",
+                  "files": 15
+                },
+                {
+                  "label": "20+",
+                  "files": 6
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "apps/web/file1.ts",
+                  "revisions": 44
+                },
+                {
+                  "path": "apps/web/file2.ts",
+                  "revisions": 25
+                },
+                {
+                  "path": "apps/web/file3.ts",
+                  "revisions": 18
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 1.3,
+              "medianFile": 1.17,
+              "deepestLevel": 6,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 3
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 7
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 25
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 33
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 28
+                },
+                {
+                  "label": "2+",
+                  "files": 16
+                }
+              ],
+              "deepestFile": {
+                "path": "apps/web/handler.ts",
+                "perLine": 2.8
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 28,
+                "p90": 73
+              },
+              "commentLines": {
+                "lines": 998,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [
             {
               "kind": "in-focus",
@@ -3616,6 +4897,9 @@
               "evidence": "2 people made their first commit here in the last 180 days."
             }
           ],
+          "totalTerritories": 3,
+          "splitReason": "big: 112 files",
+          "splitDetail": 2,
           "territories": [
             {
               "path": "apps/web/src",
@@ -3664,6 +4948,149 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
+              "stats": {
+                "files": 78,
+                "codeLines": 8663,
+                "fileLength": {
+                  "min": 4,
+                  "median": 83,
+                  "max": 666,
+                  "histogram": [
+                    {
+                      "label": "1–50",
+                      "files": 18
+                    },
+                    {
+                      "label": "51–100",
+                      "files": 19
+                    },
+                    {
+                      "label": "101–200",
+                      "files": 22
+                    },
+                    {
+                      "label": "201–400",
+                      "files": 13
+                    },
+                    {
+                      "label": "401–800",
+                      "files": 5
+                    },
+                    {
+                      "label": "800+",
+                      "files": 1
+                    }
+                  ],
+                  "longestFile": "apps/web/src/index.ts"
+                },
+                "languages": [
+                  {
+                    "name": "TypeScript",
+                    "files": 78,
+                    "lines": 8663
+                  }
+                ],
+                "tests": {
+                  "files": 13,
+                  "lines": 1444
+                },
+                "churn": {
+                  "median": 5,
+                  "p90": 25,
+                  "revisions": 702,
+                  "revisionLines": 62374,
+                  "histogram": [
+                    {
+                      "label": "1",
+                      "files": 15
+                    },
+                    {
+                      "label": "2",
+                      "files": 11
+                    },
+                    {
+                      "label": "3–4",
+                      "files": 19
+                    },
+                    {
+                      "label": "5–9",
+                      "files": 19
+                    },
+                    {
+                      "label": "10–19",
+                      "files": 10
+                    },
+                    {
+                      "label": "20+",
+                      "files": 4
+                    }
+                  ],
+                  "mostChanged": [
+                    {
+                      "path": "apps/web/src/file1.ts",
+                      "revisions": 44
+                    },
+                    {
+                      "path": "apps/web/src/file2.ts",
+                      "revisions": 25
+                    },
+                    {
+                      "path": "apps/web/src/file3.ts",
+                      "revisions": 18
+                    }
+                  ]
+                },
+                "complexity": {
+                  "perLine": 1.5,
+                  "medianFile": 1.35,
+                  "deepestLevel": 9,
+                  "histogram": [
+                    {
+                      "label": "<0.25",
+                      "files": 2
+                    },
+                    {
+                      "label": "0.25–0.5",
+                      "files": 5
+                    },
+                    {
+                      "label": "0.5–1",
+                      "files": 18
+                    },
+                    {
+                      "label": "1–1.5",
+                      "files": 23
+                    },
+                    {
+                      "label": "1.5–2",
+                      "files": 19
+                    },
+                    {
+                      "label": "2+",
+                      "files": 11
+                    }
+                  ],
+                  "deepestFile": {
+                    "path": "apps/web/src/handler.ts",
+                    "perLine": 3
+                  }
+                },
+                "style": {
+                  "indent": {
+                    "spacesShare": 0.96,
+                    "tabsShare": 0.04,
+                    "width": 2
+                  },
+                  "lineLength": {
+                    "median": 29,
+                    "p90": 71
+                  },
+                  "commentLines": {
+                    "lines": 693,
+                    "share": 0.08
+                  }
+                }
+              },
               "badges": [
                 {
                   "kind": "in-focus",
@@ -3672,6 +5099,9 @@
                   "evidence": "448 commits in the window, the most of any territory."
                 }
               ],
+              "totalTerritories": 4,
+              "splitReason": "big: 78 files",
+              "splitDetail": 3,
               "territories": [
                 {
                   "path": "apps/web/src/routes",
@@ -3702,6 +5132,149 @@
                   "reasons": [],
                   "kind": "folder",
                   "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "stats": {
+                    "files": 34,
+                    "codeLines": 3818,
+                    "fileLength": {
+                      "min": 10,
+                      "median": 84,
+                      "max": 561,
+                      "histogram": [
+                        {
+                          "label": "1–50",
+                          "files": 8
+                        },
+                        {
+                          "label": "51–100",
+                          "files": 8
+                        },
+                        {
+                          "label": "101–200",
+                          "files": 11
+                        },
+                        {
+                          "label": "201–400",
+                          "files": 5
+                        },
+                        {
+                          "label": "401–800",
+                          "files": 2
+                        },
+                        {
+                          "label": "800+",
+                          "files": 0
+                        }
+                      ],
+                      "longestFile": "apps/web/src/routes/index.ts"
+                    },
+                    "languages": [
+                      {
+                        "name": "TypeScript",
+                        "files": 34,
+                        "lines": 3818
+                      }
+                    ],
+                    "tests": {
+                      "files": 5,
+                      "lines": 561
+                    },
+                    "churn": {
+                      "median": 5,
+                      "p90": 25,
+                      "revisions": 306,
+                      "revisionLines": 27490,
+                      "histogram": [
+                        {
+                          "label": "1",
+                          "files": 6
+                        },
+                        {
+                          "label": "2",
+                          "files": 5
+                        },
+                        {
+                          "label": "3–4",
+                          "files": 9
+                        },
+                        {
+                          "label": "5–9",
+                          "files": 8
+                        },
+                        {
+                          "label": "10–19",
+                          "files": 4
+                        },
+                        {
+                          "label": "20+",
+                          "files": 2
+                        }
+                      ],
+                      "mostChanged": [
+                        {
+                          "path": "apps/web/src/routes/file1.ts",
+                          "revisions": 44
+                        },
+                        {
+                          "path": "apps/web/src/routes/file2.ts",
+                          "revisions": 25
+                        },
+                        {
+                          "path": "apps/web/src/routes/file3.ts",
+                          "revisions": 18
+                        }
+                      ]
+                    },
+                    "complexity": {
+                      "perLine": 2.5,
+                      "medianFile": 2.25,
+                      "deepestLevel": 11,
+                      "histogram": [
+                        {
+                          "label": "<0.25",
+                          "files": 1
+                        },
+                        {
+                          "label": "0.25–0.5",
+                          "files": 2
+                        },
+                        {
+                          "label": "0.5–1",
+                          "files": 8
+                        },
+                        {
+                          "label": "1–1.5",
+                          "files": 10
+                        },
+                        {
+                          "label": "1.5–2",
+                          "files": 8
+                        },
+                        {
+                          "label": "2+",
+                          "files": 5
+                        }
+                      ],
+                      "deepestFile": {
+                        "path": "apps/web/src/routes/handler.ts",
+                        "perLine": 4
+                      }
+                    },
+                    "style": {
+                      "indent": {
+                        "spacesShare": 0.96,
+                        "tabsShare": 0.04,
+                        "width": 2
+                      },
+                      "lineLength": {
+                        "median": 32,
+                        "p90": 77
+                      },
+                      "commentLines": {
+                        "lines": 305,
+                        "share": 0.08
+                      }
+                    }
+                  },
                   "badges": [
                     {
                       "kind": "in-focus",
@@ -3710,8 +5283,8 @@
                       "evidence": "301 commits in the window, the most of any territory."
                     }
                   ],
-                  "territories": [],
-                  "totalTerritories": 0
+                  "totalTerritories": 0,
+                  "territories": []
                 },
                 {
                   "path": "apps/web/src/components",
@@ -3760,6 +5333,149 @@
                   "reasons": [],
                   "kind": "folder",
                   "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "stats": {
+                    "files": 29,
+                    "codeLines": 3328,
+                    "fileLength": {
+                      "min": 6,
+                      "median": 86,
+                      "max": 574,
+                      "histogram": [
+                        {
+                          "label": "1–50",
+                          "files": 6
+                        },
+                        {
+                          "label": "51–100",
+                          "files": 7
+                        },
+                        {
+                          "label": "101–200",
+                          "files": 10
+                        },
+                        {
+                          "label": "201–400",
+                          "files": 4
+                        },
+                        {
+                          "label": "401–800",
+                          "files": 2
+                        },
+                        {
+                          "label": "800+",
+                          "files": 0
+                        }
+                      ],
+                      "longestFile": "apps/web/src/components/index.ts"
+                    },
+                    "languages": [
+                      {
+                        "name": "TypeScript",
+                        "files": 29,
+                        "lines": 3328
+                      }
+                    ],
+                    "tests": {
+                      "files": 4,
+                      "lines": 459
+                    },
+                    "churn": {
+                      "median": 5,
+                      "p90": 15,
+                      "revisions": 261,
+                      "revisionLines": 23962,
+                      "histogram": [
+                        {
+                          "label": "1",
+                          "files": 5
+                        },
+                        {
+                          "label": "2",
+                          "files": 4
+                        },
+                        {
+                          "label": "3–4",
+                          "files": 8
+                        },
+                        {
+                          "label": "5–9",
+                          "files": 7
+                        },
+                        {
+                          "label": "10–19",
+                          "files": 4
+                        },
+                        {
+                          "label": "20+",
+                          "files": 1
+                        }
+                      ],
+                      "mostChanged": [
+                        {
+                          "path": "apps/web/src/components/file1.ts",
+                          "revisions": 44
+                        },
+                        {
+                          "path": "apps/web/src/components/file2.ts",
+                          "revisions": 25
+                        },
+                        {
+                          "path": "apps/web/src/components/file3.ts",
+                          "revisions": 18
+                        }
+                      ]
+                    },
+                    "complexity": {
+                      "perLine": 1.1,
+                      "medianFile": 0.99,
+                      "deepestLevel": 7,
+                      "histogram": [
+                        {
+                          "label": "<0.25",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.25–0.5",
+                          "files": 2
+                        },
+                        {
+                          "label": "0.5–1",
+                          "files": 8
+                        },
+                        {
+                          "label": "1–1.5",
+                          "files": 8
+                        },
+                        {
+                          "label": "1.5–2",
+                          "files": 7
+                        },
+                        {
+                          "label": "2+",
+                          "files": 4
+                        }
+                      ],
+                      "deepestFile": {
+                        "path": "apps/web/src/components/handler.ts",
+                        "perLine": 2.6
+                      }
+                    },
+                    "style": {
+                      "indent": {
+                        "spacesShare": 0.96,
+                        "tabsShare": 0.04,
+                        "width": 2
+                      },
+                      "lineLength": {
+                        "median": 28,
+                        "p90": 73
+                      },
+                      "commentLines": {
+                        "lines": 266,
+                        "share": 0.08
+                      }
+                    }
+                  },
                   "badges": [
                     {
                       "kind": "newcomer-friendly",
@@ -3768,8 +5484,8 @@
                       "evidence": "2 people made their first commit here in the last 180 days."
                     }
                   ],
-                  "territories": [],
-                  "totalTerritories": 0
+                  "totalTerritories": 0,
+                  "territories": []
                 },
                 {
                   "path": "apps/web/src/hooks",
@@ -3800,9 +5516,152 @@
                   "reasons": [],
                   "kind": "folder",
                   "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "stats": {
+                    "files": 9,
+                    "codeLines": 1082,
+                    "fileLength": {
+                      "min": 8,
+                      "median": 90,
+                      "max": 361,
+                      "histogram": [
+                        {
+                          "label": "1–50",
+                          "files": 2
+                        },
+                        {
+                          "label": "51–100",
+                          "files": 2
+                        },
+                        {
+                          "label": "101–200",
+                          "files": 4
+                        },
+                        {
+                          "label": "201–400",
+                          "files": 1
+                        },
+                        {
+                          "label": "401–800",
+                          "files": 0
+                        },
+                        {
+                          "label": "800+",
+                          "files": 0
+                        }
+                      ],
+                      "longestFile": "apps/web/src/hooks/index.ts"
+                    },
+                    "languages": [
+                      {
+                        "name": "TypeScript",
+                        "files": 9,
+                        "lines": 1082
+                      }
+                    ],
+                    "tests": {
+                      "files": 1,
+                      "lines": 120
+                    },
+                    "churn": {
+                      "median": 4,
+                      "p90": 14,
+                      "revisions": 72,
+                      "revisionLines": 6925,
+                      "histogram": [
+                        {
+                          "label": "1",
+                          "files": 1
+                        },
+                        {
+                          "label": "2",
+                          "files": 1
+                        },
+                        {
+                          "label": "3–4",
+                          "files": 4
+                        },
+                        {
+                          "label": "5–9",
+                          "files": 2
+                        },
+                        {
+                          "label": "10–19",
+                          "files": 1
+                        },
+                        {
+                          "label": "20+",
+                          "files": 0
+                        }
+                      ],
+                      "mostChanged": [
+                        {
+                          "path": "apps/web/src/hooks/file1.ts",
+                          "revisions": 40
+                        },
+                        {
+                          "path": "apps/web/src/hooks/file2.ts",
+                          "revisions": 23
+                        },
+                        {
+                          "path": "apps/web/src/hooks/file3.ts",
+                          "revisions": 17
+                        }
+                      ]
+                    },
+                    "complexity": {
+                      "perLine": 0.9,
+                      "medianFile": 0.81,
+                      "deepestLevel": 11,
+                      "histogram": [
+                        {
+                          "label": "<0.25",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.25–0.5",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.5–1",
+                          "files": 4
+                        },
+                        {
+                          "label": "1–1.5",
+                          "files": 2
+                        },
+                        {
+                          "label": "1.5–2",
+                          "files": 2
+                        },
+                        {
+                          "label": "2+",
+                          "files": 1
+                        }
+                      ],
+                      "deepestFile": {
+                        "path": "apps/web/src/hooks/handler.ts",
+                        "perLine": 2.4
+                      }
+                    },
+                    "style": {
+                      "indent": {
+                        "spacesShare": 0.96,
+                        "tabsShare": 0.04,
+                        "width": 2
+                      },
+                      "lineLength": {
+                        "median": 30,
+                        "p90": 75
+                      },
+                      "commentLines": {
+                        "lines": 87,
+                        "share": 0.08
+                      }
+                    }
+                  },
                   "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
+                  "totalTerritories": 0,
+                  "territories": []
                 },
                 {
                   "path": "apps/web/src",
@@ -3824,6 +5683,149 @@
                   "reasons": [],
                   "kind": "other",
                   "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "stats": {
+                    "files": 6,
+                    "codeLines": 743,
+                    "fileLength": {
+                      "min": 4,
+                      "median": 93,
+                      "max": 743,
+                      "histogram": [
+                        {
+                          "label": "1–50",
+                          "files": 1
+                        },
+                        {
+                          "label": "51–100",
+                          "files": 1
+                        },
+                        {
+                          "label": "101–200",
+                          "files": 3
+                        },
+                        {
+                          "label": "201–400",
+                          "files": 1
+                        },
+                        {
+                          "label": "401–800",
+                          "files": 0
+                        },
+                        {
+                          "label": "800+",
+                          "files": 0
+                        }
+                      ],
+                      "longestFile": "apps/web/src/index.ts"
+                    },
+                    "languages": [
+                      {
+                        "name": "TypeScript",
+                        "files": 6,
+                        "lines": 743
+                      }
+                    ],
+                    "tests": {
+                      "files": 1,
+                      "lines": 124
+                    },
+                    "churn": {
+                      "median": 5,
+                      "p90": 25,
+                      "revisions": 54,
+                      "revisionLines": 5350,
+                      "histogram": [
+                        {
+                          "label": "1",
+                          "files": 1
+                        },
+                        {
+                          "label": "2",
+                          "files": 0
+                        },
+                        {
+                          "label": "3–4",
+                          "files": 4
+                        },
+                        {
+                          "label": "5–9",
+                          "files": 1
+                        },
+                        {
+                          "label": "10–19",
+                          "files": 0
+                        },
+                        {
+                          "label": "20+",
+                          "files": 0
+                        }
+                      ],
+                      "mostChanged": [
+                        {
+                          "path": "apps/web/src/file1.ts",
+                          "revisions": 44
+                        },
+                        {
+                          "path": "apps/web/src/file2.ts",
+                          "revisions": 25
+                        },
+                        {
+                          "path": "apps/web/src/file3.ts",
+                          "revisions": 18
+                        }
+                      ]
+                    },
+                    "complexity": {
+                      "perLine": 1.5,
+                      "medianFile": 1.35,
+                      "deepestLevel": 9,
+                      "histogram": [
+                        {
+                          "label": "<0.25",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.25–0.5",
+                          "files": 0
+                        },
+                        {
+                          "label": "0.5–1",
+                          "files": 4
+                        },
+                        {
+                          "label": "1–1.5",
+                          "files": 1
+                        },
+                        {
+                          "label": "1.5–2",
+                          "files": 1
+                        },
+                        {
+                          "label": "2+",
+                          "files": 0
+                        }
+                      ],
+                      "deepestFile": {
+                        "path": "apps/web/src/handler.ts",
+                        "perLine": 3
+                      }
+                    },
+                    "style": {
+                      "indent": {
+                        "spacesShare": 0.96,
+                        "tabsShare": 0.04,
+                        "width": 2
+                      },
+                      "lineLength": {
+                        "median": 29,
+                        "p90": 71
+                      },
+                      "commentLines": {
+                        "lines": 59,
+                        "share": 0.08
+                      }
+                    }
+                  },
                   "badges": [
                     {
                       "kind": "one-expert",
@@ -3832,13 +5834,10 @@
                       "evidence": "Maya Lindqvist is the only active expert."
                     }
                   ],
-                  "territories": [],
-                  "totalTerritories": 0
+                  "totalTerritories": 0,
+                  "territories": []
                 }
-              ],
-              "totalTerritories": 4,
-              "splitDetail": 3,
-              "splitReason": "big: 78 files"
+              ]
             },
             {
               "path": "apps/web/test",
@@ -3869,9 +5868,152 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
+              "stats": {
+                "files": 21,
+                "codeLines": 3281,
+                "fileLength": {
+                  "min": 4,
+                  "median": 117,
+                  "max": 937,
+                  "histogram": [
+                    {
+                      "label": "1–50",
+                      "files": 5
+                    },
+                    {
+                      "label": "51–100",
+                      "files": 5
+                    },
+                    {
+                      "label": "101–200",
+                      "files": 7
+                    },
+                    {
+                      "label": "201–400",
+                      "files": 3
+                    },
+                    {
+                      "label": "401–800",
+                      "files": 1
+                    },
+                    {
+                      "label": "800+",
+                      "files": 0
+                    }
+                  ],
+                  "longestFile": "apps/web/test/index.ts"
+                },
+                "languages": [
+                  {
+                    "name": "TypeScript",
+                    "files": 21,
+                    "lines": 3281
+                  }
+                ],
+                "tests": {
+                  "files": 21,
+                  "lines": 3281
+                },
+                "churn": {
+                  "median": 3,
+                  "p90": 13,
+                  "revisions": 147,
+                  "revisionLines": 18374,
+                  "histogram": [
+                    {
+                      "label": "1",
+                      "files": 4
+                    },
+                    {
+                      "label": "2",
+                      "files": 3
+                    },
+                    {
+                      "label": "3–4",
+                      "files": 6
+                    },
+                    {
+                      "label": "5–9",
+                      "files": 5
+                    },
+                    {
+                      "label": "10–19",
+                      "files": 2
+                    },
+                    {
+                      "label": "20+",
+                      "files": 1
+                    }
+                  ],
+                  "mostChanged": [
+                    {
+                      "path": "apps/web/test/file1.ts",
+                      "revisions": 36
+                    },
+                    {
+                      "path": "apps/web/test/file2.ts",
+                      "revisions": 21
+                    },
+                    {
+                      "path": "apps/web/test/file3.ts",
+                      "revisions": 15
+                    }
+                  ]
+                },
+                "complexity": {
+                  "perLine": 2.2,
+                  "medianFile": 1.98,
+                  "deepestLevel": 6,
+                  "histogram": [
+                    {
+                      "label": "<0.25",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.25–0.5",
+                      "files": 1
+                    },
+                    {
+                      "label": "0.5–1",
+                      "files": 6
+                    },
+                    {
+                      "label": "1–1.5",
+                      "files": 6
+                    },
+                    {
+                      "label": "1.5–2",
+                      "files": 5
+                    },
+                    {
+                      "label": "2+",
+                      "files": 3
+                    }
+                  ],
+                  "deepestFile": {
+                    "path": "apps/web/test/handler.ts",
+                    "perLine": 3.7
+                  }
+                },
+                "style": {
+                  "indent": {
+                    "spacesShare": 0.96,
+                    "tabsShare": 0.04,
+                    "width": 2
+                  },
+                  "lineLength": {
+                    "median": 29,
+                    "p90": 71
+                  },
+                  "commentLines": {
+                    "lines": 262,
+                    "share": 0.08
+                  }
+                }
+              },
               "badges": [],
-              "territories": [],
-              "totalTerritories": 0
+              "totalTerritories": 0,
+              "territories": []
             },
             {
               "path": "apps/web",
@@ -3902,14 +6044,154 @@
               "reasons": [],
               "kind": "other",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
+              "stats": {
+                "files": 13,
+                "codeLines": 1588,
+                "fileLength": {
+                  "min": 6,
+                  "median": 92,
+                  "max": 611,
+                  "histogram": [
+                    {
+                      "label": "1–50",
+                      "files": 3
+                    },
+                    {
+                      "label": "51–100",
+                      "files": 3
+                    },
+                    {
+                      "label": "101–200",
+                      "files": 5
+                    },
+                    {
+                      "label": "201–400",
+                      "files": 2
+                    },
+                    {
+                      "label": "401–800",
+                      "files": 0
+                    },
+                    {
+                      "label": "800+",
+                      "files": 0
+                    }
+                  ],
+                  "longestFile": "apps/web/index.ts"
+                },
+                "languages": [
+                  {
+                    "name": "TypeScript",
+                    "files": 13,
+                    "lines": 1588
+                  }
+                ],
+                "tests": {
+                  "files": 2,
+                  "lines": 244
+                },
+                "churn": {
+                  "median": 5,
+                  "p90": 15,
+                  "revisions": 117,
+                  "revisionLines": 11434,
+                  "histogram": [
+                    {
+                      "label": "1",
+                      "files": 2
+                    },
+                    {
+                      "label": "2",
+                      "files": 1
+                    },
+                    {
+                      "label": "3–4",
+                      "files": 6
+                    },
+                    {
+                      "label": "5–9",
+                      "files": 3
+                    },
+                    {
+                      "label": "10–19",
+                      "files": 1
+                    },
+                    {
+                      "label": "20+",
+                      "files": 0
+                    }
+                  ],
+                  "mostChanged": [
+                    {
+                      "path": "apps/web/file1.ts",
+                      "revisions": 44
+                    },
+                    {
+                      "path": "apps/web/file2.ts",
+                      "revisions": 25
+                    },
+                    {
+                      "path": "apps/web/file3.ts",
+                      "revisions": 18
+                    }
+                  ]
+                },
+                "complexity": {
+                  "perLine": 1.3,
+                  "medianFile": 1.17,
+                  "deepestLevel": 6,
+                  "histogram": [
+                    {
+                      "label": "<0.25",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.25–0.5",
+                      "files": 0
+                    },
+                    {
+                      "label": "0.5–1",
+                      "files": 6
+                    },
+                    {
+                      "label": "1–1.5",
+                      "files": 3
+                    },
+                    {
+                      "label": "1.5–2",
+                      "files": 3
+                    },
+                    {
+                      "label": "2+",
+                      "files": 1
+                    }
+                  ],
+                  "deepestFile": {
+                    "path": "apps/web/handler.ts",
+                    "perLine": 2.8
+                  }
+                },
+                "style": {
+                  "indent": {
+                    "spacesShare": 0.96,
+                    "tabsShare": 0.04,
+                    "width": 2
+                  },
+                  "lineLength": {
+                    "median": 28,
+                    "p90": 73
+                  },
+                  "commentLines": {
+                    "lines": 127,
+                    "share": 0.08
+                  }
+                }
+              },
               "badges": [],
-              "territories": [],
-              "totalTerritories": 0
+              "totalTerritories": 0,
+              "territories": []
             }
-          ],
-          "totalTerritories": 3,
-          "splitDetail": 2,
-          "splitReason": "big: 112 files"
+          ]
         },
         {
           "path": "packages/api",
@@ -3958,6 +6240,149 @@
           "reasons": [],
           "kind": "package",
           "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "stats": {
+            "files": 71,
+            "codeLines": 8001,
+            "fileLength": {
+              "min": 9,
+              "median": 85,
+              "max": 676,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 17
+                },
+                {
+                  "label": "51–100",
+                  "files": 17
+                },
+                {
+                  "label": "101–200",
+                  "files": 20
+                },
+                {
+                  "label": "201–400",
+                  "files": 12
+                },
+                {
+                  "label": "401–800",
+                  "files": 4
+                },
+                {
+                  "label": "800+",
+                  "files": 1
+                }
+              ],
+              "longestFile": "packages/api/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 71,
+                "lines": 8001
+              }
+            ],
+            "tests": {
+              "files": 11,
+              "lines": 1240
+            },
+            "churn": {
+              "median": 3,
+              "p90": 18,
+              "revisions": 497,
+              "revisionLines": 44806,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 14
+                },
+                {
+                  "label": "2",
+                  "files": 10
+                },
+                {
+                  "label": "3–4",
+                  "files": 17
+                },
+                {
+                  "label": "5–9",
+                  "files": 17
+                },
+                {
+                  "label": "10–19",
+                  "files": 9
+                },
+                {
+                  "label": "20+",
+                  "files": 4
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "packages/api/file1.ts",
+                  "revisions": 36
+                },
+                {
+                  "path": "packages/api/file2.ts",
+                  "revisions": 21
+                },
+                {
+                  "path": "packages/api/file3.ts",
+                  "revisions": 15
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 2,
+              "medianFile": 1.8,
+              "deepestLevel": 11,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 2
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 4
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 17
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 21
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 17
+                },
+                {
+                  "label": "2+",
+                  "files": 10
+                }
+              ],
+              "deepestFile": {
+                "path": "packages/api/handler.ts",
+                "perLine": 3.5
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 31,
+                "p90": 76
+              },
+              "commentLines": {
+                "lines": 640,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [
             {
               "kind": "well-tested",
@@ -3966,259 +6391,8 @@
               "evidence": "46% of the files are tests (33 of 71)."
             }
           ],
-          "territories": [
-            {
-              "path": "packages/api/src",
-              "files": 52,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 26,
-                  "soleFiles": 9,
-                  "share": 0.5
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 21,
-                  "soleFiles": 6,
-                  "share": 0.4038
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 10,
-                  "soleFiles": 1,
-                  "share": 0.1923
-                },
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 8,
-                  "soleFiles": 1,
-                  "share": 0.1538
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [],
-              "territories": [
-                {
-                  "path": "packages/api/src/middleware",
-                  "files": 6,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Jonas Weber",
-                      "email": "jonas.weber@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                      "files": 5,
-                      "soleFiles": 3,
-                      "share": 0.8333
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-06-20T13:10:03.000Z",
-                  "badges": [
-                    {
-                      "kind": "one-expert",
-                      "category": "knowledge",
-                      "label": "One expert",
-                      "evidence": "Jonas Weber is the only active expert."
-                    }
-                  ],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/api/src/routes",
-                  "files": 24,
-                  "truckFactor": 2,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Tomás Herrera",
-                      "email": "tomas.herrera@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                      "files": 14,
-                      "soleFiles": 6,
-                      "share": 0.5833
-                    },
-                    {
-                      "name": "Jonas Weber",
-                      "email": "jonas.weber@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                      "files": 10,
-                      "soleFiles": 2,
-                      "share": 0.4167
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/api/src/services",
-                  "files": 19,
-                  "truckFactor": 2,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Jonas Weber",
-                      "email": "jonas.weber@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                      "files": 10,
-                      "soleFiles": 4,
-                      "share": 0.5263
-                    },
-                    {
-                      "name": "Tomás Herrera",
-                      "email": "tomas.herrera@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                      "files": 8,
-                      "soleFiles": 2,
-                      "share": 0.4211
-                    },
-                    {
-                      "name": "Dmitri Volkov",
-                      "email": "dmitri.volkov@aurora.example",
-                      "active": false,
-                      "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                      "files": 6,
-                      "soleFiles": 1,
-                      "share": 0.3158
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/api/src",
-                  "files": 3,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Tomás Herrera",
-                      "email": "tomas.herrera@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                      "files": 3,
-                      "soleFiles": 2,
-                      "share": 1.0
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "other",
-                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                }
-              ],
-              "totalTerritories": 4,
-              "splitDetail": 3,
-              "splitReason": "big: 52 files"
-            },
-            {
-              "path": "packages/api/test",
-              "files": 14,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 8,
-                  "soleFiles": 3,
-                  "share": 0.5714
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 7,
-                  "soleFiles": 2,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [],
-              "territories": [],
-              "totalTerritories": 0
-            },
-            {
-              "path": "packages/api",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ],
-              "territories": [],
-              "totalTerritories": 0
-            }
-          ],
-          "totalTerritories": 3,
-          "splitDetail": 2,
-          "splitReason": "big: 71 files"
+          "totalTerritories": 0,
+          "territories": []
         },
         {
           "path": "packages/ui",
@@ -4267,6 +6441,149 @@
           "reasons": [],
           "kind": "package",
           "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "stats": {
+            "files": 96,
+            "codeLines": 10687,
+            "fileLength": {
+              "min": 8,
+              "median": 83,
+              "max": 668,
+              "histogram": [
+                {
+                  "label": "1–50",
+                  "files": 23
+                },
+                {
+                  "label": "51–100",
+                  "files": 24
+                },
+                {
+                  "label": "101–200",
+                  "files": 26
+                },
+                {
+                  "label": "201–400",
+                  "files": 16
+                },
+                {
+                  "label": "401–800",
+                  "files": 6
+                },
+                {
+                  "label": "800+",
+                  "files": 1
+                }
+              ],
+              "longestFile": "packages/ui/index.ts"
+            },
+            "languages": [
+              {
+                "name": "TypeScript",
+                "files": 96,
+                "lines": 10687
+              }
+            ],
+            "tests": {
+              "files": 16,
+              "lines": 1781
+            },
+            "churn": {
+              "median": 4,
+              "p90": 14,
+              "revisions": 768,
+              "revisionLines": 68397,
+              "histogram": [
+                {
+                  "label": "1",
+                  "files": 19
+                },
+                {
+                  "label": "2",
+                  "files": 14
+                },
+                {
+                  "label": "3–4",
+                  "files": 21
+                },
+                {
+                  "label": "5–9",
+                  "files": 24
+                },
+                {
+                  "label": "10–19",
+                  "files": 13
+                },
+                {
+                  "label": "20+",
+                  "files": 5
+                }
+              ],
+              "mostChanged": [
+                {
+                  "path": "packages/ui/file1.ts",
+                  "revisions": 40
+                },
+                {
+                  "path": "packages/ui/file2.ts",
+                  "revisions": 23
+                },
+                {
+                  "path": "packages/ui/file3.ts",
+                  "revisions": 17
+                }
+              ]
+            },
+            "complexity": {
+              "perLine": 2,
+              "medianFile": 1.8,
+              "deepestLevel": 8,
+              "histogram": [
+                {
+                  "label": "<0.25",
+                  "files": 2
+                },
+                {
+                  "label": "0.25–0.5",
+                  "files": 6
+                },
+                {
+                  "label": "0.5–1",
+                  "files": 22
+                },
+                {
+                  "label": "1–1.5",
+                  "files": 28
+                },
+                {
+                  "label": "1.5–2",
+                  "files": 24
+                },
+                {
+                  "label": "2+",
+                  "files": 14
+                }
+              ],
+              "deepestFile": {
+                "path": "packages/ui/handler.ts",
+                "perLine": 3.5
+              }
+            },
+            "style": {
+              "indent": {
+                "spacesShare": 0.96,
+                "tabsShare": 0.04,
+                "width": 2
+              },
+              "lineLength": {
+                "median": 33,
+                "p90": 75
+              },
+              "commentLines": {
+                "lines": 855,
+                "share": 0.08
+              }
+            }
+          },
           "badges": [
             {
               "kind": "shared-knowledge",
@@ -4275,286 +6592,201 @@
               "evidence": "4 active experts and a truck factor of 4."
             }
           ],
-          "territories": [
-            {
-              "path": "packages/ui/stories",
-              "files": 18,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 13,
-                  "soleFiles": 5,
-                  "share": 0.7222
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 9,
-                  "soleFiles": 3,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [],
-              "territories": [],
-              "totalTerritories": 0
-            },
-            {
-              "path": "packages/ui/src",
-              "files": 71,
-              "truckFactor": 4,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 39,
-                  "soleFiles": 14,
-                  "share": 0.5493
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 30,
-                  "soleFiles": 8,
-                  "share": 0.4225
-                },
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 14,
-                  "soleFiles": 2,
-                  "share": 0.1972
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 9,
-                  "soleFiles": 3,
-                  "share": 0.1268
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "shared-knowledge",
-                  "category": "knowledge",
-                  "label": "Shared knowledge",
-                  "evidence": "4 active experts and a truck factor of 4."
-                }
-              ],
-              "territories": [
-                {
-                  "path": "packages/ui/src/tokens",
-                  "files": 11,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Priya Raman",
-                      "email": "priya.raman@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                      "files": 9,
-                      "soleFiles": 5,
-                      "share": 0.8182
-                    },
-                    {
-                      "name": "Maya Lindqvist",
-                      "email": "maya.lindqvist@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                      "files": 3,
-                      "soleFiles": 0,
-                      "share": 0.2727
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/ui/src/hooks",
-                  "files": 9,
-                  "truckFactor": 2,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Maya Lindqvist",
-                      "email": "maya.lindqvist@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                      "files": 5,
-                      "soleFiles": 2,
-                      "share": 0.5556
-                    },
-                    {
-                      "name": "Priya Raman",
-                      "email": "priya.raman@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                      "files": 4,
-                      "soleFiles": 1,
-                      "share": 0.4444
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/ui/src/components",
-                  "files": 48,
-                  "truckFactor": 4,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Priya Raman",
-                      "email": "priya.raman@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                      "files": 26,
-                      "soleFiles": 9,
-                      "share": 0.5417
-                    },
-                    {
-                      "name": "Maya Lindqvist",
-                      "email": "maya.lindqvist@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                      "files": 22,
-                      "soleFiles": 7,
-                      "share": 0.4583
-                    },
-                    {
-                      "name": "Aiko Tanaka",
-                      "email": "aiko.tanaka@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                      "files": 12,
-                      "soleFiles": 2,
-                      "share": 0.25
-                    },
-                    {
-                      "name": "Sam Okafor",
-                      "email": "sam.okafor@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                      "files": 6,
-                      "soleFiles": 2,
-                      "share": 0.125
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "folder",
-                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
-                  "badges": [
-                    {
-                      "kind": "shared-knowledge",
-                      "category": "knowledge",
-                      "label": "Shared knowledge",
-                      "evidence": "4 active experts and a truck factor of 4."
-                    }
-                  ],
-                  "territories": [],
-                  "totalTerritories": 0
-                },
-                {
-                  "path": "packages/ui/src",
-                  "files": 3,
-                  "truckFactor": 1,
-                  "island": false,
-                  "orphaned": false,
-                  "experts": [
-                    {
-                      "name": "Priya Raman",
-                      "email": "priya.raman@aurora.example",
-                      "active": true,
-                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                      "files": 3,
-                      "soleFiles": 2,
-                      "share": 1.0
-                    }
-                  ],
-                  "reasons": [],
-                  "kind": "other",
-                  "lastChangedAt": "2026-08-12T11:22:19.000Z",
-                  "badges": [],
-                  "territories": [],
-                  "totalTerritories": 0
-                }
-              ],
-              "totalTerritories": 4,
-              "splitDetail": 3,
-              "splitReason": "big: 71 files"
-            },
-            {
-              "path": "packages/ui",
-              "files": 7,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 7,
-                  "soleFiles": 4,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Priya Raman is the only active expert."
-                }
-              ],
-              "territories": [],
-              "totalTerritories": 0
-            }
-          ],
-          "totalTerritories": 3,
-          "splitDetail": 2,
-          "splitReason": "big: 96 files"
+          "totalTerritories": 0,
+          "territories": []
         }
       ]
+    }
+  },
+  "stats": {
+    "files": 473,
+    "codeLines": 60942,
+    "fileLength": {
+      "min": 5,
+      "median": 96,
+      "max": 1204,
+      "histogram": [
+        {
+          "label": "1–50",
+          "files": 113
+        },
+        {
+          "label": "51–100",
+          "files": 118
+        },
+        {
+          "label": "101–200",
+          "files": 120
+        },
+        {
+          "label": "201–400",
+          "files": 80
+        },
+        {
+          "label": "401–800",
+          "files": 33
+        },
+        {
+          "label": "800+",
+          "files": 9
+        }
+      ],
+      "longestFile": "apps/web/src/routes/checkout.ts"
+    },
+    "languages": [
+      {
+        "name": "TypeScript",
+        "files": 318,
+        "lines": 46412
+      },
+      {
+        "name": "CSS",
+        "files": 64,
+        "lines": 7905
+      },
+      {
+        "name": "SQL",
+        "files": 41,
+        "lines": 3188
+      },
+      {
+        "name": "JavaScript",
+        "files": 27,
+        "lines": 2140
+      },
+      {
+        "name": "Shell",
+        "files": 14,
+        "lines": 611
+      },
+      {
+        "name": "HTML",
+        "files": 6,
+        "lines": 472
+      },
+      {
+        "name": "Python",
+        "files": 3,
+        "lines": 214
+      }
+    ],
+    "tests": {
+      "files": 118,
+      "lines": 14820
+    },
+    "churn": {
+      "median": 5,
+      "p90": 20,
+      "revisions": 4257,
+      "revisionLines": 438782,
+      "histogram": [
+        {
+          "label": "1",
+          "files": 94
+        },
+        {
+          "label": "2",
+          "files": 70
+        },
+        {
+          "label": "3–4",
+          "files": 97
+        },
+        {
+          "label": "5–9",
+          "files": 118
+        },
+        {
+          "label": "10–19",
+          "files": 66
+        },
+        {
+          "label": "20+",
+          "files": 28
+        }
+      ],
+      "mostChanged": [
+        {
+          "path": "apps/web/src/routes/checkout.ts",
+          "revisions": 214
+        },
+        {
+          "path": "packages/api/src/routes/orders.ts",
+          "revisions": 97
+        },
+        {
+          "path": "packages/db/src/schema.ts",
+          "revisions": 71
+        },
+        {
+          "path": "apps/admin/src/pages/orders.tsx",
+          "revisions": 58
+        },
+        {
+          "path": "packages/ui/src/components/button.tsx",
+          "revisions": 44
+        }
+      ]
+    },
+    "complexity": {
+      "perLine": 1.7,
+      "medianFile": 1.53,
+      "deepestLevel": 10,
+      "histogram": [
+        {
+          "label": "<0.25",
+          "files": 14
+        },
+        {
+          "label": "0.25–0.5",
+          "files": 33
+        },
+        {
+          "label": "0.5–1",
+          "files": 97
+        },
+        {
+          "label": "1–1.5",
+          "files": 141
+        },
+        {
+          "label": "1.5–2",
+          "files": 118
+        },
+        {
+          "label": "2+",
+          "files": 70
+        }
+      ],
+      "deepestFile": {
+        "path": "packages/api/src/routes/orders.ts",
+        "perLine": 4.1
+      }
+    },
+    "style": {
+      "indent": {
+        "spacesShare": 0.96,
+        "tabsShare": 0.04,
+        "width": 2
+      },
+      "lineLength": {
+        "median": 33,
+        "p90": 72
+      },
+      "commentLines": {
+        "lines": 4875,
+        "share": 0.08
+      },
+      "conventionalCommits": {
+        "commits": 2246,
+        "conventional": 1713,
+        "share": 0.7627
+      },
+      "commitSize": {
+        "commits": 2108,
+        "median": 24,
+        "p90": 310
+      }
     }
   },
   "stories": [

@@ -3,6 +3,7 @@
 import { Schema } from "effect";
 
 import { TerritoryBadge } from "./badges.js";
+import { CodeStats } from "./code-stats.js";
 
 const Count = Schema.Natural;
 
@@ -102,6 +103,12 @@ const TerritoryFields = Schema.Struct({
    * territory always has a date.
    */
   lastChangedAt: Schema.String,
+  /**
+   * Code stats of the territory's files. They do not depend on how territories
+   * are cut, and carry no `style.conventionalCommits` or `style.commitSize`:
+   * those are the repository's own.
+   */
+  stats: CodeStats,
   /** Badges of the territory, most important first; the dashboard shows the first three. */
   badges: Schema.Array(TerritoryBadge),
   /** The territories it splits into before the output limit cut `territories`; 0 for a territory that does not split. */

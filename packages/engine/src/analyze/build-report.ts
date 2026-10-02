@@ -17,6 +17,7 @@ import {
 } from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import type { Report } from "../report/report.js";
+import { universeStats } from "../stats/universe-stats.js";
 import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
 import { STORY_THRESHOLDS } from "../stories/thresholds.js";
@@ -56,6 +57,33 @@ const comparisonField = (
     ? {}
     : { comparison: comparison({ current, previous, isCodePath }) };
 
+/** The code stats of the universe: revisions over the full history, commit habits over the window. */
+const statsOf = (
+  { universe, isCodePath }: RepositoryFacts,
+  history: Analysis["scoped"],
+  window: Analysis["commits"],
+) => universeStats({ universe, history, window, isCodePath });
+
+const knowledgeOf = (
+  facts: RepositoryFacts,
+  scoped: Analysis["scoped"],
+  headTime: number,
+  stats: ReturnType<typeof statsOf>,
+) =>
+  knowledge({
+    commits: scoped,
+    universe: facts.universe,
+    stats,
+    scope: facts.repository.scope,
+    packageRoots: facts.packageRoots,
+    detail: facts.detail,
+    shallow: facts.repository.shallow,
+    headTime,
+    now: facts.now,
+    blame: facts.blame,
+    signatures: facts.signatures,
+  });
+
 /** Builds the report from the facts, each section over the commits it covers. */
 export const buildReport = (facts: RepositoryFacts): Report => {
   const {
@@ -67,18 +95,13 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     firstCommitAt,
     lastCommitAt,
   } = prepareAnalysis(facts);
-  const { section: knowledgeSection, recommendedTerritories } = knowledge({
-    commits: scoped,
-    universe: facts.universe,
-    scope: facts.repository.scope,
-    packageRoots: facts.packageRoots,
-    detail: facts.detail,
-    shallow: facts.repository.shallow,
+  const stats = statsOf(facts, scoped, commits);
+  const { section: knowledgeSection, recommendedTerritories } = knowledgeOf(
+    facts,
+    scoped,
     headTime,
-    now: facts.now,
-    blame: facts.blame,
-    signatures: facts.signatures,
-  });
+    stats,
+  );
   const people = contributors({
     commits,
     history: scoped,
@@ -111,6 +134,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     contributors: people,
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
+    stats: stats.repository,
     stories: storiesOf(facts, scoped, knowledgeSection, recommendedTerritories),
     ...comparisonField(facts, commits, previous),
   };

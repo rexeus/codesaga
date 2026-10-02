@@ -27,6 +27,7 @@ const SECTIONS = [
   "contributors",
   "automation",
   "knowledge",
+  "stats",
   "stories",
 ] as const;
 

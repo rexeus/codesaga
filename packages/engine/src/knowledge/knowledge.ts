@@ -18,7 +18,11 @@ import { MIN_DIRECTORY_FILES, directoryKnowledge } from "./directories.js";
 import { EXPERT_RATIO } from "./doe.js";
 import { ISLAND_SHARE, ORPHANED_SHARE, describeFileSet } from "./file-set.js";
 import { knowledgeModel } from "./model.js";
-import type { KnowledgeInput, KnowledgeModel } from "./model.js";
+import type {
+  KnowledgeInput,
+  KnowledgeModel,
+  TerritoryInput,
+} from "./model.js";
 import {
   TERRITORIES_PER_CONTRIBUTOR,
   MAX_TARGET_TERRITORIES,
@@ -61,16 +65,17 @@ export const TERRITORY_THRESHOLDS = {
   maxTargetTerritories: MAX_TARGET_TERRITORIES,
 };
 
-type KnowledgeFacts = KnowledgeInput & {
-  /** Repository-relative scope; "." for the whole repository. */
-  readonly scope: string;
-  /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
-  readonly packageRoots: ReadonlyArray<string>;
-  /** A shallow clone cannot tell when a territory was created or who arrived, so it has no `new-territory` or `newcomer-friendly` badge. */
-  readonly shallow: boolean;
-  /** The detail to start at, from 1, rounded down; a detail beyond the deepest one means the deepest. The recommended detail when absent, not finite or below 1. */
-  readonly detail?: number | undefined;
-};
+type KnowledgeFacts = KnowledgeInput &
+  TerritoryInput & {
+    /** Repository-relative scope; "." for the whole repository. */
+    readonly scope: string;
+    /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
+    readonly packageRoots: ReadonlyArray<string>;
+    /** A shallow clone cannot tell when a territory was created or who arrived, so it has no `new-territory` or `newcomer-friendly` badge. */
+    readonly shallow: boolean;
+    /** The detail to start at, from 1, rounded down; a detail beyond the deepest one means the deepest. The recommended detail when absent, not finite or below 1. */
+    readonly detail?: number | undefined;
+  };
 
 /** The requested detail rounded down; the recommended one when it is absent, not finite or below 1. */
 const startDetail = (
@@ -119,6 +124,7 @@ const reportedTerritory = (
   return {
     ...territory,
     lastChangedAt: isoOfEpochSeconds(input?.lastChangeTime ?? facts.headTime),
+    stats: facts.stats.forPaths(source.paths),
     badges: input === undefined ? [] : territoryBadges(input, facts.now),
     territories: territories.map((child) =>
       reportedTerritory(child, inputs, facts),

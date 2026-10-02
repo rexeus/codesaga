@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { at, classifiedCommit } from "../testing/classified-commit.js";
+import { inventoryFile, universeStatsOf } from "../testing/inventory-file.js";
 import { knowledge } from "./knowledge.js";
 
 const now = DateTime.makeUnsafe("2026-03-01T00:00:00Z");
@@ -32,7 +33,11 @@ const touching = (
 const run = (commits: ReadonlyArray<ClassifiedCommit>, shallow = false) =>
   knowledge({
     commits,
-    universe: paths.map((path) => ({ path, loc: 50 })),
+    universe: paths.map((path) => inventoryFile(path)),
+    stats: universeStatsOf(
+      paths.map((path) => inventoryFile(path)),
+      commits,
+    ),
     scope: ".",
     packageRoots: ["packages/api", "packages/web"],
     shallow,

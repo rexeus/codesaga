@@ -8,6 +8,7 @@ import { territoryViews, dormantLegend, detailSummary } from "./territories.js";
 type Territory = Report["knowledge"]["territories"]["territories"][number];
 
 const [maya, tomas, priya] = sampleReport().contributors;
+const stats = sampleReport().stats;
 
 const expert = (name: string, files: number, share: number, active = true) => ({
   name,
@@ -31,6 +32,7 @@ const territory = (overrides: Partial<Territory>): Territory => ({
   reasons: [],
   kind: "package",
   lastChangedAt: "2026-08-14T08:00:00.000Z",
+  stats,
   badges: [],
   totalTerritories: 0,
   territories: [],

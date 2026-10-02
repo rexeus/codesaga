@@ -1,10 +1,13 @@
 import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
+import { sampleReport } from "../testing/reports.js";
 import { territoryDetails } from "./territory-details.js";
 
 type Tree = Report["knowledge"]["territories"];
 type Territory = Tree["territories"][number];
+
+const stats = sampleReport().stats;
 
 const territory = (
   path: string,
@@ -19,6 +22,7 @@ const territory = (
   reasons: [],
   kind: "folder",
   lastChangedAt: "2026-08-14T08:00:00.000Z",
+  stats,
   badges: [],
   totalTerritories: 0,
   territories: [],

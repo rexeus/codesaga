@@ -5,6 +5,7 @@ import { Schema } from "effect";
 
 import { AutomationTotals } from "./automation-totals.js";
 import { ContributorBadge } from "./badges.js";
+import { CodeStats } from "./code-stats.js";
 import { Comparison } from "./comparison.js";
 import { Knowledge } from "./knowledge-report.js";
 import { PullRequests } from "./pull-requests.js";
@@ -181,7 +182,7 @@ const Automation = Schema.Struct({
  * The full result of `analyze`.
  *
  * The activity sections (`overview`, `activity`, `punchcard`, `contributors`,
- * `automation`) cover `window`; `knowledge` covers the whole history. A missing `agent-assisted` marker means "not
+ * `automation`) cover `window`; `knowledge` and `stats` cover the whole history. A missing `agent-assisted` marker means "not
  * detected", not "human-written": the automation numbers are a lower bound.
  */
 export const Report = Schema.Struct({
@@ -204,6 +205,12 @@ export const Report = Schema.Struct({
   contributors: Schema.Array(Contributor),
   automation: Automation,
   knowledge: Knowledge,
+  /**
+   * Code stats of all universe files at HEAD and of the history behind them,
+   * independent of `window` except for the commit habits in `style`, which
+   * cover the commits of the window.
+   */
+  stats: CodeStats,
   /**
    * Notable facts about the history and the team, most notable first, at most
    * six; empty when nothing passes a threshold.

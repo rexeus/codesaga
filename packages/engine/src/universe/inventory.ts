@@ -4,6 +4,7 @@ import type { FileSystem, Path } from "effect";
 
 import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
+import type { TextMeasure } from "../stats/measure-text.js";
 import { matchesAny } from "./globs.js";
 import { isSourceLanguage } from "./languages.js";
 import { measureSourceFile } from "./source-file.js";
@@ -20,12 +21,8 @@ export type InventoryOptions = {
   readonly exclude: ReadonlyArray<string>;
 };
 
-/** A file that counts, with what reading it revealed. */
-export type InventoryFile = {
-  readonly path: string;
-  /** Non-blank lines. */
-  readonly loc: number;
-};
+/** A file that counts, with what reading it revealed: its `loc` of non-blank lines and the measures the stats add up. */
+export type InventoryFile = { readonly path: string } & TextMeasure;
 
 /** Files read at once; bounds open file handles. */
 const READ_CONCURRENCY = 16;
@@ -89,8 +86,8 @@ export const inventory = (
     const measured = yield* Effect.forEach(
       candidates,
       (path) =>
-        Effect.map(measureSourceFile(options.root, path), (loc) =>
-          loc === undefined ? undefined : { path, loc },
+        Effect.map(measureSourceFile(options.root, path), (measure) =>
+          measure === undefined ? undefined : { path, ...measure },
         ),
       { concurrency: READ_CONCURRENCY },
     );
