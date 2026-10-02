@@ -27,8 +27,8 @@ const SECONDS_PER_DAY = 86_400;
 
 type Tenure = {
   readonly times: ReadonlyArray<number>;
-  /** The time of the first commit of anyone who counts as a contributor. */
-  readonly repositoryStart: number;
+  /** The time of the first commit of anyone who counts as a contributor; undefined when the history is incomplete. */
+  readonly repositoryStart: number | undefined;
   readonly now: DateTime.Utc;
   readonly nowSeconds: number;
 };
@@ -87,7 +87,7 @@ const returning = ({ times, now }: Tenure) => {
  */
 export const tenureBadges = (
   commits: ReadonlyArray<ClassifiedCommit>,
-  repositoryStart: number,
+  repositoryStart: number | undefined,
   now: DateTime.Utc,
 ): ReadonlyArray<ContributorBadge> => {
   const tenure = {

@@ -25,7 +25,12 @@ const Repository = Schema.Struct({
   scope: Schema.String,
   /**
    * A shallow clone: history before its oldest fetched commit is missing, so
-   * counts undercount. `git fetch --unshallow` completes it.
+   * counts undercount. `git fetch --unshallow` completes it. Everything that
+   * needs a first commit is withheld, since the oldest commit shown is not the
+   * first: no contributor has `status: "new"` (they are `active` or
+   * `dormant`) or the `welcome` badge, no area has the `new` or
+   * `newcomer-friendly` badge, and there are no `anniversary` or `newcomers`
+   * highlights.
    */
   shallow: Schema.Boolean,
   /** ISO timestamp of the oldest commit in scope over the full history; null without commits. */

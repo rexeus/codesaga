@@ -15,14 +15,17 @@ export type ContributorStatus = "new" | "active" | "dormant";
  * Whether a contributor whose first commit is at `firstCommitTime` is new: it
  * lies at most `NEW_CONTRIBUTOR_DAYS` days before `now`, and someone committed
  * before it, since the founder of a young repository is nobody's newcomer.
- * `repositoryStart` is the first commit of anyone who counts as a contributor.
+ * `repositoryStart` is the first commit of anyone who counts as a contributor,
+ * or undefined when the history is incomplete, as in a shallow clone, where
+ * nobody's first visible commit is known to be their first: then nobody is new.
  * Times are seconds since the epoch.
  */
 export const isNewContributor = (
   firstCommitTime: number,
-  repositoryStart: number,
+  repositoryStart: number | undefined,
   now: DateTime.Utc,
 ): boolean =>
+  repositoryStart !== undefined &&
   firstCommitTime > repositoryStart &&
   isActiveWithin(firstCommitTime, now, NEW_CONTRIBUTOR_DAYS);
 
@@ -34,7 +37,7 @@ export const isNewContributor = (
 export const contributorStatus = (
   firstCommitTime: number,
   lastCommitTime: number,
-  repositoryStart: number,
+  repositoryStart: number | undefined,
   now: DateTime.Utc,
 ): ContributorStatus => {
   if (!isActiveWithin(lastCommitTime, now, ACTIVE_CONTRIBUTOR_DAYS)) {

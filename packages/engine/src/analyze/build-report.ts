@@ -33,7 +33,7 @@ const THRESHOLDS: Report["thresholds"] = {
 };
 
 const highlightsOf = (
-  { now, isCodePath }: RepositoryFacts,
+  { now, isCodePath, repository }: RepositoryFacts,
   commits: Analysis["scoped"],
   knowledgeSection: Report["knowledge"],
   areas: HighlightFacts["areas"],
@@ -41,6 +41,7 @@ const highlightsOf = (
   highlights({
     commits,
     now,
+    shallow: repository.shallow,
     isCodePath,
     knowledge: knowledgeSection,
     ...(areas === undefined ? {} : { areas }),
@@ -72,6 +73,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     scope: facts.repository.scope,
     packageRoots: facts.packageRoots,
     depth: facts.depth,
+    shallow: facts.repository.shallow,
     headTime,
     now: facts.now,
     blame: facts.blame,
@@ -82,6 +84,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     history: scoped,
     scope: facts.repository.scope,
     now: facts.now,
+    shallow: facts.repository.shallow,
     isCodePath: facts.isCodePath,
     universePaths: facts.universe.map(({ path }) => path),
     areas: recommendedAreas,

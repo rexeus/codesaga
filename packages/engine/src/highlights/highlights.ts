@@ -53,6 +53,8 @@ export type HighlightFacts = {
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   /** The `Clock` time that "last 90 days" and anniversaries are measured against. */
   readonly now: DateTime.Utc;
+  /** A shallow clone cannot tell anniversaries and newcomers, which both read the first commits, so it has neither. */
+  readonly shallow: boolean;
   /** Whether a changed path counts toward code lines. */
   readonly isCodePath: (path: string) => boolean;
   /** The universe's size and who must leave before most of it has no expert. */

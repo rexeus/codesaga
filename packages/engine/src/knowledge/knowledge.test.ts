@@ -35,6 +35,7 @@ const run = (
     universe: files(...paths),
     scope,
     packageRoots: [],
+    shallow: false,
     headTime: at("2026-02-01T00:00:00Z"),
     now,
   }).section;

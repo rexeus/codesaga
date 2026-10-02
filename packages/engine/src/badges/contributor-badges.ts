@@ -52,8 +52,12 @@ export type ContributorBadgeFacts = {
   /** The contributor's own human and agent-assisted commits over the full history, newest first. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   readonly now: DateTime.Utc;
-  /** The time of the first commit of anyone who counts as a contributor, over the full history; `welcome` needs someone earlier. */
-  readonly repositoryStart: number;
+  /**
+   * The time of the first commit of anyone who counts as a contributor, over
+   * the full history; `welcome` needs someone earlier. Undefined when the
+   * history is incomplete, as in a shallow clone: then `welcome` is withheld.
+   */
+  readonly repositoryStart: number | undefined;
   /**
    * The areas of the recommended level; they decide all-rounder, specialist
    * and keeper, which are withheld without them.

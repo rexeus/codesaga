@@ -23,16 +23,21 @@ export type AreaHistory = {
   readonly now: DateTime.Utc;
   /** The time of each path's first commit in the life of the path. */
   readonly fileFirstCommits: ReadonlyMap<string, number>;
-  /** The time of the repository's first commit. */
-  readonly startTime: number;
+  /** The time of the repository's first commit; undefined in a shallow clone, which does not show it. */
+  readonly startTime: number | undefined;
   /** The first commit of every contributor who arrived after the repository started, with the paths it changed. */
   readonly firstCommits: AreaBadgeInput["firstCommits"];
 };
 
-/** The first commits of files and of people, from commits newest first. */
+/**
+ * The first commits of files and of people, from commits newest first. A
+ * shallow clone knows neither when the repository started nor who arrived
+ * after it, so it has no start time and no first commits.
+ */
 export const areaHistoryOf = (
   commits: ReadonlyArray<ClassifiedCommit>,
   now: DateTime.Utc,
+  shallow: boolean,
 ): AreaHistory => {
   const fileFirstCommits = new Map<string, number>();
   const firstByPerson = new Map<
@@ -59,7 +64,7 @@ export const areaHistoryOf = (
       });
     }
   }
-  const startTime = commits.reduce(
+  const start = commits.reduce(
     (first, { time }) => Math.min(first, time),
     Infinity,
   );
@@ -67,10 +72,10 @@ export const areaHistoryOf = (
     commits,
     now,
     fileFirstCommits,
-    startTime,
-    firstCommits: [...firstByPerson.values()].filter(
-      ({ time }) => time > startTime,
-    ),
+    startTime: shallow ? undefined : start,
+    firstCommits: shallow
+      ? []
+      : [...firstByPerson.values()].filter(({ time }) => time > start),
   };
 };
 

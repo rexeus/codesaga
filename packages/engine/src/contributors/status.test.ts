@@ -77,3 +77,16 @@ describe("contributorStatus founder", () => {
     ).toBe("dormant");
   });
 });
+
+describe("contributorStatus without a known repository start", () => {
+  it("is never new, for a young first commit either", () => {
+    expect(
+      contributorStatus(
+        at("2026-06-20T00:00:00Z"),
+        at("2026-06-30T00:00:00Z"),
+        undefined,
+        now,
+      ),
+    ).toBe("active");
+  });
+});

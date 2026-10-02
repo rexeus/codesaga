@@ -217,11 +217,14 @@ const renameRecordHighlight = (
  * or 1000 days) falls within `anniversaryWindowDays` of today; newcomers made
  * their first commit in the last `newcomerDays` days, while others started
  * earlier; the biggest cleanup is the commit with the most net deleted code
- * lines; the rename record is the file renamed most often.
+ * lines; the rename record is the file renamed most often. A shallow clone has
+ * neither anniversary nor newcomers: the first commits it shows are only the
+ * oldest it fetched.
  */
 export const historyEventHighlights = ({
   commits,
   now,
+  shallow,
   isCodePath,
 }: HighlightFacts): ReadonlyArray<Highlight> => {
   const nowSeconds = DateTime.toEpochMillis(now) / 1000;
@@ -231,8 +234,10 @@ export const historyEventHighlights = ({
     undefined,
   );
   return [
-    ...(first === undefined ? [] : anniversaryHighlight(first, nowSeconds)),
-    ...newcomersHighlight(commits, nowSeconds),
+    ...(first === undefined || shallow
+      ? []
+      : anniversaryHighlight(first, nowSeconds)),
+    ...(shallow ? [] : newcomersHighlight(commits, nowSeconds)),
     ...biggestCleanupHighlight(commits, isCodePath),
     ...renameRecordHighlight(commits),
   ];

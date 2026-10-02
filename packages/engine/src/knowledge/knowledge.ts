@@ -60,6 +60,8 @@ type KnowledgeFacts = KnowledgeInput & {
   readonly scope: string;
   /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
   readonly packageRoots: ReadonlyArray<string>;
+  /** A shallow clone cannot tell when an area was created or who arrived, so it has no `new` or `newcomer-friendly` badge. */
+  readonly shallow: boolean;
   /** The level to start at, from 1, rounded down; a level beyond the deepest one means the deepest. The recommended level when absent, not finite or below 1. */
   readonly depth?: number | undefined;
 };
@@ -101,7 +103,7 @@ const areasSection = (
     ),
     historyContributors: countContributors(facts.commits),
   });
-  const history = areaHistoryOf(facts.commits, facts.now);
+  const history = areaHistoryOf(facts.commits, facts.now, facts.shallow);
   const inputs = levels.map(({ areas }) =>
     areaBadgeInputs(areas, history, model),
   );

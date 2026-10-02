@@ -17,6 +17,7 @@ export const highlightFacts = (
 ): HighlightFacts => ({
   commits: [],
   now,
+  shallow: false,
   isCodePath: (path) => path.endsWith(".ts"),
   knowledge: { files: 10, truckFactor: { value: 3, people: [] } },
   ...overrides,

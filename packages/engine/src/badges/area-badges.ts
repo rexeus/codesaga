@@ -62,8 +62,8 @@ export type AreaBadgeInput = {
   readonly recentCommits: number;
   /** The most such commits that touched any other area of the same level. */
   readonly peerRecentCommits: number;
-  /** The time of the repository's first commit; an area is `new` only well after it. */
-  readonly startTime: number;
+  /** The time of the repository's first commit; an area is `new` only well after it. Undefined when unknown, as in a shallow clone: then no area is `new`. */
+  readonly startTime: number | undefined;
   /** The first commit of every person who arrived after the repository started, with the paths it changed. */
   readonly firstCommits: ReadonlyArray<{
     readonly time: number;
@@ -164,6 +164,7 @@ const newArea = ({ fileFirstCommits, startTime, now, nowSeconds }: Context) => {
     Infinity,
   );
   return fileFirstCommits.length > 0 &&
+    startTime !== undefined &&
     created - startTime >= newAfterStartDays * SECONDS_PER_DAY &&
     isActiveWithin(created, now, newDays)
     ? {

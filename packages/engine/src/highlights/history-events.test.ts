@@ -261,3 +261,22 @@ describe("historyEventHighlights biggest cleanup", () => {
     ).toStrictEqual([]);
   });
 });
+
+const shallow = (commits: ReadonlyArray<ClassifiedCommit>) =>
+  historyEventHighlights(highlightFacts({ commits, shallow: true }));
+
+describe("historyEventHighlights in a shallow clone", () => {
+  it("names no anniversary and no newcomers, which both read the first commits", () => {
+    const commits = withNewcomers(
+      "2026-06-10T00:00:00Z",
+      "2026-06-20T00:00:00Z",
+    );
+    const anniversary = commitsAt(["2021-07-05T10:00:00Z"]);
+
+    expect(
+      newcomersOf("2026-06-10T00:00:00Z", "2026-06-20T00:00:00Z"),
+    ).toHaveLength(1);
+    expect(anniversaryOf("2021-07-05T10:00:00Z")).toHaveLength(1);
+    expect(shallow([...commits, ...anniversary])).toStrictEqual([]);
+  });
+});

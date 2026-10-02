@@ -17,6 +17,7 @@ const run = (
     history: commits,
     scope,
     now,
+    shallow: false,
     isCodePath: (path) => path.endsWith(".ts"),
     universePaths,
   });
@@ -216,6 +217,7 @@ describe("contributors badges in a solo repository", () => {
       history,
       scope: ".",
       now,
+      shallow: false,
       isCodePath: () => false,
       universePaths: [],
       areas,
@@ -229,5 +231,38 @@ describe("contributors badges in a solo repository", () => {
     expect(badgesOfAda([...ada, classifiedCommit({ author: grace })])).toEqual(
       expect.arrayContaining(["all-rounder", "keeper"]),
     );
+  });
+});
+
+describe("contributors in a shallow clone", () => {
+  const first = classifiedCommit({ time: at("2026-05-01T00:00:00Z") });
+  const later = classifiedCommit({
+    author: grace,
+    time: at("2026-06-01T00:00:00Z"),
+  });
+  const peopleOf = (shallow: boolean) =>
+    contributors({
+      commits: [first, later],
+      history: [first, later],
+      scope: ".",
+      now,
+      shallow,
+      isCodePath: () => false,
+      universePaths: [],
+    }).map(({ name, status, badges }) => [
+      name,
+      status,
+      badges.map(({ kind }) => kind),
+    ]);
+
+  it("calls nobody new and awards no welcome, though the same history in a complete clone does", () => {
+    expect(peopleOf(false)).toStrictEqual([
+      ["Ada", "active", []],
+      ["Grace", "new", ["welcome"]],
+    ]);
+    expect(peopleOf(true)).toStrictEqual([
+      ["Ada", "active", []],
+      ["Grace", "active", []],
+    ]);
   });
 });

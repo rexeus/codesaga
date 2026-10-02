@@ -33,6 +33,8 @@ type ContributorsInput = {
   readonly isCodePath: (path: string) => boolean;
   /** The universe files of the scope; the files each person created decide `founder`. */
   readonly universePaths: ReadonlyArray<string>;
+  /** A shallow clone lacks the history before its boundary, so nobody can be told to be new. */
+  readonly shallow: boolean;
   /** The areas of the recommended level; without them `all-rounder`, `specialist` and `keeper` are withheld. */
   readonly areas?: ContributorBadgeFacts["areas"];
 };
@@ -70,12 +72,12 @@ const createdFilesByEmail = (
   return created;
 };
 
-type Context = Omit<ContributorsInput, "commits" | "history"> & {
+type Context = Omit<ContributorsInput, "commits" | "history" | "shallow"> & {
   readonly created: ReadonlyMap<string, number>;
   /** How many people count as contributors over the full history. */
   readonly historyContributors: number;
-  /** The time of the first commit of anyone who counts as a contributor. */
-  readonly repositoryStart: number;
+  /** The time of the first commit of anyone who counts as a contributor; undefined in a shallow clone. */
+  readonly repositoryStart: number | undefined;
 };
 
 const contributorOf = (
@@ -135,12 +137,13 @@ const contributorOf = (
 /**
  * The `contributors` section, sorted by commits descending, then name. `activeDays`
  * counts distinct local dates; `active` means a commit in the 183 days before
- * `now`, `status` is judged over 90 days; `areas` are the three directories with the most commits, cut at two
+ * `now`, `status` is judged over 90 days, and nobody is `new` in a shallow clone; `areas` are the three directories with the most commits, cut at two
  * levels below the scope; `weekly`, `status` and `badges` serve the contributor card.
  */
 export const contributors = ({
   commits,
   history,
+  shallow,
   ...input
 }: ContributorsInput): Report["contributors"] => {
   const everyone = byEmail(history);
@@ -148,9 +151,11 @@ export const contributors = ({
     ...input,
     created: createdFilesByEmail(history, input.universePaths),
     historyContributors: everyone.size,
-    repositoryStart: [...everyone.values()]
-      .flat()
-      .reduce((first, { time }) => Math.min(first, time), Infinity),
+    repositoryStart: shallow
+      ? undefined
+      : [...everyone.values()]
+          .flat()
+          .reduce((first, { time }) => Math.min(first, time), Infinity),
   };
   return [...byEmail(commits)]
     .map(([email, own]) =>

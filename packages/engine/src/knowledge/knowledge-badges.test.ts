@@ -29,12 +29,13 @@ const touching = (
     })),
   });
 
-const run = (commits: ReadonlyArray<ClassifiedCommit>) =>
+const run = (commits: ReadonlyArray<ClassifiedCommit>, shallow = false) =>
   knowledge({
     commits,
     universe: paths.map((path) => ({ path, loc: 50 })),
     scope: ".",
     packageRoots: ["packages/api", "packages/web"],
+    shallow,
     headTime: at("2026-02-25T00:00:00Z"),
     now,
   });
@@ -117,5 +118,27 @@ describe("knowledge area badges", () => {
     expect(
       recommendedAreas.map(({ activeExperts }) => activeExperts),
     ).toStrictEqual([[ada.email], [grace.email]]);
+  });
+});
+
+describe("knowledge area badges in a shallow clone", () => {
+  it("awards no badge that needs the first commits in a shallow clone", () => {
+    const newcomers = [
+      touching("2026-02-20T00:00:00Z", "packages/web", grace),
+      touching("2026-02-10T00:00:00Z", "packages/web", {
+        ...ada,
+        email: "b@example.com",
+      }),
+      touching("2025-01-10T00:00:00Z", "packages/web", ada),
+    ];
+
+    expect(kindsOf(run(newcomers), 1, "packages/web")).toEqual(
+      expect.arrayContaining(["newcomer-friendly"]),
+    );
+    expect(kindsOf(run(history), 1, "packages/web")).toContain("new");
+    expect(kindsOf(run(newcomers, true), 1, "packages/web")).not.toContain(
+      "newcomer-friendly",
+    );
+    expect(kindsOf(run(history, true), 1, "packages/web")).not.toContain("new");
   });
 });

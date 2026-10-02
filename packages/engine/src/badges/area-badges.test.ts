@@ -188,6 +188,18 @@ describe("areaBadges rules in detail", () => {
     ).not.toContain("shared-knowledge");
   });
 
+  it("does not call an area new, or newcomer-friendly, without a known repository start", () => {
+    const young = {
+      fileFirstCommits: [daysAgo(10)],
+      firstCommits: [firstCommit(180), firstCommit(5)],
+    };
+
+    expect(kindsOf({ ...young, startTime: daysAgo(190) })).toEqual(
+      expect.arrayContaining(["new", "newcomer-friendly"]),
+    );
+    expect(kindsOf({ ...young, startTime: undefined })).not.toContain("new");
+  });
+
   it("awards no single expert to an island", () => {
     expect(
       kindsOf({ island: true, experts: [expert({ soleFiles: 9 })] }),
