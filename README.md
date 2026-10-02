@@ -12,7 +12,7 @@ npx codesaga inspect packages/billing     # who knows this code, and are they st
 npx codesaga check --min-truck-factor 2   # fail CI when knowledge risk crosses a threshold
 ```
 
-Requires Node.js 22 or newer and `git` on your PATH. Works for any language.
+Requires Node.js 22.12 or newer and `git` on your PATH. Works for any language.
 
 ## What it answers
 
@@ -20,6 +20,7 @@ Requires Node.js 22 or newer and `git` on your PATH. Works for any language.
 - **Team** — every contributor with commits, active days, first and last commit, and main folders. There is no score and no ranking by lines: counts are context, not a leaderboard.
 - **Knowledge** — who is an expert on which files, the **truck factor** (how many people can leave before more than half of the code has no expert), **knowledge islands** (one person is the only expert) and **orphaned knowledge** (the experts are no longer active).
 - **Automation** — how many commits bots wrote, AI agents wrote, or humans wrote with an AI agent, per month and per tool.
+- **Deep dive: TypeScript** — the TypeScript and JavaScript files of the repository, read with a real parser; see _Deep dive: TypeScript_.
 
 ## The dashboard
 
@@ -253,6 +254,17 @@ codesaga analyze --github --since 3m
 
 The terminal view gains a "Pull requests" block and the dashboard a "Pull requests" section, both only when the report has the data.
 
+## Deep dive: TypeScript
+
+A deep dive is a language analysis beyond the code stats, in the report's `deepDives` section. It exists for repositories with TypeScript or JavaScript files (`.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`) and is absent for all others. `analyze` parses every such file of the universe at HEAD with [oxc-parser](https://oxc.rs), from the work tree, so uncommitted edits count, and `deepDives.typescript.coverage` says what the analysis rests on:
+
+- `files` — the universe's TypeScript and JavaScript files; it equals `parsed` plus `declarationFiles` plus every count in `skipped`.
+- `declarationFiles` — `.d.ts`, `.d.mts` and `.d.cts` files, which hold types only and are counted, not parsed.
+- `skipped` — files that were not analyzed, by reason, only for reasons that occurred: `too-large` (over 1 MiB), `minified` (lines average over 300 characters, or one is over 10,000), `too-deep` (nested more than 1,000 brackets deep, or deeper than a parser can follow), `syntax-error` (nothing could be recovered from the file), `parser-error`, `unreadable` and `parser-unavailable`. Hostile input is skipped and counted, never fatal.
+- `parser` — the parser's `name` and `version`.
+
+oxc-parser is codesaga's only runtime dependency. It ships a native binding for each platform. Where it or the binding cannot be loaded (an unsupported platform, or an install that left the optional binding out), `analyze` still succeeds: the section keeps its coverage, every file is skipped as `parser-unavailable`, `parser.version` is `null`, and `unavailable` gives the loader's message. `inspect` never loads the parser.
+
 ## How the numbers work
 
 - **One pass over the history.** codesaga reads `git log` of HEAD once, following renames. Merge commits are read to keep the commit graph connected but count as nothing. A file deleted and later recreated at the same path starts a new life: knowledge credits only the file that exists today, while the activity sections still count the earlier work. Every section is computed from that.
@@ -307,6 +319,7 @@ The report states every threshold under `thresholds`, and the JSON contract is v
 - **The cache keys on the mailmap, replace refs, grafts and the shallow boundary, not on every git setting.** A change to `.gitattributes` (such as marking files `-diff`), `.git/info/attributes`, `core.attributesFile`, `diff.algorithm` or `diff.renameLimit` alters what `git log` prints for old commits without invalidating the cache; run once with `--no-cache` and clear it with `rm -rf .git/codesaga`.
 - **Linked worktrees share one cache** and rewrite it when their HEADs differ.
 - **The cache file grows with history**, about 1.2 KB per commit.
+- **The parser is a native dependency.** An install that drops optional dependencies, such as an npm lockfile made on another platform, leaves the TypeScript deep dive without a parser; it reports why in `coverage.unavailable`. Reinstalling on the target platform fixes it.
 
 ## Contributing
 
