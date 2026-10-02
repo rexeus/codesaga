@@ -11,6 +11,7 @@ import {
   detailSummary,
 } from "../present/territories.js";
 import type { DetailSummary } from "../present/territories.js";
+import { territoryDetails } from "../present/territory-details.js";
 import { detailSlider } from "./detail-slider.js";
 import { h } from "./dom.js";
 import { icon } from "./icons.js";
@@ -93,7 +94,7 @@ const summaryLine = (
  * nothing is computed here.
  */
 export const renderKnowledge = (report: Report): HTMLElement => {
-  const { territories } = report.knowledge;
+  const territories = territoryDetails(report.knowledge.territories);
   const solo = isSolo(report);
   const summary = h("div", "");
   const grid = h("div", "");

@@ -99,7 +99,7 @@ describe("codesaga territory detail from a .codesaga.json", () => {
         const startDetail = (...flags: ReadonlyArray<string>) =>
           Effect.map(analyzeJson(repo, ...flags), (report) => ({
             detail: report.knowledge.territories.detail,
-            details: report.knowledge.territories.details.length,
+            maxDetail: report.knowledge.territories.maxDetail,
           }));
 
         const recommended = yield* startDetail();
@@ -111,11 +111,11 @@ describe("codesaga territory detail from a .codesaga.json", () => {
         writeConfig(repo, { detail: 1, depth: 2 });
         const detailOverDepth = yield* startDetail();
 
-        expect(recommended).toStrictEqual({ detail: 1, details: 2 });
-        expect(fromConfig).toStrictEqual({ detail: 2, details: 2 });
-        expect(fromFlag).toStrictEqual({ detail: 1, details: 2 });
-        expect(fromDepthKey).toStrictEqual({ detail: 2, details: 2 });
-        expect(detailOverDepth).toStrictEqual({ detail: 1, details: 2 });
+        expect(recommended).toStrictEqual({ detail: 1, maxDetail: 2 });
+        expect(fromConfig).toStrictEqual({ detail: 2, maxDetail: 2 });
+        expect(fromFlag).toStrictEqual({ detail: 1, maxDetail: 2 });
+        expect(fromDepthKey).toStrictEqual({ detail: 2, maxDetail: 2 });
+        expect(detailOverDepth).toStrictEqual({ detail: 1, maxDetail: 2 });
       }).pipe(Effect.scoped),
   );
 });

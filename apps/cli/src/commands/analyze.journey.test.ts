@@ -108,9 +108,7 @@ describe("codesaga analyze --detail", () => {
         expect(viaDepthAlias.detail).toBe(2);
         expect(second.recommendedDetail).toBe(1);
         expect(beyond.detail).toBe(2);
-        expect(beyond.details.map(({ detail }) => detail)).toStrictEqual([
-          1, 2,
-        ]);
+        expect(beyond.maxDetail).toBe(2);
       }).pipe(Effect.scoped),
   );
 

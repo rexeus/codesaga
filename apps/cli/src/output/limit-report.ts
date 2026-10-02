@@ -1,13 +1,26 @@
 import type { Report } from "@codesaga/engine";
-import { Array as Arr } from "effect";
 
 /** The contributors and knowledge directories `analyze` reports in JSON when nothing sets a limit. */
 export const DEFAULT_LIMIT = 25;
 
+type Territory = Report["knowledge"]["territories"]["territories"][number];
+
+/** The first `limit` territories, and below each the first `limit` of its own, recursively. */
+const limitTerritories = (
+  territories: ReadonlyArray<Territory>,
+  limit: number,
+): ReadonlyArray<Territory> =>
+  territories.slice(0, limit).map((territory) =>
+    Object.assign({}, territory, {
+      territories: limitTerritories(territory.territories, limit),
+    }),
+  );
+
 /**
  * Applies `--limit` to a report: `contributors` is cut to its first `limit`
- * entries and so are the knowledge `directories` and the `territories` of every
- * detail (already ordered by risk; `totalTerritories` keeps the full count), `0`
+ * entries and so are the knowledge `directories`, the first-cut `territories` and
+ * the territories inside each one (already ordered by risk; `totalTerritories`
+ * keeps the full count of each list), `0`
  * keeps everything, and `totals` still describes the untruncated size.
  * The pull request authors and reviewers are cut the same way, with their
  * sizes in `pullRequests.totals`. Time series are never cut.
@@ -23,12 +36,9 @@ export const limitReport = (report: Report, limit: number): Report =>
           directories: report.knowledge.directories.slice(0, limit),
           territories: {
             ...report.knowledge.territories,
-            details: Arr.map(
-              report.knowledge.territories.details,
-              (detail) => ({
-                ...detail,
-                territories: detail.territories.slice(0, limit),
-              }),
+            territories: limitTerritories(
+              report.knowledge.territories.territories,
+              limit,
             ),
           },
         },

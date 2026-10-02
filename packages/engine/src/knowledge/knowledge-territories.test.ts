@@ -13,7 +13,7 @@ const linus = { name: "Linus", email: "linus@example.com" };
 const filesIn = (directory: string, count: number): ReadonlyArray<string> =>
   Array.from({ length: count }, (_, index) => `${directory}/f${index}.ts`);
 
-// 16 files in 4 packages: detail 1 has 4 viable territories, detail 2 has 5, then nothing changes.
+// 16 files in 4 packages: detail 1 has 4 viable territories; at detail 2 packages/lib splits into a and b, which have different experts, so there are 5.
 const paths = [
   "apps/web/index.ts",
   ...filesIn("apps/web/src", 3),
@@ -29,6 +29,20 @@ const packageRoots = [
   "packages/lib",
 ];
 
+/** Ada writes apps/web and packages/lib/a, Grace packages/lib/b and packages/cli, Linus packages/api. */
+const WRITTEN_BY: ReadonlyMap<string, ReadonlyArray<string>> = new Map([
+  [ada.email, ["apps/web", "packages/lib/a"]],
+  [grace.email, ["packages/lib/b", "packages/cli"]],
+  [linus.email, ["packages/api"]],
+]);
+
+const filesOf = (author: ClassifiedCommit["author"]): ReadonlyArray<string> =>
+  paths.filter((path) =>
+    (WRITTEN_BY.get(author.email) ?? []).some((prefix) =>
+      path.startsWith(prefix),
+    ),
+  );
+
 const commit = (
   time: string,
   author: ClassifiedCommit["author"],
@@ -36,7 +50,7 @@ const commit = (
   classifiedCommit({
     time: at(time),
     author,
-    changes: paths.map((path) => ({ path, added: 10, deleted: 0 })),
+    changes: filesOf(author).map((path) => ({ path, added: 10, deleted: 0 })),
   });
 
 const territoriesOf = (
@@ -61,8 +75,8 @@ const threeActive = [
 ];
 
 describe("knowledge territories", () => {
-  it("recommends the detail with about two territories per contributor active in 90 days", () => {
-    // 3 active contributors: target 6; detail 1 has 4 viable territories, detail 2 has 5
+  it("recommends the deepest detail with at most two territories per contributor active in 90 days", () => {
+    // 3 active contributors allow 6; detail 1 has 4 viable territories, detail 2 has 5
     const territories = territoriesOf(threeActive);
 
     expect(territories).toMatchObject({
@@ -70,13 +84,11 @@ describe("knowledge territories", () => {
       recommendedDetail: 2,
       reason: "detail 2: 5 territories with 3+ files for 3 active contributors",
     });
-    expect(territories.details.map(({ detail }) => detail)).toStrictEqual([
-      1, 2,
-    ]);
+    expect(territories.maxDetail).toBe(2);
   });
 
   it("does not count contributors whose last commit is older than 90 days", () => {
-    // 1 active contributor: target 4, which detail 1 meets
+    // 1 active contributor allows 4 territories, which detail 2 (5) exceeds
     const territories = territoriesOf([
       commit("2026-02-20T00:00:00Z", ada),
       commit("2025-06-01T00:00:00Z", grace),
@@ -89,7 +101,7 @@ describe("knowledge territories", () => {
     });
   });
 
-  it("sizes the target by every contributor when nobody is active", () => {
+  it("sizes the allowance by every contributor when nobody is active", () => {
     const territories = territoriesOf([
       commit("2025-06-03T00:00:00Z", ada),
       commit("2025-06-02T00:00:00Z", grace),
@@ -124,5 +136,38 @@ describe("knowledge territories", () => {
 
   it("rounds a fractional detail down", () => {
     expect(territoriesOf(threeActive, 1.9).detail).toBe(1);
+  });
+});
+
+const kindsIn = (
+  territories: ReadonlyArray<{
+    readonly path: string;
+    readonly badges: ReadonlyArray<{ readonly kind: string }>;
+  }>,
+  path: string,
+) =>
+  territories
+    .find((territory) => territory.path === path)
+    ?.badges.map(({ kind }) => kind);
+
+describe("knowledge territory tree badges", () => {
+  it("awards in focus to the busiest territory among its siblings, at every level of the tree", () => {
+    // packages/lib touches 3 commits, packages/cli 2, apps/web and packages/api 1; inside lib, b has 2 commits and a has 1
+    const { territories } = territoriesOf([
+      commit("2026-02-20T00:00:00Z", ada),
+      commit("2026-02-19T00:00:00Z", grace),
+      commit("2026-02-18T00:00:00Z", grace),
+      commit("2026-02-17T00:00:00Z", linus),
+    ]);
+    const lib = territories.find(({ path }) => path === "packages/lib");
+
+    expect(kindsIn(territories, "packages/lib")).toContain("in-focus");
+    expect(kindsIn(territories, "packages/cli")).not.toContain("in-focus");
+    expect(kindsIn(lib?.territories ?? [], "packages/lib/b")).toContain(
+      "in-focus",
+    );
+    expect(kindsIn(lib?.territories ?? [], "packages/lib/a")).not.toContain(
+      "in-focus",
+    );
   });
 });

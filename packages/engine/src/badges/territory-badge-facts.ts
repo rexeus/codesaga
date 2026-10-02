@@ -32,7 +32,7 @@ export type TerritoryBadgeInput = {
   readonly lastChangeTime: number | undefined;
   /** Human and agent-assisted commits in the last `inFocusDays` days that touched the territory. */
   readonly recentCommits: number;
-  /** The most such commits that touched any other territory of the same detail. */
+  /** The most such commits that touched any other named territory with the same parent, or any other first-cut territory. */
   readonly peerRecentCommits: number;
   /** The time of the repository's first commit; a territory is `new-territory` only well after it. Undefined when unknown, as in a shallow clone: then no territory is `new-territory`. */
   readonly startTime: number | undefined;

@@ -74,23 +74,25 @@ const DirectoryKnowledge = Schema.Struct({
 
 /**
  * The knowledge state of one territory: a slice of the universe that, together
- * with its siblings at the same detail, covers every universe file exactly once.
- * Reads like a directory, so every field of `DirectoryKnowledge` applies to
- * the files of the territory alone, `lineOwners` included: with `blame`, each
- * territory names the owners of its own lines.
+ * with its siblings, covers the files of their parent exactly once. Reads like a
+ * directory, so every field of `DirectoryKnowledge` applies to the files of the
+ * territory alone, `lineOwners` included: with `blame`, each territory names the
+ * owners of its own lines. A territory that splits describes all of its files
+ * and lists the territories it splits into.
  */
-const Territory = Schema.Struct({
+const TerritoryFields = Schema.Struct({
   ...DirectoryKnowledge.fields,
   /**
    * `package`: the root of a package, marked by a manifest such as
    * `package.json`; `folder`: a directory below a package root or below the
    * scope, or the scoped file itself when `analyze` is given a file; `other`:
-   * the small territories below `path` grouped as "other files". For `other`,
-   * `path` is the directory that holds them, so a `package` territory and its
-   * `other` territory share a path: `path` and `kind` together identify a
-   * territory. An `other` territory with fewer than
-   * `thresholds.territories.minFiles` files is a leftover: `island` and
-   * `orphaned` do not apply to it, so they are false and `reasons` is empty.
+   * the files of a territory that are too few to be one, grouped as "other
+   * files". For `other`, `path` is the territory that holds them, or the scope
+   * at the first cut, so a `package` territory and its `other` territory share
+   * a path: `path` and `kind` together identify a territory within its siblings. An
+   * `other` territory with fewer than `thresholds.territories.minFiles` files is
+   * a leftover: `island` and `orphaned` do not apply to it, so they are false and
+   * `reasons` is empty.
    */
   kind: Schema.Literals(["package", "folder", "other"]),
   /**
@@ -102,42 +104,63 @@ const Territory = Schema.Struct({
   lastChangedAt: Schema.String,
   /** Badges of the territory, most important first; the dashboard shows the first three. */
   badges: Schema.Array(TerritoryBadge),
-});
-export type Territory = typeof Territory.Type;
-
-/** The territories at one detail. */
-const TerritoryDetail = Schema.Struct({
-  /**
-   * 1 for packages (or top-level directories without packages), each further
-   * detail one directory step deeper. A territory that holds more than
-   * `thresholds.territories.giantShare` of the files is split further within its
-   * detail, so that one package does not become one card.
-   */
-  detail: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-  /** The territories at this detail before the output limit cut `territories`. */
+  /** The territories it splits into before the output limit cut `territories`; 0 for a territory that does not split. */
   totalTerritories: Count,
-  /** Ordered like `directories`: riskiest first, `other` territories last. Possibly truncated by the output limit, per detail; see `totalTerritories`. */
-  territories: Schema.Array(Territory),
+  /**
+   * Why the territory splits: "big: 52 files" when it holds many of the files,
+   * or "src/api and src/ui have different experts" when its folders have
+   * different main experts. Present exactly when the territory splits.
+   */
+  splitReason: Schema.optionalKey(Schema.String),
+  /**
+   * The detail from which `territories` are shown in place of this territory, at
+   * least 2. Present exactly when the territory splits.
+   */
+  splitDetail: Schema.optionalKey(
+    Schema.Int.check(Schema.isGreaterThanOrEqualTo(2)),
+  ),
 });
-export type TerritoryDetail = typeof TerritoryDetail.Type;
+
+type TerritoryOwn = typeof TerritoryFields.Type;
+
+/** A territory with the territories it splits into, which cover its files exactly once. */
+export type Territory = TerritoryOwn & {
+  /** Ordered like `directories`: riskiest first, `other` territories last. Possibly truncated by the output limit; see `totalTerritories`. Empty for a territory that does not split. */
+  readonly territories: ReadonlyArray<Territory>;
+};
+
+const Territory: Schema.Codec<Territory> = Schema.Struct({
+  ...TerritoryFields.fields,
+  territories: Schema.Array(
+    Schema.suspend((): Schema.Codec<Territory> => Territory),
+  ),
+});
 
 /**
- * The knowledge in non-overlapping territories at several details, all
- * computed by the engine so that viewers only pick a detail.
+ * The knowledge in non-overlapping territories as a tree: the first cut into
+ * packages (or top-level directories) and, below it, the splits of territories that
+ * are big or whose folders have different experts. A detail is how many splits are
+ * open: at detail 1 the territories are the first cut, and a territory is shown
+ * through its children from its `splitDetail` on. Every territory carries its own
+ * knowledge, so viewers only pick a detail.
  */
 const Territories = Schema.Struct({
-  /** The detail the terminal and the dashboard start at: `--detail`, else `recommendedDetail`. A `--detail` beyond the finest detail is the finest detail. */
+  /** The detail the terminal and the dashboard start at: `--detail`, else `recommendedDetail`. A `--detail` beyond `maxDetail` is `maxDetail`. */
   detail: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   /** The detail that suits the team size, chosen with `thresholds.territories`. */
   recommendedDetail: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+  /** The finest detail, at most `thresholds.territories.maxDetail`; every split opens at a detail from 2 to this one. */
+  maxDetail: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   /**
    * The recommendation in words: "detail 2: 11 territories with 3+ files for 6
-   * active contributors". It counts the territories that are not `other`, so
-   * the `totalTerritories` of the detail is higher.
+   * active contributors". It counts the territories shown at that detail that
+   * are not `other`.
    */
   reason: Schema.String,
-  /** Details 1 to the finest useful one (at most `thresholds.territories.maxDetail`), in order; no two details have the same territories. */
-  details: Schema.NonEmptyArray(TerritoryDetail),
+  /** The first cut before the output limit cut `territories`. */
+  totalTerritories: Count,
+  /** The first cut: packages, or top-level directories, and the files of neither as one `other` territory. Ordered like `directories`: riskiest first, `other` last. Possibly truncated by the output limit; see `totalTerritories`. */
+  territories: Schema.Array(Territory),
 });
 
 /**
@@ -167,7 +190,7 @@ export const Knowledge = Schema.Struct({
    * `no-deprecated` lint would flag every producer and consumer until then.)
    */
   directories: Schema.Array(DirectoryKnowledge),
-  /** The knowledge in territories that partition the files, at several details. */
+  /** The knowledge in territories that partition the files, as a tree with details. */
   territories: Territories,
   /** Present only when the analysis ran with `blame`: the line owners of all `files` together, which no sum over `directories` gives. */
   lineOwners: Schema.optionalKey(LineOwners),

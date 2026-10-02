@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 
 import { Report } from "@codesaga/engine";
-import { Array as Arr, Schema } from "effect";
+import { Schema } from "effect";
 
 const sampleUrl = new URL(
   "../../../../fixtures/report.sample.json",
@@ -15,22 +15,19 @@ export const sampleReport = (): Report =>
 
 type Territories = Report["knowledge"]["territories"];
 
-/** `report` with `change` applied to the territories of every detail; `totalTerritories` stays as it is. */
+/** `report` with `change` applied to the first-cut territories; `totalTerritories` stays as it is. */
 export const mapTerritories = (
   report: Report,
   change: (
-    territories: Territories["details"][number]["territories"],
-  ) => Territories["details"][number]["territories"],
+    territories: Territories["territories"],
+  ) => Territories["territories"],
 ): Report => ({
   ...report,
   knowledge: {
     ...report.knowledge,
     territories: {
       ...report.knowledge.territories,
-      details: Arr.map(report.knowledge.territories.details, (detail) => ({
-        ...detail,
-        territories: change(detail.territories),
-      })),
+      territories: change(report.knowledge.territories.territories),
     },
   },
 });

@@ -61,24 +61,23 @@ describe("limitReport", () => {
 });
 
 describe("limitReport territories", () => {
-  it("cuts the territories of every detail to the limit and keeps each detail's total", () => {
+  it("cuts the first cut and the territories inside each one to the limit and keeps every total", () => {
     const report = sampleReport();
 
-    const limited = limitReport(report, 3).knowledge.territories;
-    const original = report.knowledge.territories;
-    expect(
-      limited.details.map(({ totalTerritories, territories }) => [
-        totalTerritories,
-        territories.length,
-      ]),
-    ).toStrictEqual([
-      [11, 3],
-      [27, 3],
-      [41, 3],
+    const limited = limitReport(report, 2).knowledge.territories;
+
+    expect(limited.totalTerritories).toBe(11);
+    expect(limited.territories.map(({ path }) => path)).toStrictEqual([
+      "docs",
+      "packages/db",
     ]);
-    expect(limited.details[0]?.territories).toStrictEqual(
-      original.details[0]?.territories.slice(0, 3),
-    );
-    expect(limited.detail).toBe(original.detail);
+    const db = limited.territories[1];
+    expect(db?.totalTerritories).toBe(3);
+    expect(db?.territories.map(({ path }) => path)).toStrictEqual([
+      "packages/db/migrations",
+      "packages/db/src",
+    ]);
+    expect(db?.territories[1]?.totalTerritories).toBe(2);
+    expect(limited.detail).toBe(report.knowledge.territories.detail);
   });
 });

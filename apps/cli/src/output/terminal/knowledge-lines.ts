@@ -1,4 +1,4 @@
-// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest territories at the chosen detail.
+// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest first-cut territories.
 // Every name and path that came from git passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -18,8 +18,7 @@ const MAX_PATH_WIDTH = 24;
 const MAX_TRUCK_FACTOR_NAMES = 3;
 
 type Knowledge = Report["knowledge"];
-type Territory =
-  Knowledge["territories"]["details"][number]["territories"][number];
+type Territory = Knowledge["territories"]["territories"][number];
 type Expert = Territory["experts"][number];
 type LineOwners = NonNullable<Territory["lineOwners"]>;
 
@@ -82,24 +81,33 @@ const leadingLineOwner = (lineOwners: LineOwners | undefined): string => {
 
 const OTHER_FILES = " (other)";
 
+type Row = { readonly label: string; readonly territory: Territory };
+
 /** The territory's path, escaped and cut to the column; the small territories of a directory are marked as its other files. */
 const territoryLabel = ({ path, kind }: Territory): string =>
   kind === "other"
     ? `${fitEscaped(path, MAX_PATH_WIDTH - OTHER_FILES.length)}${OTHER_FILES}`
     : fitEscaped(path, MAX_PATH_WIDTH);
 
+/** The riskiest first-cut territories. */
+const territoryRows = ({
+  territories,
+}: Knowledge["territories"]): ReadonlyArray<Row> =>
+  territories
+    .slice(0, TOP_TERRITORIES)
+    .map((territory) => ({ label: territoryLabel(territory), territory }));
+
 const territoryLines = (
   { territories }: Knowledge,
   style: Style,
 ): ReadonlyArray<string> => {
-  const shown = territories.details.find(
-    ({ detail }) => detail === territories.detail,
-  );
-  const top = (shown?.territories ?? []).slice(0, TOP_TERRITORIES);
-  if (top.length === 0) {
+  const rows = territoryRows(territories);
+  if (rows.length === 0) {
     return [];
   }
-  const blamed = top.some((territory) => territory.lineOwners !== undefined);
+  const blamed = rows.some(
+    ({ territory }) => territory.lineOwners !== undefined,
+  );
   const columns: ReadonlyArray<Column> = [
     { header: "files", align: "right" },
     { header: "flags", align: "left" },
@@ -109,10 +117,10 @@ const territoryLines = (
   return [
     ...labelledTable(
       "Knowledge territories",
-      top.map((territory) => territoryLabel(territory)),
+      rows.map(({ label }) => label),
       renderTable(
         columns,
-        top.map((territory) =>
+        rows.map(({ territory }) =>
           [
             plain(String(territory.files)),
             plain(badgesOf(territory)),
@@ -129,7 +137,7 @@ const territoryLines = (
       "",
       [
         style.dim(
-          `Territories at detail ${territories.detail} of ${territories.details.length} (recommended: ${territories.recommendedDetail})`,
+          `Territories at detail ${territories.detail} of ${territories.maxDetail} (recommended: ${territories.recommendedDetail})`,
         ),
         style.dim(territories.reason),
       ],

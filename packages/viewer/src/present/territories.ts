@@ -4,10 +4,7 @@ import { territoryBadges } from "./badges.js";
 import type { BadgeRow } from "./badges.js";
 import { formatAgo, formatCount, formatPercent } from "./format.js";
 import { personEntities } from "./people.js";
-
-type Territories = Report["knowledge"]["territories"];
-type Detail = Territories["details"][number];
-type Territory = Detail["territories"][number];
+import type { Detail, Territory } from "./territory-details.js";
 
 /** How many cards of a detail are drawn before the reader asks for all. */
 export const TERRITORY_CARDS_SHOWN = 12;

@@ -3,7 +3,7 @@ import type { Report } from "@codesaga/engine";
 import type { IconName } from "./icons.js";
 
 type TerritoryBadge =
-  Report["knowledge"]["territories"]["details"][number]["territories"][number]["badges"][number];
+  Report["knowledge"]["territories"]["territories"][number]["badges"][number];
 type ContributorBadge = Report["contributors"][number]["badges"][number];
 
 /** How a badge is tinted: a warning, something good, plain news, or nothing special. */

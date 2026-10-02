@@ -123,8 +123,7 @@ layer(NodeServices.layer)("analyze --blame", (it) => {
 
       assert.strictEqual(report.knowledge.directories.length, 1);
       assert.notProperty(report.knowledge.directories[0] ?? {}, "lineOwners");
-      for (const territory of report.knowledge.territories.details[0]
-        ?.territories ?? []) {
+      for (const territory of report.knowledge.territories.territories) {
         assert.notProperty(territory, "lineOwners");
       }
     }),
@@ -146,13 +145,11 @@ layer(NodeServices.layer)("analyze --blame territories", (it) => {
       const report = yield* analyze(analyzeOptionsFor(repo, { blame: true }));
 
       assert.deepStrictEqual(
-        report.knowledge.territories.details[0]?.territories.map(
-          ({ path, lineOwners }) => [
-            path,
-            lineOwners?.lines,
-            lineOwners?.owners.map(({ name, lines }) => [name, lines]),
-          ],
-        ),
+        report.knowledge.territories.territories.map(({ path, lineOwners }) => [
+          path,
+          lineOwners?.lines,
+          lineOwners?.owners.map(({ name, lines }) => [name, lines]),
+        ]),
         [
           ["docs", 4, [["Codesaga Test", 4]]],
           [

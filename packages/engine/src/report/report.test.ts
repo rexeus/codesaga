@@ -53,11 +53,12 @@ layer(NodeServices.layer)("Report", (it) => {
   it.effect("carries the data of the redesigned dashboard in the sample", () =>
     Effect.gen(function* () {
       const report = decode(yield* readSample);
-      const details = report.knowledge.territories.details;
+      const { territories } = report.knowledge;
 
-      assert.deepStrictEqual(
-        details.map(({ detail }) => detail),
-        [1, 2, 3],
+      assert.strictEqual(territories.maxDetail, 3);
+      assert.strictEqual(
+        territories.totalTerritories,
+        territories.territories.length,
       );
       assert.strictEqual(report.stories.length, 6);
       assert.deepStrictEqual(
@@ -80,21 +81,52 @@ layer(NodeServices.layer)("Report", (it) => {
   );
 });
 
+type SampleTerritory =
+  Report["knowledge"]["territories"]["territories"][number];
+
+/** Every list of siblings in the tree: the first cut and the children of each split territory. */
+const siblingLists = (
+  territories: ReadonlyArray<SampleTerritory>,
+): ReadonlyArray<ReadonlyArray<SampleTerritory>> => [
+  territories,
+  ...territories.flatMap(({ territories: inside }) => siblingLists(inside)),
+];
+
 layer(NodeServices.layer)("Report sample territories", (it) => {
   it.effect(
-    "lists the other-files territories of every detail after the other territories",
+    "lists the other-files territories of every list after the other territories",
     () =>
       Effect.gen(function* () {
-        const { details } = decode(yield* readSample).knowledge.territories;
+        const { territories } = decode(yield* readSample).knowledge.territories;
 
-        for (const { territories } of details) {
-          const kinds = territories.map(({ kind }) => kind);
+        for (const siblings of siblingLists(territories)) {
+          const kinds = siblings.map(({ kind }) => kind);
           assert.deepStrictEqual(
             kinds,
             kinds.toSorted(
               (a, b) => Number(a === "other") - Number(b === "other"),
             ),
           );
+        }
+      }),
+  );
+
+  it.effect(
+    "gives exactly the territories that split a reason and a detail within the finest one",
+    () =>
+      Effect.gen(function* () {
+        const { territories, maxDetail } = decode(yield* readSample).knowledge
+          .territories;
+
+        for (const territory of siblingLists(territories).flat()) {
+          const splits = territory.territories.length > 0;
+          assert.strictEqual(territory.splitReason !== undefined, splits);
+          assert.strictEqual(territory.splitDetail !== undefined, splits);
+          assert.strictEqual(
+            territory.totalTerritories,
+            territory.territories.length,
+          );
+          assert.isTrue((territory.splitDetail ?? 2) <= maxDetail);
         }
       }),
   );
@@ -245,14 +277,14 @@ layer(NodeServices.layer)("Report rejects story data with", (it) => {
     }),
   );
 
-  it.effect("a territory section without details", () =>
+  it.effect("a territory section without maxDetail", () =>
     Effect.gen(function* () {
       const { knowledge, ...rest } = decode(yield* readSample);
-      const territories = { ...knowledge.territories, details: [] };
+      const { maxDetail: _removed, ...territories } = knowledge.territories;
 
       assert.throws(() => {
         decode({ ...rest, knowledge: { ...knowledge, territories } });
-      }, /details/u);
+      }, /maxDetail/u);
     }),
   );
 });

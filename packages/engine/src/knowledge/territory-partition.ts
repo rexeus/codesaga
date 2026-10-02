@@ -1,31 +1,31 @@
-// Owns cutting the universe's paths into territories: the partition per detail and the "other files" groups.
-// Pure over paths, so the cut is testable without history; `territories.ts` describes the knowledge of each territory.
-// Cost: one pass over the files per detail, at most `MAX_DETAIL` details.
+// Owns cutting the universe's paths into the territory tree: the first cut, the splits and the detail at which each opens.
+// Pure over paths and experts, so the cut is testable without history; `territories.ts` describes the knowledge of each territory.
+// Cost: the first cut is one pass over the files; each split plans once per territory it considers, so about one pass per tree level.
 
-import { Array as Arr, Order } from "effect";
+import { Order } from "effect";
 
 import { groupBy } from "../collections/group-by.js";
 import { ancestorsOf } from "../universe/ancestors.js";
-import { TERRITORY_MIN_FILES, cutSteps, treeSizes } from "./territory-tree.js";
-import type { TreeFile, TreeSizes } from "./territory-tree.js";
+import { TERRITORY_MIN_FILES, planSplit } from "./territory-tree.js";
+import type { SplitContext, SplitPlan } from "./territory-tree.js";
 
-/** The deepest detail reported. */
+/** The finest detail reported. */
 export const MAX_DETAIL = 6;
 
 type TerritoryKind = "package" | "folder" | "other";
 
-/** A territory and the universe files it holds. */
+/** A territory, the universe files it holds and the territories it splits into. */
 export type PartitionTerritory = {
   readonly path: string;
   readonly kind: TerritoryKind;
-  /** Repository-relative universe files, each in exactly one territory of the detail. */
+  /** Repository-relative universe files, including those of the children. */
   readonly paths: ReadonlyArray<string>;
-};
-
-export type PartitionDetail = {
-  readonly detail: number;
-  /** Ordered by path, then kind; `other` territories included. */
+  /** The territories it splits into, each file in exactly one; empty for a territory that does not split. */
   readonly territories: ReadonlyArray<PartitionTerritory>;
+  /** Why it splits; present exactly when `territories` is not empty. */
+  readonly splitReason?: string;
+  /** The detail from which the children are shown instead of the territory, at least 2; present exactly when `territories` is not empty. */
+  readonly splitDetail?: number;
 };
 
 export type PartitionInput = {
@@ -35,23 +35,33 @@ export type PartitionInput = {
   readonly packageRoots: ReadonlyArray<string>;
   /** Repository-relative scope; "." for the whole repository. */
   readonly scope: string;
+  /** The emails of the experts of a universe file; empty for none. */
+  readonly expertsOf: SplitContext["expertsOf"];
 };
 
-/** A file placed below its anchor: the root of its package, else the scope. */
-type Placed = TreeFile & {
-  readonly path: string;
-  readonly inPackage: boolean;
+export type Partition = {
+  /** The first cut, ordered by path, then kind; the small territories are one `other` territory last. */
+  readonly territories: ReadonlyArray<PartitionTerritory>;
+  /** The finest detail, from 1: the splits are spread over the details 2 to this one. */
+  readonly maxDetail: number;
+  /** The last detail that opens a split between folders with different experts; 1 when none does. */
+  readonly expertiseDetail: number;
 };
 
-const joinPath = (anchor: string, dirs: ReadonlyArray<string>): string => {
-  const parts = anchor === "." ? dirs : [anchor, ...dirs];
-  return parts.length === 0 ? "." : parts.join("/");
+type Draft = {
+  path: string;
+  kind: TerritoryKind;
+  paths: ReadonlyArray<string>;
+  territories: Array<Draft>;
+  splitReason?: string;
+  splitDetail?: number;
 };
 
-const parentOf = (path: string): string => {
-  const slash = path.lastIndexOf("/");
-  return slash < 0 ? "." : path.slice(0, slash);
-};
+const draftOf = (
+  path: string,
+  kind: TerritoryKind,
+  paths: ReadonlyArray<string>,
+): Draft => ({ path, kind, paths, territories: [] });
 
 /**
  * The package roots that count. A root with no universe file holds nothing. The
@@ -73,135 +83,148 @@ const effectiveRoots = ({
   return new Set(nested.length === 0 && scopeIsPackage ? [scope] : nested);
 };
 
-const placeFiles = (input: PartitionInput): ReadonlyArray<Placed> => {
-  const roots = effectiveRoots(input);
-  return input.paths.map((path) => {
-    const root = [".", ...ancestorsOf(path)]
-      .toReversed()
-      .find((directory) => roots.has(directory));
-    const anchor = root ?? input.scope;
-    const relative = anchor === "." ? path : path.slice(anchor.length + 1);
-    return {
-      path,
-      anchor,
-      inPackage: root !== undefined,
-      dirs: relative.split("/").slice(0, -1),
-    };
-  });
-};
-
-/** The detail's territories before small ones are grouped. */
-const cutAt = (
-  files: ReadonlyArray<Placed>,
-  detail: number,
-  sizes: TreeSizes,
-): ReadonlyArray<PartitionTerritory> => {
-  const territories = new Map<
-    string,
-    PartitionTerritory & { paths: Array<string> }
-  >();
-  for (const file of files) {
-    const base = file.inPackage ? detail - 1 : detail;
-    const steps = Math.min(
-      cutSteps(file, base, files.length, sizes),
-      file.dirs.length,
-    );
-    const kind = steps === 0 && file.inPackage ? "package" : "folder";
-    const path = joinPath(file.anchor, file.dirs.slice(0, steps));
-    const key = `${kind}\0${path}`;
-    const territory = territories.get(key) ?? { path, kind, paths: [] };
-    territory.paths.push(file.path);
-    territories.set(key, territory);
-  }
-  return [...territories.values()];
-};
-
-/** Groups the territories below `TERRITORY_MIN_FILES` per parent into one `other` territory each. */
-const groupSmall = (
-  territories: ReadonlyArray<PartitionTerritory>,
+/** The territory a file belongs to in the first cut: its package, else its top-level folder below the scope, else none. */
+const firstCutKey = (
+  path: string,
+  roots: ReadonlySet<string>,
   scope: string,
-): ReadonlyArray<PartitionTerritory> => {
-  const isSmall = (territory: PartitionTerritory): boolean =>
-    territory.paths.length < TERRITORY_MIN_FILES;
-  const small = groupBy(
-    territories.filter((territory) => isSmall(territory)),
-    (territory) =>
-      territory.path === scope ? scope : parentOf(territory.path),
-  );
+): { readonly path: string; readonly kind: TerritoryKind } | undefined => {
+  const root = [".", ...ancestorsOf(path)]
+    .toReversed()
+    .find((directory) => roots.has(directory));
+  if (root !== undefined) {
+    return { path: root, kind: "package" };
+  }
+  const relative = scope === "." ? path : path.slice(scope.length + 1);
+  const [top] = relative.split("/");
+  return relative.includes("/") && top !== undefined
+    ? { path: scope === "." ? top : `${scope}/${top}`, kind: "folder" }
+    : undefined;
+};
+
+/** Packages, or the top-level folders where a file lies in none; groups under `TERRITORY_MIN_FILES` files become the scope's other files. */
+const firstCut = (input: PartitionInput): ReadonlyArray<Draft> => {
+  const roots = effectiveRoots(input);
+  const groups = groupBy(input.paths, (path) => {
+    const key = firstCutKey(path, roots, input.scope);
+    return key === undefined ? "" : `${key.kind}\0${key.path}`;
+  });
+  const named: Array<Draft> = [];
+  const leftovers: Array<string> = [];
+  for (const [key, paths] of groups) {
+    const [kind, path] = key.split("\0");
+    if (
+      kind === undefined ||
+      path === undefined ||
+      paths.length < TERRITORY_MIN_FILES
+    ) {
+      leftovers.push(...paths);
+    } else {
+      named.push(
+        draftOf(path, kind === "package" ? "package" : "folder", paths),
+      );
+    }
+  }
   return [
-    ...territories.filter((territory) => !isSmall(territory)),
-    ...[...small].map(([path, own]): PartitionTerritory => ({
-      path,
-      kind: "other",
-      paths: own.flatMap((territory) => territory.paths),
-    })),
+    ...named.toSorted((a, b) => (a.path < b.path ? -1 : 1)),
+    ...(leftovers.length === 0
+      ? []
+      : [draftOf(input.scope, "other", leftovers)]),
   ];
 };
 
-const byPathThenKind = Order.combine(
-  Order.mapInput(
-    Order.String,
-    (territory: PartitionTerritory) => territory.path,
-  ),
-  Order.mapInput(
-    Order.String,
-    (territory: PartitionTerritory) => territory.kind,
-  ),
-);
+type Candidate = { readonly node: Draft; readonly plan: SplitPlan };
 
-const signatureOf = (territories: ReadonlyArray<PartitionTerritory>): string =>
-  territories
-    .map(
-      (territory) =>
-        `${territory.kind}\0${territory.path}\0${territory.paths.length}`,
-    )
-    .toSorted()
-    .join("\n");
+/** The split to apply first: more expertise gain, then more files, then the path. */
+const byValue = Order.combineAll([
+  Order.flip(
+    Order.mapInput(Order.Number, ({ plan }: Candidate) => plan.expertiseGain),
+  ),
+  Order.flip(
+    Order.mapInput(Order.Number, ({ node }: Candidate) => node.paths.length),
+  ),
+  Order.mapInput(Order.String, ({ node }: Candidate) => node.path),
+]);
 
 /**
- * The partition of the universe at details 1 to the deepest useful one, at
- * most `MAX_DETAIL`: the detail after which nothing changes is the last, so
- * no two details are alike. Each file belongs to exactly one territory per detail.
- * Detail 1 is the package roots, or the directories below the scope without
- * any; detail k is k-1 directory steps below a package root. A file outside
- * every package is cut k directory steps below the scope. A file directly in a
- * root belongs to that root's own territory. Within every detail a territory holding
- * more than `GIANT_TERRITORY_SHARE` of the files is split up to `GIANT_SPLIT_STEPS`
- * directories further, stopping once a split yields two territories of at least
- * `TERRITORY_MIN_FILES` files (see `cutSteps`), so one package cannot become one
- * giant territory. Territories with
- * fewer than `TERRITORY_MIN_FILES` files are grouped per parent as one `other` territory.
- * Detail 1 is always returned, with no territories for no files. A scope that is
- * itself a file has one detail with one `folder` territory for that file.
+ * Splits every territory that should split, the most valuable split first; a
+ * split's children are considered once it is applied. Returns the splits in
+ * the order they were applied.
  */
-export const partitionDetails = (
-  input: PartitionInput,
-): Arr.NonEmptyReadonlyArray<PartitionDetail> => {
+const applySplits = (
+  roots: ReadonlyArray<Draft>,
+  context: SplitContext,
+): ReadonlyArray<Candidate> => {
+  let pending: ReadonlyArray<Candidate> = [];
+  const applied: Array<Candidate> = [];
+  const consider = (node: Draft): void => {
+    const plan = planSplit(node, context);
+    if (plan !== undefined) {
+      pending = [...pending, { node, plan }];
+    }
+  };
+  for (const root of roots) {
+    consider(root);
+  }
+  for (;;) {
+    const [chosen, ...rest] = pending.toSorted(byValue);
+    if (chosen === undefined) {
+      return applied;
+    }
+    pending = rest;
+    const { node, plan } = chosen;
+    node.territories = [
+      ...plan.folders.map(({ path, paths }) => draftOf(path, "folder", paths)),
+      ...(plan.other.length === 0
+        ? []
+        : [draftOf(node.path, "other", plan.other)]),
+    ];
+    node.splitReason = plan.reason;
+    for (const child of node.territories) {
+      consider(child);
+    }
+    applied.push(chosen);
+  }
+};
+
+/**
+ * The territory tree of the universe. The first cut is the package roots, or the
+ * top-level directories below the scope for files outside every package; a file
+ * directly in a package root belongs to that root's own territory. A territory
+ * splits into its child folders by `planSplit`, and territories with fewer than
+ * `TERRITORY_MIN_FILES` files are grouped as other files. The splits are applied in
+ * order of value (more expertise gain, then more files) and spread evenly over
+ * the details 2 to `maxDetail`, at most `MAX_DETAIL`: a split opens at its
+ * detail and everything it yields is shown from there. Each file belongs to
+ * exactly one territory at every detail. A scope that is itself a file has one
+ * `folder` territory, that file.
+ */
+export const partitionTerritories = (input: PartitionInput): Partition => {
   const [onlyPath] = input.paths;
   if (input.paths.length === 1 && onlyPath === input.scope) {
-    return [
-      {
-        detail: 1,
-        territories: [{ path: onlyPath, kind: "folder", paths: [onlyPath] }],
-      },
-    ];
+    return {
+      territories: [
+        { path: onlyPath, kind: "folder", paths: [onlyPath], territories: [] },
+      ],
+      maxDetail: 1,
+      expertiseDetail: 1,
+    };
   }
-  const files = placeFiles(input);
-  const sizes = treeSizes(files);
-  const cuts = Arr.makeBy(MAX_DETAIL, (index) =>
-    cutAt(files, index + 1, sizes),
-  );
-  const signatures = cuts.map((cut) => signatureOf(cut));
-  const repeated = signatures.findIndex(
-    (signature, index) => index > 0 && signature === signatures[index - 1],
-  );
-  const [coarsest, ...finer] = cuts;
-  const kept: Arr.NonEmptyReadonlyArray<ReadonlyArray<PartitionTerritory>> = [
-    coarsest,
-    ...(repeated === -1 ? finer : finer.slice(0, repeated - 1)),
-  ];
-  return Arr.map(kept, (cut, index) => ({
-    detail: index + 1,
-    territories: groupSmall(cut, input.scope).toSorted(byPathThenKind),
-  }));
+  const roots = firstCut(input);
+  const splits = applySplits(roots, {
+    totalFiles: input.paths.length,
+    expertsOf: input.expertsOf,
+  });
+  const maxDetail = Math.min(MAX_DETAIL, splits.length + 1);
+  const detailOf = (index: number): number =>
+    2 + Math.floor((index * (maxDetail - 1)) / splits.length);
+  let expertiseDetail = 1;
+  for (const [index, { node, plan }] of splits.entries()) {
+    node.splitDetail = detailOf(index);
+    expertiseDetail =
+      plan.expertiseGain > 0
+        ? Math.max(expertiseDetail, node.splitDetail)
+        : expertiseDetail;
+  }
+  return { territories: roots, maxDetail, expertiseDetail };
 };

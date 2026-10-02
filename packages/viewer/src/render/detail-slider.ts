@@ -1,5 +1,3 @@
-import type { Report } from "@codesaga/engine";
-
 import {
   detailTicks,
   detailStatus,
@@ -8,13 +6,12 @@ import {
   sliderFill,
 } from "../present/detail-slider.js";
 import type { DetailTick } from "../present/detail-slider.js";
+import type { Territories } from "../present/territory-details.js";
 import { h } from "./dom.js";
 import { icon } from "./icons.js";
 
-type Territories = Report["knowledge"]["territories"];
-
 const REC_HINT =
-  "Detail 1 is a package or top-level folder; each detail below splits territories by one more folder. ";
+  "Detail 1 is a package or top-level folder; each further detail splits more of the big territories and those whose folders have different experts. ";
 
 const stopOf = (tick: DetailTick): HTMLElement => {
   const stop = h(

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { at, classifiedCommit } from "../testing/classified-commit.js";
 import { knowledgeModel } from "./model.js";
-import { territoryDetails } from "./territories.js";
+import { territoriesAtDetail, territoryTree } from "./territories.js";
 
 const now = DateTime.makeUnsafe("2026-03-01T00:00:00Z");
 const ada = { name: "Ada", email: "ada@example.com" };
@@ -24,12 +24,12 @@ const touching = (
 const filesIn = (directory: string, count: number): ReadonlyArray<string> =>
   Array.from({ length: count }, (_, index) => `${directory}/f${index}.ts`);
 
-const detailsOf = (
+const treeOf = (
   commits: ReadonlyArray<ClassifiedCommit>,
   paths: ReadonlyArray<string>,
   packageRoots: ReadonlyArray<string>,
 ) =>
-  territoryDetails({
+  territoryTree({
     paths,
     packageRoots,
     scope: ".",
@@ -44,9 +44,9 @@ const detailsOf = (
 const web = filesIn("apps/web", 4);
 const lib = filesIn("packages/lib", 4);
 
-describe("territoryDetails knowledge", () => {
+describe("territoryTree knowledge", () => {
   it("describes each territory by the experts of its own files", () => {
-    const [detail] = detailsOf(
+    const { territories } = treeOf(
       [
         touching("2026-02-20T00:00:00Z", web, ada),
         touching("2026-02-19T00:00:00Z", lib, grace),
@@ -56,7 +56,7 @@ describe("territoryDetails knowledge", () => {
     );
 
     expect(
-      detail.territories.map(({ path, kind, files, island, experts }) => ({
+      territories.map(({ path, kind, files, island, experts }) => ({
         path,
         kind,
         files,
@@ -85,11 +85,11 @@ describe("territoryDetails knowledge", () => {
   });
 });
 
-describe("territoryDetails order and counts", () => {
+describe("territoryTree order", () => {
   it("lists orphaned territories first, then the healthy ones, and the small territories last", () => {
     const old = filesIn("apps/old", 3);
     const scripts = ["scripts/a.ts", "scripts/b.ts"];
-    const [detail] = detailsOf(
+    const { territories } = treeOf(
       [
         touching("2026-02-21T00:00:00Z", web, ada),
         touching("2026-02-20T00:00:00Z", web, grace),
@@ -101,40 +101,15 @@ describe("territoryDetails order and counts", () => {
     );
 
     expect(
-      detail.territories.map(({ kind, path }) => `${kind} ${path}`),
+      territories.map(({ kind, path }) => `${kind} ${path}`),
     ).toStrictEqual(["package apps/old", "package apps/web", "other ."]);
-  });
-
-  it("counts the territories of every detail, a detail deeper having more", () => {
-    const paths = [
-      "apps/web/index.ts",
-      ...filesIn("apps/web/src", 3),
-      ...filesIn("packages/lib", 3),
-      ...filesIn("packages/cli", 3),
-    ];
-    const details = detailsOf(
-      [touching("2026-02-20T00:00:00Z", paths, ada)],
-      paths,
-      ["apps/web", "packages/lib", "packages/cli"],
-    );
-
-    expect(
-      details.map(({ detail, totalTerritories, territories }) => [
-        detail,
-        totalTerritories,
-        territories.length,
-      ]),
-    ).toStrictEqual([
-      [1, 3, 3],
-      [2, 4, 4],
-    ]);
   });
 });
 
-describe("territoryDetails other-files territories", () => {
+describe("territoryTree other-files territories", () => {
   const old = filesIn("apps/old", 3);
   const otherFilesOf = (scripts: ReadonlyArray<string>) => {
-    const [detail] = detailsOf(
+    const { territories } = treeOf(
       [
         touching("2026-02-21T00:00:00Z", web, ada),
         touching("2025-01-01T00:00:00Z", old, grace),
@@ -143,7 +118,7 @@ describe("territoryDetails other-files territories", () => {
       [...web, ...old, ...scripts],
       ["apps/web", "apps/old"],
     );
-    return detail.territories.find(({ kind }) => kind === "other");
+    return territories.find(({ kind }) => kind === "other");
   };
 
   it("flags no island and no orphaned knowledge for fewer than 3 files", () => {
@@ -164,5 +139,78 @@ describe("territoryDetails other-files territories", () => {
       island: true,
       orphaned: true,
     });
+  });
+});
+
+const core = [
+  ...filesIn("packages/core/src", 5),
+  ...filesIn("packages/core/test", 5),
+];
+const other = filesIn("packages/lib", 10);
+const paths = [...core, ...other, ...filesIn("packages/cli", 10)];
+const splitTree = treeOf(
+  [
+    touching("2026-02-20T00:00:00Z", filesIn("packages/core/src", 5), ada),
+    touching("2026-02-19T00:00:00Z", filesIn("packages/core/test", 5), grace),
+    touching("2026-02-18T00:00:00Z", other, ada),
+    touching("2026-02-17T00:00:00Z", filesIn("packages/cli", 10), ada),
+  ],
+  paths,
+  ["packages/core", "packages/lib", "packages/cli"],
+);
+
+describe("territoryTree splits", () => {
+  it("describes a split territory by all its files and its children by their own", () => {
+    const split = splitTree.territories.find(
+      ({ path }) => path === "packages/core",
+    );
+
+    expect(split).toMatchObject({
+      files: 10,
+      splitReason:
+        "packages/core/src and packages/core/test have different experts",
+      splitDetail: 2,
+      totalTerritories: 2,
+    });
+    expect(
+      split?.territories.map(({ path, files, experts }) => [
+        path,
+        files,
+        experts.map(({ email }) => email),
+      ]),
+    ).toStrictEqual([
+      ["packages/core/src", 5, ["ada@example.com"]],
+      ["packages/core/test", 5, ["grace@example.com"]],
+    ]);
+  });
+
+  it("leaves territories without a split childless and without a reason", () => {
+    const whole = splitTree.territories.find(
+      ({ path }) => path === "packages/lib",
+    );
+
+    expect(whole).toMatchObject({ territories: [], totalTerritories: 0 });
+    expect(whole).not.toHaveProperty("splitReason");
+    expect(whole).not.toHaveProperty("splitDetail");
+  });
+
+  it("shows the first cut at detail 1 and the split territory's children from detail 2", () => {
+    expect(splitTree.maxDetail).toBe(2);
+    expect(splitTree.expertiseDetail).toBe(2);
+    expect(
+      [1, 2].map((detail) =>
+        territoriesAtDetail(splitTree.territories, detail)
+          .map(({ path }) => path)
+          .toSorted(),
+      ),
+    ).toStrictEqual([
+      ["packages/cli", "packages/core", "packages/lib"],
+      [
+        "packages/cli",
+        "packages/core/src",
+        "packages/core/test",
+        "packages/lib",
+      ],
+    ]);
   });
 });

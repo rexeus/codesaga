@@ -42,13 +42,19 @@ const commitTwoPackages = (repo: TempRepository) =>
   });
 
 const summarize = (
-  details: ReadonlyArray<{
-    territories: ReadonlyArray<{ kind: string; path: string; files: number }>;
-  }>,
-) =>
-  details.map(({ territories }) =>
-    territories.map(({ kind, path, files }) => `${kind} ${path} ${files}`),
-  );
+  territories: ReadonlyArray<{ kind: string; path: string; files: number }>,
+) => territories.map(({ kind, path, files }) => `${kind} ${path} ${files}`);
+
+/** Commits of `commitTwoPackages` plus Grace's tests for apps/web: the package is big and its folders have different experts. */
+const commitSplitPackage = (repo: TempRepository) =>
+  Effect.gen(function* () {
+    yield* commitTwoPackages(repo);
+    yield* repo.commit(
+      "2026-02-03T09:00:00Z",
+      code("apps/web/test", ["t1", "t2", "t3"]),
+      { author: grace },
+    );
+  });
 
 layer(NodeServices.layer)("analyze knowledge territories", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
@@ -63,19 +69,12 @@ layer(NodeServices.layer)("analyze knowledge territories", (it) => {
 
         const { knowledge } = yield* analyze(analyzeOptionsFor(repo));
 
-        assert.deepStrictEqual(summarize(knowledge.territories.details), [
-          [
-            "package apps/web 4",
-            "package packages/cli 3",
-            "package packages/lib 3",
-          ],
-          [
-            "folder apps/web/src 3",
-            "package packages/cli 3",
-            "package packages/lib 3",
-            "other apps 1",
-          ],
+        assert.deepStrictEqual(summarize(knowledge.territories.territories), [
+          "package apps/web 4",
+          "package packages/cli 3",
+          "package packages/lib 3",
         ]);
+        assert.strictEqual(knowledge.territories.maxDetail, 1);
         assert.strictEqual(knowledge.territories.detail, 1);
         assert.strictEqual(
           knowledge.territories.reason,
@@ -112,9 +111,10 @@ layer(NodeServices.layer)("analyze territory dates", (it) => {
 
         assert.deepStrictEqual(
           Object.fromEntries(
-            knowledge.territories.details[0]?.territories.map(
-              ({ path, lastChangedAt }) => [path, lastChangedAt],
-            ) ?? [],
+            knowledge.territories.territories.map(({ path, lastChangedAt }) => [
+              path,
+              lastChangedAt,
+            ]),
           ),
           {
             "apps/web": "2026-02-01T09:00:00.000Z",
@@ -165,9 +165,10 @@ layer(NodeServices.layer)("analyze territory badges", (it) => {
           ],
         );
         assert.deepStrictEqual(
-          report.knowledge.territories.details[0]?.territories.map(
-            ({ path, badges }) => [path, badges.map(({ kind }) => kind)],
-          ),
+          report.knowledge.territories.territories.map(({ path, badges }) => [
+            path,
+            badges.map(({ kind }) => kind),
+          ]),
           [
             ["apps/web", ["island"]],
             ["packages/cli", ["island"]],
@@ -181,20 +182,57 @@ layer(NodeServices.layer)("analyze territory badges", (it) => {
 layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
+  it.effect(
+    "splits a big package whose folders have different experts, recommending the detail that shows the split",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* commitSplitPackage(repo);
+
+        const { knowledge } = yield* analyze(analyzeOptionsFor(repo));
+
+        const web = knowledge.territories.territories.find(
+          ({ path }) => path === "apps/web",
+        );
+        assert.strictEqual(web?.files, 7);
+        assert.strictEqual(web?.splitDetail, 2);
+        assert.strictEqual(
+          web?.splitReason,
+          "apps/web/src and apps/web/test have different experts",
+        );
+        assert.deepStrictEqual(summarize(web?.territories ?? []), [
+          "folder apps/web/src 3",
+          "folder apps/web/test 3",
+          "other apps/web 1",
+        ]);
+        assert.strictEqual(knowledge.territories.maxDetail, 2);
+        assert.strictEqual(knowledge.territories.recommendedDetail, 2);
+        assert.strictEqual(
+          knowledge.territories.reason,
+          "detail 2: 4 territories with 3+ files for 2 active contributors",
+        );
+      }),
+  );
+
   it.effect("starts at the requested detail", () =>
     Effect.gen(function* () {
       yield* setNow;
       const repo = yield* makeTempRepository;
-      yield* commitTwoPackages(repo);
+      yield* commitSplitPackage(repo);
 
       const { knowledge } = yield* analyze(
-        analyzeOptionsFor(repo, { detail: 2 }),
+        analyzeOptionsFor(repo, { detail: 1 }),
       );
 
-      assert.strictEqual(knowledge.territories.detail, 2);
-      assert.strictEqual(knowledge.territories.recommendedDetail, 1);
+      assert.strictEqual(knowledge.territories.detail, 1);
+      assert.strictEqual(knowledge.territories.recommendedDetail, 2);
     }),
   );
+});
+
+layer(NodeServices.layer)("analyze knowledge territories scope", (it) => {
+  const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect("cuts only the packages inside the analyzed scope", () =>
     Effect.gen(function* () {
@@ -206,8 +244,9 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
         analyzeOptionsFor(repo, { scope: "packages" }),
       );
 
-      assert.deepStrictEqual(summarize(knowledge.territories.details), [
-        ["package packages/cli 3", "package packages/lib 3"],
+      assert.deepStrictEqual(summarize(knowledge.territories.territories), [
+        "package packages/cli 3",
+        "package packages/lib 3",
       ]);
     }),
   );
@@ -222,8 +261,8 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
         analyzeOptionsFor(repo, { scope: "packages/lib" }),
       );
 
-      assert.deepStrictEqual(summarize(knowledge.territories.details), [
-        ["package packages/lib 3"],
+      assert.deepStrictEqual(summarize(knowledge.territories.territories), [
+        "package packages/lib 3",
       ]);
     }),
   );
@@ -238,8 +277,8 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
         analyzeOptionsFor(repo, { scope: "packages/lib/x.ts" }),
       );
 
-      assert.deepStrictEqual(summarize(knowledge.territories.details), [
-        ["folder packages/lib/x.ts 1"],
+      assert.deepStrictEqual(summarize(knowledge.territories.territories), [
+        "folder packages/lib/x.ts 1",
       ]);
       assert.strictEqual(
         knowledge.territories.reason,

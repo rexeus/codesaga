@@ -149,7 +149,7 @@ const inFocus = ({ recentCommits, peerRecentCommits }: Context) =>
     ? {
         kind: "in-focus" as const,
         label: "In focus",
-        evidence: `${nounOf(recentCommits, "commit")} in the last ${inFocusDays} days, the most of any territory at this detail.`,
+        evidence: `${nounOf(recentCommits, "commit")} in the last ${inFocusDays} days, the most of its sibling territories.`,
       }
     : undefined;
 

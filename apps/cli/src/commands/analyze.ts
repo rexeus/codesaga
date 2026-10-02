@@ -91,13 +91,13 @@ export const analyzeCommand = Command.make(
     ),
     detail: detailFlag("detail").pipe(
       Flag.withDescription(
-        "Knowledge detail to start at, from 1 (packages) to finer folders; a detail beyond the finest one means the finest (default: the detail recommended for the team)",
+        "Knowledge detail to start at: 1 is the packages (or top-level folders), each further detail splits more of the big territories and those whose folders have different experts; a detail beyond the finest one means the finest (default: the detail recommended for the team)",
       ),
     ),
     depth: detailFlag("depth").pipe(Flag.withHidden),
     limit: Flag.Int("limit").pipe(
       Flag.withDescription(
-        `Contributors and knowledge directories and territories (per detail) to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
+        `Contributors, knowledge directories and territories (first-cut and inside each territory) to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
       ),
       Flag.filter(
         (limit) => limit >= 0,

@@ -1,6 +1,6 @@
 // Owns gathering what the territory badge rules read, from the knowledge model and the commits.
-// One pass over the commits per detail for the territory facts, one for the history facts shared by all details.
-// Cost: every change of every commit once per detail, plus one lookup per universe file and expert.
+// One pass over the commits for the facts of every territory, one for the history facts all of them share.
+// Cost: every change of every commit once, a lookup per territory that holds the file, plus one lookup per universe file and expert.
 
 import type { DateTime } from "effect";
 
@@ -16,7 +16,7 @@ import { TERRITORY_BADGE_THRESHOLDS } from "./territory-badge-thresholds.js";
 
 const { inFocusDays } = TERRITORY_BADGE_THRESHOLDS;
 
-/** What every detail shares: the commits, the time they are judged at and when files and people started. */
+/** What every territory shares: the commits, the time they are judged at and when files and people started. */
 export type TerritoryHistory = {
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   /** The `Clock` time that "the last 90 days" is measured back from. */
@@ -86,30 +86,35 @@ type TerritoryFacts = {
   readonly personFirst: Map<string, number>;
 };
 
-/** For each territory of one detail, the last change, the recent commits and when each person arrived. */
+/** Every territory of the tree: the last change, the recent commits and when each person arrived. */
 const territoryFactsOf = (
-  territories: ReadonlyArray<TerritoryWithFiles>,
+  tree: ReadonlyArray<TerritoryWithFiles>,
   { commits, now }: TerritoryHistory,
-): ReadonlyArray<TerritoryFacts> => {
-  const territoryOfPath = new Map(
-    territories.flatMap(({ paths }, index) =>
-      paths.map((path) => [path, index]),
-    ),
-  );
-  const facts = territories.map((): TerritoryFacts => ({
-    lastChangeTime: undefined,
-    recentCommits: 0,
-    personFirst: new Map(),
-  }));
+): ReadonlyMap<TerritoryWithFiles, TerritoryFacts> => {
+  const facts = new Map<TerritoryWithFiles, TerritoryFacts>();
+  const factsOfPath = new Map<string, Array<TerritoryFacts>>();
+  const visit = (territory: TerritoryWithFiles): void => {
+    const own: TerritoryFacts = {
+      lastChangeTime: undefined,
+      recentCommits: 0,
+      personFirst: new Map(),
+    };
+    facts.set(territory, own);
+    for (const path of territory.paths) {
+      factsOfPath.set(path, [...(factsOfPath.get(path) ?? []), own]);
+    }
+    for (const child of territory.territories) {
+      visit(child);
+    }
+  };
+  for (const territory of tree) {
+    visit(territory);
+  }
   for (const commit of commits) {
     const touched = new Set(
-      commit.changes.flatMap(({ path }) => territoryOfPath.get(path) ?? []),
+      commit.changes.flatMap(({ path }) => factsOfPath.get(path) ?? []),
     );
-    for (const index of touched) {
-      const territory = facts[index];
-      if (territory === undefined) {
-        continue;
-      }
+    for (const territory of touched) {
       territory.lastChangeTime = Math.max(
         territory.lastChangeTime ?? 0,
         commit.time,
@@ -163,44 +168,51 @@ const expertsOf = (
 };
 
 /**
- * The badge input of every territory of one detail, in the order of `territories`. The
- * territory in focus is chosen among the named territories: the commits of an `other` territory
- * add up many small ones and do not compete.
+ * The badge input of every territory of the tree, found by the territory itself. The
+ * territory in focus is chosen among its named siblings, the territories with the
+ * same parent, or the first cut: the commits of an `other` territory add up many
+ * small ones and do not compete.
  */
 export const territoryBadgeInputs = (
-  territories: ReadonlyArray<TerritoryWithFiles>,
+  tree: ReadonlyArray<TerritoryWithFiles>,
   history: TerritoryHistory,
   model: KnowledgeModel,
-): ReadonlyArray<TerritoryBadgeInput> => {
-  const facts = territoryFactsOf(territories, history);
-  return territories.map((territory, index) => {
-    const own = facts[index];
-    const peers = facts.flatMap((peer, other) =>
-      other === index || territories[other]?.kind === "other"
-        ? []
-        : [peer.recentCommits],
-    );
-    return {
-      kind: territory.kind,
-      path: territory.path,
-      paths: territory.paths,
-      truckFactor: territory.truckFactor,
-      island: territory.island,
-      orphaned: territory.orphaned,
-      experts: expertsOf(territory, model, own?.personFirst ?? new Map()),
-      fileFirstCommits: territory.paths.flatMap(
-        (path) => history.fileFirstCommits.get(path) ?? [],
-      ),
-      lastChangeTime: own?.lastChangeTime,
-      recentCommits: own?.recentCommits ?? 0,
-      peerRecentCommits: peers.reduce(
-        (most, count) => Math.max(most, count),
-        0,
-      ),
-      startTime: history.startTime,
-      firstCommits: history.firstCommits,
-    };
-  });
+): ReadonlyMap<TerritoryWithFiles, TerritoryBadgeInput> => {
+  const facts = territoryFactsOf(tree, history);
+  const inputs = new Map<TerritoryWithFiles, TerritoryBadgeInput>();
+  const visit = (siblings: ReadonlyArray<TerritoryWithFiles>): void => {
+    for (const territory of siblings) {
+      const own = facts.get(territory);
+      const peers = siblings.flatMap((peer) =>
+        peer === territory || peer.kind === "other"
+          ? []
+          : [facts.get(peer)?.recentCommits ?? 0],
+      );
+      inputs.set(territory, {
+        kind: territory.kind,
+        path: territory.path,
+        paths: territory.paths,
+        truckFactor: territory.truckFactor,
+        island: territory.island,
+        orphaned: territory.orphaned,
+        experts: expertsOf(territory, model, own?.personFirst ?? new Map()),
+        fileFirstCommits: territory.paths.flatMap(
+          (path) => history.fileFirstCommits.get(path) ?? [],
+        ),
+        lastChangeTime: own?.lastChangeTime,
+        recentCommits: own?.recentCommits ?? 0,
+        peerRecentCommits: peers.reduce(
+          (most, count) => Math.max(most, count),
+          0,
+        ),
+        startTime: history.startTime,
+        firstCommits: history.firstCommits,
+      });
+      visit(territory.territories);
+    }
+  };
+  visit(tree);
+  return inputs;
 };
 
 /**

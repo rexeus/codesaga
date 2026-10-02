@@ -28,12 +28,15 @@
     "territories": {
       "minFiles": 3,
       "maxDetail": 6,
-      "giantShare": 0.4,
-      "giantSplitSteps": 2,
       "recommendationActiveDays": 90,
       "territoriesPerContributor": 2,
       "minTargetTerritories": 4,
-      "maxTargetTerritories": 25
+      "maxTargetTerritories": 25,
+      "bigShare": 0.4,
+      "bigFilesShare": 0.25,
+      "bigMinFiles": 30,
+      "bigMaxFiles": 150,
+      "mainExpertShare": 0.5
     },
     "stories": {
       "streakMinDays": 7,
@@ -2237,605 +2240,90 @@
     "territories": {
       "detail": 1,
       "recommendedDetail": 1,
+      "maxDetail": 3,
       "reason": "detail 1: 11 territories with 3+ files for 4 active contributors",
-      "details": [
+      "totalTerritories": 11,
+      "territories": [
         {
-          "detail": 1,
-          "totalTerritories": 11,
-          "territories": [
+          "path": "docs",
+          "files": 14,
+          "truckFactor": 1,
+          "island": true,
+          "orphaned": true,
+          "experts": [
             {
-              "path": "docs",
-              "files": 14,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Lena Fischer",
-                  "email": "lena.fischer@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2025-11-14T14:48:10.000Z",
-                  "files": 13,
-                  "soleFiles": 12,
-                  "share": 0.9286
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 2,
-                  "soleFiles": 1,
-                  "share": 0.1429
-                }
-              ],
-              "reasons": [
-                "Lena Fischer is the only expert on 12 of 14 files",
-                "no active expert for 12 of 14 files (last expert commit 2025-11-14)"
-              ],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Lena Fischer is the only expert on 12 of 14 files."
-                },
-                {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "12 of 14 files have no active expert."
-                },
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Maya Lindqvist is the only active expert."
-                }
-              ],
-              "lineOwners": {
-                "skippedFiles": 0,
-                "lines": 3420,
-                "owners": [
-                  {
-                    "name": "Lena Fischer",
-                    "email": "lena.fischer@aurora.example",
-                    "lines": 2950,
-                    "share": 0.8626,
-                    "kind": "human"
-                  },
-                  {
-                    "name": "Maya Lindqvist",
-                    "email": "maya.lindqvist@aurora.example",
-                    "lines": 380,
-                    "share": 0.1111,
-                    "kind": "human"
-                  },
-                  {
-                    "name": "Claude Code",
-                    "email": "noreply@anthropic.com",
-                    "lines": 90,
-                    "share": 0.0263,
-                    "kind": "agent"
-                  }
-                ]
-              }
+              "name": "Lena Fischer",
+              "email": "lena.fischer@aurora.example",
+              "active": false,
+              "lastCommitAt": "2025-11-14T14:48:10.000Z",
+              "files": 13,
+              "soleFiles": 12,
+              "share": 0.9286
             },
             {
-              "path": "packages/db",
-              "files": 52,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 36,
-                  "soleFiles": 30,
-                  "share": 0.6923
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 14,
-                  "soleFiles": 10,
-                  "share": 0.2692
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 9,
-                  "soleFiles": 6,
-                  "share": 0.1731
-                }
-              ],
-              "reasons": [
-                "no active expert for 30 of 52 files (last expert commit 2024-12-03)"
-              ],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "30 of 52 files have no active expert."
-                },
-                {
-                  "kind": "handover",
-                  "category": "knowledge",
-                  "label": "Handover",
-                  "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
-                }
-              ],
-              "lineOwners": {
-                "skippedFiles": 0,
-                "lines": 6180,
-                "owners": [
-                  {
-                    "name": "Dmitri Volkov",
-                    "email": "dmitri.volkov@aurora.example",
-                    "lines": 4120,
-                    "share": 0.6667,
-                    "kind": "human"
-                  },
-                  {
-                    "name": "Maya Lindqvist",
-                    "email": "maya.lindqvist@aurora.example",
-                    "lines": 1500,
-                    "share": 0.2427,
-                    "kind": "human"
-                  },
-                  {
-                    "name": "dependabot[bot]",
-                    "email": "49699333+dependabot[bot]@users.noreply.github.com",
-                    "lines": 560,
-                    "share": 0.0906,
-                    "kind": "bot"
-                  }
-                ]
-              }
-            },
-            {
-              "path": "packages/auth",
-              "files": 19,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 18,
-                  "soleFiles": 17,
-                  "share": 0.9474
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 2,
-                  "soleFiles": 1,
-                  "share": 0.1053
-                }
-              ],
-              "reasons": ["Jonas Weber is the only expert on 17 of 19 files"],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Jonas Weber is the only expert on 17 of 19 files."
-                },
-                {
-                  "kind": "knowledge-fading",
-                  "category": "knowledge",
-                  "label": "Knowledge fading",
-                  "evidence": "Jonas Weber, expert on 18 of 19 files, last committed 102 days ago."
-                }
-              ]
-            },
-            {
-              "path": "apps/admin",
-              "files": 58,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 42,
-                  "soleFiles": 31,
-                  "share": 0.7241
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 25,
-                  "soleFiles": 14,
-                  "share": 0.431
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "knowledge-fading",
-                  "category": "knowledge",
-                  "label": "Knowledge fading",
-                  "evidence": "Aiko Tanaka, expert on 42 of 58 files, last committed 148 days ago."
-                }
-              ]
-            },
-            {
-              "path": "infra",
-              "files": 27,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 21,
-                  "soleFiles": 15,
-                  "share": 0.7778
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 12,
-                  "soleFiles": 6,
-                  "share": 0.4444
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": ".github",
-              "files": 9,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 7,
-                  "soleFiles": 4,
-                  "share": 0.7778
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.4444
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": ".",
-              "files": 8,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.75
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "scripts",
-              "files": 7,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.8571
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.4286
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "new-territory",
-                  "category": "activity",
-                  "label": "New territory",
-                  "evidence": "Created on 2026-08-19, 42 days ago."
-                }
-              ]
-            },
-            {
-              "path": "apps/web",
-              "files": 112,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 64,
-                  "soleFiles": 30,
-                  "share": 0.5714
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 45,
-                  "soleFiles": 18,
-                  "share": 0.4018
-                },
-                {
-                  "name": "Lena Fischer",
-                  "email": "lena.fischer@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2025-11-14T14:48:10.000Z",
-                  "files": 26,
-                  "soleFiles": 12,
-                  "share": 0.2321
-                },
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 8,
-                  "soleFiles": 3,
-                  "share": 0.0714
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "in-focus",
-                  "category": "activity",
-                  "label": "In focus",
-                  "evidence": "521 commits in the window, the most of any territory."
-                },
-                {
-                  "kind": "newcomer-friendly",
-                  "category": "knowledge",
-                  "label": "Newcomer-friendly",
-                  "evidence": "2 people made their first commit here in the last 180 days."
-                }
-              ]
-            },
-            {
-              "path": "packages/api",
-              "files": 71,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 34,
-                  "soleFiles": 20,
-                  "share": 0.4789
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 26,
-                  "soleFiles": 14,
-                  "share": 0.3662
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 14,
-                  "soleFiles": 6,
-                  "share": 0.1972
-                },
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 11,
-                  "soleFiles": 5,
-                  "share": 0.1549
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "well-tested",
-                  "category": "code",
-                  "label": "Well tested",
-                  "evidence": "46% of the files are tests (33 of 71)."
-                }
-              ]
-            },
-            {
-              "path": "packages/ui",
-              "files": 96,
-              "truckFactor": 4,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 54,
-                  "soleFiles": 34,
-                  "share": 0.5625
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 40,
-                  "soleFiles": 22,
-                  "share": 0.4167
-                },
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 20,
-                  "soleFiles": 10,
-                  "share": 0.2083
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 12,
-                  "soleFiles": 4,
-                  "share": 0.125
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "shared-knowledge",
-                  "category": "knowledge",
-                  "label": "Shared knowledge",
-                  "evidence": "4 active experts and a truck factor of 4."
-                }
-              ]
+              "name": "Maya Lindqvist",
+              "email": "maya.lindqvist@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-29T15:41:07.000Z",
+              "files": 2,
+              "soleFiles": 1,
+              "share": 0.1429
             }
-          ]
-        },
-        {
-          "detail": 2,
-          "totalTerritories": 27,
-          "territories": [
+          ],
+          "reasons": [
+            "Lena Fischer is the only expert on 12 of 14 files",
+            "no active expert for 12 of 14 files (last expert commit 2025-11-14)"
+          ],
+          "kind": "folder",
+          "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "badges": [
             {
-              "path": "packages/db/migrations",
-              "files": 30,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 30,
-                  "soleFiles": 27,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [
-                "Dmitri Volkov is the only expert on 27 of 30 files",
-                "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
-              ],
-              "kind": "folder",
-              "lastChangedAt": "2026-04-22T08:14:50.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Dmitri Volkov is the only expert on 27 of 30 files."
-                },
-                {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "27 of 30 files have no active expert."
-                }
-              ]
+              "kind": "island",
+              "category": "knowledge",
+              "label": "Knowledge island",
+              "evidence": "Lena Fischer is the only expert on 12 of 14 files."
             },
+            {
+              "kind": "orphaned",
+              "category": "knowledge",
+              "label": "Orphaned",
+              "evidence": "12 of 14 files have no active expert."
+            },
+            {
+              "kind": "one-expert",
+              "category": "knowledge",
+              "label": "One expert",
+              "evidence": "Maya Lindqvist is the only active expert."
+            }
+          ],
+          "lineOwners": {
+            "skippedFiles": 0,
+            "lines": 3420,
+            "owners": [
+              {
+                "name": "Lena Fischer",
+                "email": "lena.fischer@aurora.example",
+                "lines": 2950,
+                "share": 0.8626,
+                "kind": "human"
+              },
+              {
+                "name": "Maya Lindqvist",
+                "email": "maya.lindqvist@aurora.example",
+                "lines": 380,
+                "share": 0.1111,
+                "kind": "human"
+              },
+              {
+                "name": "Claude Code",
+                "email": "noreply@anthropic.com",
+                "lines": 90,
+                "share": 0.0263,
+                "kind": "agent"
+              }
+            ]
+          },
+          "territories": [
             {
               "path": "docs/guides",
               "files": 9,
@@ -2878,7 +2366,9 @@
                   "label": "Quiet",
                   "evidence": "Unchanged since 2026-01-12, 261 days."
                 }
-              ]
+              ],
+              "territories": [],
+              "totalTerritories": 0
             },
             {
               "path": "docs",
@@ -2910,7 +2400,7 @@
                 "Lena Fischer is the only expert on 4 of 5 files",
                 "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
               ],
-              "kind": "folder",
+              "kind": "other",
               "lastChangedAt": "2026-09-29T15:41:07.000Z",
               "badges": [
                 {
@@ -2931,8 +2421,342 @@
                   "label": "One expert",
                   "evidence": "Maya Lindqvist is the only active expert."
                 }
-              ]
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 2,
+          "splitDetail": 2,
+          "splitReason": "big: 14 files"
+        },
+        {
+          "path": "packages/db",
+          "files": 52,
+          "truckFactor": 1,
+          "island": false,
+          "orphaned": true,
+          "experts": [
+            {
+              "name": "Dmitri Volkov",
+              "email": "dmitri.volkov@aurora.example",
+              "active": false,
+              "lastCommitAt": "2024-12-03T09:26:38.000Z",
+              "files": 36,
+              "soleFiles": 30,
+              "share": 0.6923
             },
+            {
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 14,
+              "soleFiles": 10,
+              "share": 0.2692
+            },
+            {
+              "name": "Jonas Weber",
+              "email": "jonas.weber@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-06-20T13:10:03.000Z",
+              "files": 9,
+              "soleFiles": 6,
+              "share": 0.1731
+            }
+          ],
+          "reasons": [
+            "no active expert for 30 of 52 files (last expert commit 2024-12-03)"
+          ],
+          "kind": "package",
+          "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "badges": [
+            {
+              "kind": "orphaned",
+              "category": "knowledge",
+              "label": "Orphaned",
+              "evidence": "30 of 52 files have no active expert."
+            },
+            {
+              "kind": "handover",
+              "category": "knowledge",
+              "label": "Handover",
+              "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
+            }
+          ],
+          "lineOwners": {
+            "skippedFiles": 0,
+            "lines": 6180,
+            "owners": [
+              {
+                "name": "Dmitri Volkov",
+                "email": "dmitri.volkov@aurora.example",
+                "lines": 4120,
+                "share": 0.6667,
+                "kind": "human"
+              },
+              {
+                "name": "Maya Lindqvist",
+                "email": "maya.lindqvist@aurora.example",
+                "lines": 1500,
+                "share": 0.2427,
+                "kind": "human"
+              },
+              {
+                "name": "dependabot[bot]",
+                "email": "49699333+dependabot[bot]@users.noreply.github.com",
+                "lines": 560,
+                "share": 0.0906,
+                "kind": "bot"
+              }
+            ]
+          },
+          "territories": [
+            {
+              "path": "packages/db/migrations",
+              "files": 30,
+              "truckFactor": 1,
+              "island": true,
+              "orphaned": true,
+              "experts": [
+                {
+                  "name": "Dmitri Volkov",
+                  "email": "dmitri.volkov@aurora.example",
+                  "active": false,
+                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
+                  "files": 30,
+                  "soleFiles": 27,
+                  "share": 1.0
+                }
+              ],
+              "reasons": [
+                "Dmitri Volkov is the only expert on 27 of 30 files",
+                "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
+              ],
+              "kind": "folder",
+              "lastChangedAt": "2026-04-22T08:14:50.000Z",
+              "badges": [
+                {
+                  "kind": "island",
+                  "category": "knowledge",
+                  "label": "Knowledge island",
+                  "evidence": "Dmitri Volkov is the only expert on 27 of 30 files."
+                },
+                {
+                  "kind": "orphaned",
+                  "category": "knowledge",
+                  "label": "Orphaned",
+                  "evidence": "27 of 30 files have no active expert."
+                }
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            },
+            {
+              "path": "packages/db/src",
+              "files": 18,
+              "truckFactor": 2,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Tomás Herrera",
+                  "email": "tomas.herrera@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                  "files": 13,
+                  "soleFiles": 5,
+                  "share": 0.7222
+                },
+                {
+                  "name": "Jonas Weber",
+                  "email": "jonas.weber@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                  "files": 9,
+                  "soleFiles": 3,
+                  "share": 0.5
+                },
+                {
+                  "name": "Dmitri Volkov",
+                  "email": "dmitri.volkov@aurora.example",
+                  "active": false,
+                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
+                  "files": 5,
+                  "soleFiles": 0,
+                  "share": 0.2778
+                }
+              ],
+              "reasons": [],
+              "kind": "folder",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
+              "badges": [
+                {
+                  "kind": "handover",
+                  "category": "knowledge",
+                  "label": "Handover",
+                  "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
+                }
+              ],
+              "territories": [
+                {
+                  "path": "packages/db/src/queries",
+                  "files": 12,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 8,
+                      "soleFiles": 4,
+                      "share": 0.6667
+                    },
+                    {
+                      "name": "Jonas Weber",
+                      "email": "jonas.weber@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                      "files": 6,
+                      "soleFiles": 2,
+                      "share": 0.5
+                    },
+                    {
+                      "name": "Dmitri Volkov",
+                      "email": "dmitri.volkov@aurora.example",
+                      "active": false,
+                      "lastCommitAt": "2024-12-03T09:26:38.000Z",
+                      "files": 4,
+                      "soleFiles": 0,
+                      "share": 0.3333
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "packages/db/src",
+                  "files": 6,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 5,
+                      "soleFiles": 3,
+                      "share": 0.8333
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [
+                    {
+                      "kind": "one-expert",
+                      "category": "knowledge",
+                      "label": "One expert",
+                      "evidence": "Tomás Herrera is the only active expert."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
+                }
+              ],
+              "totalTerritories": 2,
+              "splitDetail": 3,
+              "splitReason": "big: 18 files"
+            },
+            {
+              "path": "packages/db",
+              "files": 4,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Tomás Herrera",
+                  "email": "tomas.herrera@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                  "files": 4,
+                  "soleFiles": 2,
+                  "share": 1.0
+                }
+              ],
+              "reasons": [],
+              "kind": "other",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
+              "badges": [
+                {
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
+                  "evidence": "Tomás Herrera is the only active expert."
+                }
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 3,
+          "splitDetail": 2,
+          "splitReason": "big: 52 files"
+        },
+        {
+          "path": "packages/auth",
+          "files": 19,
+          "truckFactor": 1,
+          "island": true,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Jonas Weber",
+              "email": "jonas.weber@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-06-20T13:10:03.000Z",
+              "files": 18,
+              "soleFiles": 17,
+              "share": 0.9474
+            },
+            {
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 2,
+              "soleFiles": 1,
+              "share": 0.1053
+            }
+          ],
+          "reasons": ["Jonas Weber is the only expert on 17 of 19 files"],
+          "kind": "package",
+          "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "badges": [
+            {
+              "kind": "island",
+              "category": "knowledge",
+              "label": "Knowledge island",
+              "evidence": "Jonas Weber is the only expert on 17 of 19 files."
+            },
+            {
+              "kind": "knowledge-fading",
+              "category": "knowledge",
+              "label": "Knowledge fading",
+              "evidence": "Jonas Weber, expert on 18 of 19 files, last committed 102 days ago."
+            }
+          ],
+          "territories": [
             {
               "path": "packages/auth/src",
               "files": 16,
@@ -2975,45 +2799,88 @@
                   "label": "Knowledge fading",
                   "evidence": "Jonas Weber, expert on 14 of 16 files, last committed 102 days ago."
                 }
-              ]
-            },
-            {
-              "path": "apps/admin",
-              "files": 6,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
+              ],
+              "territories": [
                 {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 6,
-                  "soleFiles": 5,
-                  "share": 1.0
+                  "path": "packages/auth/src/providers",
+                  "files": 9,
+                  "truckFactor": 1,
+                  "island": true,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Jonas Weber",
+                      "email": "jonas.weber@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                      "files": 9,
+                      "soleFiles": 8,
+                      "share": 1.0
+                    }
+                  ],
+                  "reasons": ["Jonas Weber is the only expert on 8 of 9 files"],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-06-20T13:10:03.000Z",
+                  "badges": [
+                    {
+                      "kind": "island",
+                      "category": "knowledge",
+                      "label": "Knowledge island",
+                      "evidence": "Jonas Weber is the only expert on 8 of 9 files."
+                    },
+                    {
+                      "kind": "one-expert",
+                      "category": "knowledge",
+                      "label": "One expert",
+                      "evidence": "Jonas Weber is the only active expert."
+                    },
+                    {
+                      "kind": "knowledge-fading",
+                      "category": "knowledge",
+                      "label": "Knowledge fading",
+                      "evidence": "Jonas Weber, expert on 9 of 9 files, last committed 102 days ago."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
                 },
                 {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.3333
+                  "path": "packages/auth/src",
+                  "files": 7,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Jonas Weber",
+                      "email": "jonas.weber@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                      "files": 6,
+                      "soleFiles": 4,
+                      "share": 0.8571
+                    },
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 2,
+                      "soleFiles": 0,
+                      "share": 0.2857
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 }
               ],
-              "reasons": ["Aiko Tanaka is the only expert on 5 of 6 files"],
-              "kind": "package",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Aiko Tanaka is the only expert on 5 of 6 files."
-                }
-              ]
+              "totalTerritories": 2,
+              "splitDetail": 3,
+              "splitReason": "big: 16 files"
             },
             {
               "path": "packages/auth",
@@ -3033,7 +2900,7 @@
                 }
               ],
               "reasons": ["Jonas Weber is the only expert on 3 of 3 files"],
-              "kind": "package",
+              "kind": "other",
               "lastChangedAt": "2026-06-20T13:10:03.000Z",
               "badges": [
                 {
@@ -3048,8 +2915,53 @@
                   "label": "One expert",
                   "evidence": "Jonas Weber is the only active expert."
                 }
-              ]
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 2,
+          "splitDetail": 2,
+          "splitReason": "big: 19 files"
+        },
+        {
+          "path": "apps/admin",
+          "files": 58,
+          "truckFactor": 1,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Aiko Tanaka",
+              "email": "aiko.tanaka@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-05-05T08:33:51.000Z",
+              "files": 42,
+              "soleFiles": 31,
+              "share": 0.7241
             },
+            {
+              "name": "Priya Raman",
+              "email": "priya.raman@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-12T11:22:19.000Z",
+              "files": 25,
+              "soleFiles": 14,
+              "share": 0.431
+            }
+          ],
+          "reasons": [],
+          "kind": "package",
+          "lastChangedAt": "2026-08-12T11:22:19.000Z",
+          "badges": [
+            {
+              "kind": "knowledge-fading",
+              "category": "knowledge",
+              "label": "Knowledge fading",
+              "evidence": "Aiko Tanaka, expert on 42 of 58 files, last committed 148 days ago."
+            }
+          ],
+          "territories": [
             {
               "path": "apps/admin/src",
               "files": 44,
@@ -3086,51 +2998,122 @@
                   "label": "Knowledge fading",
                   "evidence": "Aiko Tanaka, expert on 33 of 44 files, last committed 148 days ago."
                 }
-              ]
-            },
-            {
-              "path": ".",
-              "files": 8,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
+              ],
+              "territories": [
                 {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.75
+                  "path": "apps/admin/src/pages",
+                  "files": 26,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Aiko Tanaka",
+                      "email": "aiko.tanaka@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                      "files": 21,
+                      "soleFiles": 13,
+                      "share": 0.8077
+                    },
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 10,
+                      "soleFiles": 2,
+                      "share": 0.3846
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-08-12T11:22:19.000Z",
+                  "badges": [
+                    {
+                      "kind": "knowledge-fading",
+                      "category": "knowledge",
+                      "label": "Knowledge fading",
+                      "evidence": "Aiko Tanaka, expert on 21 of 26 files, last committed 148 days ago."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
                 },
                 {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.5
+                  "path": "apps/admin/src/components",
+                  "files": 12,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Aiko Tanaka",
+                      "email": "aiko.tanaka@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                      "files": 8,
+                      "soleFiles": 4,
+                      "share": 0.6667
+                    },
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 7,
+                      "soleFiles": 3,
+                      "share": 0.5833
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-08-12T11:22:19.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "apps/admin/src",
+                  "files": 6,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Aiko Tanaka",
+                      "email": "aiko.tanaka@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                      "files": 5,
+                      "soleFiles": 3,
+                      "share": 0.8333
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-05-05T08:33:51.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 }
               ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
+              "totalTerritories": 3,
+              "splitDetail": 3,
+              "splitReason": "big: 44 files"
             },
             {
-              "path": "apps/web",
+              "path": "apps/admin/test",
               "files": 8,
-              "truckFactor": 1,
+              "truckFactor": 2,
               "island": false,
               "orphaned": false,
               "experts": [
                 {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
+                  "name": "Aiko Tanaka",
+                  "email": "aiko.tanaka@aurora.example",
                   "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
                   "files": 6,
                   "soleFiles": 3,
                   "share": 0.75
@@ -3140,16 +3123,94 @@
                   "email": "priya.raman@aurora.example",
                   "active": true,
                   "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.5
+                  "files": 6,
+                  "soleFiles": 2,
+                  "share": 0.75
                 }
               ],
               "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
+              "kind": "folder",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
             },
+            {
+              "path": "apps/admin",
+              "files": 6,
+              "truckFactor": 1,
+              "island": true,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Aiko Tanaka",
+                  "email": "aiko.tanaka@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                  "files": 6,
+                  "soleFiles": 5,
+                  "share": 1.0
+                },
+                {
+                  "name": "Priya Raman",
+                  "email": "priya.raman@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                  "files": 2,
+                  "soleFiles": 0,
+                  "share": 0.3333
+                }
+              ],
+              "reasons": ["Aiko Tanaka is the only expert on 5 of 6 files"],
+              "kind": "other",
+              "lastChangedAt": "2026-08-12T11:22:19.000Z",
+              "badges": [
+                {
+                  "kind": "island",
+                  "category": "knowledge",
+                  "label": "Knowledge island",
+                  "evidence": "Aiko Tanaka is the only expert on 5 of 6 files."
+                }
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 3,
+          "splitDetail": 2,
+          "splitReason": "big: 58 files"
+        },
+        {
+          "path": "infra",
+          "files": 27,
+          "truckFactor": 1,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 21,
+              "soleFiles": 15,
+              "share": 0.7778
+            },
+            {
+              "name": "Sam Okafor",
+              "email": "sam.okafor@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-28T19:02:26.000Z",
+              "files": 12,
+              "soleFiles": 6,
+              "share": 0.4444
+            }
+          ],
+          "reasons": [],
+          "kind": "folder",
+          "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "badges": [],
+          "territories": [
             {
               "path": "infra/docker",
               "files": 7,
@@ -3179,40 +3240,115 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
             },
             {
-              "path": "packages/ui",
-              "files": 7,
-              "truckFactor": 1,
+              "path": "infra/terraform",
+              "files": 17,
+              "truckFactor": 2,
               "island": false,
               "orphaned": false,
               "experts": [
                 {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
+                  "name": "Tomás Herrera",
+                  "email": "tomas.herrera@aurora.example",
                   "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 7,
-                  "soleFiles": 4,
-                  "share": 1.0
+                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                  "files": 14,
+                  "soleFiles": 7,
+                  "share": 0.8235
+                },
+                {
+                  "name": "Sam Okafor",
+                  "email": "sam.okafor@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
+                  "files": 8,
+                  "soleFiles": 2,
+                  "share": 0.4706
                 }
               ],
               "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
+              "kind": "folder",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
+              "badges": [],
+              "territories": [
                 {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Priya Raman is the only active expert."
+                  "path": "infra/terraform/modules",
+                  "files": 12,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 10,
+                      "soleFiles": 6,
+                      "share": 0.8333
+                    },
+                    {
+                      "name": "Sam Okafor",
+                      "email": "sam.okafor@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
+                      "files": 5,
+                      "soleFiles": 1,
+                      "share": 0.4167
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "infra/terraform",
+                  "files": 5,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 4,
+                      "soleFiles": 2,
+                      "share": 0.8
+                    },
+                    {
+                      "name": "Sam Okafor",
+                      "email": "sam.okafor@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
+                      "files": 2,
+                      "soleFiles": 0,
+                      "share": 0.4
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 }
-              ]
+              ],
+              "totalTerritories": 2,
+              "splitDetail": 3,
+              "splitReason": "big: 17 files"
             },
             {
-              "path": "scripts",
-              "files": 7,
+              "path": "infra",
+              "files": 3,
               "truckFactor": 1,
               "island": false,
               "orphaned": false,
@@ -3222,32 +3358,61 @@
                   "email": "tomas.herrera@aurora.example",
                   "active": true,
                   "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.8571
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
                   "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.4286
+                  "soleFiles": 2,
+                  "share": 1.0
                 }
               ],
               "reasons": [],
-              "kind": "folder",
+              "kind": "other",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
               "badges": [
                 {
-                  "kind": "new-territory",
-                  "category": "activity",
-                  "label": "New territory",
-                  "evidence": "Created on 2026-08-19, 42 days ago."
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
+                  "evidence": "Tomás Herrera is the only active expert."
                 }
-              ]
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 3,
+          "splitDetail": 2,
+          "splitReason": "infra/docker and infra/terraform have different experts"
+        },
+        {
+          "path": ".github",
+          "files": 9,
+          "truckFactor": 1,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Sam Okafor",
+              "email": "sam.okafor@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-28T19:02:26.000Z",
+              "files": 7,
+              "soleFiles": 4,
+              "share": 0.7778
             },
+            {
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 4,
+              "soleFiles": 1,
+              "share": 0.4444
+            }
+          ],
+          "reasons": [],
+          "kind": "folder",
+          "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "badges": [],
+          "territories": [
             {
               "path": ".github/workflows",
               "files": 6,
@@ -3277,65 +3442,9 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/api",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "packages/db",
-              "files": 4,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
             },
             {
               "path": ".github",
@@ -3355,7 +3464,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "folder",
+              "kind": "other",
               "lastChangedAt": "2026-08-28T19:02:26.000Z",
               "badges": [
                 {
@@ -3364,37 +3473,150 @@
                   "label": "One expert",
                   "evidence": "Sam Okafor is the only active expert."
                 }
-              ]
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 2,
+          "splitDetail": 2,
+          "splitReason": "big: 9 files"
+        },
+        {
+          "path": ".",
+          "files": 8,
+          "truckFactor": 1,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Maya Lindqvist",
+              "email": "maya.lindqvist@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-29T15:41:07.000Z",
+              "files": 6,
+              "soleFiles": 4,
+              "share": 0.75
             },
             {
-              "path": "infra",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 4,
+              "soleFiles": 1,
+              "share": 0.5
+            }
+          ],
+          "reasons": [],
+          "kind": "folder",
+          "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "badges": [],
+          "territories": [],
+          "totalTerritories": 0
+        },
+        {
+          "path": "scripts",
+          "files": 7,
+          "truckFactor": 1,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 6,
+              "soleFiles": 4,
+              "share": 0.8571
             },
+            {
+              "name": "Sam Okafor",
+              "email": "sam.okafor@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-28T19:02:26.000Z",
+              "files": 3,
+              "soleFiles": 1,
+              "share": 0.4286
+            }
+          ],
+          "reasons": [],
+          "kind": "folder",
+          "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "badges": [
+            {
+              "kind": "new-territory",
+              "category": "activity",
+              "label": "New territory",
+              "evidence": "Created on 2026-08-19, 42 days ago."
+            }
+          ],
+          "territories": [],
+          "totalTerritories": 0
+        },
+        {
+          "path": "apps/web",
+          "files": 112,
+          "truckFactor": 2,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Maya Lindqvist",
+              "email": "maya.lindqvist@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-29T15:41:07.000Z",
+              "files": 64,
+              "soleFiles": 30,
+              "share": 0.5714
+            },
+            {
+              "name": "Priya Raman",
+              "email": "priya.raman@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-12T11:22:19.000Z",
+              "files": 45,
+              "soleFiles": 18,
+              "share": 0.4018
+            },
+            {
+              "name": "Lena Fischer",
+              "email": "lena.fischer@aurora.example",
+              "active": false,
+              "lastCommitAt": "2025-11-14T14:48:10.000Z",
+              "files": 26,
+              "soleFiles": 12,
+              "share": 0.2321
+            },
+            {
+              "name": "Aiko Tanaka",
+              "email": "aiko.tanaka@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-05-05T08:33:51.000Z",
+              "files": 8,
+              "soleFiles": 3,
+              "share": 0.0714
+            }
+          ],
+          "reasons": [],
+          "kind": "package",
+          "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "badges": [
+            {
+              "kind": "in-focus",
+              "category": "activity",
+              "label": "In focus",
+              "evidence": "521 commits in the window, the most of any territory."
+            },
+            {
+              "kind": "newcomer-friendly",
+              "category": "knowledge",
+              "label": "Newcomer-friendly",
+              "evidence": "2 people made their first commit here in the last 180 days."
+            }
+          ],
+          "territories": [
             {
               "path": "apps/web/src",
               "files": 78,
@@ -3449,8 +3671,302 @@
                   "label": "In focus",
                   "evidence": "448 commits in the window, the most of any territory."
                 }
-              ]
+              ],
+              "territories": [
+                {
+                  "path": "apps/web/src/routes",
+                  "files": 34,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 22,
+                      "soleFiles": 10,
+                      "share": 0.6471
+                    },
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 14,
+                      "soleFiles": 3,
+                      "share": 0.4118
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [
+                    {
+                      "kind": "in-focus",
+                      "category": "activity",
+                      "label": "In focus",
+                      "evidence": "301 commits in the window, the most of any territory."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "apps/web/src/components",
+                  "files": 29,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 16,
+                      "soleFiles": 6,
+                      "share": 0.5517
+                    },
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 12,
+                      "soleFiles": 3,
+                      "share": 0.4138
+                    },
+                    {
+                      "name": "Aiko Tanaka",
+                      "email": "aiko.tanaka@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                      "files": 7,
+                      "soleFiles": 1,
+                      "share": 0.2414
+                    },
+                    {
+                      "name": "Sam Okafor",
+                      "email": "sam.okafor@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
+                      "files": 3,
+                      "soleFiles": 0,
+                      "share": 0.1034
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [
+                    {
+                      "kind": "newcomer-friendly",
+                      "category": "knowledge",
+                      "label": "Newcomer-friendly",
+                      "evidence": "2 people made their first commit here in the last 180 days."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "apps/web/src/hooks",
+                  "files": 9,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 6,
+                      "soleFiles": 3,
+                      "share": 0.6667
+                    },
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 4,
+                      "soleFiles": 1,
+                      "share": 0.4444
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "apps/web/src",
+                  "files": 6,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 5,
+                      "soleFiles": 3,
+                      "share": 0.8333
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [
+                    {
+                      "kind": "one-expert",
+                      "category": "knowledge",
+                      "label": "One expert",
+                      "evidence": "Maya Lindqvist is the only active expert."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
+                }
+              ],
+              "totalTerritories": 4,
+              "splitDetail": 3,
+              "splitReason": "big: 78 files"
             },
+            {
+              "path": "apps/web/test",
+              "files": 21,
+              "truckFactor": 2,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Priya Raman",
+                  "email": "priya.raman@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                  "files": 13,
+                  "soleFiles": 5,
+                  "share": 0.619
+                },
+                {
+                  "name": "Maya Lindqvist",
+                  "email": "maya.lindqvist@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                  "files": 10,
+                  "soleFiles": 3,
+                  "share": 0.4762
+                }
+              ],
+              "reasons": [],
+              "kind": "folder",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
+            },
+            {
+              "path": "apps/web",
+              "files": 13,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Maya Lindqvist",
+                  "email": "maya.lindqvist@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                  "files": 6,
+                  "soleFiles": 3,
+                  "share": 0.75
+                },
+                {
+                  "name": "Priya Raman",
+                  "email": "priya.raman@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                  "files": 4,
+                  "soleFiles": 1,
+                  "share": 0.5
+                }
+              ],
+              "reasons": [],
+              "kind": "other",
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 3,
+          "splitDetail": 2,
+          "splitReason": "big: 112 files"
+        },
+        {
+          "path": "packages/api",
+          "files": 71,
+          "truckFactor": 2,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Tomás Herrera",
+              "email": "tomas.herrera@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-18T16:05:44.000Z",
+              "files": 34,
+              "soleFiles": 20,
+              "share": 0.4789
+            },
+            {
+              "name": "Jonas Weber",
+              "email": "jonas.weber@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-06-20T13:10:03.000Z",
+              "files": 26,
+              "soleFiles": 14,
+              "share": 0.3662
+            },
+            {
+              "name": "Sam Okafor",
+              "email": "sam.okafor@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-28T19:02:26.000Z",
+              "files": 14,
+              "soleFiles": 6,
+              "share": 0.1972
+            },
+            {
+              "name": "Dmitri Volkov",
+              "email": "dmitri.volkov@aurora.example",
+              "active": false,
+              "lastCommitAt": "2024-12-03T09:26:38.000Z",
+              "files": 11,
+              "soleFiles": 5,
+              "share": 0.1549
+            }
+          ],
+          "reasons": [],
+          "kind": "package",
+          "lastChangedAt": "2026-09-18T16:05:44.000Z",
+          "badges": [
+            {
+              "kind": "well-tested",
+              "category": "code",
+              "label": "Well tested",
+              "evidence": "46% of the files are tests (33 of 71)."
+            }
+          ],
+          "territories": [
             {
               "path": "packages/api/src",
               "files": 52,
@@ -3498,147 +4014,142 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/web/test",
-              "files": 21,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
+              "badges": [],
+              "territories": [
                 {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 13,
-                  "soleFiles": 5,
-                  "share": 0.619
+                  "path": "packages/api/src/middleware",
+                  "files": 6,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Jonas Weber",
+                      "email": "jonas.weber@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                      "files": 5,
+                      "soleFiles": 3,
+                      "share": 0.8333
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-06-20T13:10:03.000Z",
+                  "badges": [
+                    {
+                      "kind": "one-expert",
+                      "category": "knowledge",
+                      "label": "One expert",
+                      "evidence": "Jonas Weber is the only active expert."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
                 },
                 {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 10,
-                  "soleFiles": 3,
-                  "share": 0.4762
+                  "path": "packages/api/src/routes",
+                  "files": 24,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 14,
+                      "soleFiles": 6,
+                      "share": 0.5833
+                    },
+                    {
+                      "name": "Jonas Weber",
+                      "email": "jonas.weber@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                      "files": 10,
+                      "soleFiles": 2,
+                      "share": 0.4167
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "packages/api/src/services",
+                  "files": 19,
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Jonas Weber",
+                      "email": "jonas.weber@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                      "files": 10,
+                      "soleFiles": 4,
+                      "share": 0.5263
+                    },
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 8,
+                      "soleFiles": 2,
+                      "share": 0.4211
+                    },
+                    {
+                      "name": "Dmitri Volkov",
+                      "email": "dmitri.volkov@aurora.example",
+                      "active": false,
+                      "lastCommitAt": "2024-12-03T09:26:38.000Z",
+                      "files": 6,
+                      "soleFiles": 1,
+                      "share": 0.3158
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
+                },
+                {
+                  "path": "packages/api/src",
+                  "files": 3,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Tomás Herrera",
+                      "email": "tomas.herrera@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                      "files": 3,
+                      "soleFiles": 2,
+                      "share": 1.0
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-09-18T16:05:44.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 }
               ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/db/src",
-              "files": 18,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 13,
-                  "soleFiles": 5,
-                  "share": 0.7222
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 9,
-                  "soleFiles": 3,
-                  "share": 0.5
-                },
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 5,
-                  "soleFiles": 0,
-                  "share": 0.2778
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "handover",
-                  "category": "knowledge",
-                  "label": "Handover",
-                  "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
-                }
-              ]
-            },
-            {
-              "path": "packages/ui/stories",
-              "files": 18,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 13,
-                  "soleFiles": 5,
-                  "share": 0.7222
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 9,
-                  "soleFiles": 3,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "infra/terraform",
-              "files": 17,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 14,
-                  "soleFiles": 7,
-                  "share": 0.8235
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 8,
-                  "soleFiles": 2,
-                  "share": 0.4706
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
+              "totalTerritories": 4,
+              "splitDetail": 3,
+              "splitReason": "big: 52 files"
             },
             {
               "path": "packages/api/test",
@@ -3669,38 +4180,134 @@
               "reasons": [],
               "kind": "folder",
               "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
             },
             {
-              "path": "apps/admin/test",
-              "files": 8,
+              "path": "packages/api",
+              "files": 5,
+              "truckFactor": 1,
+              "island": false,
+              "orphaned": false,
+              "experts": [
+                {
+                  "name": "Tomás Herrera",
+                  "email": "tomas.herrera@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
+                  "files": 5,
+                  "soleFiles": 3,
+                  "share": 1.0
+                }
+              ],
+              "reasons": [],
+              "kind": "other",
+              "lastChangedAt": "2026-09-18T16:05:44.000Z",
+              "badges": [
+                {
+                  "kind": "one-expert",
+                  "category": "knowledge",
+                  "label": "One expert",
+                  "evidence": "Tomás Herrera is the only active expert."
+                }
+              ],
+              "territories": [],
+              "totalTerritories": 0
+            }
+          ],
+          "totalTerritories": 3,
+          "splitDetail": 2,
+          "splitReason": "big: 71 files"
+        },
+        {
+          "path": "packages/ui",
+          "files": 96,
+          "truckFactor": 4,
+          "island": false,
+          "orphaned": false,
+          "experts": [
+            {
+              "name": "Priya Raman",
+              "email": "priya.raman@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-12T11:22:19.000Z",
+              "files": 54,
+              "soleFiles": 34,
+              "share": 0.5625
+            },
+            {
+              "name": "Maya Lindqvist",
+              "email": "maya.lindqvist@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-09-29T15:41:07.000Z",
+              "files": 40,
+              "soleFiles": 22,
+              "share": 0.4167
+            },
+            {
+              "name": "Aiko Tanaka",
+              "email": "aiko.tanaka@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-05-05T08:33:51.000Z",
+              "files": 20,
+              "soleFiles": 10,
+              "share": 0.2083
+            },
+            {
+              "name": "Sam Okafor",
+              "email": "sam.okafor@aurora.example",
+              "active": true,
+              "lastCommitAt": "2026-08-28T19:02:26.000Z",
+              "files": 12,
+              "soleFiles": 4,
+              "share": 0.125
+            }
+          ],
+          "reasons": [],
+          "kind": "package",
+          "lastChangedAt": "2026-09-29T15:41:07.000Z",
+          "badges": [
+            {
+              "kind": "shared-knowledge",
+              "category": "knowledge",
+              "label": "Shared knowledge",
+              "evidence": "4 active experts and a truck factor of 4."
+            }
+          ],
+          "territories": [
+            {
+              "path": "packages/ui/stories",
+              "files": 18,
               "truckFactor": 2,
               "island": false,
               "orphaned": false,
               "experts": [
                 {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 6,
-                  "soleFiles": 3,
-                  "share": 0.75
-                },
-                {
                   "name": "Priya Raman",
                   "email": "priya.raman@aurora.example",
                   "active": true,
                   "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 6,
-                  "soleFiles": 2,
-                  "share": 0.75
+                  "files": 13,
+                  "soleFiles": 5,
+                  "share": 0.7222
+                },
+                {
+                  "name": "Maya Lindqvist",
+                  "email": "maya.lindqvist@aurora.example",
+                  "active": true,
+                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                  "files": 9,
+                  "soleFiles": 3,
+                  "share": 0.5
                 }
               ],
               "reasons": [],
               "kind": "folder",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": []
+              "lastChangedAt": "2026-09-29T15:41:07.000Z",
+              "badges": [],
+              "territories": [],
+              "totalTerritories": 0
             },
             {
               "path": "packages/ui/src",
@@ -3756,477 +4363,160 @@
                   "label": "Shared knowledge",
                   "evidence": "4 active experts and a truck factor of 4."
                 }
-              ]
-            },
-            {
-              "path": "apps/web",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 4,
-                  "soleFiles": 3,
-                  "share": 0.8
-                }
               ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            }
-          ]
-        },
-        {
-          "detail": 3,
-          "totalTerritories": 41,
-          "territories": [
-            {
-              "path": "packages/db/migrations",
-              "files": 30,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
+              "territories": [
                 {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 30,
-                  "soleFiles": 27,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [
-                "Dmitri Volkov is the only expert on 27 of 30 files",
-                "no active expert for 27 of 30 files (last expert commit 2024-12-03)"
-              ],
-              "kind": "folder",
-              "lastChangedAt": "2026-04-22T08:14:50.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Dmitri Volkov is the only expert on 27 of 30 files."
+                  "path": "packages/ui/src/tokens",
+                  "files": 11,
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 9,
+                      "soleFiles": 5,
+                      "share": 0.8182
+                    },
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 3,
+                      "soleFiles": 0,
+                      "share": 0.2727
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 },
                 {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "27 of 30 files have no active expert."
-                }
-              ]
-            },
-            {
-              "path": "docs/guides",
-              "files": 9,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Lena Fischer",
-                  "email": "lena.fischer@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2025-11-14T14:48:10.000Z",
+                  "path": "packages/ui/src/hooks",
                   "files": 9,
-                  "soleFiles": 8,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [
-                "Lena Fischer is the only expert on 8 of 9 files",
-                "no active expert for 8 of 9 files (last expert commit 2025-11-14)"
-              ],
-              "kind": "folder",
-              "lastChangedAt": "2026-01-12T11:03:27.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Lena Fischer is the only expert on 8 of 9 files."
+                  "truckFactor": 2,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 5,
+                      "soleFiles": 2,
+                      "share": 0.5556
+                    },
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 4,
+                      "soleFiles": 1,
+                      "share": 0.4444
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 },
                 {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "8 of 9 files have no active expert."
+                  "path": "packages/ui/src/components",
+                  "files": 48,
+                  "truckFactor": 4,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 26,
+                      "soleFiles": 9,
+                      "share": 0.5417
+                    },
+                    {
+                      "name": "Maya Lindqvist",
+                      "email": "maya.lindqvist@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-09-29T15:41:07.000Z",
+                      "files": 22,
+                      "soleFiles": 7,
+                      "share": 0.4583
+                    },
+                    {
+                      "name": "Aiko Tanaka",
+                      "email": "aiko.tanaka@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-05-05T08:33:51.000Z",
+                      "files": 12,
+                      "soleFiles": 2,
+                      "share": 0.25
+                    },
+                    {
+                      "name": "Sam Okafor",
+                      "email": "sam.okafor@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-28T19:02:26.000Z",
+                      "files": 6,
+                      "soleFiles": 2,
+                      "share": 0.125
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "folder",
+                  "lastChangedAt": "2026-09-29T15:41:07.000Z",
+                  "badges": [
+                    {
+                      "kind": "shared-knowledge",
+                      "category": "knowledge",
+                      "label": "Shared knowledge",
+                      "evidence": "4 active experts and a truck factor of 4."
+                    }
+                  ],
+                  "territories": [],
+                  "totalTerritories": 0
                 },
                 {
-                  "kind": "quiet",
-                  "category": "activity",
-                  "label": "Quiet",
-                  "evidence": "Unchanged since 2026-01-12, 261 days."
-                }
-              ]
-            },
-            {
-              "path": "docs",
-              "files": 5,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": true,
-              "experts": [
-                {
-                  "name": "Lena Fischer",
-                  "email": "lena.fischer@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2025-11-14T14:48:10.000Z",
-                  "files": 4,
-                  "soleFiles": 4,
-                  "share": 0.8
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.4
-                }
-              ],
-              "reasons": [
-                "Lena Fischer is the only expert on 4 of 5 files",
-                "no active expert for 4 of 5 files (last expert commit 2025-11-14)"
-              ],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Lena Fischer is the only expert on 4 of 5 files."
-                },
-                {
-                  "kind": "orphaned",
-                  "category": "knowledge",
-                  "label": "Orphaned",
-                  "evidence": "4 of 5 files have no active expert."
-                },
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Maya Lindqvist is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "packages/auth/src/providers",
-              "files": 9,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 9,
-                  "soleFiles": 8,
-                  "share": 1.0
-                }
-              ],
-              "reasons": ["Jonas Weber is the only expert on 8 of 9 files"],
-              "kind": "folder",
-              "lastChangedAt": "2026-06-20T13:10:03.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Jonas Weber is the only expert on 8 of 9 files."
-                },
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Jonas Weber is the only active expert."
-                },
-                {
-                  "kind": "knowledge-fading",
-                  "category": "knowledge",
-                  "label": "Knowledge fading",
-                  "evidence": "Jonas Weber, expert on 9 of 9 files, last committed 102 days ago."
-                }
-              ]
-            },
-            {
-              "path": "apps/admin",
-              "files": 6,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 6,
-                  "soleFiles": 5,
-                  "share": 1.0
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.3333
-                }
-              ],
-              "reasons": ["Aiko Tanaka is the only expert on 5 of 6 files"],
-              "kind": "package",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Aiko Tanaka is the only expert on 5 of 6 files."
-                }
-              ]
-            },
-            {
-              "path": "packages/auth",
-              "files": 3,
-              "truckFactor": 1,
-              "island": true,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
+                  "path": "packages/ui/src",
                   "files": 3,
-                  "soleFiles": 3,
-                  "share": 1.0
+                  "truckFactor": 1,
+                  "island": false,
+                  "orphaned": false,
+                  "experts": [
+                    {
+                      "name": "Priya Raman",
+                      "email": "priya.raman@aurora.example",
+                      "active": true,
+                      "lastCommitAt": "2026-08-12T11:22:19.000Z",
+                      "files": 3,
+                      "soleFiles": 2,
+                      "share": 1.0
+                    }
+                  ],
+                  "reasons": [],
+                  "kind": "other",
+                  "lastChangedAt": "2026-08-12T11:22:19.000Z",
+                  "badges": [],
+                  "territories": [],
+                  "totalTerritories": 0
                 }
               ],
-              "reasons": ["Jonas Weber is the only expert on 3 of 3 files"],
-              "kind": "package",
-              "lastChangedAt": "2026-06-20T13:10:03.000Z",
-              "badges": [
-                {
-                  "kind": "island",
-                  "category": "knowledge",
-                  "label": "Knowledge island",
-                  "evidence": "Jonas Weber is the only expert on 3 of 3 files."
-                },
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Jonas Weber is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "apps/admin/src/pages",
-              "files": 26,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 21,
-                  "soleFiles": 13,
-                  "share": 0.8077
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 10,
-                  "soleFiles": 2,
-                  "share": 0.3846
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": [
-                {
-                  "kind": "knowledge-fading",
-                  "category": "knowledge",
-                  "label": "Knowledge fading",
-                  "evidence": "Aiko Tanaka, expert on 21 of 26 files, last committed 148 days ago."
-                }
-              ]
-            },
-            {
-              "path": "packages/ui/src/tokens",
-              "files": 11,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 9,
-                  "soleFiles": 5,
-                  "share": 0.8182
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 3,
-                  "soleFiles": 0,
-                  "share": 0.2727
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": ".",
-              "files": 8,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.75
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/web",
-              "files": 8,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 6,
-                  "soleFiles": 3,
-                  "share": 0.75
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "infra/docker",
-              "files": 7,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.8571
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.4286
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/auth/src",
-              "files": 7,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.8571
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.2857
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
+              "totalTerritories": 4,
+              "splitDetail": 3,
+              "splitReason": "big: 71 files"
             },
             {
               "path": "packages/ui",
@@ -4246,7 +4536,7 @@
                 }
               ],
               "reasons": [],
-              "kind": "package",
+              "kind": "other",
               "lastChangedAt": "2026-08-12T11:22:19.000Z",
               "badges": [
                 {
@@ -4255,909 +4545,14 @@
                   "label": "One expert",
                   "evidence": "Priya Raman is the only active expert."
                 }
-              ]
-            },
-            {
-              "path": "scripts",
-              "files": 7,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 6,
-                  "soleFiles": 4,
-                  "share": 0.8571
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.4286
-                }
               ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "new-territory",
-                  "category": "activity",
-                  "label": "New territory",
-                  "evidence": "Created on 2026-08-19, 42 days ago."
-                }
-              ]
-            },
-            {
-              "path": ".github/workflows",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 5,
-                  "soleFiles": 2,
-                  "share": 0.8333
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 1,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/web/src",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 0.8333
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Maya Lindqvist is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "packages/api/src/middleware",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 0.8333
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-06-20T13:10:03.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Jonas Weber is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "packages/db/src",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 0.8333
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "packages/api",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "packages/db",
-              "files": 4,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "package",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": ".github",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-08-28T19:02:26.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Sam Okafor is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "infra",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": [
-                {
-                  "kind": "one-expert",
-                  "category": "knowledge",
-                  "label": "One expert",
-                  "evidence": "Tomás Herrera is the only active expert."
-                }
-              ]
-            },
-            {
-              "path": "apps/web/src/routes",
-              "files": 34,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 22,
-                  "soleFiles": 10,
-                  "share": 0.6471
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 14,
-                  "soleFiles": 3,
-                  "share": 0.4118
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "in-focus",
-                  "category": "activity",
-                  "label": "In focus",
-                  "evidence": "301 commits in the window, the most of any territory."
-                }
-              ]
-            },
-            {
-              "path": "apps/web/src/components",
-              "files": 29,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 16,
-                  "soleFiles": 6,
-                  "share": 0.5517
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 12,
-                  "soleFiles": 3,
-                  "share": 0.4138
-                },
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 7,
-                  "soleFiles": 1,
-                  "share": 0.2414
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 3,
-                  "soleFiles": 0,
-                  "share": 0.1034
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "newcomer-friendly",
-                  "category": "knowledge",
-                  "label": "Newcomer-friendly",
-                  "evidence": "2 people made their first commit here in the last 180 days."
-                }
-              ]
-            },
-            {
-              "path": "packages/api/src/routes",
-              "files": 24,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 14,
-                  "soleFiles": 6,
-                  "share": 0.5833
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 10,
-                  "soleFiles": 2,
-                  "share": 0.4167
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/web/test",
-              "files": 21,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 13,
-                  "soleFiles": 5,
-                  "share": 0.619
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 10,
-                  "soleFiles": 3,
-                  "share": 0.4762
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/api/src/services",
-              "files": 19,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 10,
-                  "soleFiles": 4,
-                  "share": 0.5263
-                },
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 8,
-                  "soleFiles": 2,
-                  "share": 0.4211
-                },
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 6,
-                  "soleFiles": 1,
-                  "share": 0.3158
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/ui/stories",
-              "files": 18,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 13,
-                  "soleFiles": 5,
-                  "share": 0.7222
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 9,
-                  "soleFiles": 3,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/api/test",
-              "files": 14,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 8,
-                  "soleFiles": 3,
-                  "share": 0.5714
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 7,
-                  "soleFiles": 2,
-                  "share": 0.5
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/admin/src/components",
-              "files": 12,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 8,
-                  "soleFiles": 4,
-                  "share": 0.6667
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 7,
-                  "soleFiles": 3,
-                  "share": 0.5833
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": []
-            },
-            {
-              "path": "infra/terraform/modules",
-              "files": 12,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 10,
-                  "soleFiles": 6,
-                  "share": 0.8333
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 5,
-                  "soleFiles": 1,
-                  "share": 0.4167
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/db/src/queries",
-              "files": 12,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 8,
-                  "soleFiles": 4,
-                  "share": 0.6667
-                },
-                {
-                  "name": "Jonas Weber",
-                  "email": "jonas.weber@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-06-20T13:10:03.000Z",
-                  "files": 6,
-                  "soleFiles": 2,
-                  "share": 0.5
-                },
-                {
-                  "name": "Dmitri Volkov",
-                  "email": "dmitri.volkov@aurora.example",
-                  "active": false,
-                  "lastCommitAt": "2024-12-03T09:26:38.000Z",
-                  "files": 4,
-                  "soleFiles": 0,
-                  "share": 0.3333
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/web/src/hooks",
-              "files": 9,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 6,
-                  "soleFiles": 3,
-                  "share": 0.6667
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.4444
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/ui/src/hooks",
-              "files": 9,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 5,
-                  "soleFiles": 2,
-                  "share": 0.5556
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 4,
-                  "soleFiles": 1,
-                  "share": 0.4444
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/admin/test",
-              "files": 8,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 6,
-                  "soleFiles": 3,
-                  "share": 0.75
-                },
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 6,
-                  "soleFiles": 2,
-                  "share": 0.75
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": []
-            },
-            {
-              "path": "infra/terraform",
-              "files": 5,
-              "truckFactor": 2,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 4,
-                  "soleFiles": 2,
-                  "share": 0.8
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 2,
-                  "soleFiles": 0,
-                  "share": 0.4
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/ui/src/components",
-              "files": 48,
-              "truckFactor": 4,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 26,
-                  "soleFiles": 9,
-                  "share": 0.5417
-                },
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 22,
-                  "soleFiles": 7,
-                  "share": 0.4583
-                },
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 12,
-                  "soleFiles": 2,
-                  "share": 0.25
-                },
-                {
-                  "name": "Sam Okafor",
-                  "email": "sam.okafor@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-28T19:02:26.000Z",
-                  "files": 6,
-                  "soleFiles": 2,
-                  "share": 0.125
-                }
-              ],
-              "reasons": [],
-              "kind": "folder",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": [
-                {
-                  "kind": "shared-knowledge",
-                  "category": "knowledge",
-                  "label": "Shared knowledge",
-                  "evidence": "4 active experts and a truck factor of 4."
-                }
-              ]
-            },
-            {
-              "path": "apps/admin/src",
-              "files": 6,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Aiko Tanaka",
-                  "email": "aiko.tanaka@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-05-05T08:33:51.000Z",
-                  "files": 5,
-                  "soleFiles": 3,
-                  "share": 0.8333
-                }
-              ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-05-05T08:33:51.000Z",
-              "badges": []
-            },
-            {
-              "path": "apps/web",
-              "files": 5,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Maya Lindqvist",
-                  "email": "maya.lindqvist@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-29T15:41:07.000Z",
-                  "files": 4,
-                  "soleFiles": 3,
-                  "share": 0.8
-                }
-              ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-09-29T15:41:07.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/api/src",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Tomás Herrera",
-                  "email": "tomas.herrera@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-09-18T16:05:44.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-09-18T16:05:44.000Z",
-              "badges": []
-            },
-            {
-              "path": "packages/ui/src",
-              "files": 3,
-              "truckFactor": 1,
-              "island": false,
-              "orphaned": false,
-              "experts": [
-                {
-                  "name": "Priya Raman",
-                  "email": "priya.raman@aurora.example",
-                  "active": true,
-                  "lastCommitAt": "2026-08-12T11:22:19.000Z",
-                  "files": 3,
-                  "soleFiles": 2,
-                  "share": 1.0
-                }
-              ],
-              "reasons": [],
-              "kind": "other",
-              "lastChangedAt": "2026-08-12T11:22:19.000Z",
-              "badges": []
+              "territories": [],
+              "totalTerritories": 0
             }
-          ]
+          ],
+          "totalTerritories": 3,
+          "splitDetail": 2,
+          "splitReason": "big: 96 files"
         }
       ]
     }

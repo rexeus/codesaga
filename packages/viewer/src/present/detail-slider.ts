@@ -1,10 +1,6 @@
-import type { Report } from "@codesaga/engine";
-
 import { formatCount } from "./format.js";
 import { namedTerritories } from "./territories.js";
-
-type Territories = Report["knowledge"]["territories"];
-type Detail = Territories["details"][number];
+import type { Detail, Territories } from "./territory-details.js";
 
 /** One stop of the detail slider. */
 export type DetailTick = {

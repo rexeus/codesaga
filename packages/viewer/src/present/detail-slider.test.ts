@@ -1,4 +1,3 @@
-import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,12 +8,11 @@ import {
   sliderFill,
   startDetail,
 } from "./detail-slider.js";
-
-type Territories = Report["knowledge"]["territories"];
+import type { Detail, Territories } from "./territory-details.js";
 
 const detail = (
   at: number,
-  territories: Territories["details"][number]["territories"],
+  territories: Detail["territories"],
   totalTerritories = territories.length,
 ) => ({ detail: at, totalTerritories, territories });
 

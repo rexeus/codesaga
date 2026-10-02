@@ -84,18 +84,22 @@ layer(NodeServices.layer)("analyze knowledge directories", (it) => {
   );
 });
 
+type TerritoryNode = Report["knowledge"]["territories"]["territories"][number];
+
+const withoutFocusBadge = (territory: TerritoryNode): TerritoryNode => ({
+  ...territory,
+  badges: territory.badges.filter(({ kind }) => kind !== "in-focus"),
+  territories: territory.territories.map((child) => withoutFocusBadge(child)),
+});
+
 /** `in-focus` reads the window by definition; everything else in knowledge does not. */
 const withoutFocus = (section: Report["knowledge"]) => ({
   ...section,
   territories: {
     ...section.territories,
-    details: section.territories.details.map((detail) => ({
-      ...detail,
-      territories: detail.territories.map((territory) => ({
-        ...territory,
-        badges: territory.badges.filter(({ kind }) => kind !== "in-focus"),
-      })),
-    })),
+    territories: section.territories.territories.map((territory) =>
+      withoutFocusBadge(territory),
+    ),
   },
 });
 

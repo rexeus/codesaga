@@ -40,14 +40,9 @@ const run = (commits: ReadonlyArray<ClassifiedCommit>, shallow = false) =>
     now,
   });
 
-const kindsOf = (
-  result: ReturnType<typeof run>,
-  detail: number,
-  path: string,
-) =>
-  result.section.territories?.details
-    .find((entry) => entry.detail === detail)
-    ?.territories.find((territory) => territory.path === path)
+const kindsOf = (result: ReturnType<typeof run>, path: string) =>
+  result.section.territories.territories
+    .find((territory) => territory.path === path)
     ?.badges.map(({ kind }) => kind);
 
 // api: Ada since 2025; web: Grace, created in February
@@ -61,24 +56,24 @@ describe("knowledge territory badges", () => {
   const result = run(history);
 
   it("awards the badges the territory's knowledge and history earn", () => {
-    expect(kindsOf(result, 1, "packages/web")).toStrictEqual([
+    expect(kindsOf(result, "packages/web")).toStrictEqual([
       "island",
       "new-territory",
     ]);
-    expect(kindsOf(result, 1, "packages/api")).toStrictEqual(["island"]);
+    expect(kindsOf(result, "packages/api")).toStrictEqual(["island"]);
   });
 
   it("awards in focus to the one territory with the most commits in the last 90 days", () => {
     // each territory has one commit in the last 90 days: no territory is in focus
-    expect(kindsOf(result, 1, "packages/web")).not.toContain("in-focus");
+    expect(kindsOf(result, "packages/web")).not.toContain("in-focus");
 
     const focused = run([
       touching("2026-02-21T00:00:00Z", "packages/web", grace),
       ...history,
     ]);
 
-    expect(kindsOf(focused, 1, "packages/web")).toContain("in-focus");
-    expect(kindsOf(focused, 1, "packages/api")).not.toContain("in-focus");
+    expect(kindsOf(focused, "packages/web")).toContain("in-focus");
+    expect(kindsOf(focused, "packages/api")).not.toContain("in-focus");
   });
 
   it("does not count old commits or bot commits towards the territory in focus", () => {
@@ -105,8 +100,8 @@ describe("knowledge territory badges", () => {
       ...years,
     ]);
 
-    expect(kindsOf(focused, 1, "packages/web")).toContain("in-focus");
-    expect(kindsOf(focused, 1, "packages/api")).not.toContain("in-focus");
+    expect(kindsOf(focused, "packages/web")).toContain("in-focus");
+    expect(kindsOf(focused, "packages/api")).not.toContain("in-focus");
   });
 });
 
@@ -141,14 +136,14 @@ describe("knowledge territory badges in a shallow clone", () => {
       touching("2025-01-10T00:00:00Z", "packages/web", ada),
     ];
 
-    expect(kindsOf(run(newcomers), 1, "packages/web")).toEqual(
+    expect(kindsOf(run(newcomers), "packages/web")).toEqual(
       expect.arrayContaining(["newcomer-friendly"]),
     );
-    expect(kindsOf(run(history), 1, "packages/web")).toContain("new-territory");
-    expect(kindsOf(run(newcomers, true), 1, "packages/web")).not.toContain(
+    expect(kindsOf(run(history), "packages/web")).toContain("new-territory");
+    expect(kindsOf(run(newcomers, true), "packages/web")).not.toContain(
       "newcomer-friendly",
     );
-    expect(kindsOf(run(history, true), 1, "packages/web")).not.toContain(
+    expect(kindsOf(run(history, true), "packages/web")).not.toContain(
       "new-territory",
     );
   });

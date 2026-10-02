@@ -88,7 +88,7 @@ layer(NodeServices.layer)("analyze a shallow clone's story", (it) => {
           firstCommitStories: report.stories
             .map(({ kind }) => kind)
             .filter((kind) => kind === "newcomers" || kind === "anniversary"),
-          webIsNew: report.knowledge.territories?.details[0]?.territories
+          webIsNew: report.knowledge.territories.territories
             .find(({ path }) => path === "web")
             ?.badges.some(({ kind }) => kind === "new-territory"),
         });

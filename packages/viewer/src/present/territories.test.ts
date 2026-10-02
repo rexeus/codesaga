@@ -5,8 +5,7 @@ import { sampleReport } from "../testing/reports.js";
 import { detailStatus, detailTicks } from "./detail-slider.js";
 import { territoryViews, dormantLegend, detailSummary } from "./territories.js";
 
-type Territories = Report["knowledge"]["territories"];
-type Territory = Territories["details"][number]["territories"][number];
+type Territory = Report["knowledge"]["territories"]["territories"][number];
 
 const [maya, tomas, priya] = sampleReport().contributors;
 
@@ -33,6 +32,8 @@ const territory = (overrides: Partial<Territory>): Territory => ({
   kind: "package",
   lastChangedAt: "2026-08-14T08:00:00.000Z",
   badges: [],
+  totalTerritories: 0,
+  territories: [],
   ...overrides,
 });
 

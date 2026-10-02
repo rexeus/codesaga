@@ -9,19 +9,25 @@ const Share = Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 }));
 const TerritoryThresholds = Schema.Struct({
   /** A territory with fewer universe files is grouped with its siblings as "other files". */
   minFiles: Count,
-  /** The deepest detail reported. */
+  /** The finest detail reported. */
   maxDetail: Count,
-  /** A territory with more than this share of the universe files, and subdirectories, is split further within its detail. */
-  giantShare: Share,
-  /** A giant territory is split at most this many directory steps beyond its detail. */
-  giantSplitSteps: Count,
+  /** A territory with more than this share of the universe files is big and splits into its folders ... */
+  bigShare: Share,
+  /** ... as does one with more files than this share of them, though at least `bigMinFiles` and at most `bigMaxFiles`. */
+  bigFilesShare: Share,
+  /** The size at which a territory is big is at least this many files ... */
+  bigMinFiles: Count,
+  /** ... and at most this many. */
+  bigMaxFiles: Count,
+  /** A territory also splits when its folders have different main experts; a main expert is an expert on at least this share of the folder's files that have an expert. */
+  mainExpertShare: Share,
   /** Contributors with a commit in this many days before now size the recommendation. */
   recommendationActiveDays: Count,
-  /** The recommended detail aims at this many territories per such contributor. */
+  /** The recommended detail allows this many territories per such contributor. */
   territoriesPerContributor: Count,
-  /** The target number of territories is clamped to at least this many. */
+  /** The territories the recommended detail allows are at least this many ... */
   minTargetTerritories: Count,
-  /** The target number of territories is clamped to at most this many. */
+  /** ... and at most this many. */
   maxTargetTerritories: Count,
 });
 

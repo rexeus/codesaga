@@ -197,25 +197,31 @@ describe("renderAnalysis line owners", () => {
   });
 });
 
-describe("renderAnalysis territories", () => {
-  it("shows the territories of the chosen detail and says which detail it is", () => {
-    const report = sampleReport();
-    const lines = renderAnalysis(
-      {
-        ...report,
-        knowledge: {
-          ...report.knowledge,
-          territories: { ...report.knowledge.territories, detail: 2 },
-        },
+/** The sample report's lines with the territories started at `detail`. */
+const atDetail = (detail: number): ReadonlyArray<string> => {
+  const report = sampleReport();
+  return renderAnalysis(
+    {
+      ...report,
+      knowledge: {
+        ...report.knowledge,
+        territories: { ...report.knowledge.territories, detail },
       },
-      plain,
-    ).split("\n");
+    },
+    plain,
+  ).split("\n");
+};
+
+describe("renderAnalysis territories", () => {
+  it("shows the first cut at detail 1 and says which detail it is", () => {
+    const lines = atDetail(1);
 
     expect(lines).toContain(
-      "  packages/db/migrations      30  orphaned, island  Dmitri Volkov 100% (dormant)",
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (dormant)  Dmitri Volkov 67%",
     );
+    expect(lines.some((line) => line.includes("migrations"))).toBe(false);
     const note = lines.indexOf(
-      "                           Territories at detail 2 of 3 (recommended: 1)",
+      "                           Territories at detail 1 of 3 (recommended: 1)",
     );
     expect(lines[note + 1]).toBe(
       "                           detail 1: 11 territories with 3+ files for 4 active contributors",
