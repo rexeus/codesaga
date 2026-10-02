@@ -14,7 +14,8 @@ import type { Report } from "../report/report.js";
 import { universeStats } from "../stats/universe-stats.js";
 import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
-import { typescriptDeepDive } from "../typescript/deep-dive.js";
+import { typescriptAnalysis } from "../typescript/deep-dive.js";
+import type { TypeScriptAnalysis } from "../typescript/deep-dive.js";
 import type { RepositoryFacts } from "./gather.js";
 import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
@@ -70,12 +71,16 @@ const knowledgeOf = (
   facts: RepositoryFacts,
   scoped: Analysis["scoped"],
   headTime: number,
-  stats: ReturnType<typeof statsOf>,
+  measured: {
+    readonly stats: ReturnType<typeof statsOf>;
+    readonly typescript: TypeScriptAnalysis | undefined;
+  },
 ) =>
   knowledge({
+    typescriptOf: measured.typescript?.forPaths,
     commits: scoped,
     universe: facts.universe,
-    stats,
+    stats: measured.stats,
     scope: facts.repository.scope,
     packageRoots: facts.packageRoots,
     detail: facts.detail,
@@ -86,21 +91,43 @@ const knowledgeOf = (
     signatures: facts.signatures,
   });
 
-const deepDivesField = ({
-  typescript,
-}: RepositoryFacts): Pick<Report, "deepDives"> =>
+const deepDivesField = (
+  typescript: TypeScriptAnalysis | undefined,
+): Pick<Report, "deepDives"> =>
   typescript === undefined
     ? {}
-    : { deepDives: { typescript: typescriptDeepDive(typescript) } };
+    : { deepDives: { typescript: typescript.section } };
+
+const peopleOf = (
+  facts: RepositoryFacts,
+  { commits, scoped }: Pick<Analysis, "commits" | "scoped">,
+  territories: Parameters<typeof contributors>[0]["territories"],
+) =>
+  contributors({
+    commits,
+    history: scoped,
+    scope: facts.repository.scope,
+    now: facts.now,
+    shallow: facts.repository.shallow,
+    isCodePath: facts.isCodePath,
+    universePaths: facts.universe.map(({ path }) => path),
+    territories,
+  });
+
+const typescriptOf = ({
+  typescript,
+}: RepositoryFacts): TypeScriptAnalysis | undefined =>
+  typescript === undefined ? undefined : typescriptAnalysis(typescript);
 
 /** The sections that exist only for some runs or some repositories. */
 const optionalSections = (
   facts: RepositoryFacts,
   current: Analysis["commits"],
   previous: Analysis["previous"],
+  typescript: TypeScriptAnalysis | undefined,
 ): Pick<Report, "comparison" | "deepDives"> => ({
   ...comparisonField(facts, current, previous),
-  ...deepDivesField(facts),
+  ...deepDivesField(typescript),
 });
 
 /** Builds the report from the facts, each section over the commits it covers. */
@@ -115,22 +142,14 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     lastCommitAt,
   } = prepareAnalysis(facts);
   const stats = statsOf(facts, scoped, commits);
+  const typescript = typescriptOf(facts);
   const { section: knowledgeSection, recommendedTerritories } = knowledgeOf(
     facts,
     scoped,
     headTime,
-    stats,
+    { stats, typescript },
   );
-  const people = contributors({
-    commits,
-    history: scoped,
-    scope: facts.repository.scope,
-    now: facts.now,
-    shallow: facts.repository.shallow,
-    isCodePath: facts.isCodePath,
-    universePaths: facts.universe.map(({ path }) => path),
-    territories: recommendedTerritories,
-  });
+  const people = peopleOf(facts, { commits, scoped }, recommendedTerritories);
   return {
     schemaVersion: 1,
     tool: { name: "codesaga", version: facts.toolVersion },
@@ -161,6 +180,6 @@ export const buildReport = (facts: RepositoryFacts): Report => {
       stats.repository,
       knowledgeSection,
     ),
-    ...optionalSections(facts, commits, previous),
+    ...optionalSections(facts, commits, previous, typescript),
   };
 };

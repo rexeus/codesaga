@@ -18,9 +18,9 @@ const failing: ParseSource = () => {
 describe("factsOfSource parsed files", () => {
   it("counts the syntax tree nodes of a parsed file", () => {
     // Program, VariableDeclaration, VariableDeclarator, Identifier, Literal
-    expect(judge("a.ts", "const a = 1;\n")).toStrictEqual({
+    expect(judge("a.ts", "const a = 1;\n")).toMatchObject({
       kind: "parsed",
-      facts: { version: 1, nodes: 5 },
+      facts: { version: 2, nodes: 5 },
     });
   });
 

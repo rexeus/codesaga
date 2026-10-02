@@ -1,14 +1,16 @@
 import { TypeScriptParser } from "@codesaga/engine";
+import type { FactsResult } from "@codesaga/engine";
 import { assert, describe, it } from "@effect/vitest";
 import { Effect } from "effect";
 
 import { sourceProgram } from "../testing/child-program.js";
 import { makeOxcParserLayer } from "./oxc-parser.js";
 
-const PARSED = {
-  kind: "parsed",
-  facts: { version: 1, nodes: 5 },
-} as const;
+/** What the layer decided about each source; the facts themselves are the engine's to test. */
+const verdicts = (results: ReadonlyArray<FactsResult>) =>
+  results.map((result) =>
+    result.kind === "parsed" ? "parsed" : result.reason,
+  );
 
 // No brackets for a text scan to see, and enough levels to kill the native parser.
 const CRASH_PAYLOAD = `x = ${"a ?\nb :\n".repeat(20_000)}c;\n`;
@@ -38,10 +40,11 @@ describe("makeOxcParserLayer", () => {
           status.kind === "ready" ? status.version : "",
           /^\d+\.\d+\.\d+$/u,
         );
-        assert.deepStrictEqual(results, [
-          PARSED,
-          { kind: "skipped", reason: "syntax-error" },
-        ]);
+        assert.deepStrictEqual(verdicts(results), ["parsed", "syntax-error"]);
+        assert.strictEqual(
+          results[0]?.kind === "parsed" ? results[0].facts.nodes : 0,
+          5,
+        );
       }),
     ),
   );
@@ -60,16 +63,12 @@ describe("makeOxcParserLayer", () => {
             { path: "d.ts", text: "const d = 1;\n" },
           ]);
 
+          const [first, hostile, third, fourth] = verdicts(results);
           assert.deepStrictEqual(
-            [results[0], results[2], results[3]],
-            [PARSED, PARSED, PARSED],
+            [first, third, fourth],
+            ["parsed", "parsed", "parsed"],
           );
-          const hostile = results[1];
-          assert.ok(
-            hostile?.kind === "skipped" &&
-              (hostile.reason === "parser-crashed" ||
-                hostile.reason === "too-deep"),
-          );
+          assert.ok(hostile === "parser-crashed" || hostile === "too-deep");
         }),
       ),
     60_000,

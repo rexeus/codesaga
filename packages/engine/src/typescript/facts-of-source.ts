@@ -3,8 +3,9 @@
 
 import type { SkipReason } from "../report/typescript-deep-dive.js";
 import { fileFactsOf } from "./file-facts.js";
-import type { FileFacts, ParsedSource } from "./file-facts.js";
+import type { FileFacts } from "./file-facts.js";
 import { inputGuardReason } from "./input-guards.js";
+import type { ParsedSource } from "./parsed-source.js";
 import { parseOptionsOf } from "./source-kinds.js";
 import type { ParseOptions } from "./source-kinds.js";
 

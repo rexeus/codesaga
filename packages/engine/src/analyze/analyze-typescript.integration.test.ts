@@ -70,6 +70,55 @@ layer(analyzeServices)("analyze the TypeScript deep dive", (it) => {
   );
 });
 
+layer(analyzeServices)(
+  "analyze the TypeScript deep dive's type safety",
+  (it) => {
+    it.effect(
+      "counts escape hatches of production code and tests apart, and per territory",
+      () =>
+        Effect.gen(function* () {
+          yield* setNow;
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-02-01T09:00:00Z", {
+            "app/a.ts": "export const a = (x: unknown) => x as any;\n",
+            "app/b.ts": "// @ts-nocheck\nexport const b = 1;\n",
+            "app/c.ts": "export const c = 1;\n",
+            "app/a.test.ts": "export const t = (x: unknown) => x!;\n",
+            "lib/d.ts": "export const d = 1;\n",
+            "lib/e.ts": "export const e = 1;\n",
+            "lib/f.ts": "export const f = 1;\n",
+          });
+
+          const report = yield* analyze(analyzeOptionsFor(repo));
+
+          const { typeSafety } = report.deepDives?.typescript ?? {};
+          assert.deepStrictEqual(typeSafety?.nocheckFiles, ["app/b.ts"]);
+          assert.deepStrictEqual(
+            [typeSafety?.production.files, typeSafety?.production.escapes],
+            [6, 3],
+          );
+          assert.deepStrictEqual(
+            [typeSafety?.tests.files, typeSafety?.tests.counts.nonNull],
+            [1, 1],
+          );
+          const byPath = Object.fromEntries(
+            report.knowledge.territories.territories.map((territory) => [
+              territory.path,
+              territory.typescript,
+            ]),
+          );
+          assert.deepStrictEqual(byPath["lib"], {
+            files: 3,
+            codeLines: 3,
+            escapesPer1000: 0,
+          });
+          assert.strictEqual(byPath["app"]?.files, 4);
+          assert.strictEqual(byPath["app"]?.escapesPer1000, 750);
+        }),
+    );
+  },
+);
+
 layer(analyzeServices)("analyze the TypeScript deep dive without it", (it) => {
   it.effect(
     "has no deep dive for a repository without TypeScript or JavaScript",

@@ -1,13 +1,16 @@
+import { factsOfSource } from "@codesaga/engine";
 import type { FactsResult, SourceText } from "@codesaga/engine";
+import { parseSync } from "oxc-parser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { makePool } from "./parse-pool.js";
 import type { PoolWorker, WorkerStart } from "./parse-pool.js";
 
-const PARSED: FactsResult = {
-  kind: "parsed",
-  facts: { version: 1, nodes: 1 },
-};
+// Real facts, so the pool's tests do not depend on what the engine counts.
+const PARSED: FactsResult = factsOfSource(
+  (path, text, options) => parseSync(path, text, options),
+  { path: "a.ts", text: "x" },
+);
 const CRASHED: FactsResult = { kind: "skipped", reason: "parser-crashed" };
 
 const sources = (...paths: ReadonlyArray<string>): Array<SourceText> =>

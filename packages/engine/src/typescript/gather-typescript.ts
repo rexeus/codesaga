@@ -14,9 +14,10 @@ export type TypeScriptFacts = {
   readonly status: ParserStatus;
   /** Declaration files, which are counted and not parsed. */
   readonly declarationFiles: ReadonlyArray<string>;
-  /** Every other file with its verdict. */
+  /** Every other file with its verdict and the non-blank lines the universe measured for it. */
   readonly files: ReadonlyArray<{
     readonly path: string;
+    readonly lines: number;
     readonly result: FactsResult;
   }>;
 };
@@ -47,6 +48,7 @@ const verdicts = (
   root: string,
   paths: ReadonlyArray<string>,
   parser: TypeScriptParser["Service"],
+  linesOf: (path: string) => number,
 ) =>
   Effect.gen(function* () {
     const sources = yield* Effect.forEach(
@@ -60,11 +62,12 @@ const verdicts = (
     const facts = yield* parser.factsOf(readable);
     const judged = Arr.zip(readable, facts).map(([source, result]) => ({
       path: source.path,
+      lines: linesOf(source.path),
       result,
     }));
     const unreadable = paths
       .filter((_, index) => sources[index] === undefined)
-      .map((path) => ({ path, result: UNREADABLE }));
+      .map((path) => ({ path, lines: linesOf(path), result: UNREADABLE }));
     return [...judged, ...unreadable];
   });
 
@@ -92,9 +95,10 @@ export const gatherTypeScript = (
     const parser = yield* TypeScriptParser;
     const declarationFiles = scripts.filter((path) => isDeclarationPath(path));
     const parsable = scripts.filter((path) => !isDeclarationPath(path));
+    const lines = new Map(universe.map(({ path, loc }) => [path, loc]));
     const batches = yield* Effect.forEach(
       Arr.chunksOf(parsable, BATCH_SIZE),
-      (paths) => verdicts(root, paths, parser),
+      (paths) => verdicts(root, paths, parser, (path) => lines.get(path) ?? 0),
     );
     return {
       status: yield* parser.status,

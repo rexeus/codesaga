@@ -2,6 +2,8 @@
 // Later blocks of the deep dive join as further optional keys beside `coverage`.
 import { Schema } from "effect";
 
+import { TypeSafety } from "./typescript-type-safety.js";
+
 const Count = Schema.Natural;
 
 /** Why a file was not analyzed. */
@@ -52,6 +54,8 @@ const Coverage = Schema.Struct({
 /** Analysis of the repository's TypeScript and JavaScript at HEAD. */
 export const TypeScriptDeepDive = Schema.Struct({
   coverage: Coverage,
+  /** Escape hatches and their counterparts. Absent when no file was parsed, and so for every block below. */
+  typeSafety: Schema.optionalKey(TypeSafety),
 });
 export type TypeScriptDeepDive = typeof TypeScriptDeepDive.Type;
 

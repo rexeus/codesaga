@@ -38,3 +38,25 @@ export const walk = (root: Node, visitor: NodeVisitor): void => {
     }
   }
 };
+
+/** What to do for the nodes of each type; a handler receives its type's node. */
+export type NodeHandlers = {
+  readonly [Type in Node["type"]]?: (
+    node: Extract<Node, { type: Type }>,
+  ) => void;
+};
+
+/**
+ * One `enter` for a table of handlers, which calls the handler of the node's
+ * type. The table's keys type each handler's node, so a handler cannot read a
+ * field its node lacks; the lookup by the node's own `type` is the one place
+ * the types cannot follow.
+ */
+export const enterWith = (handlers: NodeHandlers): ((node: Node) => void) => {
+  return (node) => {
+    const handler: unknown = Reflect.get(handlers, node.type);
+    if (typeof handler === "function") {
+      Reflect.apply(handler, handlers, [node]);
+    }
+  };
+};

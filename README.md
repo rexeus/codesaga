@@ -263,6 +263,17 @@ A deep dive is a language analysis beyond the code stats, in the report's `deepD
 - `skipped` — files that were not analyzed, by reason, only for reasons that occurred: `too-large` (over 1 MiB), `minified` (non-blank lines average over 300 characters), `too-deep` (a syntax tree deeper than the parser's stack can follow), `syntax-error` (nothing could be recovered from the file), `parser-crashed` (the file killed the parser's process, or kept it silent for 30 s plus a second per megabyte of its batch; the others of its batch are still parsed), `parser-error` (any other failure of the parser), `unreadable` and `parser-unavailable`. Hostile input is skipped and counted, never fatal.
 - `parser` — the parser's `name` and `version`.
 
+### Type safety
+
+`deepDives.typescript.typeSafety` counts the escape hatches of the type system and their counterparts in the parsed files, read from syntax and comments without a type checker, once for `production` code and once for `tests` (told by their path, as the `well-tested` badge does), because tests use assertions and `any` on purpose. Every part states its `files` and `lines` (non-blank lines), the denominator of its rates:
+
+- `counts` — `any` (every `any` keyword in a type), `assertions` (`as T` and `<T>x`, never `as const`), `doubleAssertions` (`as unknown as T`), `asAny`, `nonNull` (`x!`), `tsIgnore`, `tsExpectError`, `tsNocheck`, `lintDisables` (`eslint-disable*`, `oxlint-disable*`, `biome-ignore`), and the counterparts `satisfies`, `unknown` and `typePredicates`. Directives are read from the parser's comments, so one inside a string is not counted.
+- `per1000` — every count per 1,000 non-blank lines.
+- `escapes`, `escapesPer1000`, `filesWithEscape` and `escapeFileShare` — the sum of `any`, `assertions`, `nonNull`, the three `@ts-` directives and `lintDisables` (`as any` counts as the two holes it is; `doubleAssertions` and `asAny` are parts of those and are not added again), its rate, and the files with at least one.
+- `nocheckFiles` — up to five files with a `@ts-nocheck` comment.
+
+The figures are counts, never a score: the JSDoc types of JavaScript are not read, and `any` in a rest parameter counts like any other. Every territory carries `typescript` with its parsed `files`, their `codeLines` and `escapesPer1000` over its production lines, to hold a card against the repository.
+
 oxc-parser is codesaga's only runtime dependency. It ships a native binding for each platform, and a native parser can crash its process on hostile input, so codesaga parses in up to four child processes (one fewer than your cores) that run the same program again; a file that kills one is found by bisecting its batch and is the only one lost. The children end with the run and write nothing to stdout. Where it or the binding cannot be loaded (an unsupported platform, or an install that left the optional binding out), `analyze` still succeeds: the section keeps its coverage, every file is skipped as `parser-unavailable`, `parser.version` is `null`, and `unavailable` gives the loader's message. `inspect` never loads the parser.
 
 ## How the numbers work
