@@ -9,6 +9,7 @@ import type {
   BadgeContext,
   ContributorBadgeFacts,
 } from "./contributor-badge-facts.js";
+import { codeCraftBadges } from "./contributor-code-craft.js";
 import { pairPartner } from "./contributor-collaboration.js";
 import { documenter, tester, tidier, toolsmith } from "./contributor-craft.js";
 import { allRounder, keeper, specialist } from "./contributor-focus.js";
@@ -55,6 +56,7 @@ export const contributorBadges = (
   const context = { ...facts, email };
   return categorized([
     ...RULES.flatMap((rule) => rule(context) ?? []),
+    ...codeCraftBadges(context),
     ...rhythmBadges(facts.commits, facts.now, facts.historyHasOtherOffsets),
     ...tenureBadges(facts.commits, facts.repositoryStart, facts.now),
   ]);

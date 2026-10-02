@@ -141,6 +141,22 @@ const BadgeThresholds = Schema.Struct({
   toolsmithShare: Share,
   /** ... out of at least this many commits that change files. */
   toolsmithMinCommits: Count,
+  /** The craft badges that read code facts compare the commits of the last `recentWindowDays` days and skip a commit that changes more files than this. */
+  craftMaxFilesPerCommit: Count,
+  /** `type-tightener` needs this many explicit `any` net removed ... */
+  typeTightenerRemovedAny: Count,
+  /** ... in at least this many commits that each net-remove one. */
+  typeTightenerMinCommits: Count,
+  /** `sweeper` needs this many declarations net removed. */
+  sweeperRemovedDeclarations: Count,
+  /** `simplifier` needs this many functions made simpler ... */
+  simplifierFunctions: Count,
+  /** ... each by at least this many points of cognitive complexity. */
+  simplifierMinDrop: Count,
+  /** `test-companion` needs this many commits that add an exported function to production code ... */
+  testCompanionCommits: Count,
+  /** ... and this share of them also adding test cases. */
+  testCompanionShare: Share,
   reviewerReviews: Count,
 });
 

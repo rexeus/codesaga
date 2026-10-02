@@ -19,7 +19,11 @@ import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
 import type { ReportFacts } from "./report-facts.js";
 import { THRESHOLDS } from "./report-thresholds.js";
-import { deepDivesOf, typescriptOf } from "./typescript-analysis.js";
+import {
+  deepDivesOf,
+  historyLookupOf,
+  typescriptOf,
+} from "./typescript-analysis.js";
 
 const storiesOf = (
   { now, isCodePath, repository }: ReportFacts,
@@ -106,6 +110,7 @@ const peopleOf = (
     isCodePath: facts.isCodePath,
     universePaths: facts.universe.map(({ path }) => path),
     territories,
+    factsLookup: historyLookupOf(facts),
   });
 
 /** The sections that exist only for some runs or some repositories. */
