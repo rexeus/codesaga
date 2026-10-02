@@ -188,7 +188,13 @@ describe("renderAnalysis edge cases", () => {
       overview: {
         ...report.overview,
         commits: 0,
-        contributors: { total: 0, active30: 0, active90: 0, active365: 0 },
+        contributors: {
+          total: 0,
+          active30: 0,
+          active90: 0,
+          active365: 0,
+          allTime: 0,
+        },
         loc: 0,
         languages: [],
       },

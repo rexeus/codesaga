@@ -86,7 +86,8 @@
       "total": 8,
       "active30": 2,
       "active90": 4,
-      "active365": 7
+      "active365": 7,
+      "allTime": 8
     },
     "files": 473,
     "loc": 60942,

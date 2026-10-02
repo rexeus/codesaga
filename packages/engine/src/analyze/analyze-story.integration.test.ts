@@ -53,6 +53,36 @@ layer(NodeServices.layer)("analyze contributor status", (it) => {
   );
 });
 
+layer(NodeServices.layer)("analyze the all-time contributors", (it) => {
+  it.effect(
+    "counts the contributors of the full history under a narrowed window",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* repo.commit(
+          "2025-10-01T09:00:00Z",
+          { "src/a.ts": lines("a", 3) },
+          { author: grace },
+        );
+        yield* repo.commit(
+          "2026-03-02T09:00:00Z",
+          { "src/a.ts": lines("a", 5) },
+          { author: ada },
+        );
+
+        const { overview } = yield* analyze(
+          analyzeOptionsFor(repo, { since: "30d" }),
+        );
+
+        assert.deepStrictEqual(
+          [overview.contributors.total, overview.contributors.allTime],
+          [1, 2],
+        );
+      }),
+  );
+});
+
 layer(NodeServices.layer)(
   "analyze contributor status and the overview",
   (it) => {

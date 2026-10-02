@@ -125,7 +125,13 @@ layer(NodeServices.layer)("analyze a known history", (it) => {
       });
       assert.deepStrictEqual(report.overview, {
         commits: 8,
-        contributors: { total: 3, active30: 2, active90: 3, active365: 3 },
+        contributors: {
+          total: 3,
+          active30: 2,
+          active90: 3,
+          active365: 3,
+          allTime: 3,
+        },
         files: 2,
         loc: 22,
         languages: [{ name: "TypeScript", files: 2, loc: 22 }],

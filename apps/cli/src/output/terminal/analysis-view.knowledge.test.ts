@@ -111,7 +111,13 @@ const soleAuthor = (active: boolean) => {
     ...report,
     overview: {
       ...report.overview,
-      contributors: { total: 1, active30: 1, active90: 1, active365: 1 },
+      contributors: {
+        total: 1,
+        active30: 1,
+        active90: 1,
+        active365: 1,
+        allTime: 1,
+      },
     },
     knowledge: {
       ...report.knowledge,

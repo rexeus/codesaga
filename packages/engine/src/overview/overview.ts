@@ -12,6 +12,7 @@ import {
   ACTIVE_CONTRIBUTOR_DAYS,
   isActiveWithin,
 } from "../contributors/activeness.js";
+import { countContributors } from "../contributors/count-contributors.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { languageOf } from "../universe/languages.js";
@@ -19,6 +20,8 @@ import { languageOf } from "../universe/languages.js";
 type OverviewInput = {
   /** The window's commits of every class. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
+  /** The scope's commits of every class over the full history, whatever the window. */
+  readonly history: ReadonlyArray<ClassifiedCommit>;
   readonly universe: ReadonlyArray<InventoryFile>;
   /** The `Clock` time that the 30, 90 and 365 day counts are measured back from. */
   readonly now: DateTime.Utc;
@@ -62,12 +65,14 @@ const lastCommitTimes = (
   ].map((own) => own.reduce((last, { time }) => Math.max(last, time), 0));
 
 /**
- * The `overview` section: the window's commit count, contributors in total
- * and active in the last 30, 90 and 365 days, and the universe's files and
- * non-blank lines, per language with the most lines first.
+ * The `overview` section: the window's commit count, its contributors and
+ * those active in the last 30, 90 and 365 days, the contributors over the full
+ * history, and the universe's files and non-blank lines, per language with the
+ * most lines first.
  */
 export const overview = ({
   commits,
+  history,
   universe,
   now,
 }: OverviewInput): Report["overview"] => {
@@ -81,6 +86,7 @@ export const overview = ({
       active30: activeWithin(30),
       active90: activeWithin(ACTIVE_CONTRIBUTOR_DAYS),
       active365: activeWithin(365),
+      allTime: countContributors(history),
     },
     files: universe.length,
     loc: sumOfLoc(universe),

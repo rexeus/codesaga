@@ -46,12 +46,19 @@ export const ActivityWindow = Schema.Struct({
 const Overview = Schema.Struct({
   /** Commits in the window. */
   commits: Count,
-  /** Contributors with a commit in the 30, 90 and 365 days before now; `total` counts every contributor. */
+  /**
+   * Contributors, bots and agents not included. `total` counts those with a
+   * commit in the window and `active30`, `active90` and `active365` those with a
+   * commit in the 30, 90 and 365 days before now. `allTime` counts everyone with
+   * a commit over the full history in scope, whatever `--since` narrowed the
+   * window to, so `total` of `allTime` says how much of the team the window sees.
+   */
   contributors: Schema.Struct({
     total: Count,
     active30: Count,
     active90: Count,
     active365: Count,
+    allTime: Count,
   }),
   /** Universe files. */
   files: Count,

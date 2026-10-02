@@ -46,6 +46,15 @@ const highlightsOf = (
     ...(areas === undefined ? {} : { areas }),
   });
 
+const comparisonField = (
+  { isCodePath }: RepositoryFacts,
+  current: Analysis["commits"],
+  previous: Analysis["previous"],
+): Pick<Report, "comparison"> =>
+  previous === undefined
+    ? {}
+    : { comparison: comparison({ current, previous, isCodePath }) };
+
 /** Builds the report from the facts, each section over the commits it covers. */
 export const buildReport = (facts: RepositoryFacts): Report => {
   const {
@@ -89,21 +98,18 @@ export const buildReport = (facts: RepositoryFacts): Report => {
       contributors: people.length,
       directories: knowledgeSection.directories.length,
     },
-    overview: overview({ commits, universe: facts.universe, now: facts.now }),
+    overview: overview({
+      commits,
+      history: scoped,
+      universe: facts.universe,
+      now: facts.now,
+    }),
     activity: activity({ commits, window, isCodePath: facts.isCodePath }),
     punchcard: punchcard(commits),
     contributors: people,
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
     highlights: highlightsOf(facts, scoped, knowledgeSection, recommendedAreas),
-    ...(previous === undefined
-      ? {}
-      : {
-          comparison: comparison({
-            current: commits,
-            previous,
-            isCodePath: facts.isCodePath,
-          }),
-        }),
+    ...comparisonField(facts, commits, previous),
   };
 };
