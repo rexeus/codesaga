@@ -10,9 +10,12 @@ import type { Git } from "../git/git.js";
 import type { HistoryCommit } from "../history/history.js";
 import type { InventoryOptions } from "../universe/inventory.js";
 import { namedAsCode } from "../universe/inventory.js";
-import { withoutGeneratedFiles } from "../universe/tracked-files.js";
 import {
-  factsCacheFile,
+  ignoredAmong,
+  withoutGeneratedFiles,
+} from "../universe/tracked-files.js";
+import {
+  factsCacheDirectory,
   factsFingerprint,
   loadFactsCache,
   storeFactsCache,
@@ -67,6 +70,8 @@ const keptOf = (
  * The blobs the universe's rules would count: readable, named like code
  * (excluded directories, minified names, `include` and `exclude`) and not
  * marked `linguist-generated` or `linguist-vendored` in today's attributes,
+ * and not matched by today's ignore rules (the universe leaves out a tracked
+ * file that `.gitignore` matches),
  * one per blob and option set.
  */
 const countedBlobs = (
@@ -78,12 +83,12 @@ const countedBlobs = (
     const named = blobs.filter(
       (blob) => isCode(blob.path) && skipBeforeReading(blob) === undefined,
     );
-    const attributed = new Set(
-      yield* withoutGeneratedFiles([...new Set(named.map(({ path }) => path))]),
-    );
+    const paths = [...new Set(named.map(({ path }) => path))];
+    const attributed = new Set(yield* withoutGeneratedFiles(paths));
+    const ignored = new Set(yield* ignoredAmong(paths));
     const distinct = new Map(
       named
-        .filter(({ path }) => attributed.has(path))
+        .filter(({ path }) => attributed.has(path) && !ignored.has(path))
         .map((blob): [string, HistoryBlob] => [
           factsKey(blob.oid, blob.path),
           blob,
@@ -126,21 +131,22 @@ export const gatherHistoryFacts = (
       input,
       blobsOfHistory(input.commits, yield* readHeadBlobs(input.head)),
     );
-    const file = input.useCache ? yield* factsCacheFile(input.root) : undefined;
+    const directory = input.useCache
+      ? yield* factsCacheDirectory(input.root)
+      : undefined;
     const fingerprint = factsFingerprint(status);
     const cached =
-      file === undefined
+      directory === undefined
         ? new Map<string, FactsResult>()
-        : yield* loadFactsCache(file, fingerprint);
+        : yield* loadFactsCache(directory, fingerprint);
     const fresh = yield* parseMissing(
       wanted.filter(({ oid, path }) => !cached.has(factsKey(oid, path))),
       parser,
     );
     const keys = wanted.map(({ oid, path }) => factsKey(oid, path));
     const kept = keptOf(keys, cached, fresh);
-    const gained = keys.some((key) => kept.has(key) && !cached.has(key));
-    if (file !== undefined && (gained || kept.size !== cached.size)) {
-      yield* storeFactsCache(file, fingerprint, kept);
+    if (directory !== undefined) {
+      yield* storeFactsCache(directory, fingerprint, kept, cached);
     }
     return {
       factsByBlob: new Map(

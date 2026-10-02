@@ -225,7 +225,7 @@ describe("codesaga check and the TypeScript history", () => {
           args: ["check", "--min-truck-factor", "1"],
           cwd: repo.root,
         });
-        const cacheFile = join(repo.root, ".git", "codesaga", "syntax-v1.json");
+        const cacheFile = join(repo.root, ".git", "codesaga", "syntax-v1");
         const afterCheck = existsSync(cacheFile);
         yield* journey({ args: ["analyze", "--json"], cwd: repo.root });
 

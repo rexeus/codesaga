@@ -7,48 +7,64 @@ import type { FactsResult } from "./facts-of-source.js";
 
 const skipped: FactsResult = { kind: "skipped", reason: "syntax-error" };
 
-const temporaryFile = Effect.gen(function* () {
+const temporaryDirectory = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
   const directory = yield* fs.makeTempDirectoryScoped({ prefix: "codesaga-" });
-  return `${directory}/syntax-v1.json`;
+  return `${directory}/syntax-v1`;
 });
 
-layer(NodeServices.layer)("the facts cache file", (it) => {
+const none = new Map<string, FactsResult>();
+const key = (digit: string, tail = "ts:module") =>
+  `${digit.repeat(40)}:${tail}`;
+
+layer(NodeServices.layer)("the facts cache directory", (it) => {
   it.effect("returns the verdicts it stored under the same fingerprint", () =>
     Effect.gen(function* () {
-      const file = yield* temporaryFile;
+      const directory = yield* temporaryDirectory;
 
       yield* storeFactsCache(
-        file,
+        directory,
         "fingerprint",
-        new Map([["a".repeat(40), skipped]]),
+        new Map([[key("a"), skipped]]),
+        none,
       );
 
       assert.deepStrictEqual(
-        [...(yield* loadFactsCache(file, "fingerprint"))],
-        [["a".repeat(40), skipped]],
+        [...(yield* loadFactsCache(directory, "fingerprint"))],
+        [[key("a"), skipped]],
       );
     }),
   );
 
   it.effect("returns nothing under another fingerprint", () =>
     Effect.gen(function* () {
-      const file = yield* temporaryFile;
-      yield* storeFactsCache(file, "old", new Map([["a".repeat(40), skipped]]));
+      const directory = yield* temporaryDirectory;
+      yield* storeFactsCache(
+        directory,
+        "old",
+        new Map([[key("a"), skipped]]),
+        none,
+      );
 
-      assert.strictEqual((yield* loadFactsCache(file, "new")).size, 0);
+      assert.strictEqual((yield* loadFactsCache(directory, "new")).size, 0);
     }),
   );
+});
 
-  it.effect("returns nothing for a missing or a damaged file", () =>
+layer(NodeServices.layer)("reading a damaged facts cache directory", (it) => {
+  it.effect("returns nothing for a missing directory or a damaged shard", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const file = yield* temporaryFile;
-      assert.strictEqual((yield* loadFactsCache(file, "f")).size, 0);
+      const directory = yield* temporaryDirectory;
+      assert.strictEqual((yield* loadFactsCache(directory, "f")).size, 0);
 
-      yield* fs.writeFileString(file, '{"version":1,"fingerpr');
+      yield* fs.makeDirectory(directory, { recursive: true });
+      yield* fs.writeFileString(
+        `${directory}/aa.json`,
+        '{"version":1,"fingerpr',
+      );
 
-      assert.strictEqual((yield* loadFactsCache(file, "f")).size, 0);
+      assert.strictEqual((yield* loadFactsCache(directory, "f")).size, 0);
     }),
   );
 
@@ -57,9 +73,10 @@ layer(NodeServices.layer)("the facts cache file", (it) => {
     () =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
-        const file = yield* temporaryFile;
+        const directory = yield* temporaryDirectory;
+        yield* fs.makeDirectory(directory, { recursive: true });
         yield* fs.writeFileString(
-          file,
+          `${directory}/aa.json`,
           JSON.stringify({
             version: 1,
             fingerprint: "f",
@@ -71,7 +88,61 @@ layer(NodeServices.layer)("the facts cache file", (it) => {
           }),
         );
 
-        assert.strictEqual((yield* loadFactsCache(file, "f")).size, 0);
+        assert.strictEqual((yield* loadFactsCache(directory, "f")).size, 0);
       }),
+  );
+});
+
+layer(NodeServices.layer)("storing the facts cache shards", (it) => {
+  it.effect(
+    "writes one shard per first byte and only the shards that changed",
+    () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const directory = yield* temporaryDirectory;
+        const first = new Map([
+          [key("a"), skipped],
+          [key("b"), skipped],
+        ]);
+        yield* storeFactsCache(directory, "f", first, none);
+        yield* fs.writeFileString(`${directory}/bb.json`, "marker");
+
+        yield* storeFactsCache(
+          directory,
+          "f",
+          new Map([...first, [key("c"), skipped]]),
+          first,
+        );
+
+        assert.deepStrictEqual(
+          (yield* fs.readDirectory(directory)).toSorted(),
+          ["aa.json", "bb.json", "cc.json"],
+        );
+        assert.strictEqual(
+          yield* fs.readFileString(`${directory}/bb.json`),
+          "marker",
+        );
+      }),
+  );
+
+  it.effect("removes a shard that no entry is left in", () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const directory = yield* temporaryDirectory;
+      const both = new Map([
+        [key("a"), skipped],
+        [key("b"), skipped],
+      ]);
+      yield* storeFactsCache(directory, "f", both, none);
+
+      yield* storeFactsCache(
+        directory,
+        "f",
+        new Map([[key("a"), skipped]]),
+        both,
+      );
+
+      assert.deepStrictEqual(yield* fs.readDirectory(directory), ["aa.json"]);
+    }),
   );
 });

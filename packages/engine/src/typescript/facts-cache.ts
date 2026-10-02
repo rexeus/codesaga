@@ -1,10 +1,11 @@
-// Owns the facts cache: the verdict on every parsed blob, by blob id, in the git directory.
+// Owns the facts cache: the verdict on every parsed blob, by blob id, in a directory of the git directory.
 // A blob id is a content address, so an entry stays valid until the fingerprint changes.
+// The verdicts of the history are one JSON file per first byte of the blob id, because one file would pass 100 MB for a repository of Effect's size and be rewritten whole by every run that parses one new blob.
 // The cache is an optimization only: reading or writing it never fails.
-import { Effect, FileSystem, Schema } from "effect";
-import type { Path } from "effect";
+import { Effect, FileSystem, Path, Schema } from "effect";
 
 import { cacheFile, writeFileAtomically } from "../cache/cache-store.js";
+import { groupBy } from "../collections/group-by.js";
 import type { Git } from "../git/git.js";
 import { SkipReason } from "../report/typescript-deep-dive.js";
 import type { FactsResult } from "./facts-of-source.js";
@@ -14,8 +15,13 @@ import { INPUT_GUARD_LIMITS } from "./input-guards.js";
 import { parseOptionsOf } from "./source-kinds.js";
 import type { ParserStatus } from "./typescript-parser.js";
 
-/** The file name changes with the cache document, together with its version. */
-const FACTS_CACHE_FILE = "syntax-v1.json";
+/** The directory name changes with the shape of a shard, together with its version. */
+const FACTS_CACHE_DIRECTORY = "syntax-v1";
+
+/** A shard is `<first two hex digits of the blob id>.json`. */
+const SHARD_NAME = /^[0-9a-f]{2}\.json$/u;
+
+const shardOf = (key: string): string => key.slice(0, 2);
 
 const OPTION_EXTENSIONS = [
   "ts",
@@ -29,8 +35,8 @@ const OPTION_EXTENSIONS = [
 ];
 
 /**
- * What the cache file holds. A file whose `version` differs is unreadable, so
- * change the version and the file name together when this shape changes.
+ * What a shard holds. A shard whose `version` differs is unreadable, so
+ * change the version and the directory name together when this shape changes.
  * Facts are keyed by blob id and parse options (`factsKey`), and each is
  * `FileFacts` as it is, or `{ skipped }`; the facts are not
  * checked beyond their `version`, which the fingerprint ties to the code.
@@ -80,24 +86,20 @@ export const factsFingerprint = (
   });
 
 /**
- * The cache file of the repository `Git` runs in, or undefined when git
+ * The cache directory of the repository `Git` runs in, or undefined when git
  * cannot say where its directory is.
  */
-export const factsCacheFile = (
+export const factsCacheDirectory = (
   root: string,
 ): Effect.Effect<string | undefined, never, Git | Path.Path> =>
-  cacheFile(root, FACTS_CACHE_FILE);
+  cacheFile(root, FACTS_CACHE_DIRECTORY);
 
-/**
- * The verdicts in `file` by blob id, or none when it is missing, unreadable,
- * of another version, or written under another `fingerprint`. An entry that
- * does not read as a verdict is left out.
- */
-export const loadFactsCache = (
+/** The verdicts of one shard, or none when it is unreadable, of another version or written under another `fingerprint`. */
+const loadShard = (
   file: string,
   fingerprint: string,
 ): Effect.Effect<
-  ReadonlyMap<string, FactsResult>,
+  ReadonlyArray<readonly [string, FactsResult]>,
   never,
   FileSystem.FileSystem
 > =>
@@ -106,35 +108,103 @@ export const loadFactsCache = (
     const text = yield* fs.readFileString(file);
     const document = yield* Schema.decodeEffect(CacheDocument)(text);
     if (document.fingerprint !== fingerprint) {
-      return new Map<string, FactsResult>();
+      return [];
     }
-    const verdicts = new Map<string, FactsResult>();
-    for (const [oid, entry] of Object.entries(document.facts)) {
+    return Object.entries(document.facts).flatMap(([key, entry]) => {
       const result = resultOf(entry);
-      if (result !== undefined) {
-        verdicts.set(oid, result);
-      }
-    }
-    return verdicts;
+      return result === undefined ? [] : [[key, result] as const];
+    });
+  }).pipe(Effect.orElseSucceed(() => []));
+
+/** Shards are read this many at a time. */
+const SHARD_CONCURRENCY = 8;
+
+/**
+ * The verdicts in the cache `directory` by key, or none when it is missing.
+ * A shard that is unreadable, of another version or written under another
+ * `fingerprint` contributes nothing, and so does an entry that does not
+ * read as a verdict.
+ */
+export const loadFactsCache = (
+  directory: string,
+  fingerprint: string,
+): Effect.Effect<
+  ReadonlyMap<string, FactsResult>,
+  never,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const names = yield* fs.readDirectory(directory);
+    const shards = yield* Effect.forEach(
+      names.filter((name) => SHARD_NAME.test(name)),
+      (name) => loadShard(path.join(directory, name), fingerprint),
+      { concurrency: SHARD_CONCURRENCY },
+    );
+    return new Map(shards.flat());
   }).pipe(
     Effect.orElseSucceed(
       () => new Map<string, FactsResult>() as ReadonlyMap<string, FactsResult>,
     ),
   );
 
-/** Replaces the cache in `file` atomically with `verdicts`; a failure leaves the old file in place and is ignored. */
-export const storeFactsCache = (
-  file: string,
+const keysOf = (
+  entries: ReadonlyArray<readonly [string, FactsResult]> | undefined,
+): ReadonlySet<string> => new Set(entries?.map(([key]) => key));
+
+/** Whether the shard holds other keys than it did. */
+const differs = (
+  kept: ReadonlySet<string>,
+  loaded: ReadonlySet<string>,
+): boolean =>
+  kept.size !== loaded.size || [...kept].some((key) => !loaded.has(key));
+
+const storeShard = (
+  directory: string,
+  id: string,
   fingerprint: string,
-  verdicts: ReadonlyMap<string, FactsResult>,
+  entries: ReadonlyArray<readonly [string, FactsResult]>,
 ): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> =>
-  Schema.encodeEffect(CacheDocument)({
-    version: 1,
-    fingerprint,
-    facts: Object.fromEntries(
-      Array.from(verdicts, ([oid, result]) => [oid, entryOf(result)]),
-    ),
-  }).pipe(
-    Effect.flatMap((text) => writeFileAtomically(file, text)),
-    Effect.ignore,
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const file = path.join(directory, `${id}.json`);
+    if (entries.length === 0) {
+      yield* fs.remove(file, { force: true });
+    } else {
+      const text = yield* Schema.encodeEffect(CacheDocument)({
+        version: 1,
+        fingerprint,
+        facts: Object.fromEntries(
+          entries.map(([key, result]) => [key, entryOf(result)]),
+        ),
+      });
+      yield* writeFileAtomically(file, text);
+    }
+  }).pipe(Effect.ignore);
+
+/**
+ * Replaces the shards of the cache `directory` whose keys changed, each
+ * atomically, so that `kept` is what the cache holds next; a shard that
+ * `kept` empties is removed. `loaded` is what `loadFactsCache` returned, so
+ * the shards that did not change are not rewritten. A failure leaves the old
+ * shard in place and is ignored.
+ */
+export const storeFactsCache = (
+  directory: string,
+  fingerprint: string,
+  kept: ReadonlyMap<string, FactsResult>,
+  loaded: ReadonlyMap<string, FactsResult>,
+): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> => {
+  const now = groupBy(kept, ([key]) => shardOf(key));
+  const before = groupBy(loaded, ([key]) => shardOf(key));
+  const changed = [...new Set([...now.keys(), ...before.keys()])].filter((id) =>
+    differs(keysOf(now.get(id)), keysOf(before.get(id))),
   );
+  return Effect.forEach(
+    changed,
+    (id) => storeShard(directory, id, fingerprint, now.get(id) ?? []),
+    { concurrency: SHARD_CONCURRENCY, discard: true },
+  );
+};

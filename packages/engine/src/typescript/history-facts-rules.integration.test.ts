@@ -139,6 +139,28 @@ layer(NodeServices.layer)("gatherHistoryFacts universe rules", (it) => {
   );
 });
 
+layer(NodeServices.layer)("gatherHistoryFacts and git's ignore rules", (it) => {
+  it.effect(
+    "never reads a file today's .gitignore matches, though it was committed",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* repo.commit("2026-03-01T12:00:00Z", {
+          "src/app.ts": "export const app = 1;\n",
+          "scratchpad/note.ts": "export const note = 2;\n",
+        });
+        yield* repo.commit("2026-03-02T12:00:00Z", {
+          ".gitignore": "scratchpad/\n",
+        });
+
+        const { read, parsed } = yield* run(repo);
+
+        assert.deepStrictEqual(read, [yield* blobOf(repo, "src/app.ts")]);
+        assert.strictEqual(parsed, 1);
+      }),
+  );
+});
+
 layer(NodeServices.layer)("gatherHistoryFacts progress", (it) => {
   it.effect(
     "reports the missing blobs as the total, and nothing when none is missing",
