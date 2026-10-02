@@ -169,6 +169,21 @@ describe("limitReport deep dives", () => {
   });
 });
 
+describe("limitReport TypeScript achievements", () => {
+  it("never cuts the achievements and the badges of the territories", () => {
+    const report = sampleReport();
+    const limited = limitReport(report, 1);
+
+    expect(limited.deepDives?.typescript?.achievements).toStrictEqual(
+      report.deepDives?.typescript?.achievements,
+    );
+    expect(limited.deepDives?.typescript?.achievements).toHaveLength(4);
+    expect(limited.knowledge.territories.territories[0]?.badges).toStrictEqual(
+      report.knowledge.territories.territories[0]?.badges,
+    );
+  });
+});
+
 describe("limitReport import map", () => {
   it("cuts the import map to the limit and keeps the totals", () => {
     const limited = limitReport(sampleReport(), 2).deepDives?.typescript

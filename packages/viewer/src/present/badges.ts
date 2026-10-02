@@ -54,12 +54,17 @@ const TERRITORY_ICONS: Record<TerritoryBadge["kind"], IconName> = {
   churning: "refresh-cw",
   "deeply-nested": "indent-increase",
   "well-tested": "shield-check",
+  "type-safe": "shield-check",
+  strict: "lock",
+  "complex-logic": "brain",
+  "in-a-cycle": "repeat",
 };
 
 const RISK_TONES: Partial<Record<TerritoryBadge["kind"], "crit" | "warn">> = {
   orphaned: "crit",
   island: "warn",
   "knowledge-fading": "warn",
+  "in-a-cycle": "warn",
 };
 
 const CONTRIBUTOR_ICONS: Record<ContributorBadge["kind"], IconName> = {

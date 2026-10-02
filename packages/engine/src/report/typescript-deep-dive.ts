@@ -2,6 +2,7 @@
 // Later blocks of the deep dive join as further optional keys beside `coverage`.
 import { Schema } from "effect";
 
+import { TypeScriptAchievement } from "./typescript-achievements.js";
 import { Ecosystem } from "./typescript-ecosystem.js";
 import { ComplexityAndChange, Functions } from "./typescript-functions.js";
 import { Idioms } from "./typescript-idioms.js";
@@ -85,6 +86,8 @@ export const TypeScriptDeepDive = Schema.Struct({
   imports: Schema.optionalKey(Imports),
   /** The code over the whole history; absent when the history was not parsed (the parser did not load, or the run was a `check`), and when no file of it parsed. */
   trends: Schema.optionalKey(Trends),
+  /** The milestones of its type safety and module system; absent without a production TypeScript file. */
+  achievements: Schema.optionalKey(Schema.Array(TypeScriptAchievement)),
 });
 export type TypeScriptDeepDive = typeof TypeScriptDeepDive.Type;
 

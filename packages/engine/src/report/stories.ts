@@ -19,6 +19,12 @@ import { Schema } from "effect";
  * - `busiest-day`: `value` is the commits of the day, `date` the author's local day.
  * - `truck-factor-alert`: `value` is the truck factor (1), `people` the person who must leave.
  * - `orphaned-knowledge`: `value` is the files without an active expert, `path` the largest orphaned territory.
+ * - `focused-test`: `value` is the focused test cases (`.only`, `fit`, `fdescribe`) in the test files, `path` the first file that holds one.
+ * - `complex-core`: `value` is the cognitive complexity of the hardest production function, `path` its file.
+ * - `core-territory`: `value` is the territories that import the territory's production files, `path` the territory.
+ * - `strict-since`: `value` is the months `strict` has been on, `date` the day of the commit that turned it on, `path` the `tsconfig` that governs the most files. Needs the history.
+ * - `type-trend`: `value` is the relative change of the production escape hatches per 1,000 lines over the last 12 months (-0.6 is a fall of 60%). Needs the history.
+ * - `module-era`: `value` is the share (0 to 1) of the production module files that use CommonJS today; 0 says ESM-only, and then `date` is the first day of the month since which no production file used CommonJS. Needs the history.
  */
 export const Story = Schema.Struct({
   kind: Schema.Literals([
@@ -33,6 +39,12 @@ export const Story = Schema.Struct({
     "busiest-day",
     "truck-factor-alert",
     "orphaned-knowledge",
+    "focused-test",
+    "complex-core",
+    "core-territory",
+    "strict-since",
+    "type-trend",
+    "module-era",
   ]),
   /** The headline, such as "Longest streak". */
   title: Schema.String,

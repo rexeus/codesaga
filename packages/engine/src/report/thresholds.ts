@@ -2,6 +2,8 @@
 // Rules for territories and badges nest under their own key; the first five fields predate them and stay flat.
 import { Schema } from "effect";
 
+import { TypeScriptThresholds } from "./typescript-thresholds.js";
+
 const Count = Schema.Natural;
 const Share = Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 }));
 
@@ -59,6 +61,28 @@ const StoryThresholds = Schema.Struct({
   cleanupMinNetDeletedLines: Count,
   /** `rename-record` shows when a file was renamed at least this often. */
   renameRecordMinRenames: Count,
+  /** `focused-test` shows when the test files hold at least this many focused cases. */
+  focusedTestMinCases: Count,
+  /** `complex-core` needs at least this many production functions ... */
+  complexCoreMinFunctions: Count,
+  /** ... and a hardest one of at least this cognitive complexity. */
+  complexCoreMinComplexity: Count,
+  /** `core-territory` shows when at least this share of the other named territories of the import map import the territory ... */
+  coreTerritoryShare: Share,
+  /** ... among at least this many named territories. */
+  coreTerritoryMinTerritories: Count,
+  /** `type-trend` compares the production escape hatches per 1,000 lines now with this many months ago ... */
+  typeTrendMonths: Count,
+  /** ... and shows when they changed by at least this share, in either direction ... */
+  typeTrendMinChange: Share,
+  /** ... with at least this many escape hatches at one of the two points ... */
+  typeTrendMinEscapes: Count,
+  /** ... and at least this many production lines at both. */
+  typeTrendMinLines: Count,
+  /** `module-era` needs at least this many production module files. */
+  moduleEraMinFiles: Count,
+  /** `module-era` also shows a CommonJS share of at least this much. */
+  moduleEraCommonjsShare: Share,
 });
 
 /** The rules behind the badges of territories and contributors; the meaning of each is on its badge kind. */
@@ -78,6 +102,12 @@ const BadgeThresholds = Schema.Struct({
   newcomerFriendlyFirstCommits: Count,
   newcomerFriendlyDays: Count,
   wellTestedShare: Share,
+  /** `type-safe` needs at least this many production TypeScript files ... */
+  typeSafeMinFiles: Count,
+  /** `complex-logic` needs at least this many production functions ... */
+  complexLogicMinFunctions: Count,
+  /** ... and at least this share of them at or above `thresholds.typescript.complexityLimit`. */
+  complexLogicShare: Share,
   /** `heavyweight`, `hotspot`, `churning` and `deeply-nested` need at least this many named territories at the territory's level of the tree, itself included. */
   codeBadgeMinSiblings: Count,
   /** `heavyweight` and `hotspot` need a share among those territories of at least this many times the fair share, one over their number. */
@@ -184,42 +214,14 @@ const AchievementThresholds = Schema.Struct({
   freshBloodPeople: Count,
   /** ... whose first commit lies at most this many days ago. */
   freshBloodDays: Count,
-});
-
-/**
- * The bands and limits of the TypeScript deep dive. They are named bands from
- * cited sources for reading a distribution, not targets: 15 is the default
- * limit of Sonar's cognitive-complexity rule, the length and parameter bands
- * follow the Software Improvement Group's guidance.
- */
-const TypeScriptThresholds = Schema.Struct({
-  /** The complexity bands `0–4`, `5–9`, `10–14`, `15–24` and `25+`, as the first value of each band after the first. */
-  complexityBands: Schema.Array(Count),
-  /** The per-function limit of cognitive complexity (Sonar's default); `over15` counts functions at or above it. */
-  complexityLimit: Count,
-  /** The length bands `1–15`, `16–30`, `31–60` and `61+` non-blank lines, as the first value of each band after the first. */
-  lengthBands: Schema.Array(Count),
-  /** A function has a long parameter list with more parameters than this. */
-  maxParameters: Count,
-  /** The assertion bands `0`, `1`, `2–3` and `4+` per test case, as the first value of each band after the first. */
-  assertionBands: Schema.Array(Count),
-  /** A file is a complexity hotspot at or above this quantile of the hardest-function scores and of the revisions among the production files with a function ... */
-  hotspotQuantile: Share,
-  /** ... with a hardest function of at least this score ... */
-  hotspotMinComplexity: Count,
-  /** ... and at least this many revisions. */
-  hotspotMinRevisions: Count,
-  /** A source over this many characters is not parsed (`too-large`). */
-  maxSourceCharacters: Count,
-  /** A source whose non-blank lines average more characters than this is minified and not parsed. */
-  minifiedMeanLineLength: Count,
-  /** The import structure's rules. */
-  imports: Schema.Struct({
-    /** `towardLessStable` lists an import edge toward a territory whose instability is at least this much higher. */
-    instabilityGap: Schema.Finite,
-    /** It needs both territories to have at least this many import edges in and out together. */
-    minEdges: Count,
-  }),
+  /** `any-free` needs at least this many production TypeScript files. */
+  anyFreeMinFiles: Count,
+  /** `strict-throughout`, `esm-only` and `no-ts-ignore` need at least this many production files of their kind, so a handful of files does not earn them. */
+  typeScriptMinFiles: Count,
+  /** `tightened` needs the production escape hatches per 1,000 lines to have fallen by at least this share from their peak ... */
+  tightenedFall: Share,
+  /** ... and the peak to hold at least this many escape hatches. */
+  tightenedMinPeakEscapes: Count,
 });
 
 /** The constants an analysis applied, reported so consumers see them. */

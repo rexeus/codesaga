@@ -106,11 +106,12 @@ export const functionsReportOf = (
 
 /** What a territory carries of its production functions. */
 export type TerritoryFunctions = {
+  readonly functions: number;
   readonly over15Share: number;
   readonly maxComplexity: number;
 };
 
-/** The share of production functions at 15 or more and the highest score, undefined when the files hold no production function. */
+/** The count of production functions, the share at 15 or more and the highest score, undefined when the files hold no production function. */
 export const productionFunctionFigures = (
   files: ReadonlyArray<ParsedFile>,
 ): TerritoryFunctions | undefined => {
@@ -123,6 +124,7 @@ export const productionFunctionFigures = (
     production.map((file) => overLimit(functionsOf(file).complexity)),
   );
   return {
+    functions: count,
     over15Share: ratioOf(over15, count),
     maxComplexity: maxScoreOf(production),
   };

@@ -1,0 +1,211 @@
+import { describe, expect, it } from "vitest";
+
+import { storyFacts } from "../testing/story-facts.js";
+import {
+  configPosture,
+  deepDiveWith,
+  strictnessBlock,
+} from "../testing/typescript-blocks.js";
+import type { TrendInput } from "../typescript/trend-input.js";
+
+type FlagChange = TrendInput["events"][number];
+import { stories } from "./stories.js";
+
+/** `count` months from 2024-01, with the given series; each value is the series at every month, or a function of the month's index. */
+const trendsOf = (
+  count: number,
+  series: Record<string, (index: number) => number>,
+  events: ReadonlyArray<FlagChange> = [],
+): TrendInput => ({
+  months: Array.from({ length: count }, (_, index) => {
+    const month = index % 12;
+    return `${2024 + Math.floor(index / 12)}-${String(month + 1).padStart(2, "0")}`;
+  }),
+  series: Object.fromEntries(
+    Object.entries(series).map(([name, at]) => [
+      name,
+      Array.from({ length: count }, (_, index) => at(index)),
+    ]),
+  ),
+  events,
+});
+
+const storiesFor = (trends: TrendInput, typescript = deepDiveWith({})) =>
+  stories(storyFacts({ typescript, trends }));
+
+const strictOn = (path: string): FlagChange => ({
+  date: "2024-03-11",
+  path,
+  flag: "strict",
+  from: false,
+  to: true,
+});
+
+const dive = (strict: boolean) =>
+  deepDiveWith({
+    strictness: strictnessBlock([
+      configPosture("tsconfig.json", 50, strict),
+      configPosture("tools/tsconfig.json", 5, false),
+    ]),
+  });
+
+describe("strict-since", () => {
+  it("names the day strict was turned on in the config that governs the most files", () => {
+    // 2024-01 to 2026-03 is 27 months; 2024-03 to 2026-03 is 24.
+    expect(
+      storiesFor(trendsOf(27, {}, [strictOn("tsconfig.json")]), dive(true)),
+    ).toStrictEqual([
+      {
+        kind: "strict-since",
+        title: "Strict since",
+        detail: "strict has been on in tsconfig.json since 2024-03-11.",
+        value: 24,
+        date: "2024-03-11",
+        path: "tsconfig.json",
+      },
+    ]);
+  });
+
+  it("is not there when strict is off today, when the newest change turned it off, or for another config", () => {
+    const events = [strictOn("tsconfig.json")];
+
+    expect(storiesFor(trendsOf(27, {}, events), dive(false))).toStrictEqual([]);
+    expect(
+      storiesFor(
+        trendsOf(27, {}, [
+          ...events,
+          {
+            ...strictOn("tsconfig.json"),
+            date: "2025-01-02",
+            from: true,
+            to: false,
+          },
+        ]),
+        dive(true),
+      ),
+    ).toStrictEqual([]);
+    expect(
+      storiesFor(
+        trendsOf(27, {}, [strictOn("tools/tsconfig.json")]),
+        dive(true),
+      ),
+    ).toStrictEqual([]);
+  });
+});
+
+const escapeRate = (before: number, now: number, lines = 10_000) =>
+  trendsOf(14, {
+    "production.lines": () => lines,
+    // 14 points: index 1 is 12 months before the last point, index 13.
+    "production.escapes": (index) => (index === 13 ? now : before),
+  });
+
+describe("type-trend", () => {
+  it("words a fall of 60% in the last 12 months neutrally", () => {
+    expect(storiesFor(escapeRate(100, 40))).toStrictEqual([
+      {
+        kind: "type-trend",
+        title: "Escape hatches",
+        detail:
+          "Production escape hatches per 1,000 lines fell by 60% in the last 12 months, from 10 to 4.",
+        value: -0.6,
+      },
+    ]);
+  });
+
+  it("words a rise the same way", () => {
+    const [story] = storiesFor(escapeRate(100, 160));
+
+    expect(story?.detail).toBe(
+      "Production escape hatches per 1,000 lines rose by 60% in the last 12 months, from 10 to 16.",
+    );
+    expect(story?.value).toBe(0.6);
+  });
+
+  it("needs a change of 30% in either direction", () => {
+    expect(
+      storiesFor(escapeRate(100, 70)).map(({ kind }) => kind),
+    ).toStrictEqual(["type-trend"]);
+    expect(storiesFor(escapeRate(100, 71))).toStrictEqual([]);
+    expect(
+      storiesFor(escapeRate(100, 130)).map(({ kind }) => kind),
+    ).toStrictEqual(["type-trend"]);
+    expect(storiesFor(escapeRate(100, 129))).toStrictEqual([]);
+  });
+
+  it("needs 10 escape hatches, 1,000 lines and 13 months of history", () => {
+    expect(storiesFor(escapeRate(5, 9, 1_000))).toStrictEqual([]);
+    expect(
+      storiesFor(escapeRate(10, 4, 1_000)).map(({ kind }) => kind),
+    ).toStrictEqual(["type-trend"]);
+    expect(storiesFor(escapeRate(100, 40, 999))).toStrictEqual([]);
+    expect(
+      storiesFor(
+        trendsOf(12, {
+          "production.lines": () => 10_000,
+          "production.escapes": (index) => (index === 11 ? 40 : 100),
+        }),
+      ),
+    ).toStrictEqual([]);
+  });
+
+  it("says nothing of a start without escape hatches", () => {
+    expect(storiesFor(escapeRate(0, 40))).toStrictEqual([]);
+  });
+});
+
+const modules = (
+  esm: number,
+  commonjs: (index: number) => number,
+  count = 10,
+) =>
+  trendsOf(count, {
+    "production.esmFiles": () => esm,
+    "production.commonjsFiles": commonjs,
+  });
+
+describe("module-era", () => {
+  it("names the month since which no production file uses CommonJS", () => {
+    // CommonJS until index 5 (2024-06), none from index 6 (2024-07).
+    expect(
+      storiesFor(modules(30, (index) => (index <= 5 ? 4 : 0))),
+    ).toStrictEqual([
+      {
+        kind: "module-era",
+        title: "ESM only",
+        detail: "No production file has used CommonJS since 2024-07.",
+        value: 0,
+        date: "2024-07-01",
+      },
+    ]);
+  });
+
+  it("says nothing of a code base that was never CommonJS", () => {
+    expect(storiesFor(modules(30, () => 0))).toStrictEqual([]);
+  });
+
+  it("names a CommonJS share of at least half", () => {
+    expect(storiesFor(modules(10, () => 10))).toStrictEqual([
+      {
+        kind: "module-era",
+        title: "CommonJS code",
+        detail: "50% of the production module files use CommonJS.",
+        value: 0.5,
+      },
+    ]);
+    expect(storiesFor(modules(11, () => 10))).toStrictEqual([]);
+  });
+
+  it("needs 10 module files", () => {
+    expect(storiesFor(modules(4, () => 6))).toHaveLength(1);
+    expect(storiesFor(modules(4, () => 5))).toStrictEqual([]);
+  });
+});
+
+describe("the stories of the history", () => {
+  it("are absent without trends", () => {
+    expect(stories(storyFacts({ typescript: deepDiveWith({}) }))).toStrictEqual(
+      [],
+    );
+  });
+});

@@ -18,6 +18,12 @@ import type {
   TerritoryExpert,
 } from "./territory-badge-facts.js";
 import { TERRITORY_BADGE_THRESHOLDS } from "./territory-badge-thresholds.js";
+import {
+  complexLogic,
+  inACycle,
+  strict,
+  typeSafe,
+} from "./typescript-badges.js";
 
 const {
   sharedActiveExperts,
@@ -210,12 +216,16 @@ const RULES: ReadonlyArray<(context: Context) => EarnedBadge | undefined> = [
   churning,
   deeplyNested,
   wellTested,
+  ({ typescript }) => typeSafe(typescript),
+  ({ typescript }) => strict(typescript),
+  ({ typescript }) => complexLogic(typescript),
+  ({ typescript }) => inACycle(typescript),
 ];
 
 /**
  * The badges the territory earns, most important first: island, orphaned, one
  * expert, shared knowledge, knowledge fading, handover, new territory, in focus,
- * quiet, newcomer-friendly, heavyweight, hotspot, churning, deeply nested, well tested. Each carries its rule and the numbers behind
+ * quiet, newcomer-friendly, heavyweight, hotspot, churning, deeply nested, well tested, type-safe, strict, complex logic, in a cycle. Each carries its rule and the numbers behind
  * it as evidence. An `other` territory earns none. Pure: the caller gathers the
  * input from the knowledge model and the commits.
  */

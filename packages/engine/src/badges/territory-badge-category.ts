@@ -19,6 +19,10 @@ const CATEGORY_OF: Record<TerritoryBadge["kind"], TerritoryBadge["category"]> =
     churning: "code",
     "deeply-nested": "code",
     "well-tested": "code",
+    "type-safe": "code",
+    strict: "code",
+    "complex-logic": "code",
+    "in-a-cycle": "code",
   };
 
 /** A badge a rule earned, before its category is filed. */

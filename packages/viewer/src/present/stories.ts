@@ -18,6 +18,7 @@ import {
   nightLabel,
   weekdayTotals,
 } from "./rhythm.js";
+import { TYPESCRIPT_STORY_LOOKS } from "./typescript-story-looks.js";
 
 type Story = Report["stories"][number];
 
@@ -246,6 +247,7 @@ const LOOKS: Record<
   "biggest-cleanup": { icon: "trash-2", slot: 5, build: biggestCleanup },
   "truck-factor-alert": { icon: "truck", slot: 4, build: truckFactorAlert },
   "orphaned-knowledge": { icon: "ghost", slot: 5, build: orphanedKnowledge },
+  ...TYPESCRIPT_STORY_LOOKS,
 };
 
 /** The cards of the stories strip, in the report's order; none when the report has no story. */

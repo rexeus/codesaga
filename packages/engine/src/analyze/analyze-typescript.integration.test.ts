@@ -110,6 +110,7 @@ layer(analyzeServices)(
           assert.deepStrictEqual(byPath["lib"], {
             files: 3,
             codeLines: 3,
+            productionTypeScriptFiles: 3,
             escapesPer1000: 0,
             esmShare: 1,
             importsCount: 0,
