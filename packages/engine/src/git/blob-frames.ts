@@ -7,11 +7,17 @@
 export type Frame =
   | { readonly oid: string; readonly content: Uint8Array }
   /** The object does not exist or is not a blob. */
-  | { readonly oid: string; readonly unreadable: true };
+  | { readonly oid: string; readonly unreadable: true }
+  /** The blob is larger than the parser's `maxBytes`; its content was skipped, not kept. */
+  | { readonly oid: string; readonly tooLarge: true }
+  /** A header git would never print; the framing cannot recover, so no frame follows. */
+  | { readonly malformed: string };
 
 type OpenFrame = {
   readonly oid: string;
   readonly isBlob: boolean;
+  /** Whether the content is counted and dropped rather than kept. */
+  readonly discard: boolean;
   /** The content and its closing newline. */
   readonly length: number;
   readonly parts: Array<Uint8Array>;
@@ -43,6 +49,15 @@ const joined = (parts: ReadonlyArray<Uint8Array>, length: number) => {
   return content;
 };
 
+const completed = (open: OpenFrame): Frame => {
+  if (!open.isBlob) {
+    return { oid: open.oid, unreadable: true };
+  }
+  return open.discard
+    ? { oid: open.oid, tooLarge: true }
+    : { oid: open.oid, content: joined(open.parts, open.length - 1) };
+};
+
 /**
  * Turns chunks of `cat-file --batch` output into frames. It holds the state
  * between chunks, so use one instance per process.
@@ -50,15 +65,23 @@ const joined = (parts: ReadonlyArray<Uint8Array>, length: number) => {
 export class FrameParser {
   #header: Uint8Array = new Uint8Array(0);
   #open: OpenFrame | undefined;
+  #broken = false;
+  readonly #maxBytes: number;
+
+  /** A blob larger than `maxBytes` (default: no limit) is reported as too large without keeping its content. */
+  constructor(maxBytes = Number.POSITIVE_INFINITY) {
+    this.#maxBytes = maxBytes;
+  }
 
   /**
-   * Consumes the next chunk and returns the frames it completed. Throws on a
-   * header git would never print, as the framing cannot recover from one.
+   * Consumes the next chunk and returns the frames it completed. A header git
+   * would never print ends the output with a `malformed` frame, and every
+   * later chunk yields nothing.
    */
   push(chunk: Uint8Array): ReadonlyArray<Frame> {
     const frames: Array<Frame> = [];
     let position = 0;
-    while (position < chunk.length) {
+    while (position < chunk.length && !this.#broken) {
       if (this.#open === undefined) {
         position = this.#readHeader(chunk, position, frames);
       } else {
@@ -96,11 +119,14 @@ export class FrameParser {
     }
     const [, oid = "", type = "", size = ""] = HEADER.exec(line) ?? [];
     if (oid === "") {
-      throw new Error(`Unexpected cat-file header: ${line.slice(0, 200)}`);
+      this.#broken = true;
+      frames.push({ malformed: line.slice(0, 200) });
+      return chunk.length;
     }
     this.#open = {
       oid,
       isBlob: type === "blob",
+      discard: type !== "blob" || Number(size) > this.#maxBytes,
       length: Number(size) + 1,
       parts: [],
       received: 0,
@@ -118,14 +144,12 @@ export class FrameParser {
       return position;
     }
     const end = Math.min(chunk.length, position + open.length - open.received);
-    open.parts.push(chunk.subarray(position, end));
+    if (!open.discard) {
+      open.parts.push(chunk.subarray(position, end));
+    }
     open.received += end - position;
     if (open.received === open.length) {
-      frames.push(
-        open.isBlob
-          ? { oid: open.oid, content: joined(open.parts, open.length - 1) }
-          : { oid: open.oid, unreadable: true },
-      );
+      frames.push(completed(open));
       this.#open = undefined;
     }
     return end;

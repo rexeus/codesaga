@@ -18,8 +18,8 @@ const frame = (id: string, content: string | Uint8Array) => {
   return bytes(`${id} blob ${body.length}\n`, body, "\n");
 };
 
-const parse = (chunks: ReadonlyArray<Uint8Array>) => {
-  const parser = new FrameParser();
+const parse = (chunks: ReadonlyArray<Uint8Array>, maxBytes?: number) => {
+  const parser = new FrameParser(maxBytes);
   return [...chunks.flatMap((chunk) => parser.push(chunk)), ...parser.end()];
 };
 
@@ -29,11 +29,15 @@ const split = (whole: Uint8Array, size: number) =>
   );
 
 const contents = (frames: ReadonlyArray<Frame>) =>
-  frames.map((entry) =>
-    "content" in entry
-      ? [entry.oid, [...entry.content]]
-      : [entry.oid, "unreadable"],
-  );
+  frames.map((entry) => {
+    if ("malformed" in entry) {
+      return ["malformed", entry.malformed];
+    }
+    if ("content" in entry) {
+      return [entry.oid, Array.from(entry.content)];
+    }
+    return [entry.oid, "tooLarge" in entry ? "tooLarge" : "unreadable"];
+  });
 
 describe("FrameParser", () => {
   it("cuts content that holds newlines, empty content and invalid UTF-8 by its size", () => {
@@ -85,9 +89,21 @@ describe("FrameParser", () => {
     ]);
   });
 
-  it("throws on a header it does not know, as framing cannot recover", () => {
-    expect(() => parse([bytes("not a header\n")])).toThrow(
-      "Unexpected cat-file header: not a header",
-    );
+  it("ends the output with a malformed frame on a header it does not know, as framing cannot recover", () => {
+    const whole = bytes("not a header\n", frame(oid("a"), "ignored"));
+
+    expect(contents(parse([whole]))).toStrictEqual([
+      ["malformed", "not a header"],
+    ]);
+  });
+
+  it("counts the content of a blob over the limit without keeping it, and reads the next frame", () => {
+    const big = "x".repeat(100);
+    const whole = bytes(frame(oid("a"), big), frame(oid("b"), "small"));
+
+    expect(contents(parse(split(whole, 7), 50))).toStrictEqual([
+      [oid("a"), "tooLarge"],
+      [oid("b"), Array.from(encoder.encode("small"))],
+    ]);
   });
 });

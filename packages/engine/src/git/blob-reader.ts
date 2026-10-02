@@ -3,6 +3,8 @@
 import { Effect, Stream } from "effect";
 
 import { FrameParser } from "./blob-frames.js";
+import type { Frame } from "./blob-frames.js";
+import { GitCommandFailed } from "./git-errors.js";
 import type { GitError } from "./git-errors.js";
 import { Git } from "./git.js";
 
@@ -21,6 +23,8 @@ export type SkipReason =
   | "symlink"
   /** The mode says the entry is a submodule. */
   | "submodule"
+  /** Larger than `maxBytes`, or a text too long to decode; never decoded. */
+  | "too-large"
   /** git has no such blob, as in a partial clone, or the id is not a full hex id. */
   | "unreadable";
 
@@ -55,12 +59,40 @@ const skipped = (oid: string, reason: SkipReason): BlobRead => ({
 
 const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
 
+/** Invalid UTF-8 is a `TypeError`; a text beyond the engine's string length is a `RangeError`, which says nothing of binary content. */
 const decode = (oid: string, content: Uint8Array): BlobRead => {
   try {
     return { oid, text: decoder.decode(content) };
-  } catch {
+  } catch (error) {
+    if (error instanceof RangeError) {
+      return skipped(oid, "too-large");
+    }
     return skipped(oid, "binary");
   }
+};
+
+const malformed = (header: string) =>
+  new GitCommandFailed({
+    args: ["cat-file", "--batch"],
+    exitCode: -1,
+    stderr: `unexpected output: ${header}`,
+  });
+
+const readOf = (frame: Frame): Effect.Effect<BlobRead, GitError> => {
+  if ("malformed" in frame) {
+    return Effect.fail(malformed(frame.malformed));
+  }
+  if ("content" in frame) {
+    return Effect.succeed(decode(frame.oid, frame.content));
+  }
+  return Effect.succeed(
+    skipped(frame.oid, "tooLarge" in frame ? "too-large" : "unreadable"),
+  );
+};
+
+export type ReadOptions = {
+  /** Blobs larger than this many bytes are skipped as `too-large` before they are decoded or kept. */
+  readonly maxBytes?: number;
 };
 
 /**
@@ -69,10 +101,12 @@ const decode = (oid: string, content: Uint8Array): BlobRead => {
  * an id that is not a full hex id, then the rest as git answers. A blob that is
  * not valid UTF-8 is skipped as `binary`; a byte-order mark stays in the text.
  *
+ * Fails with a `GitCommandFailed` when git prints something other than frames.
  * Git must run in the repository that holds the blobs.
  */
 export const readBlobs = (
   blobs: ReadonlyArray<BlobRef>,
+  options: ReadOptions = {},
 ): Stream.Stream<BlobRead, GitError, Git> =>
   Stream.unwrap(
     Effect.gen(function* () {
@@ -91,15 +125,11 @@ export const readBlobs = (
         Stream.fromIterable(refused),
         git.bytes(["cat-file", "--batch"], `${requested.join("\n")}\n`).pipe(
           Stream.mapAccum(
-            () => new FrameParser(),
+            () => new FrameParser(options.maxBytes),
             (parser, chunk) => [parser, parser.push(chunk)],
             { onHalt: (parser) => parser.end() },
           ),
-          Stream.map((frame) =>
-            "content" in frame
-              ? decode(frame.oid, frame.content)
-              : skipped(frame.oid, "unreadable"),
-          ),
+          Stream.mapEffect((frame) => readOf(frame)),
         ),
       );
     }),

@@ -5,14 +5,18 @@ import { Effect, FileSystem, Path, Stream } from "effect";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { readBlobs } from "./blob-reader.js";
-import type { BlobRead, BlobRef } from "./blob-reader.js";
+import type { BlobRead, BlobRef, ReadOptions } from "./blob-reader.js";
 import { Git } from "./git.js";
 
 const byOid = (reads: ReadonlyArray<BlobRead>) =>
   reads.toSorted((a, b) => a.oid.localeCompare(b.oid));
 
-const read = (repo: TempRepository, blobs: ReadonlyArray<BlobRef>) =>
-  Stream.runCollect(readBlobs(blobs)).pipe(
+const read = (
+  repo: TempRepository,
+  blobs: ReadonlyArray<BlobRef>,
+  options?: ReadOptions,
+) =>
+  Stream.runCollect(readBlobs(blobs, options)).pipe(
     Effect.map(byOid),
     Effect.provide(Git.layer(repo.directory)),
   );
@@ -92,6 +96,32 @@ layer(NodeServices.layer)("readBlobs skips", (it) => {
             { oid: absent, skipped: "submodule" },
             { oid: absent, skipped: "unreadable" },
             { oid: "HEAD:plain.ts", skipped: "unreadable" },
+          ]),
+        );
+      }),
+  );
+
+  it.effect(
+    "skips a blob over maxBytes as too-large by the size git reports, and still reads the ones after it",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* repo.commit("2026-03-01T12:00:00Z", {
+          "big.ts": "é".repeat(600),
+          "small.ts": "x\n",
+        });
+        const big = yield* blobId(repo, "big.ts");
+        const small = yield* blobId(repo, "small.ts");
+
+        const reads = yield* read(repo, [{ oid: big }, { oid: small }], {
+          maxBytes: 1_000,
+        });
+
+        assert.deepStrictEqual(
+          reads,
+          byOid([
+            { oid: big, skipped: "too-large" },
+            { oid: small, text: "x\n" },
           ]),
         );
       }),
