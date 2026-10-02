@@ -2,36 +2,22 @@
 // Pure, so the composition is testable without git; analyze only gathers the facts.
 // One pass per section over the scoped commits.
 
+import { achievements } from "../achievements/achievements.js";
 import { activity } from "../activity/activity.js";
 import { punchcard } from "../activity/punchcard.js";
 import { automation } from "../automation/automation.js";
-import { CONTRIBUTOR_BADGE_THRESHOLDS } from "../badges/contributor-badges.js";
-import { TERRITORY_BADGE_THRESHOLDS } from "../badges/territory-badge-thresholds.js";
 import { comparison } from "../compare/comparison.js";
-import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import { contributors } from "../contributors/contributors.js";
-import {
-  TERRITORY_THRESHOLDS,
-  KNOWLEDGE_THRESHOLDS,
-  knowledge,
-} from "../knowledge/knowledge.js";
+import { knowledge } from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import type { Report } from "../report/report.js";
 import { universeStats } from "../stats/universe-stats.js";
 import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
-import { STORY_THRESHOLDS } from "../stories/thresholds.js";
 import type { RepositoryFacts } from "./gather.js";
 import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
-
-const THRESHOLDS: Report["thresholds"] = {
-  activeDays: ACTIVE_DAYS,
-  ...KNOWLEDGE_THRESHOLDS,
-  territories: TERRITORY_THRESHOLDS,
-  stories: STORY_THRESHOLDS,
-  badges: { ...TERRITORY_BADGE_THRESHOLDS, ...CONTRIBUTOR_BADGE_THRESHOLDS },
-};
+import { THRESHOLDS } from "./report-thresholds.js";
 
 const storiesOf = (
   { now, isCodePath, repository }: RepositoryFacts,
@@ -46,6 +32,21 @@ const storiesOf = (
     isCodePath,
     knowledge: knowledgeSection,
     ...(territories === undefined ? {} : { territories }),
+  });
+
+const achievementsOf = (
+  { now, isCodePath, repository }: RepositoryFacts,
+  commits: Analysis["scoped"],
+  stats: Report["stats"],
+  knowledgeSection: Report["knowledge"],
+): Report["achievements"] =>
+  achievements({
+    commits,
+    now,
+    shallow: repository.shallow,
+    isCodePath,
+    stats,
+    truckFactor: knowledgeSection.truckFactor.value,
   });
 
 const comparisonField = (
@@ -136,6 +137,12 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     knowledge: knowledgeSection,
     stats: stats.repository,
     stories: storiesOf(facts, scoped, knowledgeSection, recommendedTerritories),
+    achievements: achievementsOf(
+      facts,
+      scoped,
+      stats.repository,
+      knowledgeSection,
+    ),
     ...comparisonField(facts, commits, previous),
   };
 };

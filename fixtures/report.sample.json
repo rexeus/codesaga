@@ -88,6 +88,19 @@
       "newHereDays": 90,
       "backAgainGapDays": 183,
       "reviewerReviews": 10
+    },
+    "achievements": {
+      "firstCommitsTiers": [1000, 10000],
+      "marathonDays": 1000,
+      "communityTiers": [10, 50, 100],
+      "busProofTruckFactor": 5,
+      "polyglotLanguages": 5,
+      "polyglotMinShare": 0.01,
+      "testCultureShare": 0.3,
+      "unbrokenDays": 30,
+      "springCleaningNetLines": 1000,
+      "freshBloodPeople": 5,
+      "freshBloodDays": 90
     }
   },
   "totals": {
@@ -4978,6 +4991,116 @@
           "email": "sam.okafor@aurora.example"
         }
       ]
+    }
+  ],
+  "achievements": [
+    {
+      "kind": "first-commits",
+      "title": "First 1,000 commits",
+      "tier": 1,
+      "tiers": [1000, 10000],
+      "reached": true,
+      "reachedAt": "2024-04-19",
+      "holds": "milestone",
+      "detail": "The 1,000th commit landed on 2024-04-19.",
+      "progress": {
+        "value": 2246,
+        "target": 10000,
+        "unit": "commits"
+      }
+    },
+    {
+      "kind": "marathon",
+      "title": "Marathon",
+      "reached": true,
+      "reachedAt": "2026-07-06",
+      "holds": "milestone",
+      "detail": "1,085 days of history since 2023-10-10.",
+      "progress": null
+    },
+    {
+      "kind": "community",
+      "title": "Community",
+      "tiers": [10, 50, 100],
+      "reached": false,
+      "reachedAt": null,
+      "holds": "milestone",
+      "detail": "8 contributors so far.",
+      "progress": {
+        "value": 8,
+        "target": 10,
+        "unit": "contributors"
+      }
+    },
+    {
+      "kind": "bus-proof",
+      "title": "Bus-proof",
+      "reached": false,
+      "reachedAt": null,
+      "holds": "state",
+      "detail": "Truck factor 2: 2 people must leave before more than half of the files lose every expert.",
+      "progress": {
+        "value": 2,
+        "target": 5,
+        "unit": "truck factor"
+      }
+    },
+    {
+      "kind": "polyglot",
+      "title": "Polyglot",
+      "reached": true,
+      "reachedAt": "2024-05-14",
+      "holds": "milestone",
+      "detail": "5 languages: TypeScript, CSS, SQL, JavaScript, Shell.",
+      "progress": null
+    },
+    {
+      "kind": "test-culture",
+      "title": "Test culture",
+      "reached": false,
+      "reachedAt": null,
+      "holds": "state",
+      "detail": "118 of 473 files are tests (25%).",
+      "progress": {
+        "value": 24,
+        "target": 30,
+        "unit": "% test files"
+      }
+    },
+    {
+      "kind": "unbroken",
+      "title": "Unbroken",
+      "reached": false,
+      "reachedAt": null,
+      "holds": "milestone",
+      "detail": "Longest streak: 23 days with a commit every day.",
+      "progress": {
+        "value": 23,
+        "target": 30,
+        "unit": "days in a row"
+      }
+    },
+    {
+      "kind": "spring-cleaning",
+      "title": "Spring cleaning",
+      "reached": true,
+      "reachedAt": "2025-06-24",
+      "holds": "milestone",
+      "detail": "One commit removed 4,120 more code lines than it added: \"Drop the legacy checkout flow\".",
+      "progress": null
+    },
+    {
+      "kind": "fresh-blood",
+      "title": "Fresh blood",
+      "reached": false,
+      "reachedAt": null,
+      "holds": "state",
+      "detail": "1 newcomer in the last 90 days.",
+      "progress": {
+        "value": 1,
+        "target": 5,
+        "unit": "newcomers in 90 days"
+      }
     }
   ]
 }

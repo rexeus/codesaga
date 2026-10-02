@@ -29,6 +29,7 @@ const SECTIONS = [
   "knowledge",
   "stats",
   "stories",
+  "achievements",
 ] as const;
 
 layer(NodeServices.layer)("Report", (it) => {
@@ -62,6 +63,12 @@ layer(NodeServices.layer)("Report", (it) => {
         territories.territories.length,
       );
       assert.strictEqual(report.stories.length, 6);
+      assert.deepStrictEqual(
+        report.achievements
+          .filter(({ reached }) => reached)
+          .map(({ kind }) => kind),
+        ["first-commits", "marathon", "polyglot", "spring-cleaning"],
+      );
       assert.deepStrictEqual(
         report.contributors.map(({ status }) => status),
         [

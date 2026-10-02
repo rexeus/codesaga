@@ -3,6 +3,7 @@
 // Additive fields keep schemaVersion 1; renaming or removing a field bumps it.
 import { Schema } from "effect";
 
+import { Achievement } from "./achievements.js";
 import { AutomationTotals } from "./automation-totals.js";
 import { ContributorBadge } from "./badges.js";
 import { CodeStats } from "./code-stats.js";
@@ -216,6 +217,12 @@ export const Report = Schema.Struct({
    * six; empty when nothing passes a threshold.
    */
   stories: Schema.Array(Story).check(Schema.isMaxLength(6)),
+  /**
+   * The repository's milestones, all nine kinds in a fixed order, reached or
+   * not; independent of `window`. See `Achievement` for what holds in a
+   * shallow clone.
+   */
+  achievements: Schema.Array(Achievement).check(Schema.isBetweenLength(9, 9)),
   /** Only with `--compare`: the window against the span before it. */
   comparison: Schema.optionalKey(Comparison),
   /** Only with `--github`: pull requests and reviews read from GitHub. */

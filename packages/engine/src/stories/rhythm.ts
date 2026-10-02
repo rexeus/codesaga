@@ -8,6 +8,8 @@ import {
   localHourOf,
   weekdayOfDay,
 } from "../activity/buckets.js";
+import { dayRuns } from "../activity/day-runs.js";
+import type { DayRun } from "../activity/day-runs.js";
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { roundReported } from "../report/precision.js";
@@ -40,20 +42,11 @@ const commitsPerDay = (
 };
 
 /** The first day and length of the longest run of consecutive days; the earliest wins a tie. */
-const longestRun = (
-  days: ReadonlyArray<number>,
-): { readonly start: number; readonly length: number } => {
-  let best = { start: 0, length: 0 };
-  let run = { start: 0, length: 0 };
-  for (const day of days.toSorted((a, b) => a - b)) {
-    run =
-      run.length > 0 && day === run.start + run.length
-        ? { start: run.start, length: run.length + 1 }
-        : { start: day, length: 1 };
-    best = run.length > best.length ? run : best;
-  }
-  return best;
-};
+const longestRun = (days: ReadonlyArray<number>): DayRun =>
+  dayRuns(days).reduce<DayRun>(
+    (best, run) => (run.length > best.length ? run : best),
+    { start: 0, length: 0 },
+  );
 
 const streakStory = (
   days: ReadonlyMap<number, number>,

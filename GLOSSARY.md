@@ -92,7 +92,19 @@ Badges of a contributor:
 - **Back again** (`back-again`) — active again after a pause of at least 183 days.
 - **Reviewer** (`reviewer`) — at least 10 reviews; needs `--github` and is not awarded yet, since reviews are not tied to identities.
 
-**Achievement** — a milestone the repository as a whole has reached, such as a round number of commits or contributors. It states a reached threshold and never compares people. The report does not list achievements yet.
+**Achievement** — a milestone the repository as a whole has reached (`achievements` in the report). The report lists all nine kinds, reached or not, in a fixed order, each with a `detail`, a `progress` toward the next threshold, and `holds`: a _milestone_ stays reached and carries `reachedAt`, the day it was first passed, computed from the history (`YYYY-MM-DD`, UTC); a _state_ holds today, can be lost again and has no day. An achievement counts commits, people and files, names nobody and never compares people. Achievements read the scope's full history, whatever `--since` narrowed the window to. The thresholds are in `thresholds.achievements`.
+
+- **First 1,000 commits** (`first-commits`, milestone, tiers 1,000 and 10,000 commits) — the number of commits of any class; the second tier is titled "First 10,000 commits". `reachedAt` is the day of the 1,000th (or 10,000th) commit.
+- **Marathon** (`marathon`, milestone) — at least 1,000 days between the first and the last commit; `reachedAt` is 1,000 days after the first commit.
+- **Community** (`community`, milestone, tiers 10, 50 and 100) — the contributors over the full history; `reachedAt` is the day of the first commit of the 10th, 50th or 100th, whichever tier is the highest reached.
+- **Bus-proof** (`bus-proof`, state) — a truck factor of at least 5.
+- **Polyglot** (`polyglot`, milestone) — at least 5 languages with each at least 1% of the code lines. It is reached when the files at HEAD show it or the history once did. `reachedAt` is the first commit after which the net lines each commit added per language, over every path that counted as code and deleted files too, gave five languages each 1%; it is an estimate, and falls back to the last commit when only the files at HEAD show it.
+- **Test culture** (`test-culture`, state) — at least 30% of the files are tests.
+- **Unbroken** (`unbroken`, milestone) — a commit on each of 30 consecutive days, in the authors' local days; `reachedAt` is the 30th day of the first such run.
+- **Spring cleaning** (`spring-cleaning`, milestone) — one commit that removed at least 1,000 more code lines than it added; `reachedAt` is the day of the first.
+- **Fresh blood** (`fresh-blood`, state) — at least 5 people made their first commit in the last 90 days, counted as _new_ contributors are.
+
+A shallow clone misses the oldest history. Its milestones are reached when the commits it has show them, and their `detail` says the figures are at least that much, but `reachedAt` is null, since an older commit may have passed the threshold first. Bus-proof and Fresh blood read the whole history, so they are withheld there: not reached, without a `progress`.
 
 ## Page and commands
 

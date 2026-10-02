@@ -81,6 +81,10 @@ export const isSourceLanguage = (path: string): boolean =>
 /** The language of files whose extension is not on the allow-list; only `--include` admits them. */
 const OTHER_LANGUAGE = "Other";
 
+/** The language name of a path, "Other" for an extension that is not on the allow-list. */
+export const languageNameOf = (path: string): string =>
+  languageOf(path) ?? OTHER_LANGUAGE;
+
 /** A language with its files and non-blank lines. */
 export type LanguageShare = {
   readonly name: string;
@@ -102,7 +106,7 @@ const byLinesThenName = Order.combine(
 export const languageBreakdown = (
   files: ReadonlyArray<{ readonly path: string; readonly loc: number }>,
 ): ReadonlyArray<LanguageShare> =>
-  [...groupBy(files, (file) => languageOf(file.path) ?? OTHER_LANGUAGE)]
+  [...groupBy(files, (file) => languageNameOf(file.path))]
     .map(([name, group]) => ({
       name,
       files: group.length,

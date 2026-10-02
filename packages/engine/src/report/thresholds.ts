@@ -113,6 +113,32 @@ const BadgeThresholds = Schema.Struct({
   reviewerReviews: Count,
 });
 
+/** The rules behind the achievements; the meaning of each is on its achievement kind. */
+const AchievementThresholds = Schema.Struct({
+  /** `first-commits` tiers: commits. */
+  firstCommitsTiers: Schema.Array(Count),
+  /** `marathon` needs this many days between the first and the last commit. */
+  marathonDays: Count,
+  /** `community` tiers: contributors over the full history. */
+  communityTiers: Schema.Array(Count),
+  /** `bus-proof` needs a truck factor of at least this. */
+  busProofTruckFactor: Count,
+  /** `polyglot` needs this many languages ... */
+  polyglotLanguages: Count,
+  /** ... each with at least this share of the code lines. */
+  polyglotMinShare: Share,
+  /** `test-culture` needs at least this share of the files to be tests. */
+  testCultureShare: Share,
+  /** `unbroken` needs a commit on this many consecutive days. */
+  unbrokenDays: Count,
+  /** `spring-cleaning` needs one commit that removed this many more code lines than it added. */
+  springCleaningNetLines: Count,
+  /** `fresh-blood` needs this many people ... */
+  freshBloodPeople: Count,
+  /** ... whose first commit lies at most this many days ago. */
+  freshBloodDays: Count,
+});
+
 /** The constants an analysis applied, reported so consumers see them. */
 export const Thresholds = Schema.Struct({
   /** An expert, and the `active` flag of a contributor, need a commit in this many days before now. */
@@ -128,4 +154,5 @@ export const Thresholds = Schema.Struct({
   territories: TerritoryThresholds,
   stories: StoryThresholds,
   badges: BadgeThresholds,
+  achievements: AchievementThresholds,
 });
