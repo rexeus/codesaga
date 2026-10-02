@@ -40,10 +40,14 @@ export type HistoryFactsInput = {
   readonly useCache: boolean;
 };
 
-/** Blobs read and parsed per step. */
-const BATCH_BLOBS = 500;
+/**
+ * Blobs read and parsed per step. A step is spread over the parser's
+ * processes in batches of its own, so it must hold several of those to keep
+ * every process busy.
+ */
+const BATCH_BLOBS = 2_000;
 /** Characters of text held per step. */
-const BATCH_CHARACTERS = 32 * 1024 * 1024;
+const BATCH_CHARACTERS = 128_000_000;
 
 /** A verdict, and whether it holds for the blob's content whenever it is asked. */
 type Verdict = { readonly result: FactsResult; readonly keep: boolean };
