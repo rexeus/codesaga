@@ -11,6 +11,7 @@ import { territoryNameOf, percentOf } from "../report/sentences.js";
 import { isDocPath, isTestPath } from "../universe/path-kinds.js";
 import { categorized } from "./contributor-badge-category.js";
 import type { EarnedContributorBadge } from "./contributor-badge-category.js";
+import { RHYTHM_BADGE_THRESHOLDS, rhythmBadges } from "./contributor-rhythm.js";
 import { TENURE_BADGE_THRESHOLDS, tenureBadges } from "./contributor-tenure.js";
 
 /** The rules behind the contributor badges, for the report's `thresholds.badges`. */
@@ -24,6 +25,7 @@ export const CONTRIBUTOR_BADGE_THRESHOLDS = {
   documenterShare: 0.4,
   minCommitsForShare: 10,
   ...TENURE_BADGE_THRESHOLDS,
+  ...RHYTHM_BADGE_THRESHOLDS,
   /** Reserved: `reviewer` needs GitHub logins mapped to identities and is not awarded yet. */
   reviewerReviews: 10,
 };
@@ -67,6 +69,12 @@ export type ContributorBadgeFacts = {
   readonly territories?: ReadonlyArray<ContributorBadgeTerritory>;
   /** How many people count as contributors over the full history; with one, `all-rounder` and `keeper` compare against nobody and are withheld. */
   readonly historyContributors: number;
+  /**
+   * Whether any human commit of the full history carries an offset other than
+   * +00:00. The rhythm badges are withheld from a person whose commits all say
+   * UTC when others' do not, since such machines are probably set to UTC.
+   */
+  readonly historyHasOtherOffsets: boolean;
   /** Whether a changed path counts toward code lines. */
   readonly isCodePath: (path: string) => boolean;
   /** The universe files the contributor created, and all universe files, for `founder`. */
@@ -246,6 +254,7 @@ export const contributorBadges = (
   const context = { ...facts, email };
   return categorized([
     ...RULES.flatMap((rule) => rule(context) ?? []),
+    ...rhythmBadges(facts.commits, facts.now, facts.historyHasOtherOffsets),
     ...tenureBadges(facts.commits, facts.repositoryStart, facts.now),
   ]);
 };

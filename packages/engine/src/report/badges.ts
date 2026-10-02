@@ -96,7 +96,14 @@ export const ContributorBadge = Schema.Struct({
    * touch documentation. `steady`: a commit in each of the last
    * `steadyMonths` months. `new-here`: the first commit lies at most
    * `newHereDays` days back. `back-again`: active again after a pause of at
-   * least `backAgainGapDays` days. `reviewer`: at least `reviewerReviews`
+   * least `backAgainGapDays` days. `night-owl`, `early-bird` and
+   * `weekend-regular`: at least `rhythmShare` of the person's human commits of
+   * the last `rhythmWindowDays` days fall between `rhythmNightFromHour` and
+   * `rhythmNightToHour` o'clock, between `rhythmNightToHour` and
+   * `rhythmEarlyToHour`, or on a Saturday or Sunday, in the author's local
+   * time. They need `rhythmMinCommits` such commits in `rhythmMinMonths`
+   * calendar months, and are withheld when `rhythmUtcShare` of them carry
+   * +00:00 while the history has other offsets. `reviewer`: at least `reviewerReviews`
    * reviews; only with `--github`.
    */
   kind: Schema.Literals([
@@ -110,12 +117,15 @@ export const ContributorBadge = Schema.Struct({
     "steady",
     "new-here",
     "back-again",
+    "night-owl",
+    "early-bird",
+    "weekend-regular",
     "reviewer",
   ]),
   /**
    * What the badge is about: `focus` (`all-rounder`, `specialist`, `keeper`),
-   * `craft` (`tidier`, `tester`, `documenter`), `rhythm`, `collaboration`
-   * (`reviewer`) or `journey` (`founder`, `steady`, `new-here`, `back-again`).
+   * `craft` (`tidier`, `tester`, `documenter`), `rhythm` (`night-owl`, `early-bird`,
+   * `weekend-regular`), `collaboration` (`reviewer`) or `journey` (`founder`, `steady`, `new-here`, `back-again`).
    * Determined by `kind`. A person's badges are ordered by category in that order.
    */
   category: Schema.Literals([

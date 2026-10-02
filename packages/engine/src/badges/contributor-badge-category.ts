@@ -16,6 +16,9 @@ const CATEGORY_OF: Record<
   steady: "journey",
   "new-here": "journey",
   "back-again": "journey",
+  "night-owl": "rhythm",
+  "early-bird": "rhythm",
+  "weekend-regular": "rhythm",
   reviewer: "collaboration",
 };
 

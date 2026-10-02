@@ -87,6 +87,14 @@
       "steadyMonths": 6,
       "newHereDays": 90,
       "backAgainGapDays": 183,
+      "rhythmWindowDays": 365,
+      "rhythmMinCommits": 40,
+      "rhythmMinMonths": 3,
+      "rhythmShare": 0.25,
+      "rhythmNightFromHour": 22,
+      "rhythmNightToHour": 5,
+      "rhythmEarlyToHour": 8,
+      "rhythmUtcShare": 0.9,
       "reviewerReviews": 10
     },
     "achievements": {

@@ -7,7 +7,7 @@ import { contributorBadges } from "../badges/contributor-badges.js";
 import { at, classifiedCommit } from "./classified-commit.js";
 
 // The clock of the badge tests: 2026-07-01T00:00:00Z.
-const badgeNow = DateTime.makeUnsafe("2026-07-01T00:00:00Z");
+export const badgeNow = DateTime.makeUnsafe("2026-07-01T00:00:00Z");
 
 /** The email of the commits `classifiedCommit` makes. */
 export const ada = "ada@example.com";
@@ -46,6 +46,7 @@ export const badgeFacts = (
   isCodePath: (path) => path.endsWith(".ts"),
   repositoryStart: 0,
   historyContributors: 2,
+  historyHasOtherOffsets: false,
   founded: { files: 0, ofFiles: 100 },
   ...overrides,
 });

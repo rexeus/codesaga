@@ -110,6 +110,21 @@ const BadgeThresholds = Schema.Struct({
   steadyMonths: Count,
   newHereDays: Count,
   backAgainGapDays: Count,
+  /** `night-owl`, `early-bird` and `weekend-regular` read the human commits of the last this many days ... */
+  rhythmWindowDays: Count,
+  /** ... need at least this many of them ... */
+  rhythmMinCommits: Count,
+  /** ... in at least this many calendar months ... */
+  rhythmMinMonths: Count,
+  /** ... and at least this share of them in the hours or on the days of the badge. */
+  rhythmShare: Share,
+  /** `night-owl` counts the hours from this one on, until `rhythmNightToHour` the next morning ... */
+  rhythmNightFromHour: Count,
+  /** ... and `early-bird` the hours from here until `rhythmEarlyToHour`. */
+  rhythmNightToHour: Count,
+  rhythmEarlyToHour: Count,
+  /** The rhythm badges are withheld when at least this share of a person's commits carry +00:00 while the history has other offsets. */
+  rhythmUtcShare: Share,
   reviewerReviews: Count,
 });
 

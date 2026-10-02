@@ -11,6 +11,9 @@ const EXPECTED: Record<ContributorBadge["kind"], string> = {
   tidier: "craft",
   tester: "craft",
   documenter: "craft",
+  "night-owl": "rhythm",
+  "early-bird": "rhythm",
+  "weekend-regular": "rhythm",
   reviewer: "collaboration",
   founder: "journey",
   steady: "journey",
@@ -38,6 +41,7 @@ describe("categorized", () => {
   it("orders badges by category, then by the order the rules produced them", () => {
     const filed = categorized([
       earned("steady"),
+      earned("weekend-regular"),
       earned("tester"),
       earned("founder"),
       earned("keeper"),
@@ -51,6 +55,7 @@ describe("categorized", () => {
       "all-rounder",
       "tester",
       "tidier",
+      "weekend-regular",
       "reviewer",
       "steady",
       "founder",

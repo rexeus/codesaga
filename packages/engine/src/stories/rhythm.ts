@@ -13,7 +13,7 @@ import type { DayRun } from "../activity/day-runs.js";
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { roundReported } from "../report/precision.js";
-import { countOf, percentOf } from "../report/sentences.js";
+import { countOf, hourLabelOf, percentOf } from "../report/sentences.js";
 import type { Story } from "../report/stories.js";
 import type { StoryFacts } from "./stories.js";
 import { STORY_THRESHOLDS } from "./thresholds.js";
@@ -94,9 +94,6 @@ const isNight = (hour: number): boolean =>
 
 const isWeekend = (day: number): boolean => weekdayOfDay(day) >= SATURDAY;
 
-const hourLabel = (hour: number): string =>
-  `${String(hour).padStart(2, "0")}:00`;
-
 /** The night owls and the weekend share over the human commits; bots and agents work around the clock. */
 const habitStories = (
   commits: ReadonlyArray<ClassifiedCommit>,
@@ -118,7 +115,7 @@ const habitStories = (
           {
             kind: "night-owls" as const,
             title: "Night owls",
-            detail: `${percentOf(night / human.length)} of the human commits land between ${hourLabel(nightFromHour)} and ${hourLabel(nightToHour)} local time (${countOf(night)} of ${countOf(human.length)}).`,
+            detail: `${percentOf(night / human.length)} of the human commits land between ${hourLabelOf(nightFromHour)} and ${hourLabelOf(nightToHour)} local time (${countOf(night)} of ${countOf(human.length)}).`,
             value: roundReported(night / human.length),
           },
         ]),
