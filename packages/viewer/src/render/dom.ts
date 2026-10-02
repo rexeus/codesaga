@@ -63,3 +63,19 @@ export const mono = (text: string, title = text): HTMLElement => {
   element.title = title;
   return element;
 };
+
+/**
+ * The text split into pieces that end in a slash, with a word-break
+ * opportunity between them, so a long path wraps after a `/` and never inside
+ * a name. The pieces are text nodes.
+ */
+export const breakAfterSlashes = (text: string): Child[] => {
+  const names = text.split("/");
+  const last = names.length - 1;
+  return names
+    .map((name, index) => (index === last ? name : `${name}/`))
+    .filter((piece) => piece !== "")
+    .flatMap((piece, index) =>
+      index === 0 ? [piece] : [document.createElement("wbr"), piece],
+    );
+};

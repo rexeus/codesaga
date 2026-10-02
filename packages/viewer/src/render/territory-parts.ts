@@ -3,7 +3,7 @@ import type { Report } from "@codesaga/engine";
 import { formatCount, formatNoun } from "../present/format.js";
 import type { IconName } from "../present/icons.js";
 import type { TerritoryView } from "../present/territories.js";
-import { h } from "./dom.js";
+import { breakAfterSlashes, h } from "./dom.js";
 import { icon } from "./icons.js";
 import { bindTooltip } from "./tooltip.js";
 
@@ -70,15 +70,22 @@ export const pathTitle = ({
   other,
 }: TerritoryView): HTMLElement => {
   if (other) {
-    const holder = `${parent}${leaf}`;
     return h(
       "span",
       "path",
       h("b", "", "Other files"),
-      ...(leaf === "/ (root)" ? [] : [h("span", "of", ` in ${holder}`)]),
+      ...(leaf === "/ (root)"
+        ? []
+        : [h("span", "of", " in ", ...breakAfterSlashes(`${parent}${leaf}`))]),
     );
   }
-  return h("span", "path", parent, h("b", "", leaf));
+  return h(
+    "span",
+    "path",
+    ...breakAfterSlashes(parent),
+    ...(parent === "" ? [] : [document.createElement("wbr")]),
+    h("b", "", ...breakAfterSlashes(leaf)),
+  );
 };
 
 /** `25 files · 19% of files · changed 5 weeks ago`. */
