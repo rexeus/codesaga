@@ -37,9 +37,11 @@ const isFatal = (parsed: ParsedSource, text: string): boolean =>
 
 /**
  * Judges one source: guards first, then a parse and one walk. A source over
- * a guard is `too-large`, `minified` or `too-deep` and is never parsed; a
- * fatal syntax error is `syntax-error`; a parse or walk that overflows the
- * stack is `too-deep` and any other failure `parser-error`. Never throws.
+ * a guard is `too-large` or `minified` and is never parsed; a fatal syntax
+ * error is `syntax-error`; a parse or walk that overflows the stack is
+ * `too-deep` and any other failure `parser-error`. Never throws, but cannot
+ * survive a parser that kills its process: callers that parse hostile input
+ * run this in a process they can lose.
  */
 export const factsOfSource = (
   parse: ParseSource,

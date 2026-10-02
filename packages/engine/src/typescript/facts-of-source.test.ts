@@ -77,19 +77,17 @@ describe("factsOfSource skipped files", () => {
   });
 
   it("never parses a source that fails a guard", () => {
-    const nested = `${"[\n".repeat(1_001)}${"]\n".repeat(1_001)}`;
-
-    expect(judge("a.ts", nested, neverCalled)).toStrictEqual({
-      kind: "skipped",
-      reason: "too-deep",
-    });
     expect(judge("a.js", "x".repeat(10_001), neverCalled)).toStrictEqual({
       kind: "skipped",
       reason: "minified",
     });
+    expect(judge("a.ts", "a;\n".repeat(400_000), neverCalled)).toStrictEqual({
+      kind: "skipped",
+      reason: "too-large",
+    });
   });
 
-  it("skips a tree nested deeper than the stack allows as too deep, without brackets to scan", () => {
+  it("skips a tree nested deeper than the stack allows as too deep", () => {
     const chain = `x = 1\n${"+1\n".repeat(30_000)}`;
 
     expect(judge("a.ts", chain)).toStrictEqual({

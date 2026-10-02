@@ -13,7 +13,8 @@ import { analyze } from "./analyze.js";
 
 const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
-const NESTED = `${"[\n".repeat(2_000)}${"]\n".repeat(2_000)}`;
+// A left-deep chain: no brackets, and deeper than a walk can follow.
+const NESTED = `x = 1\n${"+1\n".repeat(30_000)}`;
 
 const commitScripts = Effect.gen(function* () {
   yield* setNow;

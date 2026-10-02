@@ -1,15 +1,11 @@
 #!/usr/bin/env node
-import { NodeRuntime, NodeServices } from "@effect/platform-node";
-import { Effect, Layer } from "effect";
-import { FetchHttpClient } from "effect/http";
+import { PARSE_CHILD_ENV } from "./typescript/parse-protocol.js";
 
-import { runCli } from "./cli.js";
-import { oxcParserLayer } from "./typescript/oxc-parser.js";
-
-NodeRuntime.runMain(
-  runCli(process.argv.slice(2)).pipe(
-    Effect.provide(
-      Layer.mergeAll(NodeServices.layer, FetchHttpClient.layer, oxcParserLayer),
-    ),
-  ),
-);
+// A parse child is this program started again by `fork` to hold the native
+// parser; it never runs the CLI, and a stray value of the variable in a user's
+// shell, with no parent to talk to, does not turn the CLI into one.
+if (process.env[PARSE_CHILD_ENV] === "1" && process.send !== undefined) {
+  await import("./typescript/parse-child.js");
+} else {
+  await import("./main.js");
+}

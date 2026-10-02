@@ -1,10 +1,9 @@
-import { TypeScriptParser } from "@codesaga/engine";
 import { assert, describe, it } from "@effect/vitest";
 import { Effect } from "effect";
 import type * as Oxc from "oxc-parser";
 import { vi } from "vitest";
 
-import { oxcParserLayer } from "./oxc-parser.js";
+import { loadOxcParser } from "./oxc-loader.js";
 
 const transfers = vi.hoisted(() => ({ raw: 0, plain: 0 }));
 
@@ -28,23 +27,18 @@ vi.mock("oxc-parser", async (importOriginal) => {
   };
 });
 
-describe("oxcParserLayer when raw transfer fails", () => {
+describe("loadOxcParser when raw transfer fails", () => {
   it.effect(
     "parses on the default transfer and stops trying raw transfer",
     () =>
       Effect.gen(function* () {
-        const parser = yield* TypeScriptParser;
+        const { parse } = yield* Effect.promise(loadOxcParser);
+        const options = { lang: "ts", sourceType: "module" } as const;
 
-        const results = yield* parser.factsOf([
-          { path: "a.ts", text: "const a = 1;\n" },
-          { path: "b.ts", text: "const b = 2;\n" },
-        ]);
+        parse("a.ts", "const a = 1;\n", options);
+        parse("b.ts", "const b = 2;\n", options);
 
-        assert.deepStrictEqual(
-          results.map(({ kind }) => kind),
-          ["parsed", "parsed"],
-        );
         assert.deepStrictEqual(transfers, { raw: 1, plain: 2 });
-      }).pipe(Effect.provide(oxcParserLayer)),
+      }),
   );
 });

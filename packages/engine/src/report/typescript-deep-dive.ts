@@ -11,6 +11,7 @@ export const SkipReason = Schema.Literals([
   "too-deep",
   "syntax-error",
   "parser-error",
+  "parser-crashed",
   "unreadable",
   "parser-unavailable",
 ]);
@@ -30,11 +31,13 @@ const Coverage = Schema.Struct({
   declarationFiles: Count,
   /**
    * Files skipped by reason, only the reasons that occurred. `too-large` is
-   * over 1 MiB, `minified` has lines averaging over 300 characters or a line
-   * over 10,000, `too-deep` nests more than 1,000 brackets or overflows the
-   * walker, `syntax-error` is a fatal parse error, `parser-error` an
-   * unexpected failure of the parser, `unreadable` a file that could not be
-   * read, and `parser-unavailable` says the parser did not load.
+   * over 1 MiB, `minified` has lines averaging over 300 characters, `too-deep`
+   * is a tree nested deeper than the stack allows, `syntax-error` is a fatal
+   * parse error, `parser-error` an unexpected failure of the parser,
+   * `parser-crashed` a file that killed the parser's process (found by
+   * bisecting, so the others of its batch were still parsed), `unreadable` a
+   * file that could not be read, and `parser-unavailable` says the parser did
+   * not load.
    */
   skipped: Schema.Record(SkipReason, Schema.optionalKey(Count)),
   /** The parser the facts come from; `version` is null when it did not load. */

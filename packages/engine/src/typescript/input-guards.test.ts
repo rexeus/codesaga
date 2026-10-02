@@ -4,16 +4,9 @@ import { inputGuardReason } from "./input-guards.js";
 
 const repeat = (text: string, times: number): string => text.repeat(times);
 
-/** `open` and `close` on lines of their own, `levels` deep. */
-const nested = (open: string, close: string, levels: number): string =>
-  `${repeat(`${open}\n`, levels)}${repeat(`${close}\n`, levels)}`;
-
-const generic = (levels: number): string =>
-  `type T = ${repeat("Array<\n", levels)}1${repeat(">\n", levels)}`;
-
 const line = (length: number): string => `${repeat("x", length - 1)}\n`;
 
-describe("inputGuardReason size and minification", () => {
+describe("inputGuardReason", () => {
   it("lets ordinary code through", () => {
     expect(inputGuardReason("export const a = f(1, [2]);\n")).toBeUndefined();
     expect(inputGuardReason("")).toBeUndefined();
@@ -33,65 +26,17 @@ describe("inputGuardReason size and minification", () => {
     expect(inputGuardReason(repeat(line(301), 3))).toBe("minified");
   });
 
-  it("skips a source with a line over 10,000 characters even when the mean is low", () => {
-    const shortLines = repeat("a;\n", 200);
+  it("does not skip a long line among ordinary ones", () => {
+    const text = `const data = "${repeat("x", 12_000)}";\n${repeat("a;\n", 200)}`;
 
-    expect(
-      inputGuardReason(`${repeat("x", 10_000)}\n${shortLines}`),
-    ).toBeUndefined();
-    expect(inputGuardReason(`${repeat("x", 10_001)}\n${shortLines}`)).toBe(
-      "minified",
-    );
-  });
-});
-
-describe("inputGuardReason nesting", () => {
-  it("skips nesting over 1,000 brackets and not exactly 1,000", () => {
-    expect(inputGuardReason(nested("[", "]", 1_000))).toBeUndefined();
-    expect(inputGuardReason(nested("[", "]", 1_001))).toBe("too-deep");
-    expect(inputGuardReason(nested("f(", ")", 1_001))).toBe("too-deep");
-    expect(inputGuardReason(nested("{", "}", 1_001))).toBe("too-deep");
+    expect(inputGuardReason(text)).toBeUndefined();
   });
 
-  it("counts nested generics, which a TypeScript parser also recurses into", () => {
-    expect(inputGuardReason(generic(1_000))).toBeUndefined();
-    expect(inputGuardReason(generic(1_001))).toBe("too-deep");
-  });
-
-  it("judges depth, not the count of brackets", () => {
-    expect(inputGuardReason(repeat("f(g([1]));\n", 5_000))).toBeUndefined();
-  });
-
-  it("does not take comparisons for generics", () => {
+  it("does not take nesting, brackets or generics for a reason to skip", () => {
     expect(
-      inputGuardReason(repeat("for (let i=0;i<n;i++) { j<k; }\n", 3_000)),
+      inputGuardReason(`${repeat("[\n", 5_000)}${repeat("]\n", 5_000)}`),
     ).toBeUndefined();
-    expect(
-      inputGuardReason(repeat("if (a<b && c<d && e<f) {\n}\n", 3_000)),
-    ).toBeUndefined();
-  });
-});
-
-const fifty = (bracket: string): string => repeat(bracket, 50);
-
-describe("inputGuardReason strings and comments", () => {
-  it("ignores brackets in strings and comments", () => {
-    expect(
-      inputGuardReason(repeat(`s = "${fifty("(")}";\n`, 100)),
-    ).toBeUndefined();
-    expect(
-      inputGuardReason(repeat(`s = '${fifty("[")}';\n`, 100)),
-    ).toBeUndefined();
-    expect(inputGuardReason(repeat(`// ${fifty("{")}\n`, 100))).toBeUndefined();
-    expect(
-      inputGuardReason(`/*\n${repeat(`${fifty("(")}\n`, 100)}*/ x;\n`),
-    ).toBeUndefined();
-  });
-
-  it("reads on after an escaped quote and heals at the end of an unterminated string", () => {
-    expect(
-      inputGuardReason(repeat(`s = "a\\"${fifty("(")}";\n`, 100)),
-    ).toBeUndefined();
-    expect(inputGuardReason(`it's\n${repeat("[\n", 1_001)}`)).toBe("too-deep");
+    expect(inputGuardReason(repeat("`smile :(`;\n", 1_200))).toBeUndefined();
+    expect(inputGuardReason(repeat("x = /[(]/u;\n", 1_200))).toBeUndefined();
   });
 });

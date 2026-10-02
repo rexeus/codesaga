@@ -12,9 +12,9 @@ import {
 } from "effect";
 
 import { runCli } from "../cli.js";
+import { inProcessParserLayer } from "../testing/in-process-parser.js";
 import { makeTeamProject } from "../testing/projects.js";
 import { stubGithub, unscripted } from "../testing/stub-github.js";
-import { oxcParserLayer } from "../typescript/oxc-parser.js";
 import { WorkingDirectory } from "../working-directory.js";
 
 // A host that cannot read stdin leaves no server to run: the build of the server breaks.
@@ -48,7 +48,7 @@ describe("codesaga mcp when the server breaks", () => {
         Effect.provide(
           Layer.mergeAll(
             NodeServices.layer,
-            oxcParserLayer,
+            inProcessParserLayer,
             stubGithub(() => unscripted).layer,
             stdioWithoutStdin,
           ),

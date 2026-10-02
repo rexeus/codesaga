@@ -3,12 +3,7 @@
 
 import { Context, Effect } from "effect";
 
-import { factsOfSource } from "./facts-of-source.js";
-import type {
-  FactsResult,
-  ParseSource,
-  SourceText,
-} from "./facts-of-source.js";
+import type { FactsResult, SourceText } from "./facts-of-source.js";
 
 /** Whether the parser is there to read files. */
 export type ParserStatus =
@@ -44,17 +39,6 @@ export class TypeScriptParser extends Context.Service<
     ): Effect.Effect<ReadonlyArray<FactsResult>>;
   }
 >()("@codesaga/engine/typescript/TypeScriptParser") {}
-
-/** A parser that reads every source with the synchronous `parse`, on the calling thread. */
-export const readyParser = (
-  identity: { readonly name: string; readonly version: string },
-  parse: ParseSource,
-): TypeScriptParser["Service"] =>
-  TypeScriptParser.of({
-    status: Effect.succeed({ kind: "ready", ...identity }),
-    factsOf: (sources) =>
-      Effect.sync(() => sources.map((source) => factsOfSource(parse, source))),
-  });
 
 /** A parser that did not load: every source is skipped as `parser-unavailable`. */
 export const unavailableParser = (

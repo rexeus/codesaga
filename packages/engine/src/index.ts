@@ -7,8 +7,9 @@ export { locateRepository } from "./git/repository.js";
 export { inspect } from "./inspect/inspect.js";
 export { InspectResult } from "./report/inspect-result.js";
 export { Report } from "./report/report.js";
+export { factsOfSource } from "./typescript/facts-of-source.js";
+export type { FactsResult, SourceText } from "./typescript/facts-of-source.js";
 export {
   TypeScriptParser,
-  readyParser,
   unavailableParser,
 } from "./typescript/typescript-parser.js";

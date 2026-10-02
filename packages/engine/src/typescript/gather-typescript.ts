@@ -21,8 +21,8 @@ export type TypeScriptFacts = {
   }>;
 };
 
-/** Files read and parsed per step; bounds the text held at once. */
-const BATCH_SIZE = 64;
+/** Files read and parsed per step; bounds the text held at once. The parser spreads a step over its processes. */
+const BATCH_SIZE = 2_000;
 /** Files read at once within a step; bounds open file handles. */
 const READ_CONCURRENCY = 16;
 

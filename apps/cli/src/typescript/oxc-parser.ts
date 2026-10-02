@@ -1,94 +1,72 @@
-import { readFile } from "node:fs/promises";
-// Owns the TypeScript parser the application ships: oxc-parser, imported lazily on first use.
-// oxc-parser is the one external dependency of the bundle, because its native binding cannot be bundled.
-import { createRequire } from "node:module";
+// Owns the TypeScript parser the application ships: oxc-parser in a small pool of child processes.
+// oxc-parser is the one external dependency of the bundle, because its native binding cannot be bundled, and it can crash its process on hostile input, so no parse runs in the application's own process.
+import { availableParallelism } from "node:os";
 
-import {
-  readyParser,
-  TypeScriptParser,
-  unavailableParser,
-} from "@codesaga/engine";
+import { TypeScriptParser, unavailableParser } from "@codesaga/engine";
 import { Effect, Layer } from "effect";
-import type * as Oxc from "oxc-parser";
+
+import { forkWorker } from "./child-worker.js";
+import type { ChildCommand } from "./child-worker.js";
+import { makePool } from "./parse-pool.js";
+import type { PoolReadiness } from "./parse-pool.js";
 
 const PARSER_NAME = "oxc-parser";
+/** Children parsing at once; each holds up to a few hundred MB while it parses. */
+const MAX_PARSE_PROCESSES = 4;
 
-type OxcModule = typeof Oxc;
+/** One process fewer than the cores, so the application keeps one, and at least one. */
+const poolSize = (): number =>
+  Math.max(1, Math.min(MAX_PARSE_PROCESSES, availableParallelism() - 1));
 
-/** The installed version, read from the package that was actually loaded. */
-const installedVersion = async (): Promise<string> => {
-  const manifest: unknown = JSON.parse(
-    await readFile(
-      createRequire(import.meta.url).resolve("oxc-parser/package.json"),
-      "utf8",
-    ),
+/** The command that runs this very program again: the file node started, with the flags it started with. */
+export const currentProgram = (): ChildCommand => ({
+  entry: process.argv[1] ?? "",
+  execArgv: process.execArgv,
+});
+
+const statusOf = (readiness: PoolReadiness) =>
+  readiness.kind === "ready"
+    ? ({
+        kind: "ready",
+        name: PARSER_NAME,
+        version: readiness.version,
+      } as const)
+    : ({
+        kind: "unavailable",
+        name: PARSER_NAME,
+        reason: readiness.reason,
+      } as const);
+
+/**
+ * The oxc-backed `TypeScriptParser`: sources are parsed in up to four child
+ * processes started from `program`, and a source that crashes the parser is
+ * skipped as `parser-crashed` while the rest are still parsed. The first child
+ * starts when a command first asks for facts, so `inspect` and `--help` never
+ * pay for it, and a child that cannot load oxc-parser or its platform binding
+ * makes the parser `unavailable` instead of failing the run. The children end
+ * with the layer's scope.
+ */
+export const makeOxcParserLayer = (program: ChildCommand) =>
+  Layer.effect(
+    TypeScriptParser,
+    Effect.gen(function* () {
+      const pool = makePool(() => forkWorker(program), poolSize());
+      yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+          pool.stop();
+        }),
+      );
+      const readiness = yield* Effect.cached(
+        Effect.promise(() => pool.ready()),
+      );
+      return TypeScriptParser.of({
+        status: Effect.map(readiness, statusOf),
+        factsOf: (sources) =>
+          Effect.flatMap(readiness, (state) =>
+            state.kind === "ready"
+              ? Effect.promise(() => pool.factsOf(sources))
+              : unavailableParser(PARSER_NAME, state.reason).factsOf(sources),
+          ),
+      });
+    }),
   );
-  if (
-    typeof manifest === "object" &&
-    manifest !== null &&
-    "version" in manifest &&
-    typeof manifest.version === "string"
-  ) {
-    return manifest.version;
-  }
-  throw new TypeError("oxc-parser's package.json declares no version");
-};
-
-/**
- * Parses with raw transfer where the platform supports it, which skips the
- * JSON round trip and is about 2.7 times faster with identical results. A
- * platform that claims support and then fails, or a parse that fails in the
- * raw mode, continues on the default transfer.
- */
-const parseWith = (oxc: OxcModule) => {
-  let raw = oxc.rawTransferSupported();
-  return (path: string, text: string, options: Oxc.ParserOptions) => {
-    if (raw) {
-      // Accepted by the parser, though its typings leave it out.
-      const rawOptions = { ...options, experimentalRawTransfer: true };
-      try {
-        return oxc.parseSync(path, text, rawOptions);
-      } catch (error) {
-        if (error instanceof RangeError) {
-          throw error;
-        }
-        raw = false;
-      }
-    }
-    return oxc.parseSync(path, text, options);
-  };
-};
-
-const firstLine = (cause: unknown): string =>
-  (cause instanceof Error ? cause.message : String(cause)).split("\n")[0] ?? "";
-
-/** Loads oxc-parser; a failure of any kind while loading or preparing it becomes an unavailable parser, never an error. */
-const loadParser = Effect.tryPromise(async () =>
-  readyParser(
-    { name: PARSER_NAME, version: await installedVersion() },
-    parseWith(await import("oxc-parser")),
-  ),
-).pipe(
-  Effect.match({
-    onSuccess: (parser) => parser,
-    onFailure: ({ cause }) => unavailableParser(PARSER_NAME, firstLine(cause)),
-  }),
-);
-
-/**
- * The oxc-backed `TypeScriptParser`, parsing inline on the calling thread.
- * It loads oxc-parser the first time a command asks for facts, so `inspect`
- * and `--help` never pay for it, and it provides `unavailableParser` where the
- * package or its platform binding is missing.
- */
-export const oxcParserLayer = Layer.effect(
-  TypeScriptParser,
-  Effect.gen(function* () {
-    const loaded = yield* Effect.cached(loadParser);
-    return TypeScriptParser.of({
-      status: Effect.flatMap(loaded, (parser) => parser.status),
-      factsOf: (sources) =>
-        Effect.flatMap(loaded, (parser) => parser.factsOf(sources)),
-    });
-  }),
-);

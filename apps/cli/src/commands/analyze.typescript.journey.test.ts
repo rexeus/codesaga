@@ -2,9 +2,11 @@ import { Report } from "@codesaga/engine";
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 
+import { sourceProgram } from "../testing/child-program.js";
 import { makeGitRepository } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
 import { makeTeamProject } from "../testing/projects.js";
+import { makeOxcParserLayer } from "../typescript/oxc-parser.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -66,5 +68,37 @@ describe("codesaga analyze --json deep dive", () => {
       expect(result.exitCode).toBe(0);
       expect(JSON.parse(result.stdout)).not.toHaveProperty("deepDives");
     }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga analyze --json when a file crashes the parser", () => {
+  it.live(
+    "still produces the JSON when a file crashes the parser, and counts it",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeGitRepository;
+        repo.commit(5, {
+          "src/a.ts": "export const a = 1;\n",
+          "src/b.ts": "export const b = 2;\n",
+          "src/hostile.ts": `x = ${"a ?\nb :\n".repeat(20_000)}c;\n`,
+        });
+
+        const result = yield* journey({
+          args: ["analyze", "--json"],
+          cwd: repo.root,
+          parser: makeOxcParserLayer(sourceProgram()),
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe("");
+        const coverage = (yield* decode(result.stdout)).deepDives?.typescript
+          ?.coverage;
+        expect(coverage).toMatchObject({
+          files: 3,
+          parsed: 2,
+          skipped: { "parser-crashed": 1 },
+        });
+      }).pipe(Effect.scoped),
+    60_000,
   );
 });
