@@ -22,7 +22,8 @@ export const AreaBadge = Schema.Struct({
    * is at most `thresholds.badges.newDays` days old and at least
    * `thresholds.badges.newAfterStartDays` days after the repository's first
    * commit, so the areas of a young repository are not new one by one. `in-focus`: the
-   * area with the most commits in the window. `quiet`: unchanged for at least
+   * area with the most human and agent-assisted commits in the last
+   * `thresholds.badges.inFocusDays` days, whatever the window of the analysis. `quiet`: unchanged for at least
    * `thresholds.badges.quietDays` days. `newcomer-friendly`: at least
    * `thresholds.badges.newcomerFriendlyFirstCommits` people made their first
    * commit here in the last `newcomerFriendlyDays` days. `well-tested`: at

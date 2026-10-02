@@ -46,10 +46,6 @@ const areasOf = (commits: ReadonlyArray<ClassifiedCommit>, depth?: number) =>
     scope: ".",
     packageRoots,
     depth,
-    window: {
-      since: "2026-01-01T00:00:00.000Z",
-      until: "2026-03-01T00:00:00.000Z",
-    },
     headTime: at("2026-02-01T00:00:00Z"),
     now,
   }).section.areas;

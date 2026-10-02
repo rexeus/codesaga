@@ -10,6 +10,7 @@ export const AREA_BADGE_THRESHOLDS = {
   newDays: 90,
   newAfterStartDays: 180,
   handoverDays: 180,
+  inFocusDays: 90,
   quietDays: 183,
   newcomerFriendlyFirstCommits: 2,
   newcomerFriendlyDays: 180,

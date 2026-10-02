@@ -5,7 +5,6 @@
 import { Array as Arr } from "effect";
 
 import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
-import type { TimeRange } from "../analyze/analysis-window.js";
 import {
   areaBadgeInputs,
   areaHistoryOf,
@@ -61,8 +60,6 @@ type KnowledgeFacts = KnowledgeInput & {
   readonly scope: string;
   /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
   readonly packageRoots: ReadonlyArray<string>;
-  /** The activity window, which decides the area in focus. */
-  readonly window: TimeRange;
   /** The level to start at, from 1, rounded down; a level beyond the deepest one means the deepest. The recommended level when absent, not finite or below 1. */
   readonly depth?: number | undefined;
 };
@@ -104,7 +101,7 @@ const areasSection = (
     ),
     historyContributors: countContributors(facts.commits),
   });
-  const history = areaHistoryOf(facts.commits, facts.window);
+  const history = areaHistoryOf(facts.commits, facts.now);
   const inputs = levels.map(({ areas }) =>
     areaBadgeInputs(areas, history, model),
   );

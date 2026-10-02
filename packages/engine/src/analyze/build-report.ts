@@ -71,7 +71,6 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     universe: facts.universe,
     scope: facts.repository.scope,
     packageRoots: facts.packageRoots,
-    window,
     depth: facts.depth,
     headTime,
     now: facts.now,

@@ -66,6 +66,8 @@ const BadgeThresholds = Schema.Struct({
   newAfterStartDays: Count,
   /** `handover` needs the new main expert's first commit to the area at most this many days ago. */
   handoverDays: Count,
+  /** `in-focus` counts the commits of the last this many days. */
+  inFocusDays: Count,
   quietDays: Count,
   newcomerFriendlyFirstCommits: Count,
   newcomerFriendlyDays: Count,

@@ -33,8 +33,8 @@ const quietArea = (
   experts: [expert(), expert()],
   fileFirstCommits: [daysAgo(2000), daysAgo(1500)],
   lastChangeTime: daysAgo(1),
-  commitsInWindow: 0,
-  peerCommitsInWindow: 0,
+  recentCommits: 0,
+  peerRecentCommits: 0,
   startTime: 0,
   firstCommits: [],
   ...overrides,
@@ -105,8 +105,8 @@ const cases: ReadonlyArray<
   ],
   [
     "in-focus",
-    { commitsInWindow: 6, peerCommitsInWindow: 5 },
-    { commitsInWindow: 5, peerCommitsInWindow: 5 },
+    { recentCommits: 6, peerRecentCommits: 5 },
+    { recentCommits: 5, peerRecentCommits: 5 },
   ],
   ["quiet", { lastChangeTime: daysAgo(183) }, { lastChangeTime: daysAgo(182) }],
   [

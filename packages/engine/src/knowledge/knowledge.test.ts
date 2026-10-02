@@ -35,10 +35,6 @@ const run = (
     universe: files(...paths),
     scope,
     packageRoots: [],
-    window: {
-      since: "2026-01-01T00:00:00.000Z",
-      until: "2026-03-01T00:00:00.000Z",
-    },
     headTime: at("2026-02-01T00:00:00Z"),
     now,
   }).section;

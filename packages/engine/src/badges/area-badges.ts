@@ -20,6 +20,7 @@ const {
   newDays,
   newAfterStartDays,
   handoverDays,
+  inFocusDays,
   quietDays,
   newcomerFriendlyFirstCommits,
   newcomerFriendlyDays,
@@ -57,10 +58,10 @@ export type AreaBadgeInput = {
   readonly fileFirstCommits: ReadonlyArray<number>;
   /** The newest commit that touched any file of the area; undefined when none is known. */
   readonly lastChangeTime: number | undefined;
-  /** Commits in the activity window that touched the area. */
-  readonly commitsInWindow: number;
-  /** The most commits in the activity window that touched any other area of the same level. */
-  readonly peerCommitsInWindow: number;
+  /** Human and agent-assisted commits in the last `inFocusDays` days that touched the area. */
+  readonly recentCommits: number;
+  /** The most such commits that touched any other area of the same level. */
+  readonly peerRecentCommits: number;
   /** The time of the repository's first commit; an area is `new` only well after it. */
   readonly startTime: number;
   /** The first commit of every person who arrived after the repository started, with the paths it changed. */
@@ -173,12 +174,12 @@ const newArea = ({ fileFirstCommits, startTime, now, nowSeconds }: Context) => {
     : undefined;
 };
 
-const inFocus = ({ commitsInWindow, peerCommitsInWindow }: Context) =>
-  commitsInWindow > 0 && commitsInWindow > peerCommitsInWindow
+const inFocus = ({ recentCommits, peerRecentCommits }: Context) =>
+  recentCommits > 0 && recentCommits > peerRecentCommits
     ? {
         kind: "in-focus" as const,
         label: "In focus",
-        evidence: `${nounOf(commitsInWindow, "commit")} in the window, the most of any area at this level.`,
+        evidence: `${nounOf(recentCommits, "commit")} in the last ${inFocusDays} days, the most of any area at this level.`,
       }
     : undefined;
 

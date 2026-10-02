@@ -2,20 +2,25 @@
 // One pass over the commits per level for the area facts, one for the history facts shared by all levels.
 // Cost: every change of every commit once per level, plus one lookup per universe file and expert.
 
-import { toEpochSeconds } from "../analyze/analysis-window.js";
-import type { TimeRange } from "../analyze/analysis-window.js";
+import type { DateTime } from "effect";
+
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
+import { isActiveWithin } from "../contributors/activeness.js";
 import type { AreaWithFiles } from "../knowledge/areas.js";
 import type { Human } from "../knowledge/contributions.js";
 import { isActive } from "../knowledge/model.js";
 import type { KnowledgeModel } from "../knowledge/model.js";
+import { AREA_BADGE_THRESHOLDS } from "./area-badge-thresholds.js";
 import type { AreaBadgeInput } from "./area-badges.js";
 
-/** What every level shares: the commits, the window and when files and people started. */
+const { inFocusDays } = AREA_BADGE_THRESHOLDS;
+
+/** What every level shares: the commits, the time they are judged at and when files and people started. */
 export type AreaHistory = {
   readonly commits: ReadonlyArray<ClassifiedCommit>;
-  readonly window: TimeRange;
+  /** The `Clock` time that "the last 90 days" is measured back from. */
+  readonly now: DateTime.Utc;
   /** The time of each path's first commit in the life of the path. */
   readonly fileFirstCommits: ReadonlyMap<string, number>;
   /** The time of the repository's first commit. */
@@ -27,7 +32,7 @@ export type AreaHistory = {
 /** The first commits of files and of people, from commits newest first. */
 export const areaHistoryOf = (
   commits: ReadonlyArray<ClassifiedCommit>,
-  window: TimeRange,
+  now: DateTime.Utc,
 ): AreaHistory => {
   const fileFirstCommits = new Map<string, number>();
   const firstByPerson = new Map<
@@ -60,7 +65,7 @@ export const areaHistoryOf = (
   );
   return {
     commits,
-    window,
+    now,
     fileFirstCommits,
     startTime,
     firstCommits: [...firstByPerson.values()].filter(
@@ -71,26 +76,24 @@ export const areaHistoryOf = (
 
 type AreaFacts = {
   lastChangeTime: number | undefined;
-  commitsInWindow: number;
+  recentCommits: number;
   /** When each person first committed to a file of the area. */
   readonly personFirst: Map<string, number>;
 };
 
-/** For each area of one level, the last change, the window commits and when each person arrived. */
+/** For each area of one level, the last change, the recent commits and when each person arrived. */
 const areaFactsOf = (
   areas: ReadonlyArray<AreaWithFiles>,
-  { commits, window }: AreaHistory,
+  { commits, now }: AreaHistory,
 ): ReadonlyArray<AreaFacts> => {
   const areaOfPath = new Map(
     areas.flatMap(({ paths }, index) => paths.map((path) => [path, index])),
   );
   const facts = areas.map((): AreaFacts => ({
     lastChangeTime: undefined,
-    commitsInWindow: 0,
+    recentCommits: 0,
     personFirst: new Map(),
   }));
-  const since = toEpochSeconds(window.since);
-  const until = toEpochSeconds(window.until);
   for (const commit of commits) {
     const touched = new Set(
       commit.changes.flatMap(({ path }) => areaOfPath.get(path) ?? []),
@@ -101,9 +104,10 @@ const areaFactsOf = (
         continue;
       }
       area.lastChangeTime = Math.max(area.lastChangeTime ?? 0, commit.time);
-      area.commitsInWindow +=
-        commit.time >= since && commit.time <= until ? 1 : 0;
       if (isContributorCommit(commit)) {
+        area.recentCommits += isActiveWithin(commit.time, now, inFocusDays)
+          ? 1
+          : 0;
         const { email } = commit.author;
         area.personFirst.set(
           email,
@@ -164,7 +168,7 @@ export const areaBadgeInputs = (
     const peers = facts.flatMap((peer, other) =>
       other === index || areas[other]?.kind === "rest"
         ? []
-        : [peer.commitsInWindow],
+        : [peer.recentCommits],
     );
     return {
       kind: area.kind,
@@ -178,8 +182,8 @@ export const areaBadgeInputs = (
         (path) => history.fileFirstCommits.get(path) ?? [],
       ),
       lastChangeTime: own?.lastChangeTime,
-      commitsInWindow: own?.commitsInWindow ?? 0,
-      peerCommitsInWindow: peers.reduce(
+      recentCommits: own?.recentCommits ?? 0,
+      peerRecentCommits: peers.reduce(
         (most, count) => Math.max(most, count),
         0,
       ),

@@ -29,13 +29,12 @@ const touching = (
     })),
   });
 
-const run = (commits: ReadonlyArray<ClassifiedCommit>, since: string) =>
+const run = (commits: ReadonlyArray<ClassifiedCommit>) =>
   knowledge({
     commits,
     universe: paths.map((path) => ({ path, loc: 50 })),
     scope: ".",
     packageRoots: ["packages/api", "packages/web"],
-    window: { since, until: "2026-03-01T00:00:00.000Z" },
     headTime: at("2026-02-25T00:00:00Z"),
     now,
   });
@@ -54,21 +53,49 @@ const history = [
 ];
 
 describe("knowledge area badges", () => {
-  const result = run(history, "2026-02-01T00:00:00.000Z");
+  const result = run(history);
 
   it("awards the badges the area's knowledge and history earn", () => {
     expect(kindsOf(result, 1, "packages/web")).toStrictEqual(["island", "new"]);
     expect(kindsOf(result, 1, "packages/api")).toStrictEqual(["island"]);
   });
 
-  it("awards in focus to the one area with the most commits in the window", () => {
-    // each area has one commit in the window: no area is in focus
+  it("awards in focus to the one area with the most commits in the last 90 days", () => {
+    // each area has one commit in the last 90 days: no area is in focus
     expect(kindsOf(result, 1, "packages/web")).not.toContain("in-focus");
 
-    const focused = run(
-      [touching("2026-02-21T00:00:00Z", "packages/web", grace), ...history],
-      "2026-02-01T00:00:00.000Z",
+    const focused = run([
+      touching("2026-02-21T00:00:00Z", "packages/web", grace),
+      ...history,
+    ]);
+
+    expect(kindsOf(focused, 1, "packages/web")).toContain("in-focus");
+    expect(kindsOf(focused, 1, "packages/api")).not.toContain("in-focus");
+  });
+
+  it("does not count old commits or bot commits towards the area in focus", () => {
+    const years = Array.from({ length: 5 }, (_, i) =>
+      touching(`2025-0${i + 1}-10T00:00:00Z`, "packages/api", ada),
     );
+    const bot = classifiedCommit({
+      time: at("2026-02-22T00:00:00Z"),
+      class: "bot",
+      tools: ["Dependabot"],
+      changes: filesIn("packages/api").map((path) => ({
+        path,
+        added: 1,
+        deleted: 0,
+      })),
+    });
+
+    // api: five old commits, one bot commit and one recent commit; web: two recent commits
+    const focused = run([
+      touching("2026-02-21T00:00:00Z", "packages/web", grace),
+      touching("2026-02-20T00:00:00Z", "packages/web", grace),
+      bot,
+      ...history.slice(1),
+      ...years,
+    ]);
 
     expect(kindsOf(focused, 1, "packages/web")).toContain("in-focus");
     expect(kindsOf(focused, 1, "packages/api")).not.toContain("in-focus");
