@@ -1,0 +1,27 @@
+/* The TypeScript lines of a territory's stats panel. */
+.spanel .ts-item {
+  grid-column: 1 / -1;
+}
+
+.ts-lines {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 24px;
+}
+
+.ts-line {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.tsub .ts-lines {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 900px) {
+  .ts-lines {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

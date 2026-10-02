@@ -2,6 +2,7 @@ import { territoryViews } from "../present/territories.js";
 import type { TerritoryView } from "../present/territories.js";
 import { territoryStats } from "../present/territory-stats.js";
 import { splitReasonLine, splitsAt } from "../present/territory-tree.js";
+import { territoryTypeScript } from "../present/typescript-territory.js";
 import { badgeChips, badgeList } from "./badges.js";
 import { h } from "./dom.js";
 import { icon } from "./icons.js";
@@ -16,6 +17,7 @@ import {
 } from "./territory-parts.js";
 import type { TreeControls } from "./territory-parts.js";
 import { statsPanel } from "./territory-stats-view.js";
+import { typescriptItem } from "./territory-typescript-view.js";
 
 const EXPERTS_SHOWN = 4;
 
@@ -25,8 +27,13 @@ const present = (parts: readonly (HTMLElement | null)[]): HTMLElement[] =>
 const statsOf = (
   { node }: TerritoryView,
   { report, languageEntity }: TreeControls,
-): HTMLElement =>
-  statsPanel(territoryStats(node.stats, report.stats, languageEntity));
+): HTMLElement => {
+  const typescript = territoryTypeScript(node, report.deepDives?.typescript);
+  return statsPanel(
+    territoryStats(node.stats, report.stats, languageEntity),
+    typescript === null ? null : typescriptItem(typescript),
+  );
+};
 
 const truck = (
   view: TerritoryView,

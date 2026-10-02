@@ -1,40 +1,15 @@
-import type { Comparison } from "../present/code-stats.js";
-import type { IconName } from "../present/icons.js";
 import type { TerritoryStatsView } from "../present/territory-stats.js";
 import { h, mono } from "./dom.js";
-import { icon } from "./icons.js";
 import { languageBar } from "./language-bar.js";
+import {
+  caption,
+  comparisonBar,
+  item,
+  labelled,
+  percentOf,
+} from "./territory-stat-parts.js";
 
 const LEGEND_LANGUAGES = 4;
-
-const labelled = (glyph: IconName, label: string): HTMLElement =>
-  h("div", "slabel", icon(glyph, 14, 2), label);
-
-const item = (
-  glyph: IconName,
-  label: string,
-  ...body: readonly Node[]
-): HTMLElement => h("div", "sitem", labelled(glyph, label), ...body);
-
-const caption = (...content: readonly (Node | string)[]): HTMLElement =>
-  h("div", "cap", ...content);
-
-const percentOf = (fraction: number): string => `${fraction * 100}%`;
-
-/** A bar with the territory's figure as its fill and the repository's as a tick across it. */
-const comparisonBar = (
-  { value, reference }: Comparison,
-  description: string,
-): HTMLElement => {
-  const fill = h("i", "fill");
-  fill.style.width = percentOf(value);
-  const mark = h("i", "ref");
-  mark.style.left = percentOf(reference);
-  const bar = h("div", "cmp", fill, mark);
-  bar.setAttribute("role", "img");
-  bar.setAttribute("aria-label", description);
-  return bar;
-};
 
 const figure = (label: string, value: string): HTMLElement =>
   h("span", "", `${label} `, h("b", "", value));
@@ -179,10 +154,13 @@ const key = (): HTMLElement =>
 
 /**
  * The stats of a territory as a panel: languages, size, file length, test
- * share, churn, complexity and style, with the churn and complexity bars
+ * share, churn, complexity and style and, where it has some, TypeScript, with the churn and complexity bars
  * marked with the repository's figure. Only facts; nothing is graded.
  */
-export const statsPanel = (view: TerritoryStatsView): HTMLElement =>
+export const statsPanel = (
+  view: TerritoryStatsView,
+  typescript: HTMLElement | null,
+): HTMLElement =>
   h(
     "div",
     "spanel",
@@ -197,5 +175,6 @@ export const statsPanel = (view: TerritoryStatsView): HTMLElement =>
     churn(view),
     complexity(view),
     style(view),
+    ...(typescript === null ? [] : [typescript]),
     key(),
   );
