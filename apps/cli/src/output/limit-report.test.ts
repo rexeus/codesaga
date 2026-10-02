@@ -167,7 +167,9 @@ describe("limitReport deep dives", () => {
       1840,
     ]);
   });
+});
 
+describe("limitReport import map", () => {
   it("cuts the import map to the limit and keeps the totals", () => {
     const limited = limitReport(sampleReport(), 2).deepDives?.typescript
       ?.imports?.territories;
