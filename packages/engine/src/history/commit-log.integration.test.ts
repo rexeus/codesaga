@@ -26,7 +26,7 @@ const read = (
       Git,
       Effect.map(Git.make(repo.directory), (real) =>
         Git.of({
-          text: (args, stdin) => real.text(args, stdin),
+          ...real,
           stream: (args, stdin) => {
             if (args[0] === "log") {
               logged.push(args.at(-1) ?? "");
