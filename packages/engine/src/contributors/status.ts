@@ -4,7 +4,7 @@
 
 import type { DateTime } from "effect";
 
-import { ACTIVE_DAYS, isActiveWithin } from "./activeness.js";
+import { ACTIVE_CONTRIBUTOR_DAYS, isActiveWithin } from "./activeness.js";
 
 /** A contributor is new when their first commit lies at most this many days before now. */
 export const NEW_CONTRIBUTOR_DAYS = 90;
@@ -27,8 +27,9 @@ export const isNewContributor = (
   isActiveWithin(firstCommitTime, now, NEW_CONTRIBUTOR_DAYS);
 
 /**
- * `dormant` without a commit in the `ACTIVE_DAYS` days before `now`; `new`
- * under `isNewContributor`; otherwise `active`.
+ * `dormant` without a commit in the `ACTIVE_CONTRIBUTOR_DAYS` days before
+ * `now`; `new` under `isNewContributor`; otherwise `active`. `active` and `new`
+ * together are the contributors the overview counts as `active90`.
  */
 export const contributorStatus = (
   firstCommitTime: number,
@@ -36,7 +37,7 @@ export const contributorStatus = (
   repositoryStart: number,
   now: DateTime.Utc,
 ): ContributorStatus => {
-  if (!isActiveWithin(lastCommitTime, now, ACTIVE_DAYS)) {
+  if (!isActiveWithin(lastCommitTime, now, ACTIVE_CONTRIBUTOR_DAYS)) {
     return "dormant";
   }
   return isNewContributor(firstCommitTime, repositoryStart, now)

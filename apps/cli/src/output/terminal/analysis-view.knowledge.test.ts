@@ -212,7 +212,7 @@ describe("renderAnalysis areas", () => {
       "                           Areas at level 2 of 3 (recommended: 1)",
     );
     expect(lines[note + 1]).toBe(
-      "                           level 1: 11 areas for 4 active contributors",
+      "                           level 1: 11 areas with 3+ files for 4 active contributors",
     );
   });
 

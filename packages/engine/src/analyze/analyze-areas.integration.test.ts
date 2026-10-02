@@ -79,7 +79,7 @@ layer(NodeServices.layer)("analyze knowledge areas", (it) => {
         assert.strictEqual(knowledge.areas.depth, 1);
         assert.strictEqual(
           knowledge.areas.reason,
-          "level 1: 3 areas for 2 active contributors",
+          "level 1: 3 areas with 3+ files for 2 active contributors",
         );
       }),
   );
@@ -203,7 +203,7 @@ layer(NodeServices.layer)("analyze knowledge areas options", (it) => {
       ]);
       assert.strictEqual(
         knowledge.areas.reason,
-        "level 1: 1 area for 1 active contributor",
+        "level 1: 1 area with 3+ files for 1 active contributor",
       );
     }),
   );

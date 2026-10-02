@@ -2,6 +2,8 @@
 // A pure function over counts, kept apart from the partition so the calibration constants live in one place.
 // Cost: one comparison per level.
 
+import { AREA_MIN_FILES } from "./area-tree.js";
+
 /** Contributors with a commit in this many days before now size the recommendation. */
 export const RECOMMENDATION_ACTIVE_DAYS = 90;
 /** The recommendation aims at this many areas per such contributor. */
@@ -14,7 +16,7 @@ export const MAX_TARGET_AREAS = 25;
 export type DepthRecommendation = {
   /** The recommended level, one of the levels given. */
   readonly depth: number;
-  /** The choice in words: "level 2: 11 areas for 6 active contributors". */
+  /** The choice in words: "level 2: 11 areas with 3+ files for 6 active contributors". */
   readonly reason: string;
 };
 
@@ -61,6 +63,6 @@ export const recommendDepth = ({
   const team = plural(people, anyActive ? "active contributor" : "contributor");
   return {
     depth: chosen.depth,
-    reason: `level ${chosen.depth}: ${plural(chosen.viableAreas, "area")} for ${team}`,
+    reason: `level ${chosen.depth}: ${plural(chosen.viableAreas, "area")} with ${AREA_MIN_FILES}+ files for ${team}`,
   };
 };

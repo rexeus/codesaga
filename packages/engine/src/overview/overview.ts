@@ -8,7 +8,10 @@ import type { DateTime } from "effect";
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { groupBy } from "../collections/group-by.js";
-import { isActiveWithin } from "../contributors/activeness.js";
+import {
+  ACTIVE_CONTRIBUTOR_DAYS,
+  isActiveWithin,
+} from "../contributors/activeness.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { languageOf } from "../universe/languages.js";
@@ -76,7 +79,7 @@ export const overview = ({
     contributors: {
       total: lastTimes.length,
       active30: activeWithin(30),
-      active90: activeWithin(90),
+      active90: activeWithin(ACTIVE_CONTRIBUTOR_DAYS),
       active365: activeWithin(365),
     },
     files: universe.length,

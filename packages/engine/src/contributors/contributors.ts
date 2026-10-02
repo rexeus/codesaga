@@ -132,7 +132,7 @@ const contributorOf = (
 /**
  * The `contributors` section, sorted by commits descending, then name. `activeDays`
  * counts distinct local dates; `active` means a commit in the 183 days before
- * `now`; `areas` are the three directories with the most commits, cut at two
+ * `now`, `status` is judged over 90 days; `areas` are the three directories with the most commits, cut at two
  * levels below the scope; `weekly`, `status` and `badges` serve the contributor card.
  */
 export const contributors = ({

@@ -256,7 +256,7 @@ describe("knowledge chain rule and scope", () => {
       areas: {
         depth: 1,
         recommendedDepth: 1,
-        reason: "level 1: 0 areas for 0 contributors",
+        reason: "level 1: 0 areas with 3+ files for 0 contributors",
         levels: [{ depth: 1, totalAreas: 0, areas: [] }],
       },
     });

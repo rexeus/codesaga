@@ -68,7 +68,7 @@ describe("knowledge areas", () => {
     expect(areas).toMatchObject({
       depth: 2,
       recommendedDepth: 2,
-      reason: "level 2: 5 areas for 3 active contributors",
+      reason: "level 2: 5 areas with 3+ files for 3 active contributors",
     });
     expect(areas.levels.map(({ depth }) => depth)).toStrictEqual([1, 2]);
   });
@@ -83,7 +83,7 @@ describe("knowledge areas", () => {
 
     expect(areas).toMatchObject({
       recommendedDepth: 1,
-      reason: "level 1: 4 areas for 1 active contributor",
+      reason: "level 1: 4 areas with 3+ files for 1 active contributor",
     });
   });
 
@@ -94,7 +94,7 @@ describe("knowledge areas", () => {
       commit("2025-06-01T00:00:00Z", linus),
     ]);
 
-    expect(areas.reason).toBe("level 2: 5 areas for 3 contributors");
+    expect(areas.reason).toBe("level 2: 5 areas with 3+ files for 3 contributors");
   });
 
   it("starts at the requested depth and still reports the recommendation", () => {

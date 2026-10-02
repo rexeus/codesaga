@@ -10,7 +10,9 @@
 
 **Contributor** — an identity with at least one human or agent-assisted commit. Bots and agents are not contributors; they appear under automation.
 
-**Active** — a contributor with a commit in the 183 days before now (`Clock`), not before HEAD: an archived repository should say that nobody is around. The overview also counts active contributors at 30, 90 and 365 days.
+**Active contributor** — a contributor with a commit in the 90 days before now (`Clock`), not before HEAD: an archived repository should say that nobody is around. A contributor's `status` is `new` or `active` exactly then, and `dormant` otherwise, so `new` and `active` together are the overview's `active90`; the overview also counts active contributors at 30 and 365 days.
+
+**Active expert** — an expert with a commit in the 183 days before now. It decides whether a directory or area is orphaned, which experts are suggested as reviewers, and the `active` flag of a contributor and of an expert. A contributor can be dormant and still carry `active: true` for a while.
 
 **Agent commit** — a commit whose author is an AI agent, such as `claude[bot]` or the Copilot cloud agent. Checked before the bot rule, because several agents commit as `[bot]` accounts.
 

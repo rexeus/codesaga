@@ -121,7 +121,11 @@ const Areas = Schema.Struct({
   depth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   /** The level that suits the team size, chosen with `thresholds.areas`. */
   recommendedDepth: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-  /** The recommendation in words: "level 2: 11 areas for 6 active contributors". */
+  /**
+   * The recommendation in words: "level 2: 11 areas with 3+ files for 6 active
+   * contributors". It counts the areas that are not `rest` groups, so the
+   * level's `totalAreas` is higher.
+   */
   reason: Schema.String,
   /** Levels 1 to the deepest useful one (at most `thresholds.areas.maxDepth`), in order; no two levels have the same areas. */
   levels: Schema.NonEmptyArray(AreaLevel),

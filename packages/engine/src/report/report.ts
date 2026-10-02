@@ -117,7 +117,7 @@ const Contributor = Schema.Struct({
   /** ISO timestamps of the first and last commit in the window. */
   firstCommitAt: Schema.String,
   lastCommitAt: Schema.String,
-  /** A commit in the `thresholds.activeDays` days before now. */
+  /** A commit in the `thresholds.activeDays` days before now; `status` judges activity over 90 days. */
   active: Schema.Boolean,
   /** The three directories with the most commits, at most two levels below the scope. */
   areas: Schema.Array(Schema.Struct({ path: Schema.String, commits: Count })),
@@ -128,10 +128,12 @@ const Contributor = Schema.Struct({
    */
   weekly: Schema.Array(Count).check(Schema.isBetweenLength(52, 52)),
   /**
-   * `dormant`: not `active`; `new`: the first commit over the full history
-   * lies at most `thresholds.badges.welcomeDays` days before now and someone
-   * committed before it (the founder of a young repository is `active`);
-   * otherwise `active`.
+   * `dormant`: no commit in the 90 days before now; `new`: not dormant, the
+   * first commit over the full history lies at most
+   * `thresholds.badges.welcomeDays` days before now and someone committed
+   * before it (the founder of a young repository is `active`); otherwise
+   * `active`. `new` and `active` together are the `overview.contributors.active90`
+   * contributors; the `active` flag above, over 183 days, is wider.
    */
   status: Schema.Literals(["new", "active", "dormant"]),
   /** Achievements, most important first; the dashboard shows the first three. */

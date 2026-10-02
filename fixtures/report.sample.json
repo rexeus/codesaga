@@ -1436,7 +1436,7 @@
         6, 0, 7, 0, 7, 4, 0, 0, 4, 4, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0
       ],
-      "status": "active",
+      "status": "dormant",
       "badges": [
         {
           "kind": "keeper",
@@ -1471,7 +1471,7 @@
         0, 0, 2, 0, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0
       ],
-      "status": "active",
+      "status": "dormant",
       "badges": []
     },
     {
@@ -2235,7 +2235,7 @@
     "areas": {
       "depth": 1,
       "recommendedDepth": 1,
-      "reason": "level 1: 11 areas for 4 active contributors",
+      "reason": "level 1: 11 areas with 3+ files for 4 active contributors",
       "levels": [
         {
           "depth": 1,

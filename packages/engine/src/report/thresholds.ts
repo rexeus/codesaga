@@ -87,7 +87,7 @@ const BadgeThresholds = Schema.Struct({
 
 /** The constants an analysis applied, reported so consumers see them. */
 export const Thresholds = Schema.Struct({
-  /** A contributor is active with a commit in this many days before now. */
+  /** An expert, and the `active` flag of a contributor, need a commit in this many days before now. */
   activeDays: Count,
   /** An expert's Degree of Expertise is at least this share of the highest among the file's authors. */
   expertRatio: Schema.Finite,

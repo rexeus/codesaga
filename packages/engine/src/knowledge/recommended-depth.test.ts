@@ -19,7 +19,7 @@ describe("recommendDepth", () => {
       }),
     ).toStrictEqual({
       depth: 2,
-      reason: "level 2: 11 areas for 6 active contributors",
+      reason: "level 2: 11 areas with 3+ files for 6 active contributors",
     });
   });
 
@@ -57,7 +57,7 @@ describe("recommendDepth targets", () => {
       }),
     ).toStrictEqual({
       depth: 2,
-      reason: "level 2: 9 areas for 5 contributors",
+      reason: "level 2: 9 areas with 3+ files for 5 contributors",
     });
   });
 
@@ -81,7 +81,7 @@ describe("recommendDepth targets", () => {
       }),
     ).toStrictEqual({
       depth: 1,
-      reason: "level 1: 1 area for 1 active contributor",
+      reason: "level 1: 1 area with 3+ files for 1 active contributor",
     });
   });
 });
