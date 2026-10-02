@@ -30,7 +30,7 @@ const prefersDark = (): boolean =>
 
 /** The theme button: the page follows the system until it is pressed, then the pressed choice wins. */
 const themeToggle = (): HTMLElement => {
-  const button = h("button", "iconbtn", icon("moon", 17));
+  const button = h("button", "iconbtn", icon("sun-moon", 17));
   button.type = "button";
   button.title = "Toggle theme";
   button.setAttribute("aria-label", "Toggle light and dark theme");

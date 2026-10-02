@@ -34,13 +34,13 @@ describe("botsCard", () => {
       {
         name: "Claude Code",
         kind: "agent",
-        icon: "spark",
+        icon: "sparkles",
         counts: "180 assisted",
       },
       {
         name: "Cursor",
         kind: "agent",
-        icon: "spark",
+        icon: "sparkles",
         counts: "5 authored · 2 assisted",
       },
     ]);

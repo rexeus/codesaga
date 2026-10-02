@@ -89,7 +89,15 @@ const deltaFoot = (foot: Extract<Foot, { kind: "delta" }>): HTMLElement =>
   h(
     "div",
     `delta ${foot.direction === "down" ? "down" : ""}`,
-    ...(foot.direction === "flat" ? [] : [icon(foot.direction, 14, 2.2)]),
+    ...(foot.direction === "flat"
+      ? []
+      : [
+          icon(
+            foot.direction === "up" ? "arrow-up-right" : "arrow-down-right",
+            14,
+            2.2,
+          ),
+        ]),
     foot.text,
     h("span", "", ` ${foot.against}`),
   );

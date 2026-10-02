@@ -48,7 +48,7 @@ export const botsCard = ({ automation }: Report): BotsCard | null => {
     tools: automation.tools.map(({ name, kind, authored, assisted }) => ({
       name,
       kind,
-      icon: kind === "agent" ? "spark" : "bot",
+      icon: kind === "agent" ? "sparkles" : "bot",
       counts: [
         ...counted(authored, "authored"),
         ...counted(assisted, "assisted"),

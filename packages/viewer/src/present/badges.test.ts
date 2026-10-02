@@ -25,7 +25,7 @@ describe("territoryBadges", () => {
         evidence: "Orphaned because of the numbers",
       },
       {
-        icon: "island",
+        icon: "tree-palm",
         tone: "warn",
         label: "Knowledge island",
         evidence: "Knowledge island because of the numbers",
@@ -62,8 +62,8 @@ describe("contributorBadges", () => {
     ]);
 
     expect(row.chips.map(({ tone, icon }) => [tone, icon])).toEqual([
-      ["info", "spark"],
-      ["plain", "key"],
+      ["info", "sparkles"],
+      ["plain", "key-round"],
     ]);
   });
 

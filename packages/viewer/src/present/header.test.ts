@@ -105,7 +105,7 @@ describe("chips", () => {
       repository: { ...report.repository, branch: null },
     };
 
-    expect(chips(detached).map(({ icon }) => icon)).not.toContain("branch");
+    expect(chips(detached).map(({ icon }) => icon)).not.toContain("git-branch");
   });
 });
 

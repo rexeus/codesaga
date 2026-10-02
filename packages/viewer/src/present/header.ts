@@ -3,13 +3,14 @@ import type { Report } from "@codesaga/engine";
 import { botsCard } from "./bots.js";
 import { describeComparison } from "./comparison-note.js";
 import { formatAge, formatCount, formatDateLong } from "./format.js";
+import type { IconName } from "./icons.js";
 
 /** A run of text of the header; `strong` runs are set in the primary ink. */
 export type Segment = { readonly text: string; readonly strong: boolean };
 
 /** A pill under the lede. `icon` names a glyph of the render layer. */
 export type Chip = {
-  readonly icon: "branch" | "hash" | "calendar" | "sun" | "compare";
+  readonly icon: IconName;
   readonly mono: boolean;
   readonly parts: readonly Segment[];
 };
@@ -84,7 +85,7 @@ export const chips = ({
     ? []
     : [
         {
-          icon: "branch",
+          icon: "git-branch",
           mono: false,
           parts: [plain("Branch "), strong(repository.branch)],
         } satisfies Chip,
@@ -111,7 +112,7 @@ export const chips = ({
     ],
   },
   {
-    icon: "sun",
+    icon: "history",
     mono: false,
     parts: [strong(weeksOf(activity.weeks.length)), plain(" of history")],
   },
@@ -119,7 +120,7 @@ export const chips = ({
     ? []
     : [
         {
-          icon: "compare",
+          icon: "arrow-left-right",
           mono: false,
           parts: [plain(describeComparison(comparison.previous))],
         } satisfies Chip,

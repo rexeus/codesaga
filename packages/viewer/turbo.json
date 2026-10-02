@@ -1,6 +1,15 @@
 {
   "extends": ["//"],
   "tasks": {
+    "build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!**/*.test.ts",
+        "!src/render/lucide-shapes.js"
+      ],
+      "outputs": ["dist/**", "src/render/lucide-shapes.js"]
+    },
     "typecheck": {
       "dependsOn": ["$TURBO_EXTENDS$", "build"]
     },

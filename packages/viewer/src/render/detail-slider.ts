@@ -32,7 +32,7 @@ const recommendation = (
   h(
     "div",
     "rec-box",
-    h("div", "badge-icon", icon("star", 20)),
+    h("div", "badge-icon", icon("target", 20)),
     h(
       "div",
       "",

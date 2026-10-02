@@ -240,10 +240,10 @@ const LOOKS: Record<
   "busiest-day": { icon: "zap", slot: 1, build: busiestDay },
   "night-owls": { icon: "moon", slot: 3, build: nightOwls },
   weekend: { icon: "calendar", slot: 1, build: weekend },
-  newcomers: { icon: "usersplus", slot: 3, build: newcomers },
-  "quiet-territory": { icon: "snow", slot: 4, build: quietTerritory },
+  newcomers: { icon: "user-plus", slot: 3, build: newcomers },
+  "quiet-territory": { icon: "snowflake", slot: 4, build: quietTerritory },
   "rename-record": { icon: "shuffle", slot: 6, build: renameRecord },
-  "biggest-cleanup": { icon: "trash", slot: 5, build: biggestCleanup },
+  "biggest-cleanup": { icon: "trash-2", slot: 5, build: biggestCleanup },
   "truck-factor-alert": { icon: "truck", slot: 4, build: truckFactorAlert },
   "orphaned-knowledge": { icon: "ghost", slot: 5, build: orphanedKnowledge },
 };

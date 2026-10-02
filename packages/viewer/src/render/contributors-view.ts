@@ -24,7 +24,7 @@ const SPARK = { width: 190, height: 28 };
 
 const statusPill = (status: PersonRow["status"]): HTMLElement => {
   if (status === "new") {
-    return h("span", "pill info", icon("spark", 13), "New");
+    return h("span", "pill info", icon("sparkles", 13), "New");
   }
   if (status === "active") {
     return h("span", "pill good", h("span", "dot"), "Active");
