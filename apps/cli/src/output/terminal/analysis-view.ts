@@ -1,4 +1,4 @@
-// Owns the human view of `analyze`: one screen with the headline, stories, activity, people, knowledge, stats, achievements, automation and languages.
+// Owns the human view of `analyze`: one screen with the headline, stories, activity, people, knowledge, stats, the TypeScript deep dive, achievements, automation and languages.
 // Every name that came from git or the file system passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -29,6 +29,7 @@ import { statsLines } from "./stats-lines.js";
 import { storyLines } from "./story-lines.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
+import { typescriptLines } from "./typescript-lines.js";
 
 type Comparison = NonNullable<Report["comparison"]>;
 
@@ -185,6 +186,7 @@ export const renderAnalysis = (report: Report, style: Style): string =>
     ...contributorLines(report, style),
     ...knowledgeLines(report, style),
     ...statsLines(report, style),
+    ...typescriptLines(report, style),
     ...achievementLines(report, style),
     ...(report.automation.tools.length === 0
       ? []

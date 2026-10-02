@@ -1,9 +1,10 @@
-// Owns the human view of `inspect`: each argument with its experts, truck factor, badges and reasons.
+// Owns the human view of `inspect`: each argument with its experts, truck factor, badges, TypeScript figures and reasons.
 // Every name and path that came from git or the user passes through terminal-safe escaping.
 import type { InspectResult } from "@codesaga/engine";
 
 import { escapeForTerminal } from "../escape.js";
 import { ago, count, day, plural, share } from "./format.js";
+import { inspectTypeScriptLines } from "./inspect-typescript-lines.js";
 import { badgesOf, nameOf, ownerLabel } from "./knowledge-lines.js";
 import type { Style } from "./style.js";
 import { plain, renderTable } from "./table.js";
@@ -102,6 +103,7 @@ const entryLines = (
   ...expertLines(entry, now, style),
   ...lineOwnerLines(entry, style),
   ...windowLines(entry, now),
+  ...inspectTypeScriptLines(entry),
   ...entry.reasons.map((reason) => `- ${escapeForTerminal(reason)}`),
 ];
 
