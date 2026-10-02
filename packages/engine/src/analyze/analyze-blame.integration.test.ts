@@ -123,6 +123,46 @@ layer(NodeServices.layer)("analyze --blame", (it) => {
 
       assert.strictEqual(report.knowledge.directories.length, 1);
       assert.notProperty(report.knowledge.directories[0] ?? {}, "lineOwners");
+      for (const area of report.knowledge.areas.levels[0]?.areas ?? []) {
+        assert.notProperty(area, "lineOwners");
+      }
+    }),
+  );
+});
+
+layer(NodeServices.layer)("analyze --blame areas", (it) => {
+  it.effect("gives each area the line owners of its own files", () =>
+    Effect.gen(function* () {
+      yield* setNow;
+      const repo = yield* makeTempRepository;
+      yield* commitHistory(repo);
+      yield* repo.commit("2026-01-09T09:00:00Z", {
+        "docs/a.ts": "m1\nm2\n",
+        "docs/b.ts": "m3\n",
+        "docs/c.ts": "m4\n",
+      });
+
+      const report = yield* analyze(analyzeOptionsFor(repo, { blame: true }));
+
+      assert.deepStrictEqual(
+        report.knowledge.areas.levels[0]?.areas.map(({ path, lineOwners }) => [
+          path,
+          lineOwners?.lines,
+          lineOwners?.owners.map(({ name, lines }) => [name, lines]),
+        ]),
+        [
+          ["docs", 4, [["Codesaga Test", 4]]],
+          [
+            "src",
+            12,
+            [
+              ["Grace", 6],
+              ["Ada Lovelace", 5],
+              ["dependabot[bot]", 1],
+            ],
+          ],
+        ],
+      );
     }),
   );
 });

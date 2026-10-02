@@ -76,7 +76,8 @@ const DirectoryKnowledge = Schema.Struct({
  * The knowledge state of one area: a part of the repository that, together with
  * its siblings at the same level, covers every universe file exactly once.
  * Reads like a directory, so every field of `DirectoryKnowledge` applies to
- * the files of the area alone.
+ * the files of the area alone, `lineOwners` included: with `blame`, each area
+ * names the owners of its own lines.
  */
 const AreaKnowledge = Schema.Struct({
   ...DirectoryKnowledge.fields,
