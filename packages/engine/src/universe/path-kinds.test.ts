@@ -32,7 +32,6 @@ describe("isDocPath", () => {
   it.each([
     "docs/guide.txt",
     "packages/a/doc/x.html",
-    "CHANGELOG.md",
     "site/page.mdx",
     "notes/a.rst",
     "notes/a.adoc",
@@ -42,10 +41,23 @@ describe("isDocPath", () => {
     expect(isDocPath(path)).toBe(true);
   });
 
-  it.each(["src/a.ts", "src/docsify.ts", "package.json"])(
-    "does not take %s for documentation",
-    (path) => {
-      expect(isDocPath(path)).toBe(false);
-    },
-  );
+  it.each([
+    "src/a.ts",
+    "src/docsify.ts",
+    "package.json",
+    ".changeset/brave-lions-jump.md",
+    "packages/a/.changeset/config.json",
+    "CHANGELOG.md",
+    "packages/a/changelog.md",
+    "CHANGES.rst",
+    "HISTORY.md",
+    "docs/RELEASE_NOTES.md",
+    "RELEASES.md",
+  ])("does not take %s for documentation", (path) => {
+    expect(isDocPath(path)).toBe(false);
+  });
+
+  it("keeps a page inside a releasing directory as documentation", () => {
+    expect(isDocPath("docs/releasing/guide.md")).toBe(true);
+  });
 });

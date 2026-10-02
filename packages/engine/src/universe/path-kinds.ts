@@ -26,10 +26,28 @@ const DOC_PATH_PATTERNS = [
   "**/README*",
 ];
 
+// Release metadata is prose in a docs-looking file format but written by release tooling, not documented by a person.
+// Matched on the lowercased path, so `CHANGELOG.md` and `changelog.md` are alike.
+const RELEASE_METADATA_PATTERNS = [
+  "**/.changeset/**",
+  "**/changelog*",
+  "**/changes*",
+  "**/history*",
+  "**/release*",
+];
+
+const isReleaseMetadata = matchesAny(RELEASE_METADATA_PATTERNS);
+const isDocumentation = matchesAny(DOC_PATH_PATTERNS);
+
 /** Whether a repository-relative path is a test file. */
 export const isTestPath: (path: string) => boolean =
   matchesAny(TEST_PATH_PATTERNS);
 
-/** Whether a repository-relative path is documentation. */
-export const isDocPath: (path: string) => boolean =
-  matchesAny(DOC_PATH_PATTERNS);
+/**
+ * Whether a repository-relative path is documentation written by a person.
+ * Release metadata is not: `.changeset/**` and files named `CHANGELOG*`,
+ * `CHANGES*`, `HISTORY*`, `RELEASE*` and `RELEASES*` in any directory, in any
+ * letter case.
+ */
+export const isDocPath = (path: string): boolean =>
+  isDocumentation(path) && !isReleaseMetadata(path.toLowerCase());
