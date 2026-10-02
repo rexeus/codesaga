@@ -105,3 +105,77 @@ describe("type-safety facts: suppression comments", () => {
     });
   });
 });
+
+describe("type-safety facts: escape sites", () => {
+  it("counts as any as one assertion chain and its any as no separate hole", () => {
+    expect(safety("const a = x as any;\n")).toMatchObject({
+      any: 1,
+      assertions: 1,
+      assertionChains: 1,
+      anyOutsideAssertions: 0,
+    });
+  });
+
+  it("counts as unknown as T and as any as T as one chain each, and a chain of plain casts once", () => {
+    const facts = safety(
+      "const a = x as unknown as T;\nconst b = y as any as T;\nconst c = (z as A) as B;\n",
+    );
+
+    expect(facts).toMatchObject({
+      assertions: 6,
+      assertionChains: 3,
+      doubleAssertions: 2,
+      anyOutsideAssertions: 0,
+    });
+  });
+
+  it("counts any inside the type of an assertion with the assertion", () => {
+    expect(
+      safety("const a = x as Array<any>;\nconst b = <Map<string, any>>y;\n"),
+    ).toMatchObject({ assertionChains: 2, anyOutsideAssertions: 0 });
+  });
+
+  it("counts any in a rest parameter and a generic constraint as benign, outside the escapes", () => {
+    const facts = safety(
+      [
+        "function f(...args: any[]) {}",
+        "const g = (...rest: any) => rest;",
+        "type H = (...a: Array<any>) => void;",
+        "function i<T extends any>(x: T) {}",
+        "function j<T extends any[]>(x: T) {}",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({
+      any: 5,
+      benignAny: 5,
+      anyOutsideAssertions: 0,
+    });
+  });
+});
+
+describe("type-safety facts: escape sites that stay", () => {
+  it("keeps any as a type argument, a parameter, a variable and a nested rest element a real escape", () => {
+    const facts = safety(
+      [
+        "const m: Map<string, any> = new Map();",
+        "function f(x: any, ...rest: Array<Set<any>>) {}",
+        "let y: any;",
+        "function g<T extends Record<string, any>>(t: T) {}",
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({
+      any: 5,
+      benignAny: 0,
+      anyOutsideAssertions: 5,
+    });
+  });
+
+  it("does not let an assertion's type leak: an any after it still counts", () => {
+    expect(safety("const a = x as T; let b: any;\n")).toMatchObject({
+      anyOutsideAssertions: 1,
+      assertionChains: 1,
+    });
+  });
+});

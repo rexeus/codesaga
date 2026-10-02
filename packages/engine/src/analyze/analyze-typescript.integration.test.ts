@@ -95,7 +95,7 @@ layer(analyzeServices)(
           assert.deepStrictEqual(typeSafety?.nocheckFiles, ["app/b.ts"]);
           assert.deepStrictEqual(
             [typeSafety?.production.files, typeSafety?.production.escapes],
-            [6, 3],
+            [6, 2],
           );
           assert.deepStrictEqual(
             [typeSafety?.tests.files, typeSafety?.tests.counts.nonNull],
@@ -114,7 +114,7 @@ layer(analyzeServices)(
             esmShare: 1,
           });
           assert.strictEqual(byPath["app"]?.files, 4);
-          assert.strictEqual(byPath["app"]?.escapesPer1000, 750);
+          assert.strictEqual(byPath["app"]?.escapesPer1000, 500);
         }),
     );
   },

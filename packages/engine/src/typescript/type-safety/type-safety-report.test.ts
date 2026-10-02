@@ -15,9 +15,19 @@ const file = (
 ): ParsedFile => ({ path, lines, facts: factsWith({ typeSafety: counts }) });
 
 const files = [
-  file("src/a.ts", 600, { any: 3, nonNull: 1, satisfies: 2 }),
+  file("src/a.ts", 600, {
+    any: 3,
+    anyOutsideAssertions: 3,
+    nonNull: 1,
+    satisfies: 2,
+  }),
   file("src/b.ts", 400, {}),
-  file("src/c.test.ts", 100, { assertions: 5, any: 1 }),
+  file("src/c.test.ts", 100, {
+    assertions: 5,
+    assertionChains: 5,
+    any: 1,
+    anyOutsideAssertions: 1,
+  }),
 ];
 
 describe("typeSafetyOf rates", () => {
@@ -51,12 +61,20 @@ describe("typeSafetyOf rates", () => {
     expect(tests).toMatchObject({ escapes: 6, escapesPer1000: 60 });
   });
 
-  it("counts as any once as an any and once as an assertion, and its subsets not again", () => {
+  it("counts a site once: as any and as unknown as T are one assertion chain, and benign any is none", () => {
     const { production } = typeSafetyOf([
-      file("a.ts", 1000, { any: 1, assertions: 1, asAny: 1 }),
+      file("a.ts", 1000, {
+        any: 4,
+        asAny: 1,
+        benignAny: 2,
+        anyOutsideAssertions: 1,
+        assertions: 3,
+        doubleAssertions: 1,
+        assertionChains: 2,
+      }),
     ]);
 
-    expect(production.escapes).toBe(2);
+    expect(production.escapes).toBe(3);
   });
 });
 

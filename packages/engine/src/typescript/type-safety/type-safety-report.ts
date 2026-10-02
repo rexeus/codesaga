@@ -12,6 +12,9 @@ const NO_FACTS: TypeSafetyFacts = {
   assertions: 0,
   doubleAssertions: 0,
   asAny: 0,
+  assertionChains: 0,
+  anyOutsideAssertions: 0,
+  benignAny: 0,
   nonNull: 0,
   tsIgnore: 0,
   tsExpectError: 0,
@@ -32,6 +35,12 @@ const zip = (
   assertions: combine(left.assertions, right.assertions),
   doubleAssertions: combine(left.doubleAssertions, right.doubleAssertions),
   asAny: combine(left.asAny, right.asAny),
+  assertionChains: combine(left.assertionChains, right.assertionChains),
+  anyOutsideAssertions: combine(
+    left.anyOutsideAssertions,
+    right.anyOutsideAssertions,
+  ),
+  benignAny: combine(left.benignAny, right.benignAny),
   nonNull: combine(left.nonNull, right.nonNull),
   tsIgnore: combine(left.tsIgnore, right.tsIgnore),
   tsExpectError: combine(left.tsExpectError, right.tsExpectError),
@@ -42,11 +51,17 @@ const zip = (
   typePredicates: combine(left.typePredicates, right.typePredicates),
 });
 
-/** The escape hatches of one file; `asAny` and `doubleAssertions` are parts of `any` and `assertions`. */
+/**
+ * The escape sites of a count set: `any` outside assertions and benign
+ * positions, assertion chains, non-null assertions, the three `@ts-`
+ * directives and lint suppressions. `as any` is one site, an assertion, and
+ * `as unknown as T` is one; `doubleAssertions`, `asAny`, `benignAny` and the
+ * `any` inside assertions are not added again.
+ */
 const escapesOf = (facts: TypeSafetyFacts): number =>
   sum([
-    facts.any,
-    facts.assertions,
+    facts.anyOutsideAssertions,
+    facts.assertionChains,
     facts.nonNull,
     facts.tsIgnore,
     facts.tsExpectError,

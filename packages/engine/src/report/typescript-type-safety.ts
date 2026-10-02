@@ -15,6 +15,12 @@ const byMeasure = <S extends Schema.Top>(value: S) =>
     doubleAssertions: value,
     /** Assertions to `any`; part of `assertions` and of `any`. */
     asAny: value,
+    /** Assertion sites: an assertion and the assertions it wraps count once, so `x as unknown as T` and `x as any as T` are one. Part of `assertions`. */
+    assertionChains: value,
+    /** `any` keywords outside the type of an assertion and outside the benign positions: the `any` that is a hole of its own, as in `Map<string, any>` or `let x: any`. Part of `any`. */
+    anyOutsideAssertions: value,
+    /** `any` in a rest parameter (`...args: any[]`) and in a generic constraint (`T extends any`), where TypeScript has no better type for "anything". Part of `any`; not an escape. */
+    benignAny: value,
     /** Non-null assertions `x!`. */
     nonNull: value,
     /** `@ts-ignore` comments, which stay silent when the line has no error. */
@@ -34,11 +40,14 @@ const byMeasure = <S extends Schema.Top>(value: S) =>
   });
 
 /**
- * The type safety of one set of parsed files. `escapes` adds `any`,
- * `assertions`, `nonNull`, `tsIgnore`, `tsExpectError`, `tsNocheck` and
- * `lintDisables`, so `as any` counts as the two holes it is; `doubleAssertions` and
- * `asAny` are parts of those and not added again. `per1000` divides each count
- * by `lines`, in thousands, and keeps 4 decimals.
+ * The type safety of one set of parsed files. `escapes` counts _sites_, one
+ * per hole: `anyOutsideAssertions`, `assertionChains`, `nonNull`, `tsIgnore`,
+ * `tsExpectError`, `tsNocheck` and `lintDisables` added. So `x as any` is one
+ * escape (an assertion, its `any` belongs to it), `x as unknown as T` is one,
+ * and `...args: any[]` is none. The other counts describe their own kind
+ * and overlap with these (`any` holds every keyword, `assertions` every
+ * assertion), so they are not added to `escapes`. `per1000` divides each
+ * count by `lines`, in thousands, and keeps 4 decimals.
  */
 const TypeSafetyPart = Schema.Struct({
   /** Parsed files in the set. */
