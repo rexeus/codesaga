@@ -16,5 +16,7 @@ export type ParsedSource = Pick<
  */
 export type FactsCollector<Facts> = {
   readonly enter: (node: Node) => void;
+  /** Called for each node after its children, for facts that depend on scope. */
+  readonly leave?: ((node: Node) => void) | undefined;
   readonly finish: (parsed: ParsedSource) => Facts;
 };

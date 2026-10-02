@@ -1,6 +1,6 @@
 // Owns the syntax questions behind the idiom counts: what an alias, a namespace or an export declares.
 
-import type { Node, Statement, TSType } from "@oxc-project/types";
+import type { Node, TSType } from "@oxc-project/types";
 
 import { stringValue } from "../node-guards.js";
 import type { NodeOfType } from "../walk.js";
@@ -52,10 +52,3 @@ export const exportedNames = (
   );
   return declaredNames(node.declaration) + named.length;
 };
-
-/** The top-level declaration a statement holds, looking through `export` and `export default`. */
-export const declarationOf = (statement: Statement): Node | null =>
-  statement.type === "ExportNamedDeclaration" ||
-  statement.type === "ExportDefaultDeclaration"
-    ? statement.declaration
-    : statement;

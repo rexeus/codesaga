@@ -3,7 +3,7 @@
 
 import { identifierName } from "../node-guards.js";
 import type { FactsCollector } from "../parsed-source.js";
-import { enterWith } from "../walk.js";
+import { onNodes } from "../walk.js";
 
 /** Ecosystem facts of one file; the counts add up over files. */
 export type EcosystemFacts = {
@@ -17,7 +17,7 @@ const HOOK_NAME = /^use[A-Z0-9]/u;
 export const ecosystemCollector = (): FactsCollector<EcosystemFacts> => {
   let hookCalls = 0;
   return {
-    enter: enterWith({
+    enter: onNodes({
       CallExpression: ({ callee }) => {
         const name =
           callee.type === "MemberExpression" &&

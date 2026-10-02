@@ -4,7 +4,7 @@
 import type { Expression, Node, TSType } from "@oxc-project/types";
 
 import type { FactsCollector } from "../parsed-source.js";
-import { enterWith } from "../walk.js";
+import { onNodes } from "../walk.js";
 import { suppressionsOf } from "./suppression-comments.js";
 
 /**
@@ -76,7 +76,7 @@ export const typeSafetyCollector = (): FactsCollector<TypeSafetyFacts> => {
     doubleAssertions += isViaCast(expression) ? 1 : 0;
   };
   return {
-    enter: enterWith({
+    enter: onNodes({
       TSAnyKeyword: () => {
         any += 1;
       },

@@ -1,7 +1,8 @@
 // Owns counting the idioms of one file: one walk for the nodes anywhere, and one look at the top-level statements.
 
+import { declarationOf } from "../node-guards.js";
 import type { FactsCollector, ParsedSource } from "../parsed-source.js";
-import { enterWith } from "../walk.js";
+import { onNodes } from "../walk.js";
 import { noIdioms } from "./idiom-facts.js";
 import type { IdiomCounts, IdiomFacts } from "./idiom-facts.js";
 import {
@@ -9,7 +10,6 @@ import {
   declarationHandlers,
   expressionHandlers,
 } from "./idiom-handlers.js";
-import { declarationOf } from "./idiom-syntax.js";
 
 const isFunctionValue = (type: string | undefined): boolean =>
   type === "ArrowFunctionExpression" || type === "FunctionExpression";
@@ -40,7 +40,7 @@ const countTopLevel = (
 export const idiomCollector = (): FactsCollector<IdiomFacts> => {
   const counts = noIdioms();
   return {
-    enter: enterWith({
+    enter: onNodes({
       ...declarationHandlers(counts),
       ...bindingHandlers(counts),
       ...expressionHandlers(counts),

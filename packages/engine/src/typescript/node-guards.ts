@@ -1,7 +1,7 @@
 // Owns the small questions the fact collectors ask of a node: a name, a string, the method a call names.
 // They read untrusted syntax, so each answers undefined rather than assuming a shape.
 
-import type { Node } from "@oxc-project/types";
+import type { Node, Statement } from "@oxc-project/types";
 
 /** The name of an identifier node, undefined for any other node. */
 export const identifierName = (
@@ -26,3 +26,10 @@ export const calledMethod = (
   const name = identifierName(callee.property);
   return name === undefined ? undefined : { object: callee.object, name };
 };
+
+/** The top-level declaration a statement holds, looking through `export` and `export default`. */
+export const declarationOf = (statement: Statement): Node | null =>
+  statement.type === "ExportNamedDeclaration" ||
+  statement.type === "ExportDefaultDeclaration"
+    ? statement.declaration
+    : statement;

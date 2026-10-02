@@ -108,3 +108,55 @@ describe("module facts: CommonJS", () => {
     ).toMatchObject({ esm: 1, commonjs: 1 });
   });
 });
+
+describe("module facts: shadowed CommonJS names", () => {
+  it("keeps a file that makes its own require ESM-only", () => {
+    const facts = modules(
+      "a.ts",
+      [
+        'import { createRequire } from "node:module";',
+        "const require = createRequire(import.meta.url);",
+        'const x = require("x");',
+      ].join("\n"),
+    );
+
+    expect(facts).toMatchObject({ esm: 2, commonjs: 0 });
+    expect(facts.requests).toStrictEqual([
+      { specifier: "node:module", kind: "import", isType: false },
+    ]);
+  });
+
+  it("does not count exports or module that a function takes as a parameter, and counts them again after it", () => {
+    const facts = modules(
+      "a.js",
+      [
+        "function wrap(exports, module) { exports.a = 1; module.exports = 2; }",
+        "const arrow = (exports) => { exports.b = 1; };",
+        "exports.c = 3;",
+      ].join("\n"),
+    );
+
+    expect(facts.commonjs).toBe(1);
+  });
+
+  it("does not count a require bound by an import, a function or a parameter with a default", () => {
+    expect(
+      modules("a.ts", 'import { require } from "x";\nrequire("y");\n').commonjs,
+    ).toBe(0);
+    expect(
+      modules("a.js", 'function require(id) {}\nrequire("y");\n').commonjs,
+    ).toBe(0);
+    expect(
+      modules("a.js", '((require = 1) => require("y"))();\n').commonjs,
+    ).toBe(0);
+    expect(
+      modules("a.js", "export const exports = {};\nexports.a = 1;\n").commonjs,
+    ).toBe(0);
+  });
+
+  it("counts require inside a function that shadows another name", () => {
+    expect(
+      modules("a.js", 'function f(other) { return require("y"); }\n').commonjs,
+    ).toBe(1);
+  });
+});

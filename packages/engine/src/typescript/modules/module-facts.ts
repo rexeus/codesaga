@@ -5,8 +5,10 @@ import type { Node } from "@oxc-project/types";
 
 import { identifierName, stringValue } from "../node-guards.js";
 import type { FactsCollector } from "../parsed-source.js";
-import { enterWith } from "../walk.js";
+import { onNodes } from "../walk.js";
 import type { NodeHandlers, NodeOfType } from "../walk.js";
+import { shadowing } from "./shadowing.js";
+import type { Shadowing } from "./shadowing.js";
 
 /** How a file reaches another module. */
 type ModuleRequestKind =
@@ -43,18 +45,20 @@ export type ModuleFacts = {
   readonly requests: ReadonlyArray<ModuleRequest>;
 };
 
-const isExportsRoot = (node: Node): boolean => {
+/** Whether the node is `exports`, `module.exports` or a member of either, with those names not bound by the file. */
+const isExportsRoot = (node: Node, isBound: Shadowing["isBound"]): boolean => {
   if (node.type === "Identifier") {
-    return node.name === "exports";
+    return node.name === "exports" && !isBound("exports");
   }
   if (node.type !== "MemberExpression") {
     return false;
   }
   const isModuleExports =
     identifierName(node.object) === "module" &&
+    !isBound("module") &&
     !node.computed &&
     identifierName(node.property) === "exports";
-  return isModuleExports || isExportsRoot(node.object);
+  return isModuleExports || isExportsRoot(node.object, isBound);
 };
 
 const isTypeOnlySpecifier = (specifier: Node): boolean =>
@@ -129,7 +133,10 @@ const esmHandlers = (tally: Tally): NodeHandlers => ({
 });
 
 /** `require`, `module.exports`, `exports.x`, `import x = require()` and `export =`. */
-const commonjsHandlers = (tally: Tally): NodeHandlers => ({
+const commonjsHandlers = (
+  tally: Tally,
+  isBound: Shadowing["isBound"],
+): NodeHandlers => ({
   TSImportEqualsDeclaration: (node) => {
     if (node.moduleReference.type === "TSExternalModuleReference") {
       tally.commonjs += 1;
@@ -145,14 +152,18 @@ const commonjsHandlers = (tally: Tally): NodeHandlers => ({
     tally.commonjs += 1;
   },
   CallExpression: ({ callee, arguments: args }) => {
-    if (identifierName(callee) === "require" && args[0] !== undefined) {
+    if (
+      identifierName(callee) === "require" &&
+      !isBound("require") &&
+      args[0] !== undefined
+    ) {
       tally.commonjs += 1;
       record(tally, args[0], "require", false);
     }
   },
   AssignmentExpression: ({ left }) => {
     tally.commonjs +=
-      left.type === "MemberExpression" && isExportsRoot(left) ? 1 : 0;
+      left.type === "MemberExpression" && isExportsRoot(left, isBound) ? 1 : 0;
   },
 });
 
@@ -165,8 +176,17 @@ export const moduleCollector = (): FactsCollector<ModuleFacts> => {
     typeImports: 0,
     requests: new Map(),
   };
+  const scope = shadowing();
+  const handlers = onNodes({
+    ...esmHandlers(tally),
+    ...commonjsHandlers(tally, scope.isBound),
+  });
   return {
-    enter: enterWith({ ...esmHandlers(tally), ...commonjsHandlers(tally) }),
+    enter: (node) => {
+      scope.enter(node);
+      handlers(node);
+    },
+    leave: scope.leave,
     finish: () => ({ ...tally, requests: [...tally.requests.values()] }),
   };
 };
