@@ -42,6 +42,21 @@ describe("highlightCards", () => {
     );
   });
 
+  it("sets nothing strong for the root path or an empty one", () => {
+    const sentence = "Everything under the repository root is quiet. Truly.";
+    const textOf = (path: string) =>
+      cardFor({
+        kind: "quiet-area",
+        title: "Quiet corner",
+        detail: sentence,
+        value: 8,
+        path,
+      }).text;
+
+    expect(textOf(".")).toEqual([{ text: sentence, strong: false }]);
+    expect(textOf("")).toEqual([{ text: sentence, strong: false }]);
+  });
+
   it("does not read a path with regular-expression characters as a pattern", () => {
     const card = cardFor({
       kind: "quiet-area",
