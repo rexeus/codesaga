@@ -25,6 +25,7 @@ import {
 import type { DigestResult } from "./facts-of-source.js";
 import { blobsOfChanges, factsKey } from "./history-blobs.js";
 import type { HistoryBlob } from "./history-blobs.js";
+import { readConfigTexts } from "./history-configs.js";
 import { parseMissing, UNREADABLE } from "./parse-blobs.js";
 import type { Verdict } from "./parse-blobs.js";
 import { TypeScriptParser } from "./typescript-parser.js";
@@ -43,6 +44,8 @@ export type HistoryFacts = {
    * trends replay. Whether a change counts is for `factsByBlob` to say.
    */
   readonly firstParent: ReadonlyArray<FirstParentCommit>;
+  /** The text of every version of a project `tsconfig*.json` that the chain changes, by blob id. */
+  readonly configs: ReadonlyMap<string, string>;
 };
 
 export type HistoryFactsInput = Pick<
@@ -162,6 +165,7 @@ export const gatherHistoryFacts = (
     }
     return {
       firstParent,
+      configs: yield* readConfigTexts(firstParent),
       factsByBlob: new Map(
         keys.map((key): [string, DigestResult] => [
           key,

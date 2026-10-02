@@ -203,6 +203,17 @@ describe("limitReport import map", () => {
     ]).toStrictEqual([3, 3]);
   });
 
+  it("leaves the trends' series, events and classes uncut", () => {
+    const report = sampleReport();
+
+    const limited = limitReport(report, 1);
+
+    expect(limited.deepDives?.typescript?.trends).toStrictEqual(
+      report.deepDives?.typescript?.trends,
+    );
+    expect(limited.deepDives?.typescript?.trends?.months).toHaveLength(5);
+  });
+
   it("leaves a report without deep dives alone", () => {
     const { deepDives: _deepDives, ...report } = sampleReport();
 

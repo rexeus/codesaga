@@ -29,6 +29,16 @@ const inSampleDirectory = (path: string): boolean =>
     .slice(0, -1)
     .some((directory) => SAMPLE_DIRECTORIES.has(directory));
 
+/**
+ * Whether the path names a project's own `tsconfig*.json`, judged by the
+ * path alone: not in an excluded or a sample directory. It says nothing of
+ * `linguist` attributes, which need git.
+ */
+export const isProjectTsconfigPath = (path: string): boolean =>
+  TSCONFIG_NAME.test(baseName(path)) &&
+  !inExcludedDirectory(path) &&
+  !inSampleDirectory(path);
+
 /** The project's own manifests and configs, repository-relative, in the order of the tracked files. */
 export type ProjectFiles = {
   readonly manifests: ReadonlyArray<string>;
