@@ -9,7 +9,9 @@ import { readManifests } from "./ecosystem/read-manifests.js";
 import type { PackageManifest } from "./ecosystem/read-manifests.js";
 import type { FactsResult, SourceText } from "./facts-of-source.js";
 import { isDeclarationPath, isScriptPath } from "./source-kinds.js";
+import { directoryOf } from "./tsconfig/posix-path.js";
 import { readTsconfigs } from "./tsconfig/read-tsconfigs.js";
+import type { WorkspacePackages } from "./tsconfig/read-tsconfigs.js";
 import type { TsconfigProject } from "./tsconfig/strictness.js";
 import { declaredTypeScript } from "./tsconfig/typescript-version.js";
 import { TypeScriptParser } from "./typescript-parser.js";
@@ -95,13 +97,28 @@ const readText = (
     return yield* fs.readFileString(path.join(root, file));
   }).pipe(Effect.orElseSucceed(() => undefined));
 
+/** The manifests that name their package, by name, with the directory they lie in. */
+const workspacePackagesOf = (
+  manifests: ReadonlyArray<PackageManifest>,
+): WorkspacePackages =>
+  new Map(
+    manifests.flatMap(({ name, path }) =>
+      name === null ? [] : [[name, directoryOf(path)] as const],
+    ),
+  );
+
 /** The project's configs, read with their `extends`, and the TypeScript the root manifest declares. */
 const readProject = (
   root: string,
   projectFiles: ProjectFiles,
+  manifests: ReadonlyArray<PackageManifest>,
 ): Effect.Effect<TsconfigProject, never, FileSystem.FileSystem | Path.Path> =>
   Effect.gen(function* () {
-    const configs = yield* readTsconfigs(root, projectFiles.tsconfigs);
+    const configs = yield* readTsconfigs(
+      root,
+      projectFiles.tsconfigs,
+      workspacePackagesOf(manifests),
+    );
     const manifest = yield* readText(root, "package.json");
     const workspace = yield* readText(root, "pnpm-workspace.yaml");
     return { configs, typescript: declaredTypeScript(manifest, workspace) };
@@ -130,6 +147,7 @@ export const gatherTypeScript = (
       return undefined;
     }
     const parser = yield* TypeScriptParser;
+    const manifests = yield* readManifests(root, projectFiles.manifests);
     const declarationFiles = scripts.filter((path) => isDeclarationPath(path));
     const parsable = scripts.filter((path) => !isDeclarationPath(path));
     const lines = new Map(universe.map(({ path, loc }) => [path, loc]));
@@ -140,8 +158,8 @@ export const gatherTypeScript = (
     return {
       status: yield* parser.status,
       declarationFiles,
-      project: yield* readProject(root, projectFiles),
-      manifests: yield* readManifests(root, projectFiles.manifests),
+      project: yield* readProject(root, projectFiles, manifests),
+      manifests,
       files: batches.flat(),
     };
   });
