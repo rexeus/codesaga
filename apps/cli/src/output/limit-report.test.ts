@@ -133,6 +133,35 @@ describe("limitReport deep dives", () => {
     ]);
   });
 
+  it("cuts the import map to the limit and keeps the totals", () => {
+    const limited = limitReport(sampleReport(), 2).deepDives?.typescript
+      ?.imports?.territories;
+
+    expect(limited?.territories.map(({ path }) => path)).toStrictEqual([
+      "packages/ui",
+      "apps/web",
+    ]);
+    expect(
+      limited?.edges.map(({ from, to }) => [from.path, to.path]),
+    ).toStrictEqual([
+      ["apps/web", "packages/ui"],
+      ["apps/admin", "packages/ui"],
+    ]);
+    expect([limited?.totalTerritories, limited?.totalEdges]).toStrictEqual([
+      9, 13,
+    ]);
+  });
+
+  it("cuts the territories a territory is imported by to the limit", () => {
+    const db = limitReport(sampleReport(), 2).knowledge.territories
+      .territories[1]?.typescript;
+
+    expect(db?.importedBy?.map(({ path }) => path)).toStrictEqual([
+      "infra",
+      "packages/api",
+    ]);
+  });
+
   it("leaves a report without deep dives alone", () => {
     const { deepDives: _deepDives, ...report } = sampleReport();
 
