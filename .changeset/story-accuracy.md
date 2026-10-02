@@ -1,5 +1,0 @@
----
-"codesaga": minor
----
-
-Stories and badges say less that is untrue. Release metadata (`.changeset/`, `CHANGELOG*`, `CHANGES*`, `HISTORY*`, `RELEASE*`) no longer counts as documentation for the `documenter` badge. `shared-knowledge` needs 4 active experts and a truck factor of 4, `well-tested` is never awarded to a test directory, and `in-focus` counts the human and agent-assisted commits of the last 90 days (`thresholds.badges.inFocusDays`) whatever `--since` says. `all-rounder` and `keeper` are withheld in a repository with a single contributor. A shallow clone no longer reports `new` contributors, `new-here`, `new-territory` and `newcomer-friendly` badges, or `anniversary` and `newcomers` stories, because the first commits it shows are not the first. The root territory is called "the repository root" in sentences. Additive JSON fields: `overview.contributors.allTime` (contributors over the full history, independent of `--since`) and `unit` on `anniversary` stories (`"years"` or `"days"`).
