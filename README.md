@@ -23,7 +23,17 @@ Requires Node.js 22 or newer and `git` on your PATH. Works for any language.
 
 ## The dashboard
 
-`codesaga analyze --html` writes `codesaga-report.html` — one self-contained file, no network access — and opens it. Top to bottom: key figures, activity, automation, knowledge, contributors, punch card and languages, in light and dark mode. Every chart has a table view, and tables sort by any column.
+`codesaga analyze --html` writes `codesaga-report.html` — one self-contained file, no network access — and opens it, in light and dark mode. Top to bottom:
+
+- **Hero** — what the repository is in one sentence (language, age, commits, people), with chips for branch, HEAD, the window and the comparison.
+- **Key figures** — commits, active contributors (of everyone who ever committed), lines of code with the language shares, and the truck factor, each with a sparkline or a small picture. A repository with one author in its whole history says so instead of showing team figures.
+- **Highlights** — notable facts the history supports, such as an anniversary, the longest streak, the share of night or weekend work, newcomers, a quiet area, the most renamed file, the biggest cleanup, or knowledge that rests on one person. A highlight appears only when its fact passes a threshold, so a repository with nothing special shows none. They state events and team facts and never rank a person; see the [glossary](GLOSSARY.md).
+- **Activity** — commits and lines per week, active contributors per month and when the work happens (weekday × hour), with a table view of every chart.
+- **Knowledge** — the repository as non-overlapping **areas**. A depth slider switches between the levels the report carries, starting at the recommended one; each area card shows who is an expert on how many of its files (people who are no longer active are hatched), its truck factor and badges such as _island_, _orphaned_, _in focus_ or _well tested_.
+- **Contributors** — a card per person with their status (`active`, `new` or `dormant`), commits per week, main areas and badges such as _specialist_, _cleaner_, _steady_ or _returning_. Filters narrow the list by status. Counts are context, not a ranking.
+- **Bots & agents** — a compact card with who wrote the commits and the detected tools; it only appears when the history shows a bot or an agent.
+
+Every number comes from the report: the dashboard computes nothing of its own. Badges state their rule and evidence in a tooltip, and the thresholds are in the report; see the [glossary](GLOSSARY.md) for highlights, badges and a contributor's `status` (`active`, `new` or `dormant`).
 
 `--out <file>` picks the path and implies `--html`; the target must be a writable file path (not a directory) in an existing directory, which is checked before the analysis starts. `--no-open` skips the browser. The path is printed to stderr, so `--html --json` still gives a clean stdout.
 

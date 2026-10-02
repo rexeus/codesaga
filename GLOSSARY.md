@@ -10,9 +10,13 @@
 
 **Contributor** — an identity with at least one human or agent-assisted commit. Bots and agents are not contributors; they appear under automation.
 
-**Active contributor** — a contributor with a commit in the 90 days before now (`Clock`), not before HEAD: an archived repository should say that nobody is around. A contributor's `status` is `new` or `active` exactly then, and `dormant` otherwise, so `new` and `active` together are the overview's `active90`; the overview also counts active contributors at 30 and 365 days.
+**Active contributor** — a contributor with a commit in the 90 days before now (`Clock`), not before HEAD: an archived repository should say that nobody is around. A contributor's `status` is `new` (the first commit is also in those 90 days) or `active` exactly then, and `dormant` otherwise, so `new` and `active` together are the overview's `active90`; the overview also counts active contributors at 30 and 365 days.
 
 **Active expert** — an expert with a commit in the 183 days before now. It decides whether a directory or area is orphaned, which experts are suggested as reviewers, and the `active` flag of a contributor and of an expert. A contributor can be dormant and still carry `active: true` for a while.
+
+**Highlight** — a notable fact about the repository's history or team (`highlights` in the report): an anniversary, the longest streak, night or weekend work, newcomers, a quiet area, the most renamed file, the biggest cleanup, the busiest day, a truck factor of one, or orphaned knowledge. Each has a threshold in `thresholds.highlights` and appears only when it passes, ranked by notability, six at most. A highlight names an event or a team fact and never ranks one person against another. An anniversary says in `unit` whether its `value` counts years or days.
+
+**Badge** — a labelled fact about an area (`island`, `orphaned`, `in-focus`, `well-tested`, ...) or a contributor (`specialist`, `cleaner`, `steady`, `returning`, ...) that passes a fixed threshold in `thresholds.badges`; each carries its rule and the evidence behind it. A badge is positive or neutral for people, never a score, and there are none about working hours. A card shows three at most and counts the rest.
 
 **Agent commit** — a commit whose author is an AI agent, such as `claude[bot]` or the Copilot cloud agent. Checked before the bot rule, because several agents commit as `[bot]` accounts.
 
