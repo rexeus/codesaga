@@ -20,6 +20,7 @@ const commitsTouchingA = (count: number): ReadonlyArray<HistoryCommit> =>
     offsetMinutes: 0,
     author: ada,
     committer: ada,
+    subject: "",
     trailers: [],
     markers: [],
     changes: [{ path: "src/a.ts", added: 1, deleted: 0 }],

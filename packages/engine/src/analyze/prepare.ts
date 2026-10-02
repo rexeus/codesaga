@@ -46,6 +46,7 @@ const classify = (
       tools,
       time: commit.time,
       offsetMinutes: commit.offsetMinutes,
+      subject: commit.subject,
       author: identities.get(email) ?? { email, name: commit.author.name },
       changes: commit.changes,
     };

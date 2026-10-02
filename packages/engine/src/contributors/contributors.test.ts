@@ -180,21 +180,24 @@ describe("contributors activity", () => {
     expect(run([])).toStrictEqual([]);
   });
 
-  it("awards the badges the person's whole history earns", () => {
-    const [ada] = run(
-      [
-        classifiedCommit({
-          time: at("2026-06-01T00:00:00Z"),
-          changes: [{ path: "src/a.ts", added: 5, deleted: 0 }],
-        }),
-      ],
-      ".",
-      ["src/a.ts", "src/b.ts", "src/c.ts", "src/d.ts"],
-    );
+  it("awards the badges the person's whole history earns, and welcome only after someone else started", () => {
+    const first = classifiedCommit({
+      time: at("2026-05-01T00:00:00Z"),
+      changes: [{ path: "src/a.ts", added: 5, deleted: 0 }],
+    });
+    const later = classifiedCommit({
+      author: grace,
+      time: at("2026-06-01T00:00:00Z"),
+      changes: [{ path: "src/b.ts", added: 5, deleted: 0 }],
+    });
 
-    expect(ada?.badges.map(({ kind }) => kind)).toStrictEqual([
-      "founder",
-      "welcome",
+    const people = run([first, later], ".", ["src/a.ts", "src/b.ts"]);
+
+    expect(
+      people.map(({ name, badges }) => [name, badges.map(({ kind }) => kind)]),
+    ).toStrictEqual([
+      ["Ada", ["founder"]],
+      ["Grace", ["founder", "welcome"]],
     ]);
   });
 });

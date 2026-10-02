@@ -16,6 +16,7 @@ const CachedCommit = Schema.Struct({
   offsetMinutes: Schema.Finite,
   author: Person,
   committer: Person,
+  subject: Schema.String,
   trailers: Schema.Array(
     Schema.Struct({ key: Schema.String, value: Schema.String }),
   ),

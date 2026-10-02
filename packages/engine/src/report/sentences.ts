@@ -14,3 +14,21 @@ export const nounOf = (
 /** A share from 0 to 1 as a whole percent, "27%". */
 export const percentOf = (share: number): string =>
   `${Math.round(share * 100)}%`;
+
+const MAX_SUBJECT_CHARACTERS = 72;
+
+/** A commit subject in quotes, cut to 72 characters (grapheme clusters) with an ellipsis; empty without a subject. */
+export const quotedSubject = (subject: string): string => {
+  const characters = Array.from(
+    new Intl.Segmenter().segment(subject),
+    ({ segment }) => segment,
+  );
+  if (characters.length === 0) {
+    return "";
+  }
+  const cut =
+    characters.length > MAX_SUBJECT_CHARACTERS
+      ? `${characters.slice(0, MAX_SUBJECT_CHARACTERS - 1).join("")}…`
+      : subject;
+  return `"${cut}"`;
+};

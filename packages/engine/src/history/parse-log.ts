@@ -42,6 +42,8 @@ export type Commit = {
   readonly offsetMinutes: number;
   readonly author: Person;
   readonly committer: Person;
+  /** The first line of the commit message, trimmed; empty for an empty message. */
+  readonly subject: string;
   /** Every trailer in message order, with whitespace collapsed. */
   readonly trailers: ReadonlyArray<Trailer>;
   /**
@@ -53,8 +55,8 @@ export type Commit = {
   readonly changes: ReadonlyArray<Change>;
 };
 
-/** Bump on any change to how commits, trailers, markers, renames or removals are parsed. */
-export const PARSER_VERSION = 3;
+/** Bump on any change to how commits, trailers, markers, subjects, renames or removals are parsed. */
+export const PARSER_VERSION = 4;
 
 /**
  * Arguments that make `git log` print what `LogParser` reads. Merge commits
@@ -115,6 +117,7 @@ const openCommit = (sha: string, fields: ReadonlyArray<string>): OpenCommit => {
     offsetMinutes: offsetMinutesOf(date ?? ""),
     author: { name: authorName ?? "", email: authorEmail ?? "" },
     committer: { name: committerName ?? "", email: committerEmail ?? "" },
+    subject: (message ?? "").split("\n", 1)[0]?.trim() ?? "",
     trailers: parsedTrailers,
     markers: parseMarkers(message ?? "", parsedTrailers),
     changes: [],

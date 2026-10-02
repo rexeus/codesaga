@@ -73,12 +73,22 @@ const createdFilesByEmail = (
 
 type Context = Omit<ContributorsInput, "commits" | "history"> & {
   readonly created: ReadonlyMap<string, number>;
+  /** The time of the first commit of anyone who counts as a contributor. */
+  readonly repositoryStart: number;
 };
 
 const contributorOf = (
   commits: ReadonlyArray<ClassifiedCommit>,
   ownHistory: ReadonlyArray<ClassifiedCommit>,
-  { scope, now, isCodePath, universePaths, areas, created }: Context,
+  {
+    scope,
+    now,
+    isCodePath,
+    universePaths,
+    areas,
+    created,
+    repositoryStart,
+  }: Context,
 ): Contributor => {
   const times = commits.map((commit) => commit.time);
   const lastTime = times.reduce((a, b) => Math.max(a, b));
@@ -107,6 +117,7 @@ const contributorOf = (
     badges: contributorBadges(email, {
       commits: ownHistory,
       now,
+      repositoryStart,
       isCodePath,
       founded: {
         files: created.get(email) ?? 0,
@@ -132,6 +143,9 @@ export const contributors = ({
   const context = {
     ...input,
     created: createdFilesByEmail(history, input.universePaths),
+    repositoryStart: [...everyone.values()]
+      .flat()
+      .reduce((first, { time }) => Math.min(first, time), Infinity),
   };
   return [...byEmail(commits)]
     .map(([email, own]) =>

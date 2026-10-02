@@ -52,6 +52,8 @@ export type ContributorBadgeFacts = {
   /** The contributor's own human and agent-assisted commits over the full history, newest first. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
   readonly now: DateTime.Utc;
+  /** The time of the first commit of anyone who counts as a contributor, over the full history; `welcome` needs someone earlier. */
+  readonly repositoryStart: number;
   /**
    * The areas of the recommended level; they decide all-rounder, specialist
    * and keeper, which are withheld without them.
@@ -218,6 +220,6 @@ export const contributorBadges = (
   const context = { ...facts, email };
   return [
     ...RULES.flatMap((rule) => rule(context) ?? []),
-    ...tenureBadges(facts.commits, facts.now),
+    ...tenureBadges(facts.commits, facts.repositoryStart, facts.now),
   ];
 };

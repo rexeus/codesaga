@@ -9,7 +9,7 @@ import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { countCodeLines } from "../history/history.js";
 import type { Highlight } from "../report/highlights.js";
-import { countOf, nounOf } from "../report/sentences.js";
+import { countOf, nounOf, quotedSubject } from "../report/sentences.js";
 import type { HighlightFacts } from "./highlights.js";
 import { HIGHLIGHT_THRESHOLDS } from "./thresholds.js";
 
@@ -63,12 +63,17 @@ const milestonesOf = (firstDay: number, nowDay: number): Array<Milestone> => {
   return [...years, ...days];
 };
 
+const dayOneOf = ({ subject, author }: ClassifiedCommit): string =>
+  subject === ""
+    ? ""
+    : ` Day one was ${quotedSubject(subject)} by ${author.name}.`;
+
 const anniversaryHighlight = (
-  firstTime: number,
+  first: ClassifiedCommit,
   nowSeconds: number,
 ): ReadonlyArray<Highlight> => {
   const nowDay = Math.floor(nowSeconds / SECONDS_PER_DAY);
-  const [nearest] = milestonesOf(localDayOf(firstTime, 0), nowDay)
+  const [nearest] = milestonesOf(localDayOf(first.time, 0), nowDay)
     .filter(({ day }) => Math.abs(day - nowDay) <= anniversaryWindowDays)
     .toSorted((a, b) => Math.abs(a.day - nowDay) - Math.abs(b.day - nowDay));
   if (nearest === undefined) {
@@ -78,7 +83,7 @@ const anniversaryHighlight = (
     {
       kind: "anniversary",
       title: "Anniversary",
-      detail: `The first commit ${nearest.day > nowDay ? "turns" : "turned"} ${nearest.label} old on ${isoDateOfDay(nearest.day)}.`,
+      detail: `The first commit ${nearest.day > nowDay ? "turns" : "turned"} ${nearest.label} old on ${isoDateOfDay(nearest.day)}.${dayOneOf(first)}`,
       value: nearest.value,
       date: isoDateOfDay(nearest.day),
     },
@@ -143,15 +148,20 @@ const newcomersHighlight = (
   ];
 };
 
+const cleanupSubject = ({ subject }: ClassifiedCommit): string =>
+  subject === "" ? "" : `: ${quotedSubject(subject)}`;
+
 const biggestCleanupHighlight = (
   commits: ReadonlyArray<ClassifiedCommit>,
   isCodePath: (path: string) => boolean,
 ): ReadonlyArray<Highlight> => {
   const net = commits.map((commit) => {
     const { added, deleted } = countCodeLines([commit], isCodePath);
-    return { time: commit.time, removed: deleted - added };
+    return { commit, removed: deleted - added };
   });
-  const biggest = net.reduce<{ time: number; removed: number } | undefined>(
+  const biggest = net.reduce<
+    { commit: ClassifiedCommit; removed: number } | undefined
+  >(
     (best, entry) => (entry.removed > (best?.removed ?? 0) ? entry : best),
     undefined,
   );
@@ -162,9 +172,9 @@ const biggestCleanupHighlight = (
     {
       kind: "biggest-cleanup",
       title: "Biggest cleanup",
-      detail: `One commit removed ${countOf(biggest.removed)} more code lines than it added.`,
+      detail: `One commit removed ${countOf(biggest.removed)} more code lines than it added${cleanupSubject(biggest.commit)}.`,
       value: biggest.removed,
-      date: isoDateOfDay(localDayOf(biggest.time, 0)),
+      date: isoDateOfDay(localDayOf(biggest.commit.time, 0)),
     },
   ];
 };
@@ -211,14 +221,13 @@ export const historyEventHighlights = ({
   isCodePath,
 }: HighlightFacts): ReadonlyArray<Highlight> => {
   const nowSeconds = DateTime.toEpochMillis(now) / 1000;
-  const firstTime = commits.reduce(
-    (first, { time }) => Math.min(first, time),
-    Infinity,
+  const first = commits.reduce<ClassifiedCommit | undefined>(
+    (oldest, commit) =>
+      oldest === undefined || commit.time <= oldest.time ? commit : oldest,
+    undefined,
   );
   return [
-    ...(commits.length === 0
-      ? []
-      : anniversaryHighlight(firstTime, nowSeconds)),
+    ...(first === undefined ? [] : anniversaryHighlight(first, nowSeconds)),
     ...newcomersHighlight(commits, nowSeconds),
     ...biggestCleanupHighlight(commits, isCodePath),
     ...renameRecordHighlight(commits),

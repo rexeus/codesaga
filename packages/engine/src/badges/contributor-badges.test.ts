@@ -33,6 +33,7 @@ const facts = (
   commits: commits.toSorted((a, b) => b.time - a.time),
   now,
   isCodePath: (path) => path.endsWith(".ts"),
+  repositoryStart: 0,
   founded: { files: 0, ofFiles: 100 },
   ...overrides,
 });
@@ -253,6 +254,17 @@ describe("contributorBadges steady, welcome and returning", () => {
       },
     ]);
     expect(kindsOf([commit(daysAgo(91))])).not.toContain("welcome");
+  });
+
+  it("withholds welcome from the one who started the repository", () => {
+    const first = commit(daysAgo(30));
+
+    expect(kindsOf([first], { repositoryStart: first.time })).not.toContain(
+      "welcome",
+    );
+    expect(kindsOf([first], { repositoryStart: first.time - 1 })).toContain(
+      "welcome",
+    );
   });
 
   it("awards returning after a pause of 6 months that ended in the last 6 months", () => {

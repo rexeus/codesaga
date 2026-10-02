@@ -24,6 +24,8 @@ const SECONDS_PER_DAY = 86_400;
 
 type Tenure = {
   readonly times: ReadonlyArray<number>;
+  /** The time of the first commit of anyone who counts as a contributor. */
+  readonly repositoryStart: number;
   readonly now: DateTime.Utc;
   readonly nowSeconds: number;
 };
@@ -43,9 +45,10 @@ const steady = ({ times, nowSeconds }: Tenure) =>
       }
     : undefined;
 
-const welcome = ({ times, now, nowSeconds }: Tenure) => {
+/** The first commit is recent, and someone committed before it: the founder of a young repository is no newcomer. */
+const welcome = ({ times, repositoryStart, now, nowSeconds }: Tenure) => {
   const first = Math.min(...times);
-  return isActiveWithin(first, now, welcomeDays)
+  return first > repositoryStart && isActiveWithin(first, now, welcomeDays)
     ? {
         kind: "welcome" as const,
         label: "Welcome",
@@ -75,16 +78,18 @@ const returning = ({ times, now }: Tenure) => {
 
 /**
  * Steady (a commit in each of the last 6 months), welcome (the first commit
- * is at most 90 days old) and returning (active again after a pause of at
+ * is at most 90 days old, and someone committed earlier) and returning (active again after a pause of at
  * least 183 days), in that order, for the person's commits over the full
  * history.
  */
 export const tenureBadges = (
   commits: ReadonlyArray<ClassifiedCommit>,
+  repositoryStart: number,
   now: DateTime.Utc,
 ): ReadonlyArray<ContributorBadge> => {
   const tenure = {
     times: commits.map(({ time }) => time),
+    repositoryStart,
     now,
     nowSeconds: DateTime.toEpochMillis(now) / 1000,
   };

@@ -59,6 +59,17 @@ describe("historyEventHighlights anniversary", () => {
     ]);
   });
 
+  it("names the subject and author of day one", () => {
+    const dayOne = classifiedCommit({
+      time: at("2021-07-05T10:00:00Z"),
+      subject: "Initial commit",
+    });
+
+    expect(run([dayOne])[0]?.detail).toBe(
+      'The first commit turns 5 years old on 2026-07-05. Day one was "Initial commit" by Ada.',
+    );
+  });
+
   it("reports nothing for a history without commits", () => {
     expect(run([])).toStrictEqual([]);
   });
@@ -99,9 +110,15 @@ const rename = (path: string, time: string, previousLife = false) =>
     ],
   });
 
-const cleanup = (deleted: number, added = 10, path = "src/a.ts") =>
+const cleanup = (
+  deleted: number,
+  added = 10,
+  path = "src/a.ts",
+  subject = "",
+) =>
   classifiedCommit({
     time: at("2026-02-03T23:30:00Z"),
+    subject,
     changes: [{ path, added, deleted }],
   });
 
@@ -211,6 +228,24 @@ describe("historyEventHighlights biggest cleanup", () => {
         date: "2026-02-03",
       },
     ]);
+  });
+
+  it("quotes the subject of the commit, cut to 72 characters", () => {
+    const [short] = found(
+      "biggest-cleanup",
+      cleanup(210, 10, "src/a.ts", "Drop it"),
+    );
+    const [long] = found(
+      "biggest-cleanup",
+      cleanup(210, 10, "src/a.ts", "x".repeat(80)),
+    );
+
+    expect(short?.detail).toBe(
+      'One commit removed 200 more code lines than it added: "Drop it".',
+    );
+    expect(long?.detail).toBe(
+      `One commit removed 200 more code lines than it added: "${"x".repeat(71)}…".`,
+    );
   });
 
   it("reports no cleanup at 199 net lines, or when every commit adds more than it removes", () => {

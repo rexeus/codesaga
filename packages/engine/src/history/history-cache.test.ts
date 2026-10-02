@@ -15,6 +15,7 @@ const commit: Commit = {
   offsetMinutes: -330,
   author: { name: "Ada Lovelace", email: "ada@example.com" },
   committer: { name: "GitHub", email: "noreply@github.com" },
+  subject: "Add the new module",
   trailers: [
     { key: "Co-Authored-By", value: "Claude <noreply@anthropic.com>" },
   ],

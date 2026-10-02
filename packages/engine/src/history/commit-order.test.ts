@@ -15,6 +15,7 @@ const commit = (
   offsetMinutes: 0,
   author: { name: "Ada", email: "ada@example.com" },
   committer: { name: "Ada", email: "ada@example.com" },
+  subject: "",
   trailers: [],
   markers: [],
   changes: [],

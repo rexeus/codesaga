@@ -35,6 +35,8 @@ export type ClassifiedCommit = Classification & {
   readonly time: number;
   /** The author's UTC offset in minutes, as in `%aI`. */
   readonly offsetMinutes: number;
+  /** The first line of the commit message; empty when there is none. */
+  readonly subject: string;
   readonly author: Identity;
   /** Changes after rename resolution, every path, code or not. */
   readonly changes: ReadonlyArray<FileChange>;
