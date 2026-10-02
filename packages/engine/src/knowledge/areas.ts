@@ -5,8 +5,8 @@
 import { Array as Arr, Order } from "effect";
 
 import type { AreaKnowledge, AreaLevel } from "../report/knowledge-report.js";
-import { partitionLevels } from "./area-partition.js";
-import type { PartitionInput } from "./area-partition.js";
+import { AREA_MIN_FILES, partitionLevels } from "./area-partition.js";
+import type { PartitionArea, PartitionInput } from "./area-partition.js";
 import { byRisk, describeDirectory } from "./directories.js";
 import type { KnowledgeModel } from "./model.js";
 
@@ -26,6 +26,24 @@ const restLast = Order.mapInput(
   (area: AreaWithFiles) => area.kind === "rest",
 );
 
+/**
+ * A `rest` area under `AREA_MIN_FILES` files is a leftover, not a unit of
+ * knowledge: one or two files would always read as an island or as orphaned.
+ */
+const describeArea = (
+  { path, kind, paths }: PartitionArea,
+  model: KnowledgeModel,
+): AreaWithFiles => {
+  const described = describeDirectory(path, paths, model);
+  const isLeftover = kind === "rest" && paths.length < AREA_MIN_FILES;
+  return {
+    ...described,
+    ...(isLeftover ? { island: false, orphaned: false, reasons: [] } : {}),
+    kind,
+    paths,
+  };
+};
+
 const byRestThenRisk = Order.combine(restLast, byRisk);
 
 /**
@@ -42,10 +60,6 @@ export const areaLevels = (
     depth,
     totalAreas: areas.length,
     areas: areas
-      .map(({ path, kind, paths }): AreaWithFiles => ({
-        ...describeDirectory(path, paths, input.model),
-        kind,
-        paths,
-      }))
+      .map((area) => describeArea(area, input.model))
       .toSorted(byRestThenRisk),
   }));

@@ -130,3 +130,39 @@ describe("areaLevels order and counts", () => {
     ]);
   });
 });
+
+describe("areaLevels rest areas", () => {
+  const old = filesIn("apps/old", 3);
+  const restOf = (loose: ReadonlyArray<string>) => {
+    const [level] = levelsOf(
+      [
+        touching("2026-02-21T00:00:00Z", web, ada),
+        touching("2025-01-01T00:00:00Z", old, grace),
+        touching("2025-01-02T00:00:00Z", loose, grace),
+      ],
+      [...web, ...old, ...loose],
+      ["apps/web", "apps/old"],
+    );
+    return level.areas.find(({ kind }) => kind === "rest");
+  };
+
+  it("flags no island and no orphaned knowledge for fewer than 3 files", () => {
+    // two files, sole expert Grace, no active expert: a directory would be both
+    expect(restOf(["scripts/a.ts", "tools/b.ts"])).toMatchObject({
+      files: 2,
+      island: false,
+      orphaned: false,
+      reasons: [],
+    });
+  });
+
+  it("flags them once the grouped files reach 3", () => {
+    expect(
+      restOf(["scripts/a.ts", "scripts/b.ts", "tools/c.ts"]),
+    ).toMatchObject({
+      files: 3,
+      island: true,
+      orphaned: true,
+    });
+  });
+});

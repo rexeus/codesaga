@@ -86,6 +86,9 @@ const AreaKnowledge = Schema.Struct({
    * scope; `rest`: the small areas below `path` grouped as "other files". For
    * `rest`, `path` is the directory that holds them, so a `package` area and
    * its `rest` area share a path: `path` and `kind` together identify an area.
+   * A `rest` area with fewer than `thresholds.areas.minFiles` files is a
+   * leftover: `island` and `orphaned` do not apply to it, so they are false and
+   * `reasons` is empty.
    */
   kind: Schema.Literals(["package", "directory", "rest"]),
   /** Achievements of the area, most important first; the dashboard shows the first three. */

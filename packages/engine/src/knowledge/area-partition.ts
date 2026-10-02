@@ -22,7 +22,7 @@ export const GIANT_SPLIT_STEPS = 2;
 type AreaKind = "package" | "directory" | "rest";
 
 /** An area and the universe files it holds. */
-type PartitionArea = {
+export type PartitionArea = {
   readonly path: string;
   readonly kind: AreaKind;
   /** Repository-relative universe files, each in exactly one area of the level. */
