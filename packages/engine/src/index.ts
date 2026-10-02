@@ -8,6 +8,7 @@ export { inspect } from "./inspect/inspect.js";
 export { InspectResult } from "./report/inspect-result.js";
 export { Report } from "./report/report.js";
 export { factsOfSource } from "./typescript/facts-of-source.js";
+export { ParseProgress } from "./typescript/parse-progress.js";
 export type { FactsResult, SourceText } from "./typescript/facts-of-source.js";
 export {
   TypeScriptParser,
