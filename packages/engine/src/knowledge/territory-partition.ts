@@ -24,7 +24,7 @@ export type PartitionTerritory = {
   readonly territories: ReadonlyArray<PartitionTerritory>;
   /** Why it splits; present exactly when `territories` is not empty. */
   readonly splitReason?: string;
-  /** The detail from which the children are shown instead of the territory, at least 2; present exactly when `territories` is not empty. */
+  /** The detail from which the children are shown instead of the territory: 1 for a dominant territory, else at least 2; present exactly when `territories` is not empty. */
   readonly splitDetail?: number;
 };
 
@@ -135,8 +135,11 @@ const firstCut = (input: PartitionInput): ReadonlyArray<Draft> => {
 
 type Candidate = { readonly node: Draft; readonly plan: SplitPlan };
 
-/** The split to apply first: more expertise gain, then more files, then the path. */
+/** The split to apply first: a dominant territory's, then more expertise gain, then more files, then the path. */
 const byValue = Order.combineAll([
+  Order.flip(
+    Order.mapInput(Order.Boolean, ({ plan }: Candidate) => plan.dominant),
+  ),
   Order.flip(
     Order.mapInput(Order.Number, ({ plan }: Candidate) => plan.expertiseGain),
   ),
@@ -192,7 +195,8 @@ const applySplits = (
  * top-level directories below the scope for files outside every package; a file
  * directly in a package root belongs to that root's own territory. A territory
  * splits into its child folders by `planSplit`, and territories with fewer than
- * `TERRITORY_MIN_FILES` files are grouped as other files. The splits are applied in
+ * `TERRITORY_MIN_FILES` files are grouped as other files. A split of a dominant
+ * territory (see `SplitPlan`) opens at detail 1. The other splits are applied in
  * order of value (more expertise gain, then more files) and spread evenly over
  * the details 2 to `maxDetail`, at most `MAX_DETAIL`: a split opens at its
  * detail and everything it yields is shown from there. Each file belongs to
@@ -215,15 +219,22 @@ export const partitionTerritories = (input: PartitionInput): Partition => {
     totalFiles: input.paths.length,
     expertsOf: input.expertsOf,
   });
-  const maxDetail = Math.min(MAX_DETAIL, splits.length + 1);
-  const detailOf = (index: number): number =>
-    2 + Math.floor((index * (maxDetail - 1)) / splits.length);
+  const batched = splits.filter(({ plan }) => !plan.dominant);
+  const maxDetail = Math.min(MAX_DETAIL, batched.length + 1);
+  const detailOf = (candidate: Candidate): number =>
+    candidate.plan.dominant
+      ? 1
+      : 2 +
+        Math.floor(
+          (batched.indexOf(candidate) * (maxDetail - 1)) / batched.length,
+        );
   let expertiseDetail = 1;
-  for (const [index, { node, plan }] of splits.entries()) {
-    node.splitDetail = detailOf(index);
+  for (const candidate of splits) {
+    const detail = detailOf(candidate);
+    candidate.node.splitDetail = detail;
     expertiseDetail =
-      plan.expertiseGain > 0
-        ? Math.max(expertiseDetail, node.splitDetail)
+      candidate.plan.expertiseGain > 0
+        ? Math.max(expertiseDetail, detail)
         : expertiseDetail;
   }
   return { territories: roots, maxDetail, expertiseDetail };

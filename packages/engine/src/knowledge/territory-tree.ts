@@ -42,6 +42,8 @@ export type SplitPlan = {
   readonly reason: string;
   /** Distinct main experts among the folders, less one; 0 for a split by size alone. */
   readonly expertiseGain: number;
+  /** The territory holds more than `BIG_SHARE` of all files: it never stands as one card, so the split is not left for a finer detail. */
+  readonly dominant: boolean;
 };
 
 export type SplitContext = {
@@ -177,6 +179,7 @@ export const planSplit = (
         })),
         other: stray,
         reason,
+        dominant: paths.length > BIG_SHARE * totalFiles,
         expertiseGain: Math.max(
           0,
           new Set(sized.flatMap(({ expert }) => expert ?? [])).size - 1,

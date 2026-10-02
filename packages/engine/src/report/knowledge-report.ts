@@ -113,11 +113,13 @@ const TerritoryFields = Schema.Struct({
    */
   splitReason: Schema.optionalKey(Schema.String),
   /**
-   * The detail from which `territories` are shown in place of this territory, at
-   * least 2. Present exactly when the territory splits.
+   * The detail from which `territories` are shown in place of this territory: 1
+   * for a territory that holds more than `thresholds.territories.bigShare` of the
+   * files, which is never shown whole, else at least 2. Present exactly when the
+   * territory splits.
    */
   splitDetail: Schema.optionalKey(
-    Schema.Int.check(Schema.isGreaterThanOrEqualTo(2)),
+    Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   ),
 });
 
@@ -140,8 +142,9 @@ const Territory: Schema.Codec<Territory> = Schema.Struct({
  * The knowledge in non-overlapping territories as a tree: the first cut into
  * packages (or top-level directories) and, below it, the splits of territories that
  * are big or whose folders have different experts. A detail is how many splits are
- * open: at detail 1 the territories are the first cut, and a territory is shown
- * through its children from its `splitDetail` on. Every territory carries its own
+ * open: at detail 1 the territories are the first cut, in which a territory that
+ * holds most of the files is already open, and a territory is shown through its
+ * children from its `splitDetail` on. Every territory carries its own
  * knowledge, so viewers only pick a detail.
  */
 const Territories = Schema.Struct({

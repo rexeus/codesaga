@@ -45,7 +45,7 @@ const summarize = (
   territories: ReadonlyArray<{ kind: string; path: string; files: number }>,
 ) => territories.map(({ kind, path, files }) => `${kind} ${path} ${files}`);
 
-/** Commits of `commitTwoPackages` plus Grace's tests for apps/web: the package is big and its folders have different experts. */
+/** Commits of `commitTwoPackages` plus Grace's tests for apps/web: the package holds 7 of 13 files and its folders have different experts. */
 const commitSplitPackage = (repo: TempRepository) =>
   Effect.gen(function* () {
     yield* commitTwoPackages(repo);
@@ -53,6 +53,20 @@ const commitSplitPackage = (repo: TempRepository) =>
       "2026-02-03T09:00:00Z",
       code("apps/web/test", ["t1", "t2", "t3"]),
       { author: grace },
+    );
+  });
+
+/** `commitSplitPackage` plus Ada's package packages/api of 5 files: apps/web holds 7 of 18 files, less than 40%. */
+const commitSplitPackageAmongOthers = (repo: TempRepository) =>
+  Effect.gen(function* () {
+    yield* commitSplitPackage(repo);
+    yield* repo.commit(
+      "2026-02-04T09:00:00Z",
+      {
+        "packages/api/package.json": "{}\n",
+        ...code("packages/api", ["a", "b", "c", "d", "e"]),
+      },
+      { author: ada },
     );
   });
 
@@ -183,7 +197,7 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect(
-    "splits a big package whose folders have different experts, recommending the detail that shows the split",
+    "opens a package that holds most of the files at the first detail",
     () =>
       Effect.gen(function* () {
         yield* setNow;
@@ -196,7 +210,7 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
           ({ path }) => path === "apps/web",
         );
         assert.strictEqual(web?.files, 7);
-        assert.strictEqual(web?.splitDetail, 2);
+        assert.strictEqual(web?.splitDetail, 1);
         assert.strictEqual(
           web?.splitReason,
           "apps/web/src and apps/web/test have different experts",
@@ -206,27 +220,50 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
           "folder apps/web/test 3",
           "other apps/web 1",
         ]);
-        assert.strictEqual(knowledge.territories.maxDetail, 2);
-        assert.strictEqual(knowledge.territories.recommendedDetail, 2);
+        assert.strictEqual(knowledge.territories.maxDetail, 1);
         assert.strictEqual(
           knowledge.territories.reason,
-          "detail 2: 4 territories with 3+ files for 2 active contributors",
+          "detail 1: 4 territories with 3+ files for 2 active contributors",
         );
       }),
   );
+
+  it.effect(
+    "leaves the split of a package that is not dominant for a later detail the team may not allow",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* commitSplitPackageAmongOthers(repo);
+
+        const { knowledge } = yield* analyze(analyzeOptionsFor(repo));
+
+        const web = knowledge.territories.territories.find(
+          ({ path }) => path === "apps/web",
+        );
+        assert.strictEqual(web?.splitDetail, 2);
+        assert.strictEqual(knowledge.territories.maxDetail, 2);
+        // two contributors allow 4 territories: detail 1 has 4, detail 2 has 5
+        assert.strictEqual(knowledge.territories.recommendedDetail, 1);
+      }),
+  );
+});
+
+layer(NodeServices.layer)("analyze knowledge territories detail", (it) => {
+  const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect("starts at the requested detail", () =>
     Effect.gen(function* () {
       yield* setNow;
       const repo = yield* makeTempRepository;
-      yield* commitSplitPackage(repo);
+      yield* commitSplitPackageAmongOthers(repo);
 
       const { knowledge } = yield* analyze(
-        analyzeOptionsFor(repo, { detail: 1 }),
+        analyzeOptionsFor(repo, { detail: 2 }),
       );
 
-      assert.strictEqual(knowledge.territories.detail, 1);
-      assert.strictEqual(knowledge.territories.recommendedDetail, 2);
+      assert.strictEqual(knowledge.territories.detail, 2);
+      assert.strictEqual(knowledge.territories.recommendedDetail, 1);
     }),
   );
 });

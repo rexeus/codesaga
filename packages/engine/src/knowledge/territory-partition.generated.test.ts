@@ -126,7 +126,7 @@ describe("partitionTerritories over generated trees: division", () => {
 });
 
 describe("partitionTerritories over generated trees: reasons", () => {
-  it("gives every split a reason that is true and a detail no earlier than its parent's", () => {
+  it("gives every split a reason that is true and a detail no earlier than its parent's, 1 exactly for a dominant territory", () => {
     for (const seed of SEEDS) {
       const input = inputOf(seed);
       const { territories, maxDetail } = partitionTerritories(input);
@@ -148,7 +148,10 @@ describe("partitionTerritories over generated trees: reasons", () => {
           territory.paths.length > bound ||
           territory.paths.length > 0.4 * input.paths.length;
         expect(detail, caseOf(seed, territory.path)).toBeGreaterThanOrEqual(
-          Math.max(2, parentDetail),
+          parentDetail,
+        );
+        expect(detail === 1, caseOf(seed, territory.path)).toBe(
+          territory.paths.length > 0.4 * input.paths.length,
         );
         expect(detail, caseOf(seed, territory.path)).toBeLessThanOrEqual(
           maxDetail,
@@ -169,21 +172,22 @@ describe("partitionTerritories over generated trees: reasons", () => {
         }
       };
       for (const territory of territories) {
-        check(territory, 2);
+        check(territory, 1);
       }
     }
   });
 });
 
 describe("partitionTerritories over generated trees: details", () => {
-  it("opens at least one split at every detail after the first and never splits other files", () => {
+  it("opens at least one split at every detail after the first, besides those of dominant territories and never splits other files", () => {
     for (const seed of SEEDS) {
       const { territories, maxDetail } = partitionTerritories(inputOf(seed));
       const splits = allOf(territories).filter(
         ({ splitDetail }) => splitDetail !== undefined,
       );
+      const batched = splits.filter(({ splitDetail }) => splitDetail !== 1);
       expect(
-        [...new Set(splits.map(({ splitDetail }) => splitDetail))].toSorted(
+        [...new Set(batched.map(({ splitDetail }) => splitDetail))].toSorted(
           (a, b) => (a ?? 0) - (b ?? 0),
         ),
         caseOf(seed, "details"),
