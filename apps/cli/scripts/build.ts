@@ -20,7 +20,12 @@ const bundle = await rolldown({
   external: ["oxc-parser"],
 });
 try {
-  await bundle.write({ file: outfile, format: "esm", minify: true });
+  await bundle.write({
+    file: outfile,
+    format: "esm",
+    minify: true,
+    codeSplitting: false,
+  });
 } finally {
   await bundle.close();
 }

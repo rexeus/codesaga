@@ -141,16 +141,12 @@ const expectWorkingInstall = async (
       `codesaga from ${installer} did not analyze the repository.`,
     );
   }
-  const parsed = valueAt(
-    analysis,
-    "deepDives",
-    "typescript",
-    "coverage",
-    "parsed",
-  );
-  if (typeof parsed !== "number" || parsed < 1) {
+  const coverage = ["deepDives", "typescript", "coverage"];
+  const parsed = valueAt(analysis, ...coverage, "parsed");
+  const crashed = valueAt(analysis, ...coverage, "skipped", "parser-crashed");
+  if (typeof parsed !== "number" || parsed < 1 || crashed !== 1) {
     throw new Error(
-      `codesaga from ${installer} parsed no TypeScript file: ${analysis}`,
+      `codesaga from ${installer} should parse the fixture's TypeScript and count its one file that crashes the parser: ${analysis}`,
     );
   }
   decodedJson(bin, "inspect", repositoryRoot, installer);
