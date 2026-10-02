@@ -5583,6 +5583,7 @@
             "files": 31
           }
         ],
+        "undeclared": 23,
         "nodeBuiltins": [
           {
             "name": "path",

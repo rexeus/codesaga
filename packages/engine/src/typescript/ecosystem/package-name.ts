@@ -50,7 +50,7 @@ const NODE_BUILTINS = new Set([
 const PACKAGE_NAME = /^(?:@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*$/iu;
 
 /** What a specifier names. */
-export type SpecifierTarget =
+type SpecifierTarget =
   | { readonly kind: "builtin"; readonly name: string }
   | { readonly kind: "package"; readonly name: string };
 
@@ -62,7 +62,7 @@ const firstSegment = (specifier: string): string =>
  * as `@/x` or `~/x`, a URL, or text that no package could be named. A
  * built-in is named without its prefix and subpath: `node:fs/promises` is `fs`.
  */
-export const targetOf = (specifier: string): SpecifierTarget | undefined => {
+const targetOf = (specifier: string): SpecifierTarget | undefined => {
   if (specifier.startsWith("node:")) {
     const name = firstSegment(specifier.slice("node:".length));
     return name === "" ? undefined : { kind: "builtin", name };
@@ -83,4 +83,40 @@ export const tableKeyOf = (specifier: string): string | undefined => {
     return undefined;
   }
   return specifier.startsWith("node:") ? `node:${target.name}` : target.name;
+};
+
+/** What a specifier is, given the package names the repository knows. */
+export type SpecifierClass =
+  | {
+      readonly kind: "builtin" | "package" | "undeclared";
+      readonly name: string;
+    }
+  | undefined;
+
+/**
+ * Classifies `specifier`: a `node:` specifier is always a built-in; a bare
+ * name that a manifest declares or that is a workspace package is a package,
+ * also when it is a built-in's name (`events` and `buffer` can be polyfills);
+ * a bare built-in name nothing declares is a built-in; any other bare name is
+ * `undeclared`, which is what a path alias such as `src` or `@app/foo` looks
+ * like. `known` holds the declared and workspace package names.
+ */
+export const classifySpecifier = (
+  specifier: string,
+  known: ReadonlySet<string>,
+): SpecifierClass => {
+  const target = targetOf(specifier);
+  if (target === undefined) {
+    return undefined;
+  }
+  if (specifier.startsWith("node:")) {
+    return { kind: "builtin", name: target.name };
+  }
+  if (known.has(target.name)) {
+    return { kind: "package", name: target.name };
+  }
+  return {
+    kind: target.kind === "builtin" ? "builtin" : "undeclared",
+    name: target.name,
+  };
 };

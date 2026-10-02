@@ -41,9 +41,22 @@ export const Ecosystem = Schema.Struct({
       declaredIn: Count,
     }),
   ),
-  /** The ten packages imported by the most files, without Node built-ins and the repository's own workspace packages, most files first, then by name. */
+  /**
+   * The ten packages imported by the most files, most files first, then by
+   * name. A bare specifier is a package only when a `package.json` declares
+   * it (in any section) or it is the name of a workspace package; a bare
+   * `events` or `buffer` that a manifest declares is a package too, not a
+   * built-in.
+   */
   packages: Schema.Array(ImportedPackage).check(Schema.isMaxLength(10)),
-  /** The ten Node built-ins (`fs`, `node:path/posix` as `path`) imported by the most files, most first, then by name. */
+  /**
+   * How many distinct bare specifiers (by package name) no manifest declares
+   * and that name no built-in: path aliases such as `src` or `@app/foo`, and
+   * dependencies a manifest outside the analyzed files declares. They are
+   * counted, not listed.
+   */
+  undeclared: Count,
+  /** The ten Node built-ins (`fs`, `node:path/posix` as `path`) imported by the most files, most first, then by name. A `node:` specifier is always one; a bare name only when no manifest declares it. */
   nodeBuiltins: Schema.Array(ImportedPackage).check(Schema.isMaxLength(10)),
   /** Dependencies of the `package.json` files read, distinct by name over all of them; workspace packages (`workspace:` ranges) are left out. */
   dependencies: Schema.Struct({

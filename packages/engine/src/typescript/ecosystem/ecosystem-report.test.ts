@@ -75,18 +75,22 @@ describe("ecosystemOf tools", () => {
 });
 
 describe("ecosystemOf imports", () => {
-  it("lists the most imported packages by importing files, without built-ins and the repository's own packages", () => {
+  it("lists the packages a manifest declares or that are workspace packages, most importing files first, and the built-ins apart", () => {
     const ecosystem = ecosystemOf(
       [
         file("a.ts", ["lodash", "@acme/core", "node:fs", "zod"]),
         file("b.ts", ["lodash/fp", "@acme/core/x", "fs/promises", "node:path"]),
         file("c.ts", ["zod", "lodash"]),
       ],
-      [manifest({ name: "@acme/core" })],
+      [
+        manifest({ name: "@acme/core" }),
+        manifest({ dependencies: ["lodash"], devDependencies: ["zod"] }),
+      ],
     );
 
     expect(ecosystem.packages).toStrictEqual([
       { name: "lodash", files: 3 },
+      { name: "@acme/core", files: 2 },
       { name: "zod", files: 2 },
     ]);
     expect(ecosystem.nodeBuiltins).toStrictEqual([
@@ -95,10 +99,56 @@ describe("ecosystemOf imports", () => {
     ]);
   });
 
+  it("counts path aliases and undeclared names apart instead of listing them", () => {
+    const ecosystem = ecosystemOf(
+      [
+        file("a.ts", [
+          "src",
+          "components/Button",
+          "@app/foo",
+          "zod",
+          "./local",
+        ]),
+        file("b.ts", ["src/util", "@app/bar", "zod"]),
+      ],
+      [manifest({ dependencies: ["zod"] })],
+    );
+
+    expect(ecosystem.packages).toStrictEqual([{ name: "zod", files: 2 }]);
+    expect(ecosystem.undeclared).toBe(4);
+  });
+});
+
+describe("ecosystemOf built-ins", () => {
+  it("reads a bare events or buffer as a built-in unless a manifest declares it, and node: always as one", () => {
+    const files = [
+      file("a.ts", ["events", "buffer", "node:events", "node:buffer"]),
+    ];
+
+    const bare = ecosystemOf(files, [manifest()]);
+    const polyfilled = ecosystemOf(files, [
+      manifest({ dependencies: ["events"] }),
+    ]);
+
+    expect(bare.nodeBuiltins).toStrictEqual([
+      { name: "buffer", files: 1 },
+      { name: "events", files: 1 },
+    ]);
+    expect(bare.packages).toStrictEqual([]);
+    expect(polyfilled.packages).toStrictEqual([{ name: "events", files: 1 }]);
+    expect(polyfilled.nodeBuiltins).toStrictEqual([
+      { name: "buffer", files: 1 },
+      { name: "events", files: 1 },
+    ]);
+  });
+
   it("lists ten packages at most", () => {
     const names = Array.from({ length: 14 }, (_, index) => `pkg-${index}`);
 
-    expect(ecosystemOf([file("a.ts", names)], []).packages).toHaveLength(10);
+    expect(
+      ecosystemOf([file("a.ts", names)], [manifest({ dependencies: names })])
+        .packages,
+    ).toHaveLength(10);
   });
 
   it("counts distinct dependency names over the manifests and the hook calls with their files", () => {

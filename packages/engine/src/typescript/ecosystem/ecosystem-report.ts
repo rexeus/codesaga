@@ -6,7 +6,7 @@ import { sum } from "../../stats/measures.js";
 import type { ParsedFile } from "../parsed-file.js";
 import { ECOSYSTEM_TABLE } from "./ecosystem-table.js";
 import type { EcosystemEntry } from "./ecosystem-table.js";
-import { tableKeyOf, targetOf } from "./package-name.js";
+import { classifySpecifier, tableKeyOf } from "./package-name.js";
 import type { PackageManifest } from "./read-manifests.js";
 
 const MAX_LISTED = 10;
@@ -43,17 +43,35 @@ const incrementAll = <Key>(
 
 type Counted = ReadonlyMap<string, number>;
 
-/** What the files import: for each package, built-in and tool, how many files import it. */
+/** What the files import: for each package, built-in and tool, how many files import it, and the names no manifest declares. */
 type Imports = {
   readonly packages: Counted;
   readonly builtins: Counted;
   readonly tools: ReadonlyMap<EcosystemEntry, number>;
+  readonly undeclared: ReadonlySet<string>;
 };
 
-const importsOf = (files: ReadonlyArray<ParsedFile>): Imports => {
+/** The package names the manifests declare in any section and the workspace packages they name. */
+const knownPackages = (
+  manifests: ReadonlyArray<PackageManifest>,
+): ReadonlySet<string> =>
+  new Set(
+    manifests.flatMap((manifest) => [
+      ...(manifest.name === null ? [] : [manifest.name]),
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+      ...manifest.peerDependencies,
+    ]),
+  );
+
+const importsOf = (
+  files: ReadonlyArray<ParsedFile>,
+  known: ReadonlySet<string>,
+): Imports => {
   const packages = new Map<string, number>();
   const builtins = new Map<string, number>();
   const tools = new Map<EcosystemEntry, number>();
+  const undeclared = new Set<string>();
   for (const { facts } of files) {
     const specifiers = new Set(
       facts.modules.requests.map(({ specifier }) => specifier),
@@ -62,7 +80,7 @@ const importsOf = (files: ReadonlyArray<ParsedFile>): Imports => {
     const builtinNames = new Set<string>();
     const toolsHere = new Set<EcosystemEntry>();
     for (const specifier of specifiers) {
-      const target = targetOf(specifier);
+      const target = classifySpecifier(specifier, known);
       const key = tableKeyOf(specifier);
       const tool = key === undefined ? undefined : toolOf(key);
       if (tool !== undefined) {
@@ -72,13 +90,15 @@ const importsOf = (files: ReadonlyArray<ParsedFile>): Imports => {
         names.add(target.name);
       } else if (target?.kind === "builtin") {
         builtinNames.add(target.name);
+      } else if (target?.kind === "undeclared") {
+        undeclared.add(target.name);
       }
     }
     incrementAll(packages, names);
     incrementAll(builtins, builtinNames);
     incrementAll(tools, toolsHere);
   }
-  return { packages, builtins, tools };
+  return { packages, builtins, tools, undeclared };
 };
 
 /** For each tool, how many manifests declare any of its packages. */
@@ -106,12 +126,8 @@ const byFilesThenName = (
   right.files - left.files ||
   Number(left.name > right.name) - Number(left.name < right.name);
 
-const top = (
-  counts: Counted,
-  exclude: ReadonlySet<string> = new Set(),
-): Ecosystem["packages"] =>
+const top = (counts: Counted): Ecosystem["packages"] =>
   [...counts]
-    .filter(([name]) => !exclude.has(name))
     .map(([name, files]) => ({ name, files }))
     .toSorted(byFilesThenName)
     .slice(0, MAX_LISTED);
@@ -124,9 +140,8 @@ export const ecosystemOf = (
   files: ReadonlyArray<ParsedFile>,
   manifests: ReadonlyArray<PackageManifest>,
 ): Ecosystem => {
-  const imports = importsOf(files);
+  const imports = importsOf(files, knownPackages(manifests));
   const declared = declarationsOf(manifests);
-  const own = new Set(manifests.flatMap(({ name }) => name ?? []));
   const detected = ECOSYSTEM_TABLE.map((entry) => ({
     name: entry.name,
     category: entry.category,
@@ -141,7 +156,8 @@ export const ecosystemOf = (
         right.declaredIn - left.declaredIn ||
         Number(left.name > right.name) - Number(left.name < right.name),
     ),
-    packages: top(imports.packages, own),
+    packages: top(imports.packages),
+    undeclared: imports.undeclared.size,
     nodeBuiltins: top(imports.builtins),
     dependencies: {
       manifests: manifests.length,
