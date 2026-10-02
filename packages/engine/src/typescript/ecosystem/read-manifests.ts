@@ -21,6 +21,14 @@ export type PackageManifest = {
   readonly peerDependencies: ReadonlyArray<string>;
   /** The `typescript` range as written, a `catalog:` reference included; null when it declares none. */
   readonly typescript: string | null;
+  /** Where the package says its code is, for resolving imports of it. */
+  readonly entry: PackageEntry;
+};
+
+/** The entry points of a package as written: the `exports` field, and the strings of `types`, `typings`, `module` and `main` that are present, in that order. */
+type PackageEntry = {
+  readonly exports: unknown;
+  readonly fields: ReadonlyArray<string>;
 };
 
 const field = (value: unknown, key: string): unknown =>
@@ -37,6 +45,16 @@ const externalNames = (value: unknown): ReadonlyArray<string> =>
           : [name],
       )
     : [];
+
+const ENTRY_FIELDS = ["types", "typings", "module", "main"] as const;
+
+const entryOf = (json: object): PackageEntry => ({
+  exports: field(json, "exports"),
+  fields: ENTRY_FIELDS.flatMap((key) => {
+    const value = field(json, key);
+    return typeof value === "string" ? [value] : [];
+  }),
+});
 
 /** The manifest the text declares, or undefined when it is not a JSON object. */
 const manifestOf = (
@@ -60,6 +78,7 @@ const manifestOf = (
     devDependencies: externalNames(field(json, "devDependencies")),
     peerDependencies: externalNames(field(json, "peerDependencies")),
     typescript: typescriptRangeOf(json) ?? null,
+    entry: entryOf(json),
   };
 };
 

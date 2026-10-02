@@ -12,6 +12,8 @@ import type { Blame } from "../blame/read-blame.js";
 import { ACTIVE_DAYS, isActiveWithin } from "../contributors/activeness.js";
 import type { Report } from "../report/report.js";
 import type { UniverseStats } from "../stats/universe-stats.js";
+import type { ImportStructure } from "../typescript/imports/imports-analysis.js";
+import type { VisibleTerritory } from "../typescript/imports/territory-assignment.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { contributionsByFile, humansOf } from "./contributions.js";
 import type { Human } from "./contributions.js";
@@ -45,6 +47,13 @@ export type KnowledgeInput = {
 export type TerritoryInput = {
   /** The code stats of the universe; every territory carries the stats of its files, and the code badges compare them with the repository's. */
   readonly stats: UniverseStats;
+  /** The import structure at the territories shown at the given detail; absent without a deep dive. */
+  readonly importsAt?:
+    | ((
+        territories: ReadonlyArray<VisibleTerritory>,
+        detail: number,
+      ) => ImportStructure)
+    | undefined;
 };
 
 /** Finds the experts of every universe file. */

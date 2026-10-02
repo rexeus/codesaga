@@ -197,6 +197,13 @@ const TypeScriptThresholds = Schema.Struct({
   maxSourceCharacters: Count,
   /** A source whose non-blank lines average more characters than this is minified and not parsed. */
   minifiedMeanLineLength: Count,
+  /** The import structure's rules. */
+  imports: Schema.Struct({
+    /** `towardLessStable` lists an import edge toward a territory whose instability is at least this much higher. */
+    instabilityGap: Schema.Finite,
+    /** It needs both territories to have at least this many import edges in and out together. */
+    minEdges: Count,
+  }),
 });
 
 /** The constants an analysis applied, reported so consumers see them. */

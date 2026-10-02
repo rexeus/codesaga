@@ -112,6 +112,9 @@ layer(analyzeServices)(
             codeLines: 3,
             escapesPer1000: 0,
             esmShare: 1,
+            imports: [],
+            importedBy: [],
+            inCycle: false,
           });
           assert.strictEqual(byPath["app"]?.files, 4);
           assert.strictEqual(byPath["app"]?.escapesPer1000, 500);

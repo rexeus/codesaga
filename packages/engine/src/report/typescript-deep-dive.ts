@@ -5,6 +5,7 @@ import { Schema } from "effect";
 import { Ecosystem } from "./typescript-ecosystem.js";
 import { ComplexityAndChange, Functions } from "./typescript-functions.js";
 import { Idioms } from "./typescript-idioms.js";
+import { Imports } from "./typescript-imports.js";
 import { Markers } from "./typescript-markers.js";
 import { Modules } from "./typescript-modules.js";
 import { Strictness } from "./typescript-strictness.js";
@@ -79,6 +80,8 @@ export const TypeScriptDeepDive = Schema.Struct({
   tests: Schema.optionalKey(Tests),
   /** Debt markers and documented exports of production code. */
   markers: Schema.optionalKey(Markers),
+  /** How the code imports itself: cycles, fan-in and fan-out of files, and the territories' dependency map. */
+  imports: Schema.optionalKey(Imports),
 });
 export type TypeScriptDeepDive = typeof TypeScriptDeepDive.Type;
 

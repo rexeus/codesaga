@@ -34,6 +34,7 @@ const manifest = (
   devDependencies: [],
   peerDependencies: [],
   typescript: null,
+  entry: { exports: undefined, fields: [] },
   ...parts,
 });
 
