@@ -2,8 +2,6 @@
 // A pure function over counts, kept apart from the partition so the calibration constants live in one place.
 // Cost: one comparison per detail.
 
-import { TERRITORY_MIN_FILES } from "./territory-tree.js";
-
 /** Contributors with a commit in this many days before now size the recommendation. */
 export const RECOMMENDATION_ACTIVE_DAYS = 90;
 /** The recommendation allows this many territories per such contributor. */
@@ -16,7 +14,7 @@ export const MAX_TARGET_TERRITORIES = 25;
 export type DetailRecommendation = {
   /** The recommended detail, one of the details given. */
   readonly detail: number;
-  /** The choice in words: "detail 2: 11 territories with 3+ files for 6 active contributors". */
+  /** The choice in words: "detail 2: 11 territories (without other files) for 6 active contributors". */
   readonly reason: string;
 };
 
@@ -78,6 +76,6 @@ export const recommendDetail = ({
     : counted(people, "contributor", "contributors");
   return {
     detail: chosen.detail,
-    reason: `detail ${chosen.detail}: ${counted(chosen.viableTerritories, "territory", "territories")} with ${TERRITORY_MIN_FILES}+ files for ${team}`,
+    reason: `detail ${chosen.detail}: ${counted(chosen.viableTerritories, "territory", "territories")} (without other files) for ${team}`,
   };
 };

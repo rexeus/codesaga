@@ -38,7 +38,7 @@ describe("renderAnalysis", () => {
       "  apps/admin                  58                    Aiko Tanaka 72%",
       "  infra                       27                    Tomás Herrera 78%",
       "                           Territories at detail 1 of 3 (recommended: 1)",
-      "                           detail 1: 11 territories with 3+ files for 4 active contributors",
+      "                           detail 1: 11 territories (without other files) for 4 active contributors",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",

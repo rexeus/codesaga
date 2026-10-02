@@ -224,7 +224,7 @@ describe("renderAnalysis territories", () => {
       "                           Territories at detail 1 of 3 (recommended: 1)",
     );
     expect(lines[note + 1]).toBe(
-      "                           detail 1: 11 territories with 3+ files for 4 active contributors",
+      "                           detail 1: 11 territories (without other files) for 4 active contributors",
     );
   });
 

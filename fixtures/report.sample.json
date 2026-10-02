@@ -2241,7 +2241,7 @@
       "detail": 1,
       "recommendedDetail": 1,
       "maxDetail": 3,
-      "reason": "detail 1: 11 territories with 3+ files for 4 active contributors",
+      "reason": "detail 1: 11 territories (without other files) for 4 active contributors",
       "totalTerritories": 11,
       "territories": [
         {

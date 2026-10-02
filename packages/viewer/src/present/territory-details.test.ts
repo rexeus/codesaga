@@ -44,7 +44,8 @@ const tree = (limited = false): Tree => ({
   detail: 2,
   recommendedDetail: 2,
   maxDetail: 3,
-  reason: "detail 2: 3 territories with 3+ files for 1 active contributor",
+  reason:
+    "detail 2: 3 territories (without other files) for 1 active contributor",
   totalTerritories: limited ? 5 : 2,
   territories: [
     splitting("a", 2, [
@@ -74,7 +75,8 @@ describe("territoryDetails", () => {
     expect(territoryDetails(tree())).toMatchObject({
       detail: 2,
       recommendedDetail: 2,
-      reason: "detail 2: 3 territories with 3+ files for 1 active contributor",
+      reason:
+        "detail 2: 3 territories (without other files) for 1 active contributor",
     });
   });
 

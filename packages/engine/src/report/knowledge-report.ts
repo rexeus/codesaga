@@ -155,7 +155,7 @@ const Territories = Schema.Struct({
   /** The finest detail, at most `thresholds.territories.maxDetail`; every split opens at a detail from 2 to this one. */
   maxDetail: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   /**
-   * The recommendation in words: "detail 2: 11 territories with 3+ files for 6
+   * The recommendation in words: "detail 2: 11 territories (without other files) for 6
    * active contributors". It counts the territories shown at that detail that
    * are not `other`.
    */

@@ -286,7 +286,7 @@ describe("detailSummary", () => {
         detail: 1,
         recommendedDetail: 1,
         reason:
-          "detail 1: 2 territories with 3+ files for 3 active contributors",
+          "detail 1: 2 territories (without other files) for 3 active contributors",
         details: [detailWithOtherFiles],
       })[0]?.count,
     ).toBe("2 territories");

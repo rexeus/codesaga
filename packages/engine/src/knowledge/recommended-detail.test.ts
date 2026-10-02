@@ -21,7 +21,7 @@ describe("recommendDetail", () => {
     ).toStrictEqual({
       detail: 2,
       reason:
-        "detail 2: 11 territories with 3+ files for 6 active contributors",
+        "detail 2: 11 territories (without other files) for 6 active contributors",
     });
   });
 
@@ -109,7 +109,8 @@ describe("recommendDetail allowance", () => {
       }),
     ).toStrictEqual({
       detail: 2,
-      reason: "detail 2: 9 territories with 3+ files for 5 contributors",
+      reason:
+        "detail 2: 9 territories (without other files) for 5 contributors",
     });
   });
 });
@@ -136,7 +137,8 @@ describe("recommendDetail fallbacks", () => {
       }),
     ).toStrictEqual({
       detail: 1,
-      reason: "detail 1: 1 territory with 3+ files for 1 active contributor",
+      reason:
+        "detail 1: 1 territory (without other files) for 1 active contributor",
     });
   });
 });

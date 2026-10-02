@@ -82,7 +82,8 @@ describe("knowledge territories", () => {
     expect(territories).toMatchObject({
       detail: 2,
       recommendedDetail: 2,
-      reason: "detail 2: 5 territories with 3+ files for 3 active contributors",
+      reason:
+        "detail 2: 5 territories (without other files) for 3 active contributors",
     });
     expect(territories.maxDetail).toBe(2);
   });
@@ -97,7 +98,8 @@ describe("knowledge territories", () => {
 
     expect(territories).toMatchObject({
       recommendedDetail: 1,
-      reason: "detail 1: 4 territories with 3+ files for 1 active contributor",
+      reason:
+        "detail 1: 4 territories (without other files) for 1 active contributor",
     });
   });
 
@@ -109,7 +111,7 @@ describe("knowledge territories", () => {
     ]);
 
     expect(territories.reason).toBe(
-      "detail 2: 5 territories with 3+ files for 3 contributors",
+      "detail 2: 5 territories (without other files) for 3 contributors",
     );
   });
 

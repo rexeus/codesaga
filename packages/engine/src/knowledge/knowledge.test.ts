@@ -254,7 +254,8 @@ describe("knowledge chain rule and scope", () => {
         detail: 1,
         recommendedDetail: 1,
         maxDetail: 1,
-        reason: "detail 1: 0 territories with 3+ files for 0 contributors",
+        reason:
+          "detail 1: 0 territories (without other files) for 0 contributors",
         totalTerritories: 0,
         territories: [],
       },

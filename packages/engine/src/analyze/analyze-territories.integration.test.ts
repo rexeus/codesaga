@@ -92,7 +92,7 @@ layer(NodeServices.layer)("analyze knowledge territories", (it) => {
         assert.strictEqual(knowledge.territories.detail, 1);
         assert.strictEqual(
           knowledge.territories.reason,
-          "detail 1: 3 territories with 3+ files for 2 active contributors",
+          "detail 1: 3 territories (without other files) for 2 active contributors",
         );
       }),
   );
@@ -223,7 +223,7 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
         assert.strictEqual(knowledge.territories.maxDetail, 1);
         assert.strictEqual(
           knowledge.territories.reason,
-          "detail 1: 4 territories with 3+ files for 2 active contributors",
+          "detail 1: 4 territories (without other files) for 2 active contributors",
         );
       }),
   );
@@ -319,7 +319,7 @@ layer(NodeServices.layer)("analyze knowledge territories scope", (it) => {
       ]);
       assert.strictEqual(
         knowledge.territories.reason,
-        "detail 1: 1 territory with 3+ files for 1 active contributor",
+        "detail 1: 1 territory (without other files) for 1 active contributor",
       );
     }),
   );
