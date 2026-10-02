@@ -14,7 +14,8 @@ const EPOCH_WEEKDAY = 3;
 const positiveModulo = (value: number, divisor: number): number =>
   ((value % divisor) + divisor) % divisor;
 
-const isoDateOfDay = (day: number): string =>
+/** The `YYYY-MM-DD` of a day number, as days since 1970-01-01. */
+export const isoDateOfDay = (day: number): string =>
   new Date(day * SECONDS_PER_DAY * 1000).toISOString().slice(0, 10);
 
 /**

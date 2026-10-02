@@ -7,8 +7,11 @@ import { DateTime, Order } from "effect";
 import { localDayOf } from "../activity/buckets.js";
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
+import { contributorBadges } from "../badges/contributor-badges.js";
+import type { ContributorBadgeFacts } from "../badges/contributor-badges.js";
 import { groupBy } from "../collections/group-by.js";
 import { countCodeLines } from "../history/history.js";
+import { contributionsByFile } from "../knowledge/contributions.js";
 import type { Report } from "../report/report.js";
 import { ACTIVE_DAYS, isActiveWithin } from "./activeness.js";
 import { topAreas } from "./areas.js";
@@ -26,6 +29,10 @@ type ContributorsInput = {
   readonly now: DateTime.Utc;
   /** Whether a changed path counts toward added and deleted lines. */
   readonly isCodePath: (path: string) => boolean;
+  /** The universe files of the scope; the files each person created decide `founder`. */
+  readonly universePaths: ReadonlyArray<string>;
+  /** The areas of the recommended level; without them `all-rounder`, `specialist` and `keeper` are withheld. */
+  readonly areas?: ContributorBadgeFacts["areas"];
 };
 
 type Contributor = Report["contributors"][number];
@@ -46,16 +53,39 @@ const byCommitsThenName = Order.combine(
   Order.mapInput(Order.String, (c: Contributor) => c.name),
 );
 
+/** How many of the universe files each person created: the author of the file's oldest commit, when a person wrote it. */
+const createdFilesByEmail = (
+  history: ReadonlyArray<ClassifiedCommit>,
+  universePaths: ReadonlyArray<string>,
+): ReadonlyMap<string, number> => {
+  const created = new Map<string, number>();
+  for (const contributions of contributionsByFile(
+    history,
+    new Set(universePaths),
+  ).values()) {
+    const founder = contributions.find(({ firstAuthor }) => firstAuthor);
+    if (founder !== undefined) {
+      created.set(founder.email, (created.get(founder.email) ?? 0) + 1);
+    }
+  }
+  return created;
+};
+
+type Context = Omit<ContributorsInput, "commits" | "history"> & {
+  readonly created: ReadonlyMap<string, number>;
+};
+
 const contributorOf = (
   commits: ReadonlyArray<ClassifiedCommit>,
-  firstEverTime: number,
-  { scope, now, isCodePath }: Omit<ContributorsInput, "commits" | "history">,
+  ownHistory: ReadonlyArray<ClassifiedCommit>,
+  { scope, now, isCodePath, universePaths, areas, created }: Context,
 ): Contributor => {
   const times = commits.map((commit) => commit.time);
   const lastTime = times.reduce((a, b) => Math.max(a, b));
+  const email = commits[0]?.author.email ?? "";
   return {
     name: commits[0]?.author.name ?? "",
-    email: commits[0]?.author.email ?? "",
+    email,
     commits: commits.length,
     agentAssistedCommits: commits.filter(
       (commit) => commit.class === "agent-assisted",
@@ -69,8 +99,21 @@ const contributorOf = (
     active: isActiveWithin(lastTime, now, ACTIVE_DAYS),
     areas: topAreas(commits, scope),
     weekly: weeklyCommits(times, now),
-    status: contributorStatus(firstEverTime, lastTime, now),
-    badges: [],
+    status: contributorStatus(
+      ownHistory.reduce((first, { time }) => Math.min(first, time), Infinity),
+      lastTime,
+      now,
+    ),
+    badges: contributorBadges(email, {
+      commits: ownHistory,
+      now,
+      isCodePath,
+      founded: {
+        files: created.get(email) ?? 0,
+        ofFiles: universePaths.length,
+      },
+      ...(areas === undefined ? {} : { areas }),
+    }),
   };
 };
 
@@ -83,17 +126,16 @@ const contributorOf = (
 export const contributors = ({
   commits,
   history,
-  ...context
+  ...input
 }: ContributorsInput): Report["contributors"] => {
-  const firstEverTimes = new Map(
-    [...byEmail(history)].map(([email, own]) => [
-      email,
-      own.reduce((first, { time }) => Math.min(first, time), Infinity),
-    ]),
-  );
+  const everyone = byEmail(history);
+  const context = {
+    ...input,
+    created: createdFilesByEmail(history, input.universePaths),
+  };
   return [...byEmail(commits)]
     .map(([email, own]) =>
-      contributorOf(own, firstEverTimes.get(email) ?? Infinity, context),
+      contributorOf(own, everyone.get(email) ?? own, context),
     )
     .toSorted(byCommitsThenName);
 };

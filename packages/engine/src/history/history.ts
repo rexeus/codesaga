@@ -20,6 +20,8 @@ export type FileChange = {
    * then. Absent for the life of the file that exists at the path today.
    */
   readonly previousLife?: true;
+  /** Set when the commit renamed the file onto this path, or onto the name that became this path. */
+  readonly renamed?: true;
 };
 
 /** A commit whose changes are named by current paths. */
@@ -86,9 +88,13 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
       }
     }
     const { added, deleted } = change;
-    return isPrevious
-      ? { path, added, deleted, previousLife: true }
-      : { path, added, deleted };
+    return {
+      path,
+      added,
+      deleted,
+      ...(isPrevious ? { previousLife: true as const } : {}),
+      ...(change.renamedFrom === undefined ? {} : { renamed: true as const }),
+    };
   });
   for (const name of endedNames) {
     lineage.deletedNames.add(name);

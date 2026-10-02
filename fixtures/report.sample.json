@@ -35,6 +35,21 @@
       "minTargetAreas": 4,
       "maxTargetAreas": 25
     },
+    "highlights": {
+      "streakMinDays": 7,
+      "busiestDayMinCommits": 5,
+      "rhythmMinCommits": 20,
+      "nightOwlShare": 0.2,
+      "nightFromHour": 22,
+      "nightToHour": 5,
+      "weekendShare": 0.25,
+      "quietAreaMonths": 6,
+      "newcomersMinPeople": 2,
+      "newcomerDays": 90,
+      "anniversaryWindowDays": 7,
+      "cleanupMinNetDeletedLines": 200,
+      "renameRecordMinRenames": 3
+    },
     "badges": {
       "sharedActiveExperts": 3,
       "sharedTruckFactor": 3,
@@ -45,6 +60,7 @@
       "newcomerFriendlyFirstCommits": 2,
       "newcomerFriendlyDays": 180,
       "wellTestedShare": 0.4,
+      "minCommitsForShare": 10,
       "allRounderAreaShare": 0.5,
       "allRounderMinAreas": 4,
       "specialistShare": 0.8,

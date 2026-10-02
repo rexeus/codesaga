@@ -25,6 +25,36 @@ const AreaThresholds = Schema.Struct({
   maxTargetAreas: Count,
 });
 
+/** The rules behind the highlights; the meaning of each is on its highlight kind. */
+const HighlightThresholds = Schema.Struct({
+  /** `streak` shows when the longest run of days with a commit is at least this long. */
+  streakMinDays: Count,
+  /** `busiest-day` shows when the day has at least this many commits. */
+  busiestDayMinCommits: Count,
+  /** `night-owls` and `weekend` need at least this many human commits to say anything about a share. */
+  rhythmMinCommits: Count,
+  /** `night-owls` shows when at least this share of the human commits falls into the night hours. */
+  nightOwlShare: Share,
+  /** The night starts at this local hour (0 to 23) ... */
+  nightFromHour: Count,
+  /** ... and ends before this one. */
+  nightToHour: Count,
+  /** `weekend` shows when at least this share of the human commits lands on a Saturday or Sunday. */
+  weekendShare: Share,
+  /** `quiet-area` shows when the area has not changed for at least this many calendar months. */
+  quietAreaMonths: Count,
+  /** `newcomers` shows when at least this many people made their first commit in `newcomerDays`. */
+  newcomersMinPeople: Count,
+  /** A newcomer made the first commit at most this many days ago. */
+  newcomerDays: Count,
+  /** `anniversary` shows when the first commit's anniversary is at most this many days from now. */
+  anniversaryWindowDays: Count,
+  /** `biggest-cleanup` shows when one commit deleted this many more code lines than it added. */
+  cleanupMinNetDeletedLines: Count,
+  /** `rename-record` shows when a file was renamed at least this often. */
+  renameRecordMinRenames: Count,
+});
+
 /** The rules behind the badges of areas and contributors; the meaning of each is on its badge kind. */
 const BadgeThresholds = Schema.Struct({
   sharedActiveExperts: Count,
@@ -36,6 +66,8 @@ const BadgeThresholds = Schema.Struct({
   newcomerFriendlyFirstCommits: Count,
   newcomerFriendlyDays: Count,
   wellTestedShare: Share,
+  /** `specialist`, `tester` and `documenter` need at least this many commits to say anything about a share. */
+  minCommitsForShare: Count,
   allRounderAreaShare: Share,
   allRounderMinAreas: Count,
   specialistShare: Share,
@@ -62,5 +94,6 @@ export const Thresholds = Schema.Struct({
   /** A directory is orphaned when more than this share of its files have no active expert. */
   orphanedShare: Schema.Finite,
   areas: AreaThresholds,
+  highlights: HighlightThresholds,
   badges: BadgeThresholds,
 });

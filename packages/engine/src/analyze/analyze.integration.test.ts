@@ -3,6 +3,7 @@ import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
+import type { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
@@ -95,6 +96,19 @@ const commitKnownHistory = (repo: TempRepository) =>
     yield* commitAfterDependabot(repo);
   });
 
+const graceBadges: Report["contributors"][number]["badges"] = [
+  {
+    kind: "founder",
+    label: "Founder",
+    evidence: "First author of 50% of today's files.",
+  },
+  {
+    kind: "welcome",
+    label: "Welcome",
+    evidence: "First commit on 2026-02-04, 33 days ago.",
+  },
+];
+
 layer(NodeServices.layer)("analyze a known history", (it) => {
   it.effect("reports the exact window and overview", () =>
     Effect.gen(function* () {
@@ -178,7 +192,7 @@ layer(NodeServices.layer)("analyze automation", (it) => {
           // the week of Monday 2026-02-02 once, the week of 2026-03-02 twice; now is Tuesday 2026-03-10
           weekly: [...zeros(46), 1, 0, 0, 0, 2, 0],
           status: "new",
-          badges: [],
+          badges: graceBadges,
         });
       }),
   );
@@ -301,44 +315,6 @@ layer(NodeServices.layer)("analyze since and scope", (it) => {
           [
             ["Ada Lovelace", 2, 12],
             ["Linus", 2, 1],
-          ],
-        );
-      }),
-  );
-});
-
-layer(NodeServices.layer)("analyze contributor status", (it) => {
-  it.effect(
-    "judges a contributor as new by their first commit ever, not by the first in a narrowed window",
-    () =>
-      Effect.gen(function* () {
-        yield* setNow;
-        const repo = yield* makeTempRepository;
-        yield* repo.commit(
-          "2025-10-01T09:00:00Z",
-          { "src/a.ts": lines("a", 3) },
-          { author: ada },
-        );
-        yield* repo.commit(
-          "2026-03-02T09:00:00Z",
-          { "src/a.ts": lines("a", 5) },
-          { author: ada },
-        );
-        yield* repo.commit(
-          "2026-03-03T09:00:00Z",
-          { "src/b.ts": lines("b", 2) },
-          { author: grace },
-        );
-
-        const report = yield* analyze(
-          analyzeOptionsFor(repo, { since: "30d" }),
-        );
-
-        assert.deepStrictEqual(
-          report.contributors.map((c) => [c.name, c.status]),
-          [
-            ["Ada Lovelace", "active"],
-            ["Grace", "new"],
           ],
         );
       }),

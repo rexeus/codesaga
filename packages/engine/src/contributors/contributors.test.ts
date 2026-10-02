@@ -10,6 +10,7 @@ const grace = { name: "Grace", email: "grace@example.com" };
 const run = (
   commits: Parameters<typeof contributors>[0]["commits"],
   scope = ".",
+  universePaths: ReadonlyArray<string> = [],
 ) =>
   contributors({
     commits,
@@ -17,6 +18,7 @@ const run = (
     scope,
     now,
     isCodePath: (path) => path.endsWith(".ts"),
+    universePaths,
   });
 
 const touching = (path: string) =>
@@ -176,5 +178,23 @@ describe("contributors activity", () => {
 
   it("returns no contributors for no commits", () => {
     expect(run([])).toStrictEqual([]);
+  });
+
+  it("awards the badges the person's whole history earns", () => {
+    const [ada] = run(
+      [
+        classifiedCommit({
+          time: at("2026-06-01T00:00:00Z"),
+          changes: [{ path: "src/a.ts", added: 5, deleted: 0 }],
+        }),
+      ],
+      ".",
+      ["src/a.ts", "src/b.ts", "src/c.ts", "src/d.ts"],
+    );
+
+    expect(ada?.badges.map(({ kind }) => kind)).toStrictEqual([
+      "founder",
+      "welcome",
+    ]);
   });
 });

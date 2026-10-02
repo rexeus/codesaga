@@ -26,11 +26,6 @@
     }
   },
   "ignore": [
-    "packages/engine/src/badges/area-badges.ts",
-    "packages/engine/src/badges/contributor-badges.ts",
-    "packages/engine/src/highlights/highlights.ts",
-    "packages/engine/src/highlights/history-events.ts",
-    "packages/engine/src/highlights/knowledge-facts.ts",
-    "packages/engine/src/highlights/rhythm.ts"
+    "packages/engine/src/badges/area-badges.ts"
   ]
 }
