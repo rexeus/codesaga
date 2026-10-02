@@ -39,6 +39,9 @@ describe("renderAnalysis", () => {
       "  infra                       27                    Tomás Herrera 78%",
       "                           Territories at detail 1 of 3 (recommended: 1)",
       "                           detail 1: 11 territories (without other files) for 4 active contributors",
+      "Stats                      473 files · 60,942 lines · 25% tests",
+      "                           median file 96 lines · 5 revisions per file · 1.70 indentation levels per line",
+      "                           2 spaces · lines 33 median, 72 p90 · 8% comments",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
@@ -69,6 +72,49 @@ describe("renderAnalysis stories and automation", () => {
 
     expect(renderAnalysis(report, plain)).toContain("\nAutomation ");
     expect(renderAnalysis(quiet, plain)).not.toContain("Automation");
+  });
+});
+
+type Stats = ReturnType<typeof sampleReport>["stats"];
+
+/** The sample report's stats with `style.indent` replaced, as the last line of the Stats block shows it. */
+const styleLineWith = (
+  indent: Stats["style"]["indent"],
+): string | undefined => {
+  const { stats } = sampleReport();
+  return renderAnalysis(
+    {
+      ...sampleReport(),
+      stats: { ...stats, style: { ...stats.style, indent } },
+    },
+    plain,
+  )
+    .split("\n")
+    .find((line) => line.includes(" median, ") && line.includes("comments"));
+};
+
+describe("renderAnalysis stats", () => {
+  it("names tabs when most indented lines start with one", () => {
+    expect(
+      styleLineWith({ spacesShare: 0.2, tabsShare: 0.8, width: 2 }),
+    ).toMatch(/^ {27}tabs · lines /u);
+  });
+
+  it("says so for code without an indented line", () => {
+    expect(styleLineWith({ spacesShare: 0, tabsShare: 0, width: 0 })).toMatch(
+      /^ {27}no indentation · /u,
+    );
+  });
+
+  it("says so for a repository without code files", () => {
+    const report = sampleReport();
+
+    expect(
+      renderAnalysis(
+        { ...report, stats: { ...report.stats, files: 0 } },
+        plain,
+      ),
+    ).toContain("\nStats                      no code files\n");
   });
 });
 
