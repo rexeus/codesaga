@@ -91,6 +91,30 @@ describe("measureText line shapes", () => {
     });
   });
 
+  it("does not count the continuation lines of a block comment as space-indented", () => {
+    const text = [
+      "/**",
+      " * Adds one.",
+      " */",
+      "function f() {",
+      "\treturn 1;",
+      "}",
+    ].join("\n");
+
+    expect(measureText(text, commentSyntaxOf("TypeScript"))).toMatchObject({
+      tabIndented: 1,
+      spaceIndented: 0,
+    });
+  });
+
+  it("counts a space-indented line that opens a block comment as space-indented", () => {
+    const text = ["a", "  /* b", "  c */", "  d"].join("\n");
+
+    expect(measureText(text, commentSyntaxOf("TypeScript"))).toMatchObject({
+      spaceIndented: 2,
+    });
+  });
+
   it("measures line lengths without trailing whitespace or a carriage return", () => {
     expect(measure("ab  \r\n  c\r\nde")).toMatchObject({
       lineLengths: new Map([

@@ -19,7 +19,7 @@ export type TextMeasure = {
   readonly commentLines: number;
   /** Lines that start with a tab. */
   readonly tabIndented: number;
-  /** Lines that start with a space. */
+  /** Lines that start with a space, except the continuation lines of a block comment, whose ` * ` aligns the asterisks. */
   readonly spaceIndented: number;
   /** The width of one indentation level in spaces, as `detectIndentUnit` finds it for the file. */
   readonly indentWidth: number;
@@ -96,10 +96,10 @@ const readLines = (text: string, syntax: CommentSyntax): Lines => {
     leadingTabs[loc] = tabs;
     leadingSpaces[loc] = start - tabs;
     loc += 1;
-    tabIndented += codeAt(line, 0) === TAB ? 1 : 0;
-    spaceIndented += codeAt(line, 0) === SPACE ? 1 : 0;
     lineLengths.set(end, (lineLengths.get(end) ?? 0) + 1);
-    comments.add(line, start);
+    const continuesComment = comments.add(line, start);
+    tabIndented += codeAt(line, 0) === TAB ? 1 : 0;
+    spaceIndented += !continuesComment && codeAt(line, 0) === SPACE ? 1 : 0;
   }
   return {
     loc,

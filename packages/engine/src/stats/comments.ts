@@ -86,8 +86,12 @@ export const commentSyntaxOf = (language: string | undefined): CommentSyntax =>
 
 /** Counts the comment lines of the non-blank lines of one file, fed in order. */
 export type CommentCounter = {
-  /** Feeds the next non-blank line, whose first character other than a tab or a space is at `start`. */
-  readonly add: (line: string, start: number) => void;
+  /**
+   * Feeds the next non-blank line, whose first character other than a tab or a
+   * space is at `start`. Returns whether the line continues a block comment
+   * that an earlier line opened, so its leading space is no indentation.
+   */
+  readonly add: (line: string, start: number) => boolean;
   /** The comment lines so far. */
   readonly count: () => number;
 };
@@ -105,14 +109,14 @@ export const commentCounter = (syntax: CommentSyntax): CommentCounter => {
   );
   let count = 0;
   let closer: string | undefined;
-  const add = (line: string, start: number): void => {
+  const add = (line: string, start: number): boolean => {
     if (closer !== undefined) {
       count += 1;
       closer = line.includes(closer, start) ? undefined : closer;
-      return;
+      return true;
     }
     if (!openers.has(line.codePointAt(start))) {
-      return;
+      return false;
     }
     const block = syntax.block.find(([open]) => line.startsWith(open, start));
     if (block !== undefined) {
@@ -126,6 +130,7 @@ export const commentCounter = (syntax: CommentSyntax): CommentCounter => {
     ) {
       count += 1;
     }
+    return false;
   };
   return { add, count: () => count };
 };
