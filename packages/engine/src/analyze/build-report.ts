@@ -114,10 +114,13 @@ const peopleOf = (
     territories,
   });
 
-const typescriptOf = ({
-  typescript,
-}: RepositoryFacts): TypeScriptAnalysis | undefined =>
-  typescript === undefined ? undefined : typescriptAnalysis(typescript);
+const typescriptOf = (
+  { typescript }: RepositoryFacts,
+  revisions: ReadonlyMap<string, number>,
+): TypeScriptAnalysis | undefined =>
+  typescript === undefined
+    ? undefined
+    : typescriptAnalysis(typescript, revisions);
 
 /** The sections that exist only for some runs or some repositories. */
 const optionalSections = (
@@ -142,7 +145,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     lastCommitAt,
   } = prepareAnalysis(facts);
   const stats = statsOf(facts, scoped, commits);
-  const typescript = typescriptOf(facts);
+  const typescript = typescriptOf(facts, stats.revisions);
   const { section: knowledgeSection, recommendedTerritories } = knowledgeOf(
     facts,
     scoped,

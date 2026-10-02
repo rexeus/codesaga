@@ -5,6 +5,9 @@ import { typescriptAnalysis } from "./deep-dive.js";
 import type { FactsResult } from "./facts-of-source.js";
 import type { TypeScriptFacts } from "./gather-typescript.js";
 
+const analysisOf = (facts: TypeScriptFacts) =>
+  typescriptAnalysis(facts, new Map());
+
 const parsed: FactsResult = { kind: "parsed", facts: factsWith({}) };
 const skipped = (reason: "too-deep" | "syntax-error"): FactsResult => ({
   kind: "skipped",
@@ -34,7 +37,7 @@ describe("typescriptDeepDive", () => {
       ],
     };
 
-    expect(typescriptAnalysis(facts).section.coverage).toStrictEqual({
+    expect(analysisOf(facts).section.coverage).toStrictEqual({
       files: 6,
       parsed: 2,
       declarationFiles: 1,
@@ -44,7 +47,7 @@ describe("typescriptDeepDive", () => {
   });
 
   it("reports an empty skipped record when everything parsed", () => {
-    const section = typescriptAnalysis({
+    const section = analysisOf({
       status: ready,
       declarationFiles: [],
       ...NOTHING_READ,
@@ -63,7 +66,7 @@ describe("typescriptDeepDive without a parser", () => {
       name: "oxc-parser",
       reason: "Cannot find native binding",
     } as const;
-    const section = typescriptAnalysis({
+    const section = analysisOf({
       status: unavailable,
       declarationFiles: ["a.d.ts"],
       ...NOTHING_READ,
@@ -90,7 +93,7 @@ describe("typescriptDeepDive without a parser", () => {
 
 describe("typescriptAnalysis blocks", () => {
   it("has no block when no file was parsed", () => {
-    const { section } = typescriptAnalysis({
+    const { section } = analysisOf({
       status: ready,
       declarationFiles: [],
       ...NOTHING_READ,
@@ -105,7 +108,7 @@ describe("typescriptAnalysis blocks", () => {
       kind: "parsed",
       facts: factsWith({ typeSafety: { nonNull: 3 } }),
     };
-    const { forPaths } = typescriptAnalysis({
+    const { forPaths } = analysisOf({
       status: ready,
       declarationFiles: [],
       ...NOTHING_READ,
@@ -125,5 +128,86 @@ describe("typescriptAnalysis blocks", () => {
       escapesPer1000: 7.5,
     });
     expect(forPaths(["README.md", "api/c.ts"])).toBeUndefined();
+  });
+});
+
+describe("typescriptAnalysis functions", () => {
+  it("carries the share of complex functions and the hardest score on a territory", () => {
+    const complex: FactsResult = {
+      kind: "parsed",
+      facts: factsWith({
+        functions: {
+          count: 4,
+          complexity: [3, 0, 0, 1, 0],
+          scores: [
+            [0, 3],
+            [17, 1],
+          ],
+        },
+      }),
+    };
+    const { forPaths } = analysisOf({
+      status: ready,
+      declarationFiles: [],
+      ...NOTHING_READ,
+      files: [{ path: "api/a.ts", lines: 300, result: complex }],
+    });
+
+    expect(forPaths(["api/a.ts"])).toMatchObject({
+      over15Share: 0.25,
+      maxComplexity: 17,
+    });
+  });
+});
+
+describe("typescriptAnalysis blocks of a repository", () => {
+  it("reports every block of a parsed repository and joins the revisions to the functions", () => {
+    const complex: FactsResult = {
+      kind: "parsed",
+      facts: factsWith({
+        functions: { count: 1, complexity: [0, 0, 0, 1, 0], scores: [[20, 1]] },
+      }),
+    };
+    const { section } = typescriptAnalysis(
+      {
+        status: ready,
+        declarationFiles: [],
+        ...NOTHING_READ,
+        files: [{ path: "a.ts", lines: 10, result: complex }],
+      },
+      new Map([["a.ts", 3]]),
+    );
+
+    expect(Object.keys(section)).toStrictEqual([
+      "coverage",
+      "typeSafety",
+      "strictness",
+      "modules",
+      "idioms",
+      "ecosystem",
+      "functions",
+      "complexityAndChange",
+      "tests",
+      "markers",
+    ]);
+    expect(section.complexityAndChange).toMatchObject({
+      files: 1,
+      revisions: 3,
+      complexFiles: 1,
+      complexRevisions: 3,
+      complexRevisionShare: 1,
+    });
+  });
+
+  it("leaves complexity and change out when no production file has a function", () => {
+    const { section } = analysisOf({
+      status: ready,
+      declarationFiles: [],
+      ...NOTHING_READ,
+      files: [{ path: "a.ts", lines: 10, result: parsed }],
+    });
+
+    expect(section).toHaveProperty("functions");
+    expect(section).not.toHaveProperty("complexityAndChange");
   });
 });

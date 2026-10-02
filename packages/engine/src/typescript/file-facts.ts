@@ -4,11 +4,17 @@
 
 import { ecosystemCollector } from "./ecosystem/hook-facts.js";
 import type { EcosystemFacts } from "./ecosystem/hook-facts.js";
+import { functionCollector } from "./functions/function-collector.js";
+import type { FunctionFacts } from "./functions/function-facts.js";
 import { idiomCollector } from "./idioms/idiom-collector.js";
 import type { IdiomFacts } from "./idioms/idiom-facts.js";
+import { markersOf } from "./markers/marker-facts.js";
+import type { MarkerFacts } from "./markers/marker-facts.js";
 import { moduleCollector } from "./modules/module-facts.js";
 import type { ModuleFacts } from "./modules/module-facts.js";
 import type { ParsedSource } from "./parsed-source.js";
+import { testCollector } from "./tests/test-facts.js";
+import type { TestFacts } from "./tests/test-facts.js";
 import { typeSafetyCollector } from "./type-safety/type-safety-facts.js";
 import type { TypeSafetyFacts } from "./type-safety/type-safety-facts.js";
 import { walk } from "./walk.js";
@@ -17,7 +23,7 @@ import { walk } from "./walk.js";
  * The version of `FileFacts`. Facts a cache holds under another version are
  * stale, so it rises with every change to what the facts mean or contain.
  */
-const FILE_FACTS_VERSION = 6;
+const FILE_FACTS_VERSION = 7;
 
 /** The facts of one parsed file. */
 export type FileFacts = {
@@ -28,30 +34,37 @@ export type FileFacts = {
   readonly modules: ModuleFacts;
   readonly idioms: IdiomFacts;
   readonly ecosystem: EcosystemFacts;
+  readonly functions: FunctionFacts;
+  readonly tests: TestFacts;
+  readonly markers: MarkerFacts;
 };
 
 /**
- * The facts of one parsed file, from a single walk over its program. Pure
- * over the parse and synchronous. Throws a `RangeError` where the tree is
- * nested deeper than the stack allows.
+ * The facts of one parsed file, from a single walk over its program; `text`
+ * is the source the parse read, for the facts that need lines. Pure over the
+ * parse and synchronous. Throws a `RangeError` where the tree is nested
+ * deeper than the stack allows.
  */
-export const fileFactsOf = (parsed: ParsedSource): FileFacts => {
+export const fileFactsOf = (parsed: ParsedSource, text: string): FileFacts => {
   let nodes = 0;
   const typeSafety = typeSafetyCollector();
   const modules = moduleCollector();
   const idioms = idiomCollector();
   const ecosystem = ecosystemCollector();
+  const functions = functionCollector(text);
+  const tests = testCollector();
+  const collectors = [typeSafety, modules, idioms, ecosystem, functions, tests];
   walk(parsed.program, {
     enter: (node) => {
       nodes += 1;
-      typeSafety.enter(node);
-      modules.enter(node);
-      idioms.enter(node);
-      ecosystem.enter(node);
+      for (const collector of collectors) {
+        collector.enter(node);
+      }
     },
     leave: (node) => {
-      typeSafety.leave?.(node);
-      modules.leave?.(node);
+      for (const collector of collectors) {
+        collector.leave?.(node);
+      }
     },
   });
   return {
@@ -61,5 +74,8 @@ export const fileFactsOf = (parsed: ParsedSource): FileFacts => {
     modules: modules.finish(parsed),
     idioms: idioms.finish(parsed),
     ecosystem: ecosystem.finish(parsed),
+    functions: functions.finish(parsed),
+    tests: tests.finish(parsed),
+    markers: markersOf(parsed, text),
   };
 };

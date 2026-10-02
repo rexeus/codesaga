@@ -7,11 +7,15 @@ import type {
 } from "../report/typescript-deep-dive.js";
 import type { TerritoryTypeScript } from "../report/typescript-territory.js";
 import { ecosystemOf } from "./ecosystem/ecosystem-report.js";
+import { complexityAndChangeOf } from "./functions/complexity-and-change.js";
+import { functionsReportOf } from "./functions/function-report.js";
 import type { TypeScriptFacts } from "./gather-typescript.js";
 import { idiomsOf } from "./idioms/idiom-report.js";
+import { markersReportOf } from "./markers/marker-report.js";
 import { modulesOf } from "./modules/module-report.js";
 import { parsedFilesOf } from "./parsed-file.js";
 import { territoryTypeScriptOf } from "./territory-typescript.js";
+import { testsOf } from "./tests/test-report.js";
 import { strictnessOf } from "./tsconfig/strictness.js";
 import { typeSafetyOf } from "./type-safety/type-safety-report.js";
 
@@ -56,9 +60,12 @@ export type TypeScriptAnalysis = {
  * The section for the universe's TypeScript and JavaScript files, with
  * `files` equal to parsed, declaration and skipped files together, and the
  * blocks over the parsed files, which are absent when there are none.
+ * `revisions` are the commits per path in its current life, which
+ * `complexityAndChange` joins to the functions.
  */
 export const typescriptAnalysis = (
   facts: TypeScriptFacts,
+  revisions: ReadonlyMap<string, number>,
 ): TypeScriptAnalysis => {
   const parsed = parsedFilesOf(facts.files);
   const byPath = new Map(parsed.map((file) => [file.path, file]));
@@ -67,6 +74,8 @@ export const typescriptAnalysis = (
     ...facts.files.map(({ path }) => path),
   ]);
   const hasFacts = parsed.length > 0;
+  const ecosystem = ecosystemOf(parsed, facts.manifests);
+  const changed = complexityAndChangeOf(parsed, revisions);
   return {
     section: {
       coverage: coverageOf(facts),
@@ -76,7 +85,11 @@ export const typescriptAnalysis = (
             strictness: strictness.section,
             modules: modulesOf(parsed, facts.manifests),
             idioms: idiomsOf(parsed),
-            ecosystem: ecosystemOf(parsed, facts.manifests),
+            ecosystem,
+            functions: functionsReportOf(parsed),
+            ...(changed === undefined ? {} : { complexityAndChange: changed }),
+            tests: testsOf(parsed, ecosystem),
+            markers: markersReportOf(parsed),
           }
         : {}),
     },

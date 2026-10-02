@@ -1,7 +1,7 @@
 // Owns the small questions the fact collectors ask of a node: a name, a string, the method a call names.
 // They read untrusted syntax, so each answers undefined rather than assuming a shape.
 
-import type { Node, Statement } from "@oxc-project/types";
+import type { Expression, Node, Statement } from "@oxc-project/types";
 
 /** The name of an identifier node, undefined for any other node. */
 export const identifierName = (
@@ -33,3 +33,13 @@ export const declarationOf = (statement: Statement): Node | null =>
   statement.type === "ExportDefaultDeclaration"
     ? statement.declaration
     : statement;
+
+/** The expression below any parentheses, `as`, `satisfies`, `!` and type-assertion wrappers around it. */
+export const unwrapExpression = (expression: Expression): Expression =>
+  expression.type === "ParenthesizedExpression" ||
+  expression.type === "TSAsExpression" ||
+  expression.type === "TSSatisfiesExpression" ||
+  expression.type === "TSNonNullExpression" ||
+  expression.type === "TSTypeAssertion"
+    ? unwrapExpression(expression.expression)
+    : expression;

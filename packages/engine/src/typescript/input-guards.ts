@@ -4,9 +4,9 @@
 import type { SkipReason } from "../report/typescript-deep-dive.js";
 
 /** Longer sources are skipped; the universe's own limit, counted in characters. */
-const MAX_SOURCE_CHARACTERS = 1_048_576;
+export const MAX_SOURCE_CHARACTERS = 1_048_576;
 /** A source whose non-blank lines average more characters than this counts as minified, as in the universe. */
-const MAX_MEAN_LINE_LENGTH = 300;
+export const MAX_MEAN_LINE_LENGTH = 300;
 
 const isMinified = (text: string): boolean => {
   const nonBlankLines = text

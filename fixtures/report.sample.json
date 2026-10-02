@@ -117,6 +117,18 @@
       "springCleaningNetLines": 1000,
       "freshBloodPeople": 5,
       "freshBloodDays": 90
+    },
+    "typescript": {
+      "complexityBands": [5, 10, 15, 25],
+      "complexityLimit": 15,
+      "lengthBands": [16, 31, 61],
+      "maxParameters": 4,
+      "assertionBands": [1, 2, 4],
+      "hotspotQuantile": 0.9,
+      "hotspotMinComplexity": 10,
+      "hotspotMinRevisions": 2,
+      "maxSourceCharacters": 1048576,
+      "minifiedMeanLineLength": 300
     }
   },
   "totals": {
@@ -3147,7 +3159,9 @@
             "codeLines": 4300,
             "escapesPer1000": 4.1,
             "strict": true,
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0211,
+            "maxComplexity": 33
           }
         },
         {
@@ -3265,7 +3279,9 @@
             "codeLines": 1700,
             "escapesPer1000": 2.4,
             "strict": "unknown",
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0,
+            "maxComplexity": 12
           }
         },
         {
@@ -3377,7 +3393,9 @@
             "codeLines": 4700,
             "escapesPer1000": 9.8,
             "strict": "mixed",
-            "esmShare": 0.9167
+            "esmShare": 0.9167,
+            "over15Share": 0.0402,
+            "maxComplexity": 29
           }
         },
         {
@@ -3482,7 +3500,9 @@
             "codeLines": 2300,
             "escapesPer1000": 1.3,
             "strict": true,
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0,
+            "maxComplexity": 9
           }
         },
         {
@@ -3685,7 +3705,9 @@
             "codeLines": 700,
             "escapesPer1000": 0,
             "strict": true,
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0,
+            "maxComplexity": 6
           }
         },
         {
@@ -3797,7 +3819,9 @@
             "codeLines": 600,
             "escapesPer1000": 8.3,
             "strict": true,
-            "esmShare": 0.6
+            "esmShare": 0.6,
+            "over15Share": 0.0,
+            "maxComplexity": 14
           }
         },
         {
@@ -4680,7 +4704,9 @@
             "codeLines": 9800,
             "escapesPer1000": 5.1,
             "strict": true,
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0198,
+            "maxComplexity": 26
           }
         },
         {
@@ -4810,7 +4836,9 @@
             "codeLines": 6200,
             "escapesPer1000": 6.4,
             "strict": true,
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0366,
+            "maxComplexity": 41
           }
         },
         {
@@ -4940,7 +4968,9 @@
             "codeLines": 8100,
             "escapesPer1000": 3.2,
             "strict": true,
-            "esmShare": 1
+            "esmShare": 1,
+            "over15Share": 0.0123,
+            "maxComplexity": 18
           }
         }
       ]
@@ -5619,6 +5649,171 @@
           "calls": 412,
           "files": 97
         }
+      },
+      "functions": {
+        "production": {
+          "files": 262,
+          "codeLines": 38400,
+          "functions": 1840,
+          "complexity": {
+            "bands": [1403, 312, 78, 36, 11],
+            "p50": 1,
+            "p90": 6,
+            "max": 41
+          },
+          "over15": {
+            "functions": 47,
+            "share": 0.0255,
+            "lines": 3210,
+            "lineShare": 0.0836
+          },
+          "top": [
+            {
+              "name": "reconcileInvoices",
+              "path": "packages/api/src/billing/reconcile.ts",
+              "line": 88,
+              "complexity": 41,
+              "lines": 212
+            },
+            {
+              "name": "buildQuery",
+              "path": "packages/db/src/query/build.ts",
+              "line": 31,
+              "complexity": 33,
+              "lines": 164
+            },
+            {
+              "name": "AdminTable",
+              "path": "apps/admin/src/tables/admin-table.tsx",
+              "line": 17,
+              "complexity": 29,
+              "lines": 141
+            },
+            {
+              "name": "parseFilters",
+              "path": "apps/web/src/search/filters.ts",
+              "line": 52,
+              "complexity": 26,
+              "lines": 97
+            },
+            {
+              "name": "Session.refresh",
+              "path": "packages/auth/src/session.ts",
+              "line": 120,
+              "complexity": 24,
+              "lines": 88
+            }
+          ],
+          "lengths": [1210, 402, 168, 60],
+          "longParameterLists": 23,
+          "maxDepth": 7
+        },
+        "tests": {
+          "files": 76,
+          "codeLines": 12100,
+          "functions": 1260,
+          "complexity": {
+            "bands": [1190, 58, 9, 3, 0],
+            "p50": 0,
+            "p90": 3,
+            "max": 17
+          },
+          "over15": {
+            "functions": 3,
+            "share": 0.0024,
+            "lines": 402,
+            "lineShare": 0.0332
+          },
+          "top": [
+            {
+              "name": "seedDatabase",
+              "path": "packages/db/test/seed.ts",
+              "line": 14,
+              "complexity": 17,
+              "lines": 120
+            },
+            {
+              "name": "(anonymous)",
+              "path": "apps/web/test/checkout.test.ts",
+              "line": 9,
+              "complexity": 16,
+              "lines": 143
+            },
+            {
+              "name": "assertInvoice",
+              "path": "packages/api/test/helpers.ts",
+              "line": 40,
+              "complexity": 15,
+              "lines": 139
+            },
+            {
+              "name": "createFixture",
+              "path": "packages/ui/test/fixture.tsx",
+              "line": 22,
+              "complexity": 12,
+              "lines": 64
+            },
+            {
+              "name": "waitForIdle",
+              "path": "apps/admin/test/support.ts",
+              "line": 5,
+              "complexity": 11,
+              "lines": 38
+            }
+          ],
+          "lengths": [1007, 171, 56, 26],
+          "longParameterLists": 4,
+          "maxDepth": 5
+        }
+      },
+      "complexityAndChange": {
+        "files": 255,
+        "revisions": 4120,
+        "complexFiles": 19,
+        "complexRevisions": 530,
+        "complexRevisionShare": 0.1286,
+        "hotspots": [
+          {
+            "path": "packages/api/src/billing/reconcile.ts",
+            "complexity": 41,
+            "revisions": 38
+          },
+          {
+            "path": "packages/db/src/query/build.ts",
+            "complexity": 33,
+            "revisions": 27
+          },
+          {
+            "path": "apps/admin/src/tables/admin-table.tsx",
+            "complexity": 29,
+            "revisions": 24
+          }
+        ]
+      },
+      "tests": {
+        "files": 76,
+        "frameworks": ["Vitest"],
+        "cases": 1420,
+        "parameterized": 38,
+        "skipped": 9,
+        "focused": 0,
+        "todo": 4,
+        "focusedFiles": [],
+        "assertions": [88, 502, 610, 216],
+        "snapshots": 31,
+        "typeTests": 12
+      },
+      "markers": {
+        "files": 262,
+        "lines": 38400,
+        "todo": 64,
+        "fixme": 11,
+        "hack": 3,
+        "xxx": 0,
+        "deprecated": 8,
+        "exportedDeclarations": 1120,
+        "documentedExports": 604,
+        "documentedShare": 0.5393
       }
     }
   }

@@ -82,6 +82,25 @@ describe("limitReport territories", () => {
   });
 });
 
+/** The sample report with three focused test files, which the sample itself has none of. */
+const withFocusedFiles = () => {
+  const report = sampleReport();
+  const typescript = report.deepDives?.typescript;
+  if (typescript?.tests === undefined) {
+    throw new Error("the sample report has no tests block");
+  }
+  const focusedFiles = ["a.test.ts", "b.test.ts", "c.test.ts"];
+  return {
+    ...report,
+    deepDives: {
+      typescript: {
+        ...typescript,
+        tests: { ...typescript.tests, focusedFiles },
+      },
+    },
+  };
+};
+
 describe("limitReport deep dives", () => {
   it("cuts the tsconfig postures to the limit and keeps their number", () => {
     const report = sampleReport();
@@ -91,6 +110,27 @@ describe("limitReport deep dives", () => {
 
     expect(strictness?.configs).toStrictEqual(configs.slice(0, 2));
     expect(strictness?.totalConfigs).toBe(configs.length);
+  });
+
+  it("cuts the hardest functions, the hotspot files and the focused test files to the limit", () => {
+    const limited = limitReport(withFocusedFiles(), 2).deepDives?.typescript;
+
+    expect([
+      limited?.functions?.production.top.map(({ name }) => name),
+      limited?.functions?.tests.top.length,
+      limited?.complexityAndChange?.hotspots.map(({ path }) => path),
+      limited?.tests?.focusedFiles,
+      limited?.functions?.production.functions,
+    ]).toStrictEqual([
+      ["reconcileInvoices", "buildQuery"],
+      2,
+      [
+        "packages/api/src/billing/reconcile.ts",
+        "packages/db/src/query/build.ts",
+      ],
+      ["a.test.ts", "b.test.ts"],
+      1840,
+    ]);
   });
 
   it("leaves a report without deep dives alone", () => {

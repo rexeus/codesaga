@@ -11,6 +11,7 @@ import {
 } from "../knowledge/knowledge.js";
 import type { Report } from "../report/report.js";
 import { STORY_THRESHOLDS } from "../stories/thresholds.js";
+import { TYPESCRIPT_THRESHOLDS } from "../typescript/typescript-thresholds.js";
 
 /** The constants every report applies. */
 export const THRESHOLDS: Report["thresholds"] = {
@@ -20,4 +21,5 @@ export const THRESHOLDS: Report["thresholds"] = {
   stories: STORY_THRESHOLDS,
   badges: { ...TERRITORY_BADGE_THRESHOLDS, ...CONTRIBUTOR_BADGE_THRESHOLDS },
   achievements: ACHIEVEMENT_THRESHOLDS,
+  typescript: TYPESCRIPT_THRESHOLDS,
 };

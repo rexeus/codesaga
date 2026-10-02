@@ -3,9 +3,12 @@
 import { Schema } from "effect";
 
 import { Ecosystem } from "./typescript-ecosystem.js";
+import { ComplexityAndChange, Functions } from "./typescript-functions.js";
 import { Idioms } from "./typescript-idioms.js";
+import { Markers } from "./typescript-markers.js";
 import { Modules } from "./typescript-modules.js";
 import { Strictness } from "./typescript-strictness.js";
+import { Tests } from "./typescript-tests.js";
 import { TypeSafety } from "./typescript-type-safety.js";
 
 const Count = Schema.Natural;
@@ -68,6 +71,14 @@ export const TypeScriptDeepDive = Schema.Struct({
   idioms: Schema.optionalKey(Idioms),
   /** The frameworks and tools in use. */
   ecosystem: Schema.optionalKey(Ecosystem),
+  /** Cognitive complexity and shape of the functions. */
+  functions: Schema.optionalKey(Functions),
+  /** The revisions that landed in the hardest files. */
+  complexityAndChange: Schema.optionalKey(ComplexityAndChange),
+  /** The test cases and how they are marked. */
+  tests: Schema.optionalKey(Tests),
+  /** Debt markers and documented exports of production code. */
+  markers: Schema.optionalKey(Markers),
 });
 export type TypeScriptDeepDive = typeof TypeScriptDeepDive.Type;
 
