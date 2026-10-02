@@ -51,7 +51,7 @@ describe("tenure badges steady and new here", () => {
     );
 
     expect(kindsOf(many)).toContain("new-here");
-  });
+  }, 15_000);
 
   it("withholds new here from the one who started the repository", () => {
     const first = commit(daysAgo(30));

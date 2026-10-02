@@ -95,6 +95,14 @@
       "rhythmNightToHour": 5,
       "rhythmEarlyToHour": 8,
       "rhythmUtcShare": 0.9,
+      "recentWindowDays": 365,
+      "pairPartnerCommits": 5,
+      "longHaulerYears": 3,
+      "longHaulerQuarters": 4,
+      "explorerDays": 90,
+      "explorerMinTerritories": 3,
+      "toolsmithShare": 0.3,
+      "toolsmithMinCommits": 10,
       "reviewerReviews": 10
     },
     "achievements": {

@@ -7,19 +7,9 @@ import {
   daysAgo,
   kindsOf,
   old,
+  territory,
 } from "../testing/contributor-badge-facts.js";
 import { contributorBadges } from "./contributor-badges.js";
-
-const territory = (
-  path: string,
-  files = 5,
-  activeExperts: ReadonlyArray<string> = [ada],
-) => ({
-  path,
-  kind: "package" as const,
-  paths: Array.from({ length: files }, (_, i) => `${path}/f${i}.ts`),
-  activeExperts,
-});
 
 const territories8 = Array.from({ length: 8 }, (_, i) => territory(`pkg${i}`));
 const touching = (count: number) =>

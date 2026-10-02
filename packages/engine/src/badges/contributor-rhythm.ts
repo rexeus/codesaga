@@ -2,7 +2,7 @@
 // Apart from `contributor-badges.ts` because they need only commit times and offsets, and need a guard for clocks they cannot trust.
 // Cost: one pass over the contributor's commits per rule.
 
-import { DateTime } from "effect";
+import type { DateTime } from "effect";
 
 import {
   isoDateOfDay,
@@ -11,6 +11,7 @@ import {
   weekdayOfDay,
 } from "../activity/buckets.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
+import { isActiveWithin } from "../contributors/activeness.js";
 import { countOf, hourLabelOf, percentOf } from "../report/sentences.js";
 import { STORY_THRESHOLDS } from "../stories/thresholds.js";
 import type { EarnedContributorBadge } from "./contributor-badge-category.js";
@@ -38,7 +39,6 @@ const {
   rhythmUtcShare,
 } = RHYTHM_BADGE_THRESHOLDS;
 
-const SECONDS_PER_DAY = 86_400;
 const SATURDAY = 5;
 
 type Habit = {
@@ -115,10 +115,9 @@ export const rhythmBadges = (
   now: DateTime.Utc,
   historyHasOtherOffsets: boolean,
 ): ReadonlyArray<EarnedContributorBadge> => {
-  const since =
-    DateTime.toEpochMillis(now) / 1000 - rhythmWindowDays * SECONDS_PER_DAY;
   const own = commits.filter(
-    ({ class: commitClass, time }) => commitClass === "human" && time > since,
+    ({ class: commitClass, time }) =>
+      commitClass === "human" && isActiveWithin(time, now, rhythmWindowDays),
   );
   if (
     own.length < rhythmMinCommits ||

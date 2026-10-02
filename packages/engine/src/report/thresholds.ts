@@ -125,6 +125,22 @@ const BadgeThresholds = Schema.Struct({
   rhythmEarlyToHour: Count,
   /** The rhythm badges are withheld when at least this share of a person's commits carry +00:00 while the history has other offsets. */
   rhythmUtcShare: Share,
+  /** `pair-partner` and `toolsmith` read the commits of the last this many days. */
+  recentWindowDays: Count,
+  /** `pair-partner` needs this many commits with a human co-author. */
+  pairPartnerCommits: Count,
+  /** `long-hauler` needs a first commit at least this many years ago ... */
+  longHaulerYears: Count,
+  /** ... and a commit in each of this many last quarters. */
+  longHaulerQuarters: Count,
+  /** `explorer` counts first commits in territories within this many days ... */
+  explorerDays: Count,
+  /** ... in at least this many territories. */
+  explorerMinTerritories: Count,
+  /** `toolsmith` needs this share of the commits to change only tooling files ... */
+  toolsmithShare: Share,
+  /** ... out of at least this many commits that change files. */
+  toolsmithMinCommits: Count,
   reviewerReviews: Count,
 });
 

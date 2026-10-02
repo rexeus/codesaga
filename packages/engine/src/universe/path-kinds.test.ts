@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isDocPath, isTestPath } from "./path-kinds.js";
+import { isDocPath, isTestPath, isToolingPath } from "./path-kinds.js";
 
 describe("isTestPath", () => {
   it.each([
@@ -59,5 +59,51 @@ describe("isDocPath", () => {
 
   it("keeps a page inside a releasing directory as documentation", () => {
     expect(isDocPath("docs/releasing/guide.md")).toBe(true);
+  });
+});
+
+describe("isToolingPath", () => {
+  it.each([
+    ".github/workflows/ci.yml",
+    ".github/dependabot.yml",
+    ".gitlab-ci.yml",
+    ".circleci/config.yml",
+    "Dockerfile",
+    "services/api/Dockerfile.dev",
+    "package.json",
+    "packages/engine/package.json",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+    "bun.lock",
+    "bun.lockb",
+    "vite.config.ts",
+    "apps/web/next.config.mjs",
+    "tsconfig.json",
+    "packages/a/tsconfig.build.json",
+    "turbo.json",
+    ".oxlintrc.json",
+    ".eslintrc.cjs",
+    ".prettierrc",
+    "biome.json",
+    "renovate.json",
+    ".changeset/config.json",
+  ])("recognizes %s as tooling", (path) => {
+    expect(isToolingPath(path)).toBe(true);
+  });
+
+  it.each([
+    "src/a.ts",
+    "src/configuration.ts",
+    "src/config/defaults.ts",
+    "README.md",
+    "docs/ci.md",
+    ".changeset/brave-lions-jump.md",
+    "src/dockerfile-parser.ts",
+    "src/package.json.ts",
+    "composer.lock",
+    "tsconfig.ts",
+  ])("does not take %s for tooling", (path) => {
+    expect(isToolingPath(path)).toBe(false);
   });
 });

@@ -2,7 +2,7 @@
 import { DateTime } from "effect";
 
 import type { ClassifiedCommit } from "../automation/classify.js";
-import type { ContributorBadgeFacts } from "../badges/contributor-badges.js";
+import type { ContributorBadgeFacts } from "../badges/contributor-badge-facts.js";
 import { contributorBadges } from "../badges/contributor-badges.js";
 import { at, classifiedCommit } from "./classified-commit.js";
 
@@ -59,3 +59,15 @@ export const kindsOf = (
   contributorBadges(ada, badgeFacts(commits, overrides)).map(
     ({ kind }) => kind,
   );
+
+/** A package territory with `files` universe files and the given active experts. */
+export const territory = (
+  path: string,
+  files = 5,
+  activeExperts: ReadonlyArray<string> = [ada],
+) => ({
+  path,
+  kind: "package" as const,
+  paths: Array.from({ length: files }, (_, i) => `${path}/f${i}.ts`),
+  activeExperts,
+});

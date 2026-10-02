@@ -23,6 +23,7 @@ export const ICON_NAMES = [
   "check",
   "chevron-down",
   "chevron-up",
+  "compass",
   "crosshair",
   "eye",
   "file",
@@ -47,6 +48,7 @@ export const ICON_NAMES = [
   "layers",
   "lock",
   "moon",
+  "mountain",
   "package",
   "refresh-cw",
   "repeat",
@@ -70,6 +72,7 @@ export const ICON_NAMES = [
   "users",
   "users-round",
   "weight",
+  "wrench",
   "zap",
 ] as const;
 

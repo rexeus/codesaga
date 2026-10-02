@@ -13,12 +13,16 @@ const CATEGORY_OF: Record<
   tester: "craft",
   documenter: "craft",
   founder: "journey",
+  "long-hauler": "journey",
+  explorer: "journey",
   steady: "journey",
   "new-here": "journey",
   "back-again": "journey",
+  toolsmith: "craft",
   "night-owl": "rhythm",
   "early-bird": "rhythm",
   "weekend-regular": "rhythm",
+  "pair-partner": "collaboration",
   reviewer: "collaboration",
 };
 
