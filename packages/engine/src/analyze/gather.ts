@@ -53,6 +53,8 @@ export type RepositoryFacts = {
   /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
   readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
+  /** The regular files git tracks in the scope and does not ignore, code or not: the manifests and configs the deep dives read are among them. */
+  readonly tracked: ReadonlyArray<string>;
   /** The directories of the scope that hold a package manifest; "." is the repository root. */
   readonly packageRoots: ReadonlyArray<string>;
   /** The territory detail to start at, as requested; absent for the recommended one. */
@@ -203,6 +205,7 @@ const gatherInRepository = (
       commits,
       headTime,
       universe,
+      tracked,
       packageRoots: packageRootsOf(tracked),
       detail: options.detail,
       blame,

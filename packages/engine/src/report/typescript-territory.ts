@@ -2,6 +2,8 @@
 // The repository's own figures live in `deepDives.typescript`; these let a card be held against them.
 import { Schema } from "effect";
 
+import { TerritoryStrict } from "./typescript-strictness.js";
+
 /**
  * What the deep dive says of a territory's TypeScript and JavaScript files at
  * HEAD. Absent when the territory holds no parsed file of those languages.
@@ -17,5 +19,11 @@ export const TerritoryTypeScript = Schema.Struct({
    * territory has no production line.
    */
   escapesPer1000: Schema.optionalKey(Schema.Finite),
+  /**
+   * `strict` as the configs that govern the territory's files set it: `true`
+   * or `false` when they agree, `mixed` when they do not. Absent when no
+   * config governs one of its files.
+   */
+  strict: Schema.optionalKey(TerritoryStrict),
 });
 export type TerritoryTypeScript = typeof TerritoryTypeScript.Type;

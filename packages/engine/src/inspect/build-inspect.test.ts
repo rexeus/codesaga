@@ -43,6 +43,7 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
   commits,
   headTime: commits[0]?.time ?? 0,
   universe: [inventoryFile("src/a.ts", linesOf(10))],
+  tracked: ["src/a.ts"],
   packageRoots: [],
   detail: undefined,
   blame: undefined,

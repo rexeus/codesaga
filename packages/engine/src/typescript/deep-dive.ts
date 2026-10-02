@@ -9,6 +9,7 @@ import type { TerritoryTypeScript } from "../report/typescript-territory.js";
 import type { TypeScriptFacts } from "./gather-typescript.js";
 import { parsedFilesOf } from "./parsed-file.js";
 import { territoryTypeScriptOf } from "./territory-typescript.js";
+import { strictnessOf } from "./tsconfig/strictness.js";
 import { typeSafetyOf } from "./type-safety/type-safety-report.js";
 
 type Skipped = TypeScriptDeepDive["coverage"]["skipped"];
@@ -58,13 +59,22 @@ export const typescriptAnalysis = (
 ): TypeScriptAnalysis => {
   const parsed = parsedFilesOf(facts.files);
   const byPath = new Map(parsed.map((file) => [file.path, file]));
+  const strictness = strictnessOf(facts.project, [
+    ...facts.declarationFiles,
+    ...facts.files.map(({ path }) => path),
+  ]);
   const hasFacts = parsed.length > 0;
   return {
     section: {
       coverage: coverageOf(facts),
-      ...(hasFacts ? { typeSafety: typeSafetyOf(parsed) } : {}),
+      ...(hasFacts
+        ? { typeSafety: typeSafetyOf(parsed), strictness: strictness.section }
+        : {}),
     },
     forPaths: (paths) =>
-      territoryTypeScriptOf(paths.flatMap((path) => byPath.get(path) ?? [])),
+      territoryTypeScriptOf(
+        paths.flatMap((path) => byPath.get(path) ?? []),
+        strictness.strictOf(paths),
+      ),
   };
 };

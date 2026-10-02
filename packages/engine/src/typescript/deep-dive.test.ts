@@ -11,6 +11,11 @@ const skipped = (reason: "too-deep" | "syntax-error"): FactsResult => ({
   reason,
 });
 
+const NO_PROJECT: TypeScriptFacts["project"] = {
+  configs: [],
+  typescript: { declared: null, major: null },
+};
+
 const ready = { kind: "ready", name: "oxc-parser", version: "9.9.9" } as const;
 
 describe("typescriptDeepDive", () => {
@@ -18,6 +23,7 @@ describe("typescriptDeepDive", () => {
     const facts: TypeScriptFacts = {
       status: ready,
       declarationFiles: ["types/a.d.ts"],
+      project: NO_PROJECT,
       files: [
         { path: "a.ts", lines: 10, result: parsed },
         { path: "b.ts", lines: 10, result: parsed },
@@ -40,13 +46,16 @@ describe("typescriptDeepDive", () => {
     const section = typescriptAnalysis({
       status: ready,
       declarationFiles: [],
+      project: NO_PROJECT,
       files: [{ path: "a.ts", lines: 10, result: parsed }],
     }).section;
 
     expect(section.coverage.skipped).toStrictEqual({});
     expect(section.coverage).not.toHaveProperty("unavailable");
   });
+});
 
+describe("typescriptDeepDive without a parser", () => {
   it("names why the parser is unavailable and has no version for it", () => {
     const unavailable = {
       kind: "unavailable",
@@ -56,6 +65,7 @@ describe("typescriptDeepDive", () => {
     const section = typescriptAnalysis({
       status: unavailable,
       declarationFiles: ["a.d.ts"],
+      project: NO_PROJECT,
       files: [
         {
           path: "a.ts",
@@ -69,6 +79,7 @@ describe("typescriptDeepDive", () => {
       files: 2,
       parsed: 0,
       declarationFiles: 1,
+
       skipped: { "parser-unavailable": 1 },
       parser: { name: "oxc-parser", version: null },
       unavailable: "Cannot find native binding",
@@ -81,6 +92,7 @@ describe("typescriptAnalysis blocks", () => {
     const { section } = typescriptAnalysis({
       status: ready,
       declarationFiles: [],
+      project: NO_PROJECT,
       files: [{ path: "a.ts", lines: 10, result: skipped("syntax-error") }],
     });
 
@@ -95,6 +107,7 @@ describe("typescriptAnalysis blocks", () => {
     const { forPaths } = typescriptAnalysis({
       status: ready,
       declarationFiles: [],
+      project: NO_PROJECT,
       files: [
         { path: "api/a.ts", lines: 300, result: loud },
         { path: "api/b.ts", lines: 100, result: parsed },

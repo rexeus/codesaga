@@ -38,6 +38,10 @@ export const analyze = (
 > =>
   Effect.gen(function* () {
     const facts = yield* gatherFacts(options);
-    const typescript = yield* gatherTypeScript(facts.root, facts.universe);
+    const typescript = yield* gatherTypeScript(
+      facts.root,
+      facts.universe,
+      facts.tracked,
+    );
     return buildReport({ ...facts, typescript });
   });

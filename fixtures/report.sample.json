@@ -3145,7 +3145,8 @@
           "typescript": {
             "files": 38,
             "codeLines": 4300,
-            "escapesPer1000": 4.1
+            "escapesPer1000": 4.1,
+            "strict": true
           }
         },
         {
@@ -3261,7 +3262,8 @@
           "typescript": {
             "files": 14,
             "codeLines": 1700,
-            "escapesPer1000": 2.4
+            "escapesPer1000": 2.4,
+            "strict": "unknown"
           }
         },
         {
@@ -3371,7 +3373,8 @@
           "typescript": {
             "files": 40,
             "codeLines": 4700,
-            "escapesPer1000": 9.8
+            "escapesPer1000": 9.8,
+            "strict": "mixed"
           }
         },
         {
@@ -3474,7 +3477,8 @@
           "typescript": {
             "files": 20,
             "codeLines": 2300,
-            "escapesPer1000": 1.3
+            "escapesPer1000": 1.3,
+            "strict": true
           }
         },
         {
@@ -3675,7 +3679,8 @@
           "typescript": {
             "files": 6,
             "codeLines": 700,
-            "escapesPer1000": 0
+            "escapesPer1000": 0,
+            "strict": true
           }
         },
         {
@@ -3785,7 +3790,8 @@
           "typescript": {
             "files": 5,
             "codeLines": 600,
-            "escapesPer1000": 8.3
+            "escapesPer1000": 8.3,
+            "strict": true
           }
         },
         {
@@ -4666,7 +4672,8 @@
           "typescript": {
             "files": 84,
             "codeLines": 9800,
-            "escapesPer1000": 5.1
+            "escapesPer1000": 5.1,
+            "strict": true
           }
         },
         {
@@ -4794,7 +4801,8 @@
           "typescript": {
             "files": 52,
             "codeLines": 6200,
-            "escapesPer1000": 6.4
+            "escapesPer1000": 6.4,
+            "strict": true
           }
         },
         {
@@ -4922,7 +4930,8 @@
           "typescript": {
             "files": 70,
             "codeLines": 8100,
-            "escapesPer1000": 3.2
+            "escapesPer1000": 3.2,
+            "strict": true
           }
         }
       ]
@@ -5293,6 +5302,143 @@
           }
         },
         "nocheckFiles": ["apps/admin/src/legacy/export-csv.ts"]
+      },
+      "strictness": {
+        "typescript": {
+          "declared": "^5.9.2",
+          "strictByDefault": false
+        },
+        "configs": [
+          {
+            "path": "apps/web/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 96,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": true,
+            "allowJs": true,
+            "checkJs": false,
+            "target": "ES2020",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/ui/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 72,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": true,
+            "isolatedModules": true,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/api/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 64,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": true,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext"
+          },
+          {
+            "path": "apps/admin/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 44,
+            "strict": false,
+            "strictExceptions": ["noImplicitAny"],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": true,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/db/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 40,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext"
+          },
+          {
+            "path": "packages/auth/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": ["@tsconfig/node20/tsconfig.json"],
+            "files": 14,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 8,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          }
+        ],
+        "totalConfigs": 7,
+        "governedFiles": 338,
+        "ungovernedFiles": 7
       }
     }
   }

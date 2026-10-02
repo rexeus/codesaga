@@ -6,6 +6,9 @@ import { Array as Arr, Effect, FileSystem, Path } from "effect";
 import type { InventoryFile } from "../universe/inventory.js";
 import type { FactsResult, SourceText } from "./facts-of-source.js";
 import { isDeclarationPath, isScriptPath } from "./source-kinds.js";
+import { readTsconfigs } from "./tsconfig/read-tsconfigs.js";
+import type { TsconfigProject } from "./tsconfig/strictness.js";
+import { declaredTypeScript } from "./tsconfig/typescript-version.js";
 import { TypeScriptParser } from "./typescript-parser.js";
 import type { ParserStatus } from "./typescript-parser.js";
 
@@ -14,6 +17,8 @@ export type TypeScriptFacts = {
   readonly status: ParserStatus;
   /** Declaration files, which are counted and not parsed. */
   readonly declarationFiles: ReadonlyArray<string>;
+  /** The `tsconfig` files and the declared TypeScript version. */
+  readonly project: TsconfigProject;
   /** Every other file with its verdict and the non-blank lines the universe measured for it. */
   readonly files: ReadonlyArray<{
     readonly path: string;
@@ -71,6 +76,37 @@ const verdicts = (
     return [...judged, ...unreadable];
   });
 
+const TSCONFIG_NAME = /(?:^|\/)tsconfig(?:\.[^/]+)?\.json$/u;
+
+const readText = (
+  root: string,
+  file: string,
+): Effect.Effect<
+  string | undefined,
+  never,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    return yield* fs.readFileString(path.join(root, file));
+  }).pipe(Effect.orElseSucceed(() => undefined));
+
+/** The configs among the tracked files, read with their `extends`, and the TypeScript the root manifest declares. */
+const readProject = (
+  root: string,
+  tracked: ReadonlyArray<string>,
+): Effect.Effect<TsconfigProject, never, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const configs = yield* readTsconfigs(
+      root,
+      tracked.filter((path) => TSCONFIG_NAME.test(path)),
+    );
+    const manifest = yield* readText(root, "package.json");
+    const workspace = yield* readText(root, "pnpm-workspace.yaml");
+    return { configs, typescript: declaredTypeScript(manifest, workspace) };
+  });
+
 /**
  * Reads the universe's TypeScript and JavaScript files below `root` and
  * parses them, or returns undefined when the universe has none, in which case
@@ -80,6 +116,7 @@ const verdicts = (
 export const gatherTypeScript = (
   root: string,
   universe: ReadonlyArray<InventoryFile>,
+  tracked: ReadonlyArray<string>,
 ): Effect.Effect<
   TypeScriptFacts | undefined,
   never,
@@ -103,6 +140,7 @@ export const gatherTypeScript = (
     return {
       status: yield* parser.status,
       declarationFiles,
+      project: yield* readProject(root, tracked),
       files: batches.flat(),
     };
   });

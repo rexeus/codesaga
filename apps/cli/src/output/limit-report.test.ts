@@ -81,3 +81,21 @@ describe("limitReport territories", () => {
     expect(limited.detail).toBe(report.knowledge.territories.detail);
   });
 });
+
+describe("limitReport deep dives", () => {
+  it("cuts the tsconfig postures to the limit and keeps their number", () => {
+    const report = sampleReport();
+    const configs = report.deepDives?.typescript?.strictness?.configs ?? [];
+
+    const strictness = limitReport(report, 2).deepDives?.typescript?.strictness;
+
+    expect(strictness?.configs).toStrictEqual(configs.slice(0, 2));
+    expect(strictness?.totalConfigs).toBe(configs.length);
+  });
+
+  it("leaves a report without deep dives alone", () => {
+    const { deepDives: _deepDives, ...report } = sampleReport();
+
+    expect(limitReport(report, 2)).not.toHaveProperty("deepDives");
+  });
+});
