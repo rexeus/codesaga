@@ -29,6 +29,16 @@ import {
 
 const DEFAULT_HTML_FILE = "codesaga-report.html";
 
+/** `--detail`, and `--depth`, its hidden alias from before the glossary named the concept. */
+const detailFlag = (name: "detail" | "depth") =>
+  Flag.Int(name).pipe(
+    Flag.filter(
+      (value) => value >= 1,
+      (value) => `--${name} must be 1 or greater, got ${value}`,
+    ),
+    Flag.optional,
+  );
+
 export const analyzeCommand = Command.make(
   "analyze",
   {
@@ -79,9 +89,15 @@ export const analyzeCommand = Command.make(
       ),
       Flag.withDefault(true),
     ),
+    detail: detailFlag("detail").pipe(
+      Flag.withDescription(
+        "Knowledge detail to start at: 1 is the packages (or top-level folders), each further detail splits more of the big territories and those whose folders have different experts; a detail beyond the finest one means the finest (default: the detail recommended for the team)",
+      ),
+    ),
+    depth: detailFlag("depth").pipe(Flag.withHidden),
     limit: Flag.Int("limit").pipe(
       Flag.withDescription(
-        `Contributors and knowledge directories to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
+        `Contributors, knowledge directories and territories (first-cut and inside each territory) to report in --json; 0 for no limit (default ${DEFAULT_LIMIT})`,
       ),
       Flag.filter(
         (limit) => limit >= 0,
@@ -104,7 +120,10 @@ export const analyzeCommand = Command.make(
     // A path argument both locates the repository and narrows the scope,
     // so `codesaga analyze ../other-repo` works from anywhere.
     const target = yield* resolveAnalysisTarget(cwd, path);
-    const settings = yield* resolveSettings(target.cwd, flags);
+    const settings = yield* resolveSettings(target.cwd, {
+      ...flags,
+      detail: Option.orElse(flags.detail, () => flags.depth),
+    });
     const options: AnalyzeOptions = {
       ...target,
       ...engineOptions(settings),

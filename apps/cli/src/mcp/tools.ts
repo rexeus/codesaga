@@ -57,7 +57,15 @@ const AnalyzeTool = Tool.make("analyze", {
     exclude,
     limit: optional(
       Schema.Natural,
-      `Contributors and knowledge directories to return; 0 for no limit (default ${DEFAULT_LIMIT})`,
+      `Contributors, knowledge directories and territories (first-cut and inside each territory) to return; 0 for no limit (default ${DEFAULT_LIMIT})`,
+    ),
+    detail: optional(
+      Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+      "Knowledge detail to start at: 1 is the packages (or top-level folders), each further detail splits more of the big territories and those whose folders have different experts; the whole territory tree is returned, this detail is knowledge.territories.detail; a detail beyond the finest one means the finest. Default: the repository's .codesaga.json, else the detail recommended for the team",
+    ),
+    depth: optional(
+      Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
+      "Deprecated alias of detail; detail wins when both are given",
     ),
     compare: optional(
       Schema.String,

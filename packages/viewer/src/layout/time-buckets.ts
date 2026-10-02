@@ -1,5 +1,7 @@
 import type { Report } from "@codesaga/engine";
 
+import { formatDateLong, formatMonth } from "../present/format.js";
+
 type Activity = Report["activity"];
 
 /** Whether each bar stands for a week or for a calendar month. */
@@ -29,7 +31,7 @@ export const monthSpan = (month: string): readonly [number, number] => {
 
 const weekBuckets = ({ weeks }: Activity): Bucket[] =>
   weeks.map((week) => ({
-    label: `Week of ${week.start}`,
+    label: `Week of ${formatDateLong(week.start)}`,
     start: weekStart(week.start),
     end: weekStart(week.start) + 7 * MS_PER_DAY,
     commits: week.commits,
@@ -54,7 +56,7 @@ const monthBuckets = ({ weeks, months }: Activity): Bucket[] => {
   return months.map(({ month, commits }) => {
     const [start, end] = monthSpan(month);
     const { added = 0, deleted = 0 } = churn.get(month) ?? {};
-    return { label: month, start, end, commits, added, deleted };
+    return { label: formatMonth(month), start, end, commits, added, deleted };
   });
 };
 
@@ -70,23 +72,13 @@ export const bucketActivity = (
     ? { resolution: "weeks", buckets: weekBuckets(activity) }
     : { resolution: "months", buckets: monthBuckets(activity) };
 
-/** The UTC milliseconds the activity covers, or null without any week or month. */
-export const timeDomain = ({
-  weeks,
-  months,
-}: Activity): readonly [number, number] | null => {
-  const spans = [
-    ...weeks.map((week): readonly [number, number] => [
-      weekStart(week.start),
-      weekStart(week.start) + 7 * MS_PER_DAY,
-    ]),
-    ...months.map(({ month }) => monthSpan(month)),
-  ];
-  if (spans.length === 0) {
-    return null;
-  }
-  return [
-    Math.min(...spans.map(([start]) => start)),
-    Math.max(...spans.map(([, end]) => end)),
-  ];
-};
+/** The UTC milliseconds from the first span's start to the last span's end, or null without any span. */
+export const spanOf = (
+  spans: readonly (readonly [number, number])[],
+): readonly [number, number] | null =>
+  spans.length === 0
+    ? null
+    : [
+        Math.min(...spans.map(([start]) => start)),
+        Math.max(...spans.map(([, end]) => end)),
+      ];

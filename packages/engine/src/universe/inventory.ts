@@ -4,28 +4,25 @@ import type { FileSystem, Path } from "effect";
 
 import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
+import type { TextMeasure } from "../stats/measure-text.js";
 import { matchesAny } from "./globs.js";
 import { isSourceLanguage } from "./languages.js";
 import { measureSourceFile } from "./source-file.js";
-import { listTrackedFiles, withoutGeneratedFiles } from "./tracked-files.js";
+import { withoutGeneratedFiles } from "./tracked-files.js";
 
 export type InventoryOptions = {
   /** Absolute path of the work tree root. */
   readonly root: string;
-  /** Repository-relative directory the universe is limited to; "." for all. */
-  readonly scope: string;
+  /** The regular files git tracks in the scope and does not ignore, from `listTrackedFiles`. */
+  readonly tracked: ReadonlyArray<string>;
   /** Globs that replace the language allow-list when non-empty. */
   readonly include: ReadonlyArray<string>;
   /** Globs removed after `include`. */
   readonly exclude: ReadonlyArray<string>;
 };
 
-/** A file that counts, with what reading it revealed. */
-export type InventoryFile = {
-  readonly path: string;
-  /** Non-blank lines. */
-  readonly loc: number;
-};
+/** A file that counts, with what reading it revealed: its `loc` of non-blank lines and the measures the stats add up. */
+export type InventoryFile = { readonly path: string } & TextMeasure;
 
 /** Files read at once; bounds open file handles. */
 const READ_CONCURRENCY = 16;
@@ -67,10 +64,10 @@ export const namedAsCode = (
 };
 
 /**
- * Builds the universe: tracked, not ignored, not `linguist-generated` or
- * `linguist-vendored`, named like code (a language allow-list, or `include`
- * instead of it, then `exclude`), and readable as unminified text.
- * Files come back sorted by path.
+ * Builds the universe from the tracked files: those not marked
+ * `linguist-generated` or `linguist-vendored`, named like code (a language
+ * allow-list, or `include` instead of it, then `exclude`), and readable as
+ * unminified text. Files come back sorted by path.
  *
  * Git must run in `options.root`.
  */
@@ -82,16 +79,15 @@ export const inventory = (
   Git | FileSystem.FileSystem | Path.Path
 > =>
   Effect.gen(function* () {
-    const tracked = yield* listTrackedFiles(options.scope);
     const isCode = namedAsCode(options);
     const candidates = yield* withoutGeneratedFiles(
-      tracked.filter((path) => isCode(path)),
+      options.tracked.filter((path) => isCode(path)),
     );
     const measured = yield* Effect.forEach(
       candidates,
       (path) =>
-        Effect.map(measureSourceFile(options.root, path), (loc) =>
-          loc === undefined ? undefined : { path, loc },
+        Effect.map(measureSourceFile(options.root, path), (measure) =>
+          measure === undefined ? undefined : { path, ...measure },
         ),
       { concurrency: READ_CONCURRENCY },
     );

@@ -2,8 +2,7 @@
 // An argument matches a universe file when it names the file, a directory above it, or a glob matching either.
 // Pure, so the matching and the aggregation are testable without git.
 
-import { DateTime } from "effect";
-
+import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
 import type { RepositoryFacts } from "../analyze/gather.js";
 import { prepareAnalysis } from "../analyze/prepare.js";
 import type { Analysis } from "../analyze/prepare.js";
@@ -20,9 +19,6 @@ import { matchesAny } from "../universe/globs.js";
 import { automationReasons } from "./automation-reasons.js";
 
 type Entry = InspectResult["matches"][number];
-
-const isoOf = (seconds: number): string =>
-  DateTime.formatIso(DateTime.makeUnsafe(seconds * 1000));
 
 /**
  * The paths an argument matches: the file itself, files below a matching
@@ -67,7 +63,7 @@ const entryOf = (
     experts: set.experts,
     ...lineOwnersField(set.lineOwners),
     commits: touching.length,
-    lastCommitAt: touching.length === 0 ? null : isoOf(last),
+    lastCommitAt: touching.length === 0 ? null : isoOfEpochSeconds(last),
     automation: totalsOf(touching),
     reasons: [...set.reasons, ...automationReasons(touching)],
   };

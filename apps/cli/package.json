@@ -21,7 +21,8 @@
     "codesaga": "dist/codesaga.js"
   },
   "files": [
-    "dist/codesaga.js"
+    "dist/codesaga.js",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "type": "module",
   "publishConfig": {

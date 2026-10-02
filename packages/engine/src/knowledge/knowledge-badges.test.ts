@@ -1,0 +1,155 @@
+import { DateTime } from "effect";
+import { describe, expect, it } from "vitest";
+
+import type { ClassifiedCommit } from "../automation/classify.js";
+import { at, classifiedCommit } from "../testing/classified-commit.js";
+import { inventoryFile, universeStatsOf } from "../testing/inventory-file.js";
+import { knowledge } from "./knowledge.js";
+
+const now = DateTime.makeUnsafe("2026-03-01T00:00:00Z");
+const ada = { name: "Ada", email: "ada@example.com" };
+const grace = { name: "Grace", email: "grace@example.com" };
+
+const filesIn = (directory: string): ReadonlyArray<string> =>
+  Array.from({ length: 3 }, (_, index) => `${directory}/f${index}.ts`);
+
+const paths = [...filesIn("packages/api"), ...filesIn("packages/web")];
+
+const touching = (
+  time: string,
+  directory: string,
+  author: ClassifiedCommit["author"],
+): ClassifiedCommit =>
+  classifiedCommit({
+    time: at(time),
+    author,
+    changes: filesIn(directory).map((path) => ({
+      path,
+      added: 10,
+      deleted: 0,
+    })),
+  });
+
+const run = (commits: ReadonlyArray<ClassifiedCommit>, shallow = false) =>
+  knowledge({
+    commits,
+    universe: paths.map((path) => inventoryFile(path)),
+    stats: universeStatsOf(
+      paths.map((path) => inventoryFile(path)),
+      commits,
+    ),
+    scope: ".",
+    packageRoots: ["packages/api", "packages/web"],
+    shallow,
+    headTime: at("2026-02-25T00:00:00Z"),
+    now,
+  });
+
+const kindsOf = (result: ReturnType<typeof run>, path: string) =>
+  result.section.territories.territories
+    .find((territory) => territory.path === path)
+    ?.badges.map(({ kind }) => kind);
+
+// api: Ada since 2025; web: Grace, created in February
+const history = [
+  touching("2026-02-20T00:00:00Z", "packages/web", grace),
+  touching("2026-02-10T00:00:00Z", "packages/api", ada),
+  touching("2025-01-10T00:00:00Z", "packages/api", ada),
+];
+
+describe("knowledge territory badges", () => {
+  const result = run(history);
+
+  it("awards the badges the territory's knowledge and history earn", () => {
+    expect(kindsOf(result, "packages/web")).toStrictEqual([
+      "island",
+      "new-territory",
+    ]);
+    expect(kindsOf(result, "packages/api")).toStrictEqual(["island"]);
+  });
+
+  it("awards in focus to the one territory with the most commits in the last 90 days", () => {
+    // each territory has one commit in the last 90 days: no territory is in focus
+    expect(kindsOf(result, "packages/web")).not.toContain("in-focus");
+
+    const focused = run([
+      touching("2026-02-21T00:00:00Z", "packages/web", grace),
+      ...history,
+    ]);
+
+    expect(kindsOf(focused, "packages/web")).toContain("in-focus");
+    expect(kindsOf(focused, "packages/api")).not.toContain("in-focus");
+  });
+
+  it("does not count old commits or bot commits towards the territory in focus", () => {
+    const years = Array.from({ length: 5 }, (_, i) =>
+      touching(`2025-0${i + 1}-10T00:00:00Z`, "packages/api", ada),
+    );
+    const bot = classifiedCommit({
+      time: at("2026-02-22T00:00:00Z"),
+      class: "bot",
+      tools: ["Dependabot"],
+      changes: filesIn("packages/api").map((path) => ({
+        path,
+        added: 1,
+        deleted: 0,
+      })),
+    });
+
+    // api: five old commits, one bot commit and one recent commit; web: two recent commits
+    const focused = run([
+      touching("2026-02-21T00:00:00Z", "packages/web", grace),
+      touching("2026-02-20T00:00:00Z", "packages/web", grace),
+      bot,
+      ...history.slice(1),
+      ...years,
+    ]);
+
+    expect(kindsOf(focused, "packages/web")).toContain("in-focus");
+    expect(kindsOf(focused, "packages/api")).not.toContain("in-focus");
+  });
+});
+
+describe("knowledge recommended territories", () => {
+  it("describes the recommended detail's territories for the other sections", () => {
+    const { recommendedTerritories } = run(history);
+
+    expect(
+      recommendedTerritories.map(({ path, orphaned, withoutActiveExpert }) => [
+        path,
+        orphaned,
+        withoutActiveExpert,
+      ]),
+    ).toStrictEqual([
+      ["packages/api", false, 0],
+      ["packages/web", false, 0],
+    ]);
+    expect(
+      recommendedTerritories.map(({ activeExperts }) => activeExperts),
+    ).toStrictEqual([[ada.email], [grace.email]]);
+  });
+});
+
+describe("knowledge territory badges in a shallow clone", () => {
+  it("awards no badge that needs the first commits in a shallow clone", () => {
+    const newcomers = [
+      touching("2026-02-20T00:00:00Z", "packages/web", grace),
+      touching("2026-02-10T00:00:00Z", "packages/web", {
+        ...ada,
+        email: "b@example.com",
+      }),
+      touching("2025-01-10T00:00:00Z", "packages/web", ada),
+    ];
+
+    expect(kindsOf(run(newcomers), "packages/web")).toEqual(
+      expect.arrayContaining(["newcomer-friendly"]),
+    );
+    expect(kindsOf(run(history), "packages/web")).toContain("new-territory");
+    expect(kindsOf(run(newcomers, true), "packages/web")).not.toContain(
+      "newcomer-friendly",
+    );
+    expect(kindsOf(run(history, true), "packages/web")).not.toContain(
+      "new-territory",
+    );
+  });
+});

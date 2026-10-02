@@ -106,6 +106,26 @@ layer(NodeServices.layer)("readHistory changes", (it) => {
   );
 });
 
+layer(NodeServices.layer)("readHistory renames", (it) => {
+  it.effect(
+    "marks the commits that renamed a file, under the file's current path",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitRenamedTwice(repo);
+
+        const commits = yield* history(repo);
+
+        assert.deepStrictEqual(
+          commits.map((commit) =>
+            commit.changes.map((c) => c.renamed === true),
+          ),
+          [[false], [true], [false], [true], [false], [false, false]],
+        );
+      }),
+  );
+});
+
 /** The path and life of every change, newest commit first. */
 const lives = (commits: ReadonlyArray<HistoryCommit>) =>
   commits.map((commit) =>

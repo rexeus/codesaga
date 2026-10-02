@@ -20,6 +20,7 @@
     "@types/node": "catalog:",
     "d3-scale": "catalog:",
     "d3-shape": "catalog:",
+    "lucide-static": "catalog:",
     "rolldown": "catalog:",
     "tsx": "4.23.15",
     "vitest": "catalog:"

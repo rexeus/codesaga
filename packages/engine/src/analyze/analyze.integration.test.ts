@@ -3,12 +3,16 @@ import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
+import type { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
 
 const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
+
+const zeros = (count: number): Array<number> =>
+  Array.from({ length: count }, () => 0);
 
 const lines = (prefix: string, count: number): string =>
   Array.from({ length: count }, (_, index) => `${prefix}${index}\n`).join("");
@@ -92,6 +96,19 @@ const commitKnownHistory = (repo: TempRepository) =>
     yield* commitAfterDependabot(repo);
   });
 
+const graceBadges: Report["contributors"][number]["badges"] = [
+  {
+    kind: "founder",
+    label: "Founder",
+    evidence: "First author of 50% of today's files.",
+  },
+  {
+    kind: "new-here",
+    label: "New here",
+    evidence: "First commit on 2026-02-04, 33 days ago.",
+  },
+];
+
 layer(NodeServices.layer)("analyze a known history", (it) => {
   it.effect("reports the exact window and overview", () =>
     Effect.gen(function* () {
@@ -108,7 +125,13 @@ layer(NodeServices.layer)("analyze a known history", (it) => {
       });
       assert.deepStrictEqual(report.overview, {
         commits: 8,
-        contributors: { total: 3, active30: 2, active90: 3, active365: 3 },
+        contributors: {
+          total: 3,
+          active30: 2,
+          active90: 3,
+          active365: 3,
+          allTime: 3,
+        },
         files: 2,
         loc: 22,
         languages: [{ name: "TypeScript", files: 2, loc: 22 }],
@@ -172,6 +195,10 @@ layer(NodeServices.layer)("analyze automation", (it) => {
           lastCommitAt: "2026-03-05T12:00:00.000Z",
           active: true,
           areas: [{ path: "src", commits: 3 }],
+          // the week of Monday 2026-02-02 once, the week of 2026-03-02 twice; now is Tuesday 2026-03-10
+          weekly: [...zeros(46), 1, 0, 0, 0, 2, 0],
+          status: "new",
+          badges: graceBadges,
         });
       }),
   );

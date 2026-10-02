@@ -58,7 +58,7 @@ pnpm --filter codesaga dev <args>                        # run the CLI from sour
 | `codesaga` (`apps/cli`) | arguments, terminal and JSON output, exit codes, opening the browser                          | none — only the `bin`                                                    |
 
 - The engine imports no workspace package and no `node:` builtin; it reaches the platform through Effect services (`FileSystem`, `Path`, `ChildProcessSpawner`). Its only runtime dependencies are `effect` and `picomatch`.
-- The viewer is plain browser code: no Effect, no `node:`, and engine **types** only (`import type`). Its charts use `d3-scale` and `d3-shape`.
+- The viewer is plain browser code: no Effect, no `node:`, and engine **types** only (`import type`). Its charts use `d3-scale` and `d3-shape`; its icons are the Lucide subset that `scripts/build.ts` inlines (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 - The CLI composes engine and viewer through their entry points only.
 - Inside a package, group code in one folder per responsibility (`git/`, `history/`, `report/`, …). Types and errors live with the module that owns them; there is no shared `errors.ts` or `types.ts`. A folder whose files serve different responsibilities is two folders.
 - A package's only barrel is its `src/index.ts`. Every export there has a production caller; knip rejects the rest. Inside a package, import the module that owns a symbol.

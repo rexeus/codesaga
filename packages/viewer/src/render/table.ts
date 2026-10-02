@@ -1,38 +1,15 @@
 import { showAllLabel, visibleRows } from "../present/row-limit.js";
 import type { RowLimit } from "../present/row-limit.js";
-import { nextSort } from "../present/sort-state.js";
-import type { Direction, SortState } from "../present/sort-state.js";
 import { h } from "./dom.js";
 
 /** A table column: a header and how to show a row's cell. */
 export type Column<Row> = {
   readonly label: string;
   readonly numeric?: boolean;
-  /** Makes the header a button that sorts by this key. */
-  readonly sortKey?: string;
   readonly cell: (row: Row) => Node | string;
 };
 
-/** How a table sorts: its first state, the order a state gives and each column's first direction. */
-type Sorting<Row> = {
-  readonly initial: SortState;
-  readonly sort: (rows: readonly Row[], state: SortState) => Row[];
-  readonly natural: (key: string) => Direction;
-};
-
-/** How a table behaves beyond its columns. */
-export type TableOptions<Row> = {
-  readonly sorting?: Sorting<Row>;
-  /** Defaults to the first 100 rows. */
-  readonly rowLimit?: RowLimit;
-};
-
-const DEFAULT_ROW_LIMIT: RowLimit = { rows: 100, noun: "rows" };
-const ARROWS: Record<Direction, string> = { asc: "▲", desc: "▼" };
-const ARIA_SORT: Record<Direction, string> = {
-  asc: "ascending",
-  desc: "descending",
-};
+const ROW_LIMIT: RowLimit = { rows: 100, noun: "rows" };
 
 const bodyRows = <Row>(
   columns: readonly Column<Row>[],
@@ -48,81 +25,25 @@ const bodyRows = <Row>(
     ),
   );
 
-const directionOf = (
-  state: SortState | undefined,
-  key: string | undefined,
-): Direction | null =>
-  state !== undefined && key !== undefined && state.key === key
-    ? state.direction
-    : null;
-
-/** A header cell; a sortable one holds a button and shows the sort direction. */
-const headerCell = <Row>(
-  { label, numeric, sortKey }: Column<Row>,
-  onSort: ((key: string) => void) | null,
-): { th: HTMLElement; show: (state: SortState | undefined) => void } => {
-  const th = h("th", numeric === true ? "num" : "");
-  if (sortKey === undefined || onSort === null) {
-    th.textContent = label;
-    return { th, show: () => undefined };
-  }
-  const arrow = h("span", "arrow");
-  const button = h("button", "sort", label, arrow);
-  button.type = "button";
-  button.addEventListener("click", () => {
-    onSort(sortKey);
-  });
-  th.append(button);
-  return {
-    th,
-    show: (state) => {
-      const direction = directionOf(state, sortKey);
-      arrow.textContent = direction === null ? "" : ARROWS[direction];
-      th.setAttribute(
-        "aria-sort",
-        direction === null ? "none" : ARIA_SORT[direction],
-      );
-    },
-  };
-};
-
 /**
- * A table of `rows`. Only the first `rowLimit.rows` rows are built until the
- * reader asks for all of them, so a report with thousands of rows stays fast.
- * With `sorting`, headers of columns with a `sortKey` sort the rows on click.
+ * A table of `rows`. Only the first 100 rows are built until the reader asks
+ * for all of them, so a report with thousands of rows stays fast.
  */
 export const dataTable = <Row>(
   caption: string,
   columns: readonly Column<Row>[],
   rows: readonly Row[],
-  { sorting, rowLimit = DEFAULT_ROW_LIMIT }: TableOptions<Row> = {},
 ): HTMLElement => {
-  let state = sorting?.initial;
   let showAll = false;
   const body = h("tbody", "");
-  const more = h("button", "show-all", showAllLabel(rows.length, rowLimit));
+  const more = h("button", "show-all", showAllLabel(rows.length, ROW_LIMIT));
   more.type = "button";
 
   const render = (): void => {
-    const ordered =
-      sorting === undefined || state === undefined
-        ? rows
-        : sorting.sort(rows, state);
-    const shown = visibleRows(ordered, rowLimit, showAll);
+    const shown = visibleRows(rows, ROW_LIMIT, showAll);
     body.replaceChildren(...bodyRows(columns, shown));
     more.hidden = shown.length === rows.length;
-    for (const { show } of headers) {
-      show(state);
-    }
   };
-  const onSort =
-    sorting === undefined
-      ? null
-      : (key: string): void => {
-          state = nextSort(state ?? sorting.initial, key, sorting.natural(key));
-          render();
-        };
-  const headers = columns.map((column) => headerCell(column, onSort));
   more.addEventListener("click", () => {
     showAll = true;
     render();
@@ -135,7 +56,17 @@ export const dataTable = <Row>(
       "table",
       "data",
       h("caption", "visually-hidden", caption),
-      h("thead", "", h("tr", "", ...headers.map(({ th }) => th))),
+      h(
+        "thead",
+        "",
+        h(
+          "tr",
+          "",
+          ...columns.map(({ label, numeric }) =>
+            h("th", numeric === true ? "num" : "", label),
+          ),
+        ),
+      ),
       body,
     ),
     more,

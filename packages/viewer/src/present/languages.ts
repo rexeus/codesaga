@@ -54,11 +54,31 @@ const tenthsOfPercent = (values: readonly number[]): number[] => {
 };
 
 /**
- * Lines of code per language as shares, most lines first. Beyond seven
- * languages the tail folds into "Other": the palette has no more hues.
+ * The entity class of a language by name: the repository's seven biggest
+ * languages, in the order given, get a categorical slot each (`slot-1` to
+ * `slot-7`) and every other language the neutral one, so a language keeps its
+ * color in every bar and legend of the page.
+ */
+export const languageEntities = (
+  languages: readonly { readonly name: string }[],
+): ((name: string) => string) => {
+  const slots = new Map(
+    languages
+      .slice(0, MAX_NAMED)
+      .map(({ name }, index) => [name, `slot-${index + 1}`]),
+  );
+  return (name) => slots.get(name) ?? "slot-other";
+};
+
+/**
+ * Lines of code per language as shares, most lines first, each colored by
+ * `entityOf` (by default the first seven languages of the list, in order).
+ * Beyond seven languages the tail folds into "Other": the palette has no more
+ * hues.
  */
 export const languageShares = (
   languages: readonly Language[],
+  entityOf: (name: string) => string = languageEntities(languages),
 ): LanguageShare[] => {
   const folded = foldTail(languages);
   const tenths = tenthsOfPercent(folded.map(({ loc }) => loc));
@@ -67,9 +87,6 @@ export const languageShares = (
     files,
     loc,
     percent: (tenths[index] ?? 0) / 10,
-    entity:
-      languages.length > MAX_NAMED && index === MAX_NAMED
-        ? "slot-other"
-        : `slot-${index + 1}`,
+    entity: entityOf(name),
   }));
 };

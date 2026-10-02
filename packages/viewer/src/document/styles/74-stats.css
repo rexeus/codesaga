@@ -1,0 +1,262 @@
+/* The Stats section: histograms on the left, the numbers that go with them on the right. */
+.col {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  gap: 16px;
+  min-width: 0;
+}
+
+svg .mark.bin {
+  fill: var(--accent);
+  opacity: 0.5;
+}
+
+svg .mark.bin.median {
+  opacity: 1;
+}
+
+.c-median {
+  --mark: var(--accent);
+}
+
+.chart .legend {
+  flex: none;
+}
+
+.facts3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
+  margin: 6px 0 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--grid);
+}
+
+.facts3 > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.facts3 b {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.facts3 span {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.facts3 .wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.facts3 .wide .mono {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lang-bar.big {
+  height: 12px;
+  margin: 4px 0 14px;
+}
+
+.ltable {
+  display: flex;
+  flex-direction: column;
+}
+
+.lt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px 72px 50px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.lt span:nth-child(n + 2) {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.lt.head {
+  padding-top: 0;
+  border-top: 0;
+  color: var(--ink-3);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lt .k {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+.tvrow {
+  margin-bottom: 18px;
+}
+
+.tvh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+  font-size: 12.5px;
+}
+
+.tvp {
+  margin-top: 6px;
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.tvp b {
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.tbar.big {
+  height: 12px;
+}
+
+.toplist {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.tl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(60px, 120px) 40px;
+  gap: 12px;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 12.5px;
+}
+
+.tl .mono {
+  overflow: hidden;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl .bar {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--grid);
+}
+
+.tl .bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.tl b {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.srows {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.srow {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 13px 0;
+  border-top: 1px solid var(--grid);
+}
+
+.srow:first-child {
+  padding-top: 4px;
+  border-top: 0;
+}
+
+.srow .slabel {
+  margin-top: 3px;
+}
+
+.sval > * + * {
+  margin-top: 8px;
+}
+
+.sval .v {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.sval .v b {
+  color: var(--ink);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.pbar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--grid);
+  overflow: hidden;
+}
+
+.pbar i {
+  display: block;
+  min-width: 2px;
+  height: 100%;
+  background: var(--mark, var(--accent));
+}
+
+@media (max-width: 640px) {
+  .srow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .facts3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .lt {
+    grid-template-columns: minmax(0, 1fr) 44px 62px 44px;
+    font-size: 12.5px;
+  }
+
+  .tl {
+    grid-template-columns: minmax(0, 1fr) 70px 36px;
+  }
+}

@@ -59,3 +59,25 @@ describe("limitReport", () => {
     expect(limited.pullRequests?.months).toStrictEqual(pullRequests.months);
   });
 });
+
+describe("limitReport territories", () => {
+  it("cuts the first cut and the territories inside each one to the limit and keeps every total", () => {
+    const report = sampleReport();
+
+    const limited = limitReport(report, 2).knowledge.territories;
+
+    expect(limited.totalTerritories).toBe(11);
+    expect(limited.territories.map(({ path }) => path)).toStrictEqual([
+      "docs",
+      "packages/db",
+    ]);
+    const db = limited.territories[1];
+    expect(db?.totalTerritories).toBe(3);
+    expect(db?.territories.map(({ path }) => path)).toStrictEqual([
+      "packages/db/migrations",
+      "packages/db/src",
+    ]);
+    expect(db?.territories[1]?.totalTerritories).toBe(2);
+    expect(limited.detail).toBe(report.knowledge.territories.detail);
+  });
+});

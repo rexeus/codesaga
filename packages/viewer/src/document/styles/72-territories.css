@@ -1,0 +1,672 @@
+/* Territory cards: collapsed in a grid, opened to the full width with their stats and the territories inside them. */
+.territories {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.territory {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 18px 14px;
+}
+
+.territory:focus {
+  outline: none;
+}
+
+.territory:focus-visible,
+.tsub:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.territory.open {
+  grid-column: 1 / -1;
+  gap: 8px;
+  padding: 20px 24px 24px;
+}
+
+.territory .top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pathrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.territory .right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tkind {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
+.path {
+  min-width: 0;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+.path b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.path .of {
+  font-family: var(--sans);
+  font-size: 12px;
+}
+
+.territory.open .path {
+  font-size: 15px;
+}
+
+.meta {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.meta b {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.small {
+  font-size: 12.5px;
+}
+
+.territory .tfoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--grid);
+}
+
+.inside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.inside svg {
+  color: var(--accent-ink);
+}
+
+.chips-mini {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mc {
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.mc.more {
+  padding-left: 2px;
+  border-color: transparent;
+  background: none;
+  color: var(--ink-3);
+}
+
+.mini {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mini:hover {
+  border-color: var(--axis);
+  color: var(--ink);
+}
+
+.ctl2 {
+  display: flex;
+  gap: 6px;
+}
+
+/* Badges: a category color each, a warning ring for the risks. */
+.pill.tone-knowledge,
+.pill.tone-code,
+.pill.tone-activity {
+  background: color-mix(in srgb, var(--tone) 15%, transparent);
+  color: color-mix(in srgb, var(--tone) 52%, var(--ink));
+}
+
+.pill.tone-knowledge svg,
+.pill.tone-code svg,
+.pill.tone-activity svg {
+  color: color-mix(in srgb, var(--tone) 85%, var(--ink));
+}
+
+.pill.tone-knowledge {
+  --tone: var(--cat-knowledge);
+}
+
+.pill.tone-code {
+  --tone: var(--cat-code);
+}
+
+.pill.tone-activity {
+  --tone: var(--cat-activity);
+}
+
+.pill.tone-warn {
+  background: var(--warn-wash);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--warn-ink) 45%, transparent);
+  color: var(--warn-ink);
+}
+
+.pill.tone-crit {
+  background: var(--crit-wash);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--crit-ink) 45%, transparent);
+  color: var(--crit-ink);
+}
+
+.swatch.cat-risk {
+  width: 14px;
+  background: var(--warn-wash);
+  box-shadow: inset 0 0 0 1.5px var(--warn-ink);
+}
+
+.blist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.brow .ev {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+/* An opened territory. */
+.statsband {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--grid);
+}
+
+.territory .body {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 28px;
+  margin-top: 10px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--grid);
+}
+
+.territory .body.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.territory .body.one {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ptitle {
+  margin-top: 6px;
+  color: var(--ink-3);
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pane > .ptitle:first-child,
+.statsband > .ptitle {
+  margin-top: 0;
+}
+
+.nest {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reason {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 11px;
+  border-radius: 9px;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.reason svg {
+  flex: none;
+}
+
+.subs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tsub {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.tsub.other {
+  border-style: dashed;
+  border-color: var(--axis);
+  background: transparent;
+}
+
+.tsub .tsub {
+  background: var(--surface);
+}
+
+.tsub:focus {
+  outline: none;
+}
+
+.tsub > .nest {
+  margin-top: 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--axis);
+}
+
+.sub-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.sub-top .sp {
+  flex: 1;
+}
+
+.sub-top .path {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.ebar.thin {
+  height: 8px;
+}
+
+.owners-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.own {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.own .sw {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--mark, var(--other));
+}
+
+.own b {
+  font-weight: 650;
+}
+
+.later,
+.flat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.later svg,
+.flat svg {
+  flex: none;
+}
+
+.linkbtn:focus-visible,
+.mini:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The stats of a territory. */
+.spanel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+.statsband .spanel .sitem:first-child {
+  grid-column: span 2;
+}
+
+.tsub .spanel {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.tsub .spanel .sitem:first-child,
+.spanel .scmp {
+  grid-column: 1 / -1;
+}
+
+.sitem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sitem.two {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.slabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sbig {
+  margin-top: 6px;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.cap {
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.cap b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.cap.sub {
+  color: var(--ink-3);
+  font-size: 12px;
+  overflow-wrap: break-word;
+}
+
+.cap .mono {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+.mm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.mm b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.range {
+  position: relative;
+  height: 14px;
+  margin: 2px 6px;
+}
+
+.range::before,
+.range .rfill {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--grid);
+  content: "";
+}
+
+.range .rfill {
+  background: var(--accent);
+  opacity: 0.35;
+}
+
+.range .rdot {
+  position: absolute;
+  top: 1px;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  transform: translateX(-50%);
+}
+
+.cmp,
+.tbar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--grid);
+}
+
+.tbar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  background: none;
+}
+
+.tbar i {
+  display: block;
+  min-width: 3px;
+  border-radius: 3px;
+  background: var(--mark, var(--other));
+}
+
+.cmp .fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.cmp .ref {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+  transform: translateX(-1px);
+}
+
+.scmp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+.scmp .fill {
+  display: inline-block;
+  width: 18px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.scmp .ref {
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  margin-left: 12px;
+  background: var(--ink);
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.facts b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.spanel .lang-bar {
+  margin: 4px 0 6px;
+}
+
+/* Solo cards. */
+.territories.solo .size {
+  margin-top: 2px;
+}
+
+@media (max-width: 1100px) {
+  .territories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .territory .body,
+  .territory .body.two {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .spanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .statsband .spanel .sitem:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .territories {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .territory.open {
+    padding: 16px 14px 18px;
+  }
+
+  .spanel,
+  .tsub .spanel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .territory .top {
+    flex-wrap: wrap;
+  }
+}

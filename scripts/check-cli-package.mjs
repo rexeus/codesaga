@@ -18,6 +18,7 @@ import { join, resolve } from "node:path";
 
 import { makeRepository } from "./make-package-fixture.mjs";
 import { mcpToolsList } from "./mcp-tools-list.mjs";
+import { expectPackedLegalFiles } from "./packed-legal-files.mjs";
 
 const repository = resolve(import.meta.dirname, "..");
 
@@ -87,6 +88,7 @@ const expectBundledArtifact = (tarball) => {
   const expected = new Set([
     "package/dist/codesaga.js",
     "package/package.json",
+    "package/THIRD_PARTY_NOTICES.md",
   ]);
   const unexpected = files.filter(
     (file) =>
@@ -97,6 +99,7 @@ const expectBundledArtifact = (tarball) => {
     "package/dist/codesaga.js",
     "package/LICENSE",
     "package/README.md",
+    "package/THIRD_PARTY_NOTICES.md",
   ];
   if (required.some((file) => !files.includes(file)) || unexpected.length > 0) {
     throw new Error(`Unexpected package contents:\n${files.join("\n")}`);
@@ -116,15 +119,7 @@ const expectBundledArtifact = (tarball) => {
       `The packed README has relative links: ${relativeLinks.join(", ")}`,
     );
   }
-  // The build copies the repository LICENSE into apps/cli; the packed copy must match it.
-  const packedLicense = execFileSync(
-    "tar",
-    ["-xOzf", tarball, "package/LICENSE"],
-    { encoding: "utf8" },
-  );
-  if (packedLicense !== readFileSync(join(repository, "LICENSE"), "utf8")) {
-    throw new Error("The packed LICENSE differs from the repository LICENSE.");
-  }
+  expectPackedLegalFiles(tarball, repository);
   const packed = execFileSync(
     "tar",
     ["-xOzf", tarball, "package/package.json"],

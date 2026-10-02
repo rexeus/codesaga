@@ -1,0 +1,5 @@
+---
+"codesaga": minor
+---
+
+The report gains `achievements`: nine repository milestones, all of them always listed, reached or not. First 1,000 / 10,000 commits, Marathon (1,000 days of history), Community (10 / 50 / 100 contributors), Polyglot (5 languages with at least 1% of the code lines, not counting "Other"), Unbroken (a human or agent-assisted commit on 30 consecutive days) and Spring cleaning (one commit removed 1,000 more code lines than it added) are milestones that stay reached and carry the day they were first passed, computed from the history. Bus-proof (truck factor of at least 5), Test culture (30% test files) and Fresh blood (5 newcomers in 90 days) hold today and can be lost. Each has a `detail`, and a locked one its `progress`; the thresholds are in `thresholds.achievements`. An achievement counts people and never names or compares them. A shallow clone says "at least" and leaves the day out, and withholds Bus-proof and Fresh blood. `analyze` prints an "Achievements" line.

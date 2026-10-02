@@ -27,6 +27,9 @@ const SECTIONS = [
   "contributors",
   "automation",
   "knowledge",
+  "stats",
+  "stories",
+  "achievements",
 ] as const;
 
 layer(NodeServices.layer)("Report", (it) => {
@@ -46,6 +49,93 @@ layer(NodeServices.layer)("Report", (it) => {
           report.totals.directories,
           report.knowledge.directories.length,
         );
+      }),
+  );
+
+  it.effect("carries the data of the redesigned dashboard in the sample", () =>
+    Effect.gen(function* () {
+      const report = decode(yield* readSample);
+      const { territories } = report.knowledge;
+
+      assert.strictEqual(territories.maxDetail, 3);
+      assert.strictEqual(
+        territories.totalTerritories,
+        territories.territories.length,
+      );
+      assert.strictEqual(report.stories.length, 6);
+      assert.deepStrictEqual(
+        report.achievements
+          .filter(({ reached }) => reached)
+          .map(({ kind }) => kind),
+        ["first-commits", "marathon", "polyglot", "spring-cleaning"],
+      );
+      assert.deepStrictEqual(
+        report.contributors.map(({ status }) => status),
+        [
+          "active",
+          "active",
+          "active",
+          "dormant",
+          "dormant",
+          "new",
+          "dormant",
+          "dormant",
+        ],
+      );
+      for (const { weekly } of report.contributors) {
+        assert.strictEqual(weekly.length, 52);
+      }
+    }),
+  );
+});
+
+type SampleTerritory =
+  Report["knowledge"]["territories"]["territories"][number];
+
+/** Every list of siblings in the tree: the first cut and the children of each split territory. */
+const siblingLists = (
+  territories: ReadonlyArray<SampleTerritory>,
+): ReadonlyArray<ReadonlyArray<SampleTerritory>> => [
+  territories,
+  ...territories.flatMap(({ territories: inside }) => siblingLists(inside)),
+];
+
+layer(NodeServices.layer)("Report sample territories", (it) => {
+  it.effect(
+    "lists the other-files territories of every list after the other territories",
+    () =>
+      Effect.gen(function* () {
+        const { territories } = decode(yield* readSample).knowledge.territories;
+
+        for (const siblings of siblingLists(territories)) {
+          const kinds = siblings.map(({ kind }) => kind);
+          assert.deepStrictEqual(
+            kinds,
+            kinds.toSorted(
+              (a, b) => Number(a === "other") - Number(b === "other"),
+            ),
+          );
+        }
+      }),
+  );
+
+  it.effect(
+    "gives exactly the territories that split a reason and a detail within the finest one",
+    () =>
+      Effect.gen(function* () {
+        const { territories, maxDetail } = decode(yield* readSample).knowledge
+          .territories;
+
+        for (const territory of siblingLists(territories).flat()) {
+          const splits = territory.territories.length > 0;
+          assert.strictEqual(territory.splitReason !== undefined, splits);
+          assert.strictEqual(territory.splitDetail !== undefined, splits);
+          assert.strictEqual(
+            territory.totalTerritories,
+            territory.territories.length,
+          );
+          assert.isTrue((territory.splitDetail ?? 2) <= maxDetail);
+        }
       }),
   );
 });
@@ -139,6 +229,70 @@ layer(NodeServices.layer)("Report rejects a knowledge section with", (it) => {
       assert.throws(() => {
         decode({ ...rest, knowledge: { ...knowledge, directories } });
       }, /experts/u);
+    }),
+  );
+});
+
+layer(NodeServices.layer)("Report rejects story data with", (it) => {
+  it.effect("a contributor whose weekly commits are not 52 weeks", () =>
+    Effect.gen(function* () {
+      const sample = decode(yield* readSample);
+      const [first, ...others] = sample.contributors;
+      const contributors = [
+        { ...first, weekly: first?.weekly.slice(0, 51) },
+        ...others,
+      ];
+
+      assert.throws(() => {
+        decode({ ...sample, contributors });
+      }, /weekly/u);
+    }),
+  );
+
+  it.effect("a contributor badge of an unknown kind", () =>
+    Effect.gen(function* () {
+      const sample = decode(yield* readSample);
+      const [first, ...others] = sample.contributors;
+      const badge = { kind: "night-owl", label: "Night owl", evidence: "" };
+      const contributors = [{ ...first, badges: [badge] }, ...others];
+
+      assert.throws(() => {
+        decode({ ...sample, contributors });
+      }, /kind/u);
+    }),
+  );
+
+  it.effect("more than six stories", () =>
+    Effect.gen(function* () {
+      const sample = decode(yield* readSample);
+      const [first] = sample.stories;
+      const stories = Array.from({ length: 7 }, () => first);
+
+      assert.throws(() => {
+        decode({ ...sample, stories });
+      }, /stories/u);
+    }),
+  );
+
+  it.effect("a knowledge section without territories", () =>
+    Effect.gen(function* () {
+      const { knowledge, ...rest } = decode(yield* readSample);
+      const { territories: _removed, ...withoutTerritories } = knowledge;
+
+      assert.throws(() => {
+        decode({ ...rest, knowledge: withoutTerritories });
+      }, /territories/u);
+    }),
+  );
+
+  it.effect("a territory section without maxDetail", () =>
+    Effect.gen(function* () {
+      const { knowledge, ...rest } = decode(yield* readSample);
+      const { maxDetail: _removed, ...territories } = knowledge.territories;
+
+      assert.throws(() => {
+        decode({ ...rest, knowledge: { ...knowledge, territories } });
+      }, /maxDetail/u);
     }),
   );
 });

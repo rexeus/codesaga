@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { languageShares } from "./languages.js";
+import { languageEntities, languageShares } from "./languages.js";
 
 const language = (name: string, loc: number) => ({ name, files: 1, loc });
 
@@ -37,6 +37,24 @@ describe("languageShares", () => {
     const shares = languageShares([language("Go", 5), language("Rust", 4)]);
 
     expect(shares.map(({ entity }) => entity)).toEqual(["slot-1", "slot-2"]);
+  });
+
+  it("keeps the color of a language the repository gave it, whatever its place in a smaller list", () => {
+    const entityOf = languageEntities([
+      language("TypeScript", 9),
+      language("Python", 5),
+      language("Shell", 1),
+    ]);
+
+    const shares = languageShares(
+      [language("Shell", 3), language("Go", 2)],
+      entityOf,
+    );
+
+    expect(shares.map(({ name, entity }) => [name, entity])).toEqual([
+      ["Shell", "slot-3"],
+      ["Go", "slot-other"],
+    ]);
   });
 
   it("gives no shares for no languages", () => {

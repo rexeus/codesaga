@@ -7,7 +7,7 @@ export type Tick = { readonly position: number; readonly label: string };
 /** A horizontal span of the plot that responds to the pointer. */
 export type Zone = { readonly x: number; readonly width: number };
 
-const MARGIN = { top: 8, right: 12, bottom: 24, left: 44 } as const;
+const MARGIN = { top: 14, right: 6, bottom: 26, left: 38 } as const;
 
 /** Where the plot's origin sits inside its chart. */
 export const PLOT_ORIGIN = { x: MARGIN.left, y: MARGIN.top } as const;

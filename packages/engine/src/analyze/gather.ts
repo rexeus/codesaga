@@ -21,9 +21,11 @@ import {
 } from "../git/repository.js";
 import type { HistoryCommit } from "../history/history.js";
 import { readHistory } from "../history/history.js";
+import { packageRootsOf } from "../knowledge/package-roots.js";
 import type { Report } from "../report/report.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { inventory, namedAsCode } from "../universe/inventory.js";
+import { listTrackedFiles } from "../universe/tracked-files.js";
 import {
   InvalidCompare,
   resolveComparedRanges,
@@ -48,6 +50,10 @@ export type RepositoryFacts = {
   /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
   readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
+  /** The directories of the scope that hold a package manifest; "." is the repository root. */
+  readonly packageRoots: ReadonlyArray<string>;
+  /** The territory detail to start at, as requested; absent for the recommended one. */
+  readonly detail: number | undefined;
   /** `git blame` of the universe files at HEAD; undefined unless `blame` was requested. */
   readonly blame: Blame | undefined;
   /** Whether a path counts as code, for files that no longer exist too. */
@@ -102,6 +108,12 @@ export type AnalyzeOptions = {
    * slow on large repositories; absent or `false`, no blame runs.
    */
   readonly blame?: boolean | undefined;
+  /**
+   * The knowledge territory detail the report starts at, from 1; a detail beyond the
+   * deepest one means the deepest. Absent, the detail recommended for the
+   * team. Every detail is reported either way.
+   */
+  readonly detail?: number | undefined;
 };
 
 type Windows = Pick<RepositoryFacts, "since" | "previous">;
@@ -149,9 +161,10 @@ const gatherInRepository = (
     const head = yield* readHead;
     const branch = yield* readBranch;
     const shallowBoundary = yield* readShallowBoundary(root);
+    const tracked = yield* listTrackedFiles(scope);
     const universe = yield* inventory({
       root,
-      scope,
+      tracked,
       include: options.include,
       exclude: options.exclude,
     });
@@ -180,6 +193,8 @@ const gatherInRepository = (
       commits,
       headTime,
       universe,
+      packageRoots: packageRootsOf(tracked),
+      detail: options.detail,
       blame,
       isCodePath: namedAsCode(options),
       signatures: withCustomSignatures(options.signatures),

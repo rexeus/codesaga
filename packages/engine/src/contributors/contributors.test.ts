@@ -10,12 +10,16 @@ const grace = { name: "Grace", email: "grace@example.com" };
 const run = (
   commits: Parameters<typeof contributors>[0]["commits"],
   scope = ".",
+  universePaths: ReadonlyArray<string> = [],
 ) =>
   contributors({
     commits,
+    history: commits,
     scope,
     now,
+    shallow: false,
     isCodePath: (path) => path.endsWith(".ts"),
+    universePaths,
   });
 
 const touching = (path: string) =>
@@ -137,7 +141,7 @@ describe("contributors areas", () => {
 });
 
 describe("contributors activity", () => {
-  it("marks a contributor active with a commit exactly 183 days before now, and inactive one day earlier", () => {
+  it("marks a contributor active with a commit exactly 183 days before now, and not active one day earlier", () => {
     // 183 days before 2026-07-01T00:00:00Z is 2025-12-30T00:00:00Z
     const result = run([
       classifiedCommit({ time: at("2025-12-30T00:00:00Z") }),
@@ -175,5 +179,90 @@ describe("contributors activity", () => {
 
   it("returns no contributors for no commits", () => {
     expect(run([])).toStrictEqual([]);
+  });
+
+  it("awards the badges the person's whole history earns, and new here only after someone else started", () => {
+    const first = classifiedCommit({
+      time: at("2026-05-01T00:00:00Z"),
+      changes: [{ path: "src/a.ts", added: 5, deleted: 0 }],
+    });
+    const later = classifiedCommit({
+      author: grace,
+      time: at("2026-06-01T00:00:00Z"),
+      changes: [{ path: "src/b.ts", added: 5, deleted: 0 }],
+    });
+
+    const people = run([first, later], ".", ["src/a.ts", "src/b.ts"]);
+
+    expect(
+      people.map(({ name, badges }) => [name, badges.map(({ kind }) => kind)]),
+    ).toStrictEqual([
+      ["Ada", ["founder"]],
+      ["Grace", ["founder", "new-here"]],
+    ]);
+  });
+});
+
+describe("contributors badges in a solo repository", () => {
+  const territories = Array.from({ length: 4 }, (_, i) => ({
+    path: `pkg${i}`,
+    kind: "package" as const,
+    paths: [`pkg${i}/a.ts`],
+    activeExperts: ["ada@example.com"],
+  }));
+  const ada = territories.map(({ path }) => touching(`${path}/a.ts`));
+  const badgesOfAda = (history: Parameters<typeof run>[0]) =>
+    contributors({
+      commits: ada,
+      history,
+      scope: ".",
+      now,
+      shallow: false,
+      isCodePath: () => false,
+      universePaths: [],
+      territories,
+    })[0]?.badges.map(({ kind }) => kind);
+
+  it("withholds all-rounder and keeper from the only contributor over the full history", () => {
+    expect(badgesOfAda(ada)).toStrictEqual([]);
+  });
+
+  it("awards them once someone else has committed, even outside the window", () => {
+    expect(badgesOfAda([...ada, classifiedCommit({ author: grace })])).toEqual(
+      expect.arrayContaining(["all-rounder", "keeper"]),
+    );
+  });
+});
+
+describe("contributors in a shallow clone", () => {
+  const first = classifiedCommit({ time: at("2026-05-01T00:00:00Z") });
+  const later = classifiedCommit({
+    author: grace,
+    time: at("2026-06-01T00:00:00Z"),
+  });
+  const peopleOf = (shallow: boolean) =>
+    contributors({
+      commits: [first, later],
+      history: [first, later],
+      scope: ".",
+      now,
+      shallow,
+      isCodePath: () => false,
+      universePaths: [],
+    }).map(({ name, status, badges }) => [
+      name,
+      status,
+      badges.map(({ kind }) => kind),
+    ]);
+
+  it("calls nobody new and awards no new here, though the same history in a complete clone does", () => {
+    expect(peopleOf(false)).toStrictEqual([
+      ["Ada", "active", []],
+      ["Grace", "new", ["new-here"]],
+    ]);
+    expect(peopleOf(true)).toStrictEqual([
+      ["Ada", "active", []],
+      ["Grace", "active", []],
+    ]);
   });
 });

@@ -7,22 +7,32 @@ import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { inventory } from "./inventory.js";
 import type { InventoryOptions } from "./inventory.js";
+import { listTrackedFiles } from "./tracked-files.js";
 
 const DATE = "2026-03-01T12:00:00Z";
 
+const universeOf = (
+  repo: TempRepository,
+  options: Partial<Pick<InventoryOptions, "include" | "exclude">> & {
+    readonly scope?: string;
+  } = {},
+) =>
+  Effect.gen(function* () {
+    const tracked = yield* listTrackedFiles(options.scope ?? ".");
+    return yield* inventory({
+      root: repo.directory,
+      tracked,
+      include: options.include ?? [],
+      exclude: options.exclude ?? [],
+    });
+  }).pipe(Effect.provide(Git.layer(repo.directory)));
+
 const pathsOf = (
   repo: TempRepository,
-  options: Partial<InventoryOptions> = {},
+  options: Parameters<typeof universeOf>[1] = {},
 ) =>
-  inventory({
-    root: repo.directory,
-    scope: ".",
-    include: [],
-    exclude: [],
-    ...options,
-  }).pipe(
-    Effect.provide(Git.layer(repo.directory)),
-    Effect.map((files) => files.map((file) => file.path)),
+  Effect.map(universeOf(repo, options), (files) =>
+    files.map((file) => file.path),
   );
 
 layer(NodeServices.layer)("inventory git rules", (it) => {
@@ -228,17 +238,15 @@ layer(NodeServices.layer)("inventory measures", (it) => {
       const repo = yield* makeTempRepository;
       yield* repo.commit(DATE, { "a.ts": "a\n  b\n", "empty.ts": "" });
 
-      const files = yield* inventory({
-        root: repo.directory,
-        scope: ".",
-        include: [],
-        exclude: [],
-      }).pipe(Effect.provide(Git.layer(repo.directory)));
+      const files = yield* universeOf(repo);
 
-      assert.deepStrictEqual(files, [
-        { path: "a.ts", loc: 2 },
-        { path: "empty.ts", loc: 0 },
-      ]);
+      assert.deepStrictEqual(
+        files.map(({ path, loc }) => ({ path, loc })),
+        [
+          { path: "a.ts", loc: 2 },
+          { path: "empty.ts", loc: 0 },
+        ],
+      );
     }),
   );
 });

@@ -126,3 +126,7 @@ export const resolveComparedRanges = (
 /** An ISO 8601 timestamp as seconds since the epoch, the unit of commit times. */
 export const toEpochSeconds = (iso: string): number =>
   DateTime.toEpochMillis(DateTime.makeUnsafe(iso)) / 1000;
+
+/** Seconds since the epoch, the unit of commit times, as an ISO 8601 timestamp. */
+export const isoOfEpochSeconds = (seconds: number): string =>
+  DateTime.formatIso(DateTime.makeUnsafe(seconds * 1000));

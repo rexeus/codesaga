@@ -3,6 +3,7 @@ import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
+import type { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { commitKnowledgeHistory } from "../testing/knowledge-history.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
@@ -83,6 +84,25 @@ layer(NodeServices.layer)("analyze knowledge directories", (it) => {
   );
 });
 
+type TerritoryNode = Report["knowledge"]["territories"]["territories"][number];
+
+const withoutFocusBadge = (territory: TerritoryNode): TerritoryNode => ({
+  ...territory,
+  badges: territory.badges.filter(({ kind }) => kind !== "in-focus"),
+  territories: territory.territories.map((child) => withoutFocusBadge(child)),
+});
+
+/** `in-focus` reads the window by definition; everything else in knowledge does not. */
+const withoutFocus = (section: Report["knowledge"]) => ({
+  ...section,
+  territories: {
+    ...section.territories,
+    territories: section.territories.territories.map((territory) =>
+      withoutFocusBadge(territory),
+    ),
+  },
+});
+
 layer(NodeServices.layer)("analyze knowledge window and scope", (it) => {
   it.effect("ignores --since: knowledge covers the whole history", () =>
     Effect.gen(function* () {
@@ -96,7 +116,10 @@ layer(NodeServices.layer)("analyze knowledge window and scope", (it) => {
       );
 
       assert.strictEqual(recent.window.commits, 1);
-      assert.deepStrictEqual(recent.knowledge, whole.knowledge);
+      assert.deepStrictEqual(
+        withoutFocus(recent.knowledge),
+        withoutFocus(whole.knowledge),
+      );
     }),
   );
 

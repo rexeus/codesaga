@@ -5,6 +5,7 @@ import type { RepositoryFacts } from "../analyze/gather.js";
 import { SIGNATURES } from "../automation/signatures.js";
 import type { HistoryCommit } from "../history/history.js";
 import { at } from "../testing/classified-commit.js";
+import { inventoryFile, linesOf } from "../testing/inventory-file.js";
 import { buildInspectResult } from "./build-inspect.js";
 
 const ada = { name: "Ada", email: "ada@example.com" };
@@ -20,6 +21,7 @@ const commitsTouchingA = (count: number): ReadonlyArray<HistoryCommit> =>
     offsetMinutes: 0,
     author: ada,
     committer: ada,
+    subject: "",
     trailers: [],
     markers: [],
     changes: [{ path: "src/a.ts", added: 1, deleted: 0 }],
@@ -39,7 +41,9 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
   },
   commits,
   headTime: commits[0]?.time ?? 0,
-  universe: [{ path: "src/a.ts", loc: 10 }],
+  universe: [inventoryFile("src/a.ts", linesOf(10))],
+  packageRoots: [],
+  detail: undefined,
   blame: undefined,
   isCodePath: () => true,
   signatures: SIGNATURES,

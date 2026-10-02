@@ -21,8 +21,9 @@
       "ignoreBinaries": ["mkfifo"]
     },
     "packages/viewer": {
-      "entry": ["src/main.ts!"],
-      "project": ["src/**/*.ts!", "!src/testing/**!"]
+      "entry": ["src/main.ts!", "scripts/build.ts!"],
+      "project": ["src/**/*.ts!", "scripts/**/*.ts", "!src/testing/**!"],
+      "ignore": ["src/render/lucide-shapes.d.ts"]
     }
   }
 }

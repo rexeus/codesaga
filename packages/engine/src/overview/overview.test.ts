@@ -12,7 +12,8 @@ const nowSeconds = at("2026-07-01T00:00:00Z");
 const run = (
   commits: Parameters<typeof overview>[0]["commits"],
   universe: Parameters<typeof overview>[0]["universe"] = [],
-) => overview({ commits, universe, now });
+  history = commits,
+) => overview({ commits, history, universe, now });
 
 const person = (days: number, email: string) =>
   classifiedCommit({
@@ -67,6 +68,26 @@ describe("overview contributors", () => {
       active30: 1,
       active90: 3,
       active365: 5,
+      allTime: 6,
+    });
+  });
+
+  it("counts every contributor of the full history as all-time, whatever the window holds", () => {
+    const inWindow = [person(10, "ada@example.com")];
+    const history = [
+      ...inWindow,
+      person(500, "grace@example.com"),
+      person(600, "ada@example.com"),
+      classifiedCommit({
+        class: "bot",
+        tools: ["Dependabot"],
+        author: { name: "d", email: "d@example.com" },
+      }),
+    ];
+
+    expect(run(inWindow, [], history).contributors).toMatchObject({
+      total: 1,
+      allTime: 2,
     });
   });
 
@@ -117,7 +138,13 @@ describe("overview universe", () => {
   it("reports zeros and no languages for an empty universe and no commits", () => {
     expect(run([])).toStrictEqual({
       commits: 0,
-      contributors: { total: 0, active30: 0, active90: 0, active365: 0 },
+      contributors: {
+        total: 0,
+        active30: 0,
+        active90: 0,
+        active365: 0,
+        allTime: 0,
+      },
       files: 0,
       loc: 0,
       languages: [],

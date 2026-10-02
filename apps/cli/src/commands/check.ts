@@ -87,6 +87,7 @@ export const checkCommand = Command.make(
       ...flags,
       compare: Option.none(),
       limit: Option.none(),
+      detail: Option.none(),
       blame: Option.none(),
     });
     const limits = resolveGateLimits(settings.gates, flags);

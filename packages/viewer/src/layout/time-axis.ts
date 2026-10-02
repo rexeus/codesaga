@@ -1,13 +1,15 @@
 import { scaleLinear, scaleUtc } from "d3-scale";
 import type { ScaleLinear } from "d3-scale";
 
-import { formatCount } from "../present/format.js";
+import { formatCompact } from "../present/format.js";
 import type { Tick, Zone } from "./plot.js";
 
-const X_TICK_SPACING = 90;
-
+const X_TICK_SPACING = 72;
+const MONTH_TICK_SPACING = 64;
 const MS_PER_DAY = 86_400_000;
 const MONTH_STEP = 28 * MS_PER_DAY;
+/** Shorter spans are labelled by day, longer ones by month. */
+const MONTH_LABELS_FROM = 75 * MS_PER_DAY;
 
 const monthName = new Intl.DateTimeFormat("en", {
   month: "short",
@@ -20,17 +22,40 @@ const monthAndDay = new Intl.DateTimeFormat("en", {
   timeZone: "UTC",
 });
 
-/** The year on the first of January, the short month name on any other tick. */
+/** The short month name with its two-digit year: `Jul ’25`. */
 const monthTickLabel = (tick: Date): string =>
-  tick.getUTCMonth() === 0 && tick.getUTCDate() === 1
-    ? String(tick.getUTCFullYear())
-    : monthName.format(tick);
+  `${monthName.format(tick)} ’${String(tick.getUTCFullYear()).slice(2)}`;
+
+/**
+ * The first of every month the span touches, the first one clamped to the
+ * span's start so the axis opens with the month the data begins in. Months
+ * that would crowd the previous label (closer than `minGap` pixels) are left out.
+ */
+const monthTicks = (
+  [start, end]: readonly [number, number],
+  x: (timestamp: number) => number,
+  minGap: number,
+): Tick[] => {
+  const ticks: Tick[] = [];
+  const first = new Date(start);
+  let month = Date.UTC(first.getUTCFullYear(), first.getUTCMonth());
+  while (month <= end) {
+    const position = x(Math.max(month, start));
+    const previous = ticks.at(-1);
+    if (previous === undefined || position - previous.position >= minGap) {
+      ticks.push({ position, label: monthTickLabel(new Date(month)) });
+    }
+    const next = new Date(month);
+    month = Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1);
+  }
+  return ticks;
+};
 
 /**
  * Ticks a month or more apart read as months; closer ones carry the day, so
  * a short history never repeats one month name along the axis.
  */
-const timeTickLabels = (ticks: readonly Date[]): string[] => {
+const dayTickLabels = (ticks: readonly Date[]): string[] => {
   const [first, second] = ticks;
   const spansMonths =
     first !== undefined &&
@@ -50,6 +75,10 @@ export type TimeAxis = {
   readonly ticks: readonly Tick[];
 };
 
+/**
+ * The axis of the span `[start, end]` in UTC milliseconds: month labels along a
+ * span of 75 days or more, day labels along a shorter one.
+ */
 export const timeAxisOf = (
   [start, end]: readonly [number, number],
   width: number,
@@ -58,12 +87,18 @@ export const timeAxisOf = (
     .domain([new Date(start), new Date(end)])
     .range([0, width]);
   const x = (timestamp: number): number => scale(new Date(timestamp));
-  const count = Math.max(2, Math.floor(width / X_TICK_SPACING));
-  const ticks = scale.ticks(count);
-  const labels = timeTickLabels(ticks);
+  const zone: TimeAxis["zone"] = (from, to) => ({
+    x: x(from),
+    width: x(to) - x(from),
+  });
+  if (end - start >= MONTH_LABELS_FROM) {
+    return { x, zone, ticks: monthTicks([start, end], x, MONTH_TICK_SPACING) };
+  }
+  const ticks = scale.ticks(Math.max(2, Math.floor(width / X_TICK_SPACING)));
+  const labels = dayTickLabels(ticks);
   return {
     x,
-    zone: (from, to) => ({ x: x(from), width: x(to) - x(from) }),
+    zone,
     ticks: ticks.map((tick, index) => ({
       position: scale(tick),
       label: labels[index] ?? "",
@@ -79,17 +114,19 @@ export const countScale = (
   scaleLinear().domain([low, high]).nice().range([height, 0]);
 
 /**
- * Labelled ticks of a count scale; negative values read as their magnitude.
- * Only whole numbers get a tick, since the scale counts commits and people.
+ * Labelled ticks of a count scale, written by `label` (compact counts
+ * by default). Only whole numbers get a tick, since the scale counts commits and
+ * people.
  */
 export const countTicks = (
   scale: ScaleLinear<number, number>,
   count: number,
+  label: (value: number) => string = formatCompact,
 ): Tick[] =>
   scale
     .ticks(count)
     .filter((value) => Number.isInteger(value))
     .map((value) => ({
       position: scale(value),
-      label: formatCount(Math.abs(value)),
+      label: label(value),
     }));

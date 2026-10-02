@@ -7,7 +7,10 @@ import { Effect, Schema } from "effect";
 
 import { CheckResult } from "../check/check-result.js";
 import { startMcpSession } from "../testing/mcp-session.js";
-import { makeTeamProject } from "../testing/projects.js";
+import {
+  makeTerritoriesProject,
+  makeTeamProject,
+} from "../testing/projects.js";
 
 const ToolList = Schema.Struct({
   tools: Schema.Array(
@@ -93,6 +96,32 @@ describe("codesaga mcp analyze", () => {
         expect(limited.contributors).toHaveLength(1);
         expect(unlimited.contributors).toHaveLength(2);
         expect(unlimited.window.commits).toBe(5);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live(
+    "starts the territories at the detail param (or its deprecated alias depth), over the repository's config",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTerritoriesProject;
+        writeFileSync(join(repo.root, ".codesaga.json"), '{"detail":2}');
+        const session = yield* startMcpSession(repo.root);
+        const startDetail = (params: {
+          readonly detail?: number;
+          readonly depth?: number;
+        }) =>
+          Effect.gen(function* () {
+            const result = yield* session.callTool("analyze", params);
+            const report = yield* Schema.decodeUnknownEffect(Report)(
+              result.structuredContent,
+            );
+            return report.knowledge.territories.detail;
+          });
+
+        expect(yield* startDetail({})).toBe(2);
+        expect(yield* startDetail({ detail: 1 })).toBe(1);
+        expect(yield* startDetail({ depth: 1 })).toBe(1);
+        expect(yield* startDetail({ detail: 2, depth: 1 })).toBe(2);
       }).pipe(Effect.scoped),
   );
 

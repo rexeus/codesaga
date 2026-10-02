@@ -264,3 +264,13 @@ describe("LogParser chunking", () => {
     expect(parse([""])).toStrictEqual([]);
   });
 });
+
+describe("LogParser subject", () => {
+  it("takes the first line of the message as the subject", () => {
+    const body = "  Drop the legacy flow \n\nLonger text.\n";
+
+    expect(parse([header({ sha: "s", body })])[0]?.subject).toBe(
+      "Drop the legacy flow",
+    );
+  });
+});

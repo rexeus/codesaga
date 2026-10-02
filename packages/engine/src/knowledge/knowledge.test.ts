@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { at, classifiedCommit } from "../testing/classified-commit.js";
+import { inventoryFile, universeStatsOf } from "../testing/inventory-file.js";
 import { knowledge } from "./knowledge.js";
 
 const now = DateTime.makeUnsafe("2026-03-01T00:00:00Z");
@@ -23,7 +24,7 @@ const touching = (
   });
 
 const files = (...paths: ReadonlyArray<string>) =>
-  paths.map((path) => ({ path, loc: 50 }));
+  paths.map((path) => inventoryFile(path));
 
 const run = (
   commits: ReadonlyArray<ClassifiedCommit>,
@@ -33,10 +34,13 @@ const run = (
   knowledge({
     commits,
     universe: files(...paths),
+    stats: universeStatsOf(files(...paths), commits),
     scope,
+    packageRoots: [],
+    shallow: false,
     headTime: at("2026-02-01T00:00:00Z"),
     now,
-  });
+  }).section;
 
 const srcFiles = ["src/a.ts", "src/b.ts", "src/c.ts"];
 
@@ -248,6 +252,15 @@ describe("knowledge chain rule and scope", () => {
       withoutActiveExpert: 0,
       truckFactor: { value: 0, people: [] },
       directories: [],
+      territories: {
+        detail: 1,
+        recommendedDetail: 1,
+        maxDetail: 1,
+        reason:
+          "detail 1: 0 territories (without other files) for 0 contributors",
+        totalTerritories: 0,
+        territories: [],
+      },
     });
   });
 });

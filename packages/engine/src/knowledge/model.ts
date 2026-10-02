@@ -1,8 +1,9 @@
 // Owns the knowledge model of one analysis: the humans and the experts of every universe file.
 // Knowledge is relative to the full history and to `now`, which decides who is still active.
 
-import { DateTime } from "effect";
+import type { DateTime } from "effect";
 
+import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
 import { SIGNATURES } from "../automation/signatures.js";
 import type { Signature } from "../automation/signatures.js";
@@ -10,6 +11,7 @@ import type { Ownership } from "../blame/line-owners.js";
 import type { Blame } from "../blame/read-blame.js";
 import { ACTIVE_DAYS, isActiveWithin } from "../contributors/activeness.js";
 import type { Report } from "../report/report.js";
+import type { UniverseStats } from "../stats/universe-stats.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { contributionsByFile, humansOf } from "./contributions.js";
 import type { Human } from "./contributions.js";
@@ -28,7 +30,8 @@ export type Person = Report["knowledge"]["truckFactor"]["people"][number];
 export type KnowledgeInput = {
   /** The scope's classified commits over the full history, newest first. */
   readonly commits: ReadonlyArray<ClassifiedCommit>;
-  readonly universe: ReadonlyArray<InventoryFile>;
+  readonly universe: ReadonlyArray<Pick<InventoryFile, "path" | "loc">>;
+
   /** Time of the HEAD commit in seconds; recency is measured back from it. */
   readonly headTime: number;
   readonly now: DateTime.Utc;
@@ -36,6 +39,12 @@ export type KnowledgeInput = {
   readonly blame?: Blame | undefined;
   /** The signature table that tells a bot or an agent from a person among the line owners; the built-in one by default. */
   readonly signatures?: ReadonlyArray<Signature> | undefined;
+};
+
+/** What the territories read besides the model's input. */
+export type TerritoryInput = {
+  /** The code stats of the universe; every territory carries the stats of its files, and the code badges compare them with the repository's. */
+  readonly stats: UniverseStats;
 };
 
 /** Finds the experts of every universe file. */
@@ -85,5 +94,5 @@ export const personOf = (human: Human, model: KnowledgeModel): Person => ({
   name: human.name,
   email: human.email,
   active: isActive(human, model),
-  lastCommitAt: DateTime.formatIso(DateTime.makeUnsafe(human.lastTime * 1000)),
+  lastCommitAt: isoOfEpochSeconds(human.lastTime),
 });

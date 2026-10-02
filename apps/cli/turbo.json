@@ -2,7 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**", "README.md", "LICENSE"]
+      "outputs": ["dist/**", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"]
     }
   }
 }

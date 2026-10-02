@@ -10,7 +10,10 @@ import {
   makeTempDirectory,
 } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
-import { makeTeamProject } from "../testing/projects.js";
+import {
+  makeTerritoriesProject,
+  makeTeamProject,
+} from "../testing/projects.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -78,6 +81,48 @@ describe("codesaga analyze --json", () => {
         "Grace",
       ]);
       expect(report.repository.firstCommitAt).not.toBeNull();
+    }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga analyze --detail", () => {
+  it.live(
+    "starts the territories at --detail and at the deepest detail when it is beyond",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTerritoriesProject;
+        const startAt = (flag: "--detail" | "--depth", value: string) =>
+          Effect.gen(function* () {
+            const result = yield* journey({
+              args: ["analyze", "--json", flag, value],
+              cwd: repo.root,
+            });
+            return (yield* decode(result.stdout)).knowledge.territories;
+          });
+
+        const second = yield* startAt("--detail", "2");
+        const beyond = yield* startAt("--detail", "9");
+        const viaDepthAlias = yield* startAt("--depth", "2");
+
+        expect(second.detail).toBe(2);
+        expect(viaDepthAlias.detail).toBe(2);
+        expect(second.recommendedDetail).toBe(1);
+        expect(beyond.detail).toBe(2);
+        expect(beyond.maxDetail).toBe(2);
+      }).pipe(Effect.scoped),
+  );
+
+  it.live("rejects a --detail below 1 as a usage error", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTerritoriesProject;
+
+      const result = yield* journey({
+        args: ["analyze", "--json", "--detail", "0"],
+        cwd: repo.root,
+      });
+
+      expect(result.stdout).toBe("");
+      expect(result.exitCode).toBe(2);
     }).pipe(Effect.scoped),
   );
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { samplePullRequests } from "../../testing/sample-pull-requests.js";
-import { sampleReport } from "../../testing/sample-report.js";
+import { mapTerritories, sampleReport } from "../../testing/sample-report.js";
 import { renderAnalysis } from "./analysis-view.js";
 import { makeStyle } from "./style.js";
 
@@ -18,8 +18,11 @@ describe("renderAnalysis", () => {
   it("summarizes the sample report in the documented layout", () => {
     expect(renderAnalysis(sampleReport(), plain).split("\n")).toStrictEqual([
       "codesaga · aurora-web · main @ 9f3c2b1",
-      "2 years · 2,246 commits · 8 contributors, 3 active in 90 days · 60,942 lines in 7 languages",
+      "2 years · 2,246 commits · 8 contributors, 4 active in 90 days · 60,942 lines in 7 languages",
       "",
+      "Stories                    Orphaned knowledge: 30 of 52 files in packages/db have no active expert.",
+      "                           Quiet corner: docs/guides has not changed since 2026-01-12.",
+      '                           Biggest cleanup: One commit removed 4,120 more code lines than it added: "Drop the legacy checkout flow".',
       "Activity, last 12 months   █▆█▇▇▆▇▆▅▅▄▅  724 commits",
       "Contributors               commits  active days  last commit",
       "  Maya Lindqvist               690          486  today",
@@ -28,18 +31,105 @@ describe("renderAnalysis", () => {
       "  Jonas Weber                  205          175  3 months ago",
       "  Aiko Tanaka                  135          120  4 months ago",
       "Truck factor               2 · Maya Lindqvist, Tomás Herrera",
-      "Knowledge risks            files  flags             leading expert                leading line owner",
-      "  docs                        14  orphaned, island  Lena Fischer 93% (inactive)   Lena Fischer 86%",
-      "  packages/db                 52  orphaned          Dmitri Volkov 69% (inactive)  Dmitri Volkov 67%",
+      "Knowledge territories      files  flags             leading expert               leading line owner",
+      "  docs                        14  orphaned, island  Lena Fischer 93% (dormant)   Lena Fischer 86%",
+      "  packages/db                 52  orphaned          Dmitri Volkov 69% (dormant)  Dmitri Volkov 67%",
       "  packages/auth               19  island            Jonas Weber 95%",
       "  apps/admin                  58                    Aiko Tanaka 72%",
       "  infra                       27                    Tomás Herrera 78%",
+      "                           Territories at detail 1 of 3 (recommended: 1)",
+      "                           detail 1: 11 territories (without other files) for 4 active contributors",
+      "Stats                      473 files · 60,942 lines · 25% tests",
+      "                           median file 96 lines · 5 revisions per file · 1.70 indentation levels per line",
+      "                           2 spaces · lines 33 median, 72 p90 · 8% comments",
+      "Achievements               4 of 9 · First 1,000 commits · Marathon · Polyglot · Spring cleaning",
       "Automation                 agent-assisted 9% · agent 5% · bot 9%",
       "                           Claude Code 196 · Dependabot 108 · GitHub Actions 88",
       "Languages                  TypeScript 76% · CSS 13% · SQL 5% · JavaScript 4% · Shell 1%",
       "",
       "--html for the dashboard, --json for agents",
     ]);
+  });
+});
+
+describe("renderAnalysis stories and automation", () => {
+  it("shows only the top 3 stories and leaves the block out without any", () => {
+    const report = sampleReport();
+
+    const withSix = renderAnalysis(report, plain);
+    const without = renderAnalysis({ ...report, stories: [] }, plain);
+
+    expect(withSix.match(/^ {27}\S.*(?:cleanup|corner)/gmu)).toHaveLength(2);
+    expect(withSix).not.toContain("Longest streak");
+    expect(without).not.toContain("Stories");
+  });
+
+  it("shows the automation line only when a bot or an agent was detected", () => {
+    const report = sampleReport();
+    const quiet = {
+      ...report,
+      automation: { ...report.automation, tools: [] },
+    };
+
+    expect(renderAnalysis(report, plain)).toContain("\nAutomation ");
+    expect(renderAnalysis(quiet, plain)).not.toContain("Automation");
+  });
+});
+
+type Stats = ReturnType<typeof sampleReport>["stats"];
+
+/** The sample report's stats with `style.indent` replaced, as the last line of the Stats block shows it. */
+const styleLineWith = (
+  indent: Stats["style"]["indent"],
+): string | undefined => {
+  const { stats } = sampleReport();
+  return renderAnalysis(
+    {
+      ...sampleReport(),
+      stats: { ...stats, style: { ...stats.style, indent } },
+    },
+    plain,
+  )
+    .split("\n")
+    .find((line) => line.includes(" median, ") && line.includes("comments"));
+};
+
+describe("renderAnalysis stats", () => {
+  it("names tabs when most indented lines start with one", () => {
+    expect(
+      styleLineWith({ spacesShare: 0.2, tabsShare: 0.8, width: 2 }),
+    ).toMatch(/^ {27}tabs · lines /u);
+  });
+
+  it("says so for code without an indented line", () => {
+    expect(styleLineWith({ spacesShare: 0, tabsShare: 0, width: 0 })).toMatch(
+      /^ {27}no indentation · /u,
+    );
+  });
+
+  it("says so for a repository without code files", () => {
+    const report = sampleReport();
+
+    expect(
+      renderAnalysis(
+        { ...report, stats: { ...report.stats, files: 0 } },
+        plain,
+      ),
+    ).toContain("\nStats                      no code files\n");
+  });
+});
+
+describe("renderAnalysis achievements", () => {
+  it("counts the reached ones and names none that is locked", () => {
+    const report = sampleReport();
+    const locked = report.achievements.map((achievement) => ({
+      ...achievement,
+      reached: false,
+    }));
+
+    expect(
+      renderAnalysis({ ...report, achievements: locked }, plain),
+    ).toContain("\nAchievements               0 of 9\n");
   });
 });
 
@@ -159,7 +249,13 @@ describe("renderAnalysis edge cases", () => {
       overview: {
         ...report.overview,
         commits: 0,
-        contributors: { total: 0, active30: 0, active90: 0, active365: 0 },
+        contributors: {
+          total: 0,
+          active30: 0,
+          active90: 0,
+          active365: 0,
+          allTime: 0,
+        },
         loc: 0,
         languages: [],
       },
@@ -177,14 +273,17 @@ describe("renderAnalysis edge cases", () => {
     expect(lines[1]).toBe(
       "0 commits · 0 contributors, 0 active in 90 days · 0 lines in 0 languages",
     );
-    expect(lines).toContain("Automation                 none detected");
+    expect(lines.some((line) => line.startsWith("Stories"))).toBe(true);
+    expect(lines.some((line) => line.startsWith("Automation"))).toBe(false);
     expect(lines).toContain("Languages                  no code files");
   });
 });
 
 describe("renderAnalysis escaping", () => {
   it("escapes control characters in names that came from git", () => {
-    const report = sampleReport();
+    const report = mapTerritories(sampleReport(), (territories) =>
+      territories.map((territory) => ({ ...territory, path: "dir\u001B[31m" })),
+    );
     const hostile = {
       ...report,
       repository: {
@@ -196,13 +295,9 @@ describe("renderAnalysis escaping", () => {
         ...person,
         name: "\u001B[2Jevil",
       })),
-      knowledge: {
-        ...report.knowledge,
-        directories: report.knowledge.directories.map((directory) => ({
-          ...directory,
-          path: "dir\u001B[31m",
-        })),
-      },
+      stories: [
+        { kind: "streak" as const, title: "T\u001B[31m", detail: "d\nx" },
+      ],
       automation: {
         ...report.automation,
         tools: [
@@ -224,6 +319,7 @@ describe("renderAnalysis escaping", () => {
     expect(text).toContain("\\u001b[2Jevil");
     expect(text).toContain("bot\\u0007[bot] 1");
     expect(text).toContain("dir\\u001b[31m");
+    expect(text).toContain("T\\u001b[31m: d\\u000ax");
   });
 
   it("bolds the headline and labels only when styled", () => {

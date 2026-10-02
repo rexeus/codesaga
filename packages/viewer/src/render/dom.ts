@@ -1,3 +1,5 @@
+import type { Segment } from "../present/header.js";
+
 type Child = Node | string;
 type Attributes = Readonly<Record<string, string | number>>;
 
@@ -49,4 +51,31 @@ export const s = (
     throw new TypeError(`<${tag}> is not an SVG element.`);
   }
   return element;
+};
+
+/** Text with its strong runs wrapped in `<b>`; every run is a text node, so nothing parses as markup. */
+export const richText = (segments: readonly Segment[]): Child[] =>
+  segments.map(({ text, strong }) => (strong ? h("b", "", text) : text));
+
+/** A file name or path in monospace; `title` holds the whole path when the text is a tail of it. */
+export const mono = (text: string, title = text): HTMLElement => {
+  const element = h("span", "mono", text);
+  element.title = title;
+  return element;
+};
+
+/**
+ * The text split into pieces that end in a slash, with a word-break
+ * opportunity between them, so a long path wraps after a `/` and never inside
+ * a name. The pieces are text nodes.
+ */
+export const breakAfterSlashes = (text: string): Child[] => {
+  const names = text.split("/");
+  const last = names.length - 1;
+  return names
+    .map((name, index) => (index === last ? name : `${name}/`))
+    .filter((piece) => piece !== "")
+    .flatMap((piece, index) =>
+      index === 0 ? [piece] : [document.createElement("wbr"), piece],
+    );
 };

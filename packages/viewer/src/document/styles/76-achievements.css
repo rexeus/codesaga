@@ -1,0 +1,254 @@
+/* Achievements as medallions: a ring and an icon, a check or a lock, tier pips and a progress bar. */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ach {
+  --tint: var(--mark);
+  --tint-ink: color-mix(in srgb, var(--tint) 62%, var(--ink));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 24px 22px 20px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.ach.reached::before {
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--tint), transparent);
+  content: "";
+  opacity: 0.16;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.ach h3 {
+  position: relative;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.ach .evid {
+  position: relative;
+  max-width: 30ch;
+  min-height: 2.9em;
+  color: var(--ink-2);
+  font-size: 13.5px;
+}
+
+.medal {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  margin-bottom: 8px;
+}
+
+.ring {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    var(--tint),
+    color-mix(in srgb, var(--tint) 30%, #fff),
+    var(--tint) 48%,
+    color-mix(in srgb, var(--tint) 65%, #000) 78%,
+    var(--tint)
+  );
+  box-shadow:
+    0 10px 22px -10px color-mix(in srgb, var(--tint) 80%, transparent),
+    inset 0 0 0 1px rgb(255 255 255 / 0.35);
+}
+
+.core {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 24%,
+    color-mix(in srgb, var(--tint) 8%, #fff),
+    var(--surface) 70%
+  );
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.07);
+  color: var(--tint-ink);
+}
+
+.lock,
+.check {
+  position: absolute;
+  right: -3px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+}
+
+.lock {
+  background: var(--surface-2);
+  box-shadow: 0 0 0 1px var(--axis);
+  color: var(--ink-3);
+}
+
+.check {
+  background: var(--good);
+  color: #fff;
+}
+
+.tier {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -2px;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.pips {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.pips i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--grid);
+}
+
+.pips i.on {
+  background: var(--tint);
+}
+
+.afoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.when {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  color: var(--tint-ink);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.nline {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--ink-3);
+  font-size: 12px;
+  text-align: left;
+}
+
+.nline b {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.next,
+.prog {
+  width: 100%;
+}
+
+.ach .pbar i {
+  background: var(--tint);
+}
+
+.ach.locked {
+  border-style: dashed;
+  border-color: var(--axis);
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+  box-shadow: none;
+}
+
+.ach.locked .ring {
+  padding: 4px;
+  background: var(--grid);
+  box-shadow: none;
+}
+
+.ach.locked .core {
+  background: var(--surface-2);
+  box-shadow: none;
+  color: var(--ink-3);
+}
+
+.ach.locked h3 {
+  color: var(--ink-2);
+}
+
+.ach.locked .evid {
+  color: var(--ink-3);
+}
+
+.ach.locked .pbar i {
+  background: var(--ink-3);
+}
+
+:root[data-theme="dark"] .core {
+  background: radial-gradient(
+    circle at 32% 24%,
+    color-mix(in srgb, var(--tint) 22%, var(--surface-2)),
+    var(--surface) 75%
+  );
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .core {
+    background: radial-gradient(
+      circle at 32% 24%,
+      color-mix(in srgb, var(--tint) 22%, var(--surface-2)),
+      var(--surface) 75%
+    );
+    box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.35);
+  }
+}
+
+@media (max-width: 1100px) {
+  .ach-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ach-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

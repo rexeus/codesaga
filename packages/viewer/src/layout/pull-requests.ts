@@ -68,8 +68,8 @@ export const layoutPullRequests = (
         month,
         opened,
         merged,
-        openedBar: barInZone(left, y(opened), plot.height, "up"),
-        mergedBar: barInZone(right, y(merged), plot.height, "up"),
+        openedBar: barInZone(left, [y(opened), plot.height], "up"),
+        mergedBar: barInZone(right, [y(merged), plot.height], "up"),
       };
     }),
     zones,

@@ -40,6 +40,33 @@ export const makeTeamProject = Effect.map(makeGitRepository, (repo) => {
   return repo;
 });
 
+const threeFiles = (directory: string) =>
+  Object.fromEntries(
+    [1, 2, 3].map((index) => [`${directory}/f${index}.ts`, "x\n"]),
+  );
+
+/**
+ * Ada, 30 days ago, adds three files in each of `a/x`, `b` and `c`, and Grace
+ * three in `a/y`: the knowledge territories are the top-level directories `a`, `b`
+ * and `c`, and `a` splits at detail 2 because `a/x` and `a/y` have different
+ * experts. Two contributors allow 4 territories, which detail 2 (4) meets, but a
+ * fourth directory `d` makes it 5, so detail 1 is the recommended one.
+ */
+export const makeTerritoriesProject = Effect.map(makeGitRepository, (repo) => {
+  repo.commit(
+    30,
+    {
+      ...threeFiles("a/x"),
+      ...threeFiles("b"),
+      ...threeFiles("c"),
+      ...threeFiles("d"),
+    },
+    { author: ada },
+  );
+  repo.commit(29, threeFiles("a/y"), { author: grace });
+  return repo;
+});
+
 /** The team project with an `origin` on github.com, as `--github` needs. */
 export const makeGithubProject = Effect.map(makeTeamProject, (repo) => {
   repo.addOrigin("git@github.com:acme/web.git");

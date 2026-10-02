@@ -21,7 +21,7 @@ import { buildInspectResult } from "./build-inspect.js";
  * Fails like `analyze`.
  */
 export const inspect = (
-  options: Omit<AnalyzeOptions, "compare"> & {
+  options: Omit<AnalyzeOptions, "compare" | "detail"> & {
     readonly patterns: ReadonlyArray<string>;
   },
 ): Effect.Effect<

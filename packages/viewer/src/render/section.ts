@@ -1,21 +1,43 @@
+import { SECTION_ICONS } from "../present/sections.js";
+import type { SectionId } from "../present/sections.js";
 import { h } from "./dom.js";
+import { icon } from "./icons.js";
 
-/** A dashboard card with a heading and a one-line description. */
+/** A section of the page: an eyebrow, a title and a line (text, or nodes to set a part of it strong), then its content. */
 export const section = (
-  id: string,
+  id: SectionId,
+  eyebrow: string,
   title: string,
-  description: string,
+  description: string | readonly (Node | string)[],
   ...content: readonly Node[]
 ): HTMLElement => {
-  const card = h(
+  const block = h(
     "section",
-    "card",
-    h("header", "", h("h2", "", title), h("p", "", description)),
+    "block",
+    h(
+      "div",
+      "sec-head",
+      h(
+        "div",
+        "",
+        h("div", "eyebrow", icon(SECTION_ICONS[id], 15, 2), eyebrow),
+        h("h2", "", title),
+      ),
+      h(
+        "p",
+        "",
+        ...(typeof description === "string" ? [description] : description),
+      ),
+    ),
     ...content,
   );
-  card.id = id;
-  return card;
+  block.id = id;
+  return block;
 };
+
+/** A card holding stacked content, such as a table with its notes. */
+export const panel = (...content: readonly Node[]): HTMLElement =>
+  h("div", "card panel", ...content);
 
 /** One legend entry: an entity-colored swatch, its name and optional figure. */
 export const legendItem = (

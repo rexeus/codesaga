@@ -1,19 +1,20 @@
-import { scaleSqrt } from "d3-scale";
-
 import { chartSizeFor, plotSize } from "./plot.js";
 import type { Size, Tick } from "./plot.js";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-const MAX_ROW_HEIGHT = 30;
-const DOT_MARGIN = 1;
-const MIN_DOT_RADIUS = 1.5;
-const HOUR_LABEL_STEP = 3;
+const HOURS = 24;
+const MAX_ROW_HEIGHT = 26;
+const HOUR_LABEL_STEP = 6;
+/** The heat of a cell, from 1 (the lightest) to this many, 0 for no commits. */
+export const HEAT_LEVELS = 5;
 
 /** A weekday and hour with its commits; `x` and `y` are the cell's top left. */
 type PunchCell = {
   readonly weekday: (typeof WEEKDAYS)[number];
   readonly hour: number;
   readonly commits: number;
+  /** 0 for no commits, otherwise 1 to `HEAT_LEVELS` in proportion to the busiest cell. */
+  readonly level: number;
   readonly x: number;
   readonly y: number;
 };
@@ -25,15 +26,8 @@ export type PunchcardLayout = {
   readonly cell: Size;
   /** The cell with the most commits; null while there are none. */
   readonly busiest: PunchCell | null;
-  /** Every weekday and hour, row by row; the hover areas. */
+  /** Every weekday and hour, row by row. */
   readonly cells: readonly PunchCell[];
-  /** The dots: only cells with commits, centred in their cell, area proportional to commits. */
-  readonly dots: readonly {
-    readonly cell: PunchCell;
-    readonly cx: number;
-    readonly cy: number;
-    readonly radius: number;
-  }[];
   readonly weekdayTicks: readonly Tick[];
   readonly hourTicks: readonly Tick[];
 };
@@ -44,10 +38,13 @@ const pad = (hour: number): string => String(hour).padStart(2, "0");
 export const hourSpan = (hour: number): string =>
   `${pad(hour)}:00–${pad(hour)}:59`;
 
+const levelOf = (commits: number, busiest: number): number =>
+  commits === 0 ? 0 : Math.max(1, Math.ceil((commits / busiest) * HEAT_LEVELS));
+
 /**
- * Lays out the 7 × 24 punch card as a dot grid in a chart `width` pixels wide. The
- * busiest cell gets the largest dot that fits its cell, the others a
- * proportionally smaller area, and cells without commits get no dot.
+ * Lays out the 7 × 24 heatmap in a chart `width` pixels wide: square cells
+ * (at most 26 px tall) shaded in five steps by their share of the busiest
+ * cell's commits, and unshaded for none.
  */
 export const layoutPunchcard = (
   punchcard: readonly (readonly number[])[],
@@ -55,53 +52,48 @@ export const layoutPunchcard = (
 ): PunchcardLayout => {
   const plotWidth = plotSize({ width, height: 0 }).width;
   const cell: Size = {
-    width: plotWidth / 24,
-    height: Math.min(MAX_ROW_HEIGHT, plotWidth / 24),
+    width: plotWidth / HOURS,
+    height: Math.min(MAX_ROW_HEIGHT, plotWidth / HOURS),
   };
   const plot: Size = {
     width: plotWidth,
     height: cell.height * WEEKDAYS.length,
   };
-  const cells = WEEKDAYS.flatMap((weekday, row) =>
-    Array.from({ length: 24 }, (_, hour): PunchCell => ({
-      weekday,
-      hour,
-      commits: punchcard[row]?.[hour] ?? 0,
-      x: hour * cell.width,
-      y: row * cell.height,
-    })),
+  const counts = WEEKDAYS.flatMap((_, row) =>
+    Array.from({ length: HOURS }, (__, hour) => punchcard[row]?.[hour] ?? 0),
   );
-  const maxRadius = Math.min(cell.width, cell.height) / 2 - DOT_MARGIN;
-  const radius = scaleSqrt()
-    .domain([0, Math.max(1, ...cells.map(({ commits }) => commits))])
-    .range([0, Math.max(0, maxRadius)]);
-  const busiest = cells.reduce<PunchCell | null>(
-    (best, punch) => (punch.commits > (best?.commits ?? 0) ? punch : best),
-    null,
+  const peak = Math.max(1, ...counts);
+  const cells = WEEKDAYS.flatMap((weekday, row) =>
+    Array.from({ length: HOURS }, (_, hour): PunchCell => {
+      const commits = counts[row * HOURS + hour] ?? 0;
+      return {
+        weekday,
+        hour,
+        commits,
+        level: levelOf(commits, peak),
+        x: hour * cell.width,
+        y: row * cell.height,
+      };
+    }),
   );
   return {
-    busiest,
+    busiest: cells.reduce<PunchCell | null>(
+      (best, punch) => (punch.commits > (best?.commits ?? 0) ? punch : best),
+      null,
+    ),
     size: chartSizeFor(width, plot.height),
     plot,
     cell,
     cells,
-    dots: cells
-      .filter(({ commits }) => commits > 0)
-      .map((punch) => ({
-        cell: punch,
-        cx: punch.x + cell.width / 2,
-        cy: punch.y + cell.height / 2,
-        radius: Math.max(MIN_DOT_RADIUS, radius(punch.commits)),
-      })),
     weekdayTicks: WEEKDAYS.map((label, row) => ({
       position: row * cell.height + cell.height / 2,
       label,
     })),
     hourTicks: Array.from(
-      { length: 24 / HOUR_LABEL_STEP },
+      { length: HOURS / HOUR_LABEL_STEP },
       (_, index): Tick => ({
-        position: index * HOUR_LABEL_STEP * cell.width + cell.width / 2,
-        label: pad(index * HOUR_LABEL_STEP),
+        position: index * HOUR_LABEL_STEP * cell.width,
+        label: `${pad(index * HOUR_LABEL_STEP)}:00`,
       }),
     ),
   };

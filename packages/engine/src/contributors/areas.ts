@@ -1,5 +1,5 @@
-// Owns the main areas of a contributor: the directories they commit to most.
-// An area is a directory cut at two levels below the scope, so a deep tree stays readable.
+// Owns the main directories of a contributor, the report's `areas` field since 0.1.0: the directories they commit to most.
+// A main directory is cut at two directories below the scope, so a deep tree stays readable.
 import { Order } from "effect";
 
 import { groupBy } from "../collections/group-by.js";
@@ -8,7 +8,7 @@ import type { HistoryCommit } from "../history/history.js";
 const MAX_DEPTH = 2;
 const MAX_AREAS = 3;
 
-/** The directory of `path`, at most two levels below `scope`; "." for a root-level file. */
+/** The directory of `path`, at most two directories below `scope`; "." for a root-level file. */
 const areaOf = (path: string, scope: string): string => {
   const relative = scope === "." ? path : path.slice(scope.length + 1);
   const below = relative.split("/").slice(0, -1).slice(0, MAX_DEPTH);

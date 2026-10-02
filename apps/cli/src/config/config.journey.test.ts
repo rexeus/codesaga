@@ -7,7 +7,10 @@ import { Effect, Schema } from "effect";
 
 import type { GitRepository } from "../testing/git-repository.js";
 import { journey } from "../testing/journey-harness.js";
-import { makeTeamProject } from "../testing/projects.js";
+import {
+  makeTerritoriesProject,
+  makeTeamProject,
+} from "../testing/projects.js";
 
 const decode = (stdout: string) =>
   Schema.decodeUnknownEffect(Report)(JSON.parse(stdout));
@@ -84,6 +87,36 @@ describe("codesaga defaults from a .codesaga.json", () => {
       expect(report.contributors).toHaveLength(1);
       expect(report.totals.contributors).toBe(2);
     }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga territory detail from a .codesaga.json", () => {
+  it.live(
+    "starts at the recommended detail, the config's detail (or its deprecated depth), or the --detail flag, in that order of precedence",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTerritoriesProject;
+        const startDetail = (...flags: ReadonlyArray<string>) =>
+          Effect.map(analyzeJson(repo, ...flags), (report) => ({
+            detail: report.knowledge.territories.detail,
+            maxDetail: report.knowledge.territories.maxDetail,
+          }));
+
+        const recommended = yield* startDetail();
+        writeConfig(repo, { detail: 2 });
+        const fromConfig = yield* startDetail();
+        const fromFlag = yield* startDetail("--detail", "1");
+        writeConfig(repo, { depth: 2 });
+        const fromDepthKey = yield* startDetail();
+        writeConfig(repo, { detail: 1, depth: 2 });
+        const detailOverDepth = yield* startDetail();
+
+        expect(recommended).toStrictEqual({ detail: 1, maxDetail: 2 });
+        expect(fromConfig).toStrictEqual({ detail: 2, maxDetail: 2 });
+        expect(fromFlag).toStrictEqual({ detail: 1, maxDetail: 2 });
+        expect(fromDepthKey).toStrictEqual({ detail: 2, maxDetail: 2 });
+        expect(detailOverDepth).toStrictEqual({ detail: 1, maxDetail: 2 });
+      }).pipe(Effect.scoped),
   );
 });
 

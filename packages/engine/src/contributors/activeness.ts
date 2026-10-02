@@ -1,9 +1,12 @@
 // Owns what "active" means: a commit in the days before now.
-// The contributors and the overview both measure it here, so their numbers agree.
+// Experts, contributors and the overview all measure it here, so their numbers agree.
 import { DateTime } from "effect";
 
-/** A contributor is active with a commit in this many days before now. */
+/** An expert, and the `active` flag of a contributor, need a commit in this many days before now; `thresholds.activeDays`. */
 export const ACTIVE_DAYS = 183;
+
+/** An active contributor, and the overview's `active90`, need a commit in this many days before now. */
+export const ACTIVE_CONTRIBUTOR_DAYS = 90;
 
 const SECONDS_PER_DAY = 86_400;
 

@@ -1,0 +1,209 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 0 104px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(900px 380px at 12% -10%, var(--hero-a), transparent 70%),
+    radial-gradient(700px 360px at 92% 0%, var(--hero-b), transparent 70%),
+    radial-gradient(600px 300px at 60% 120%, var(--hero-c), transparent 70%),
+    var(--page);
+}
+
+.hero .wrap {
+  position: relative;
+}
+
+.ridge {
+  position: absolute;
+  inset: auto 0 0;
+  height: 200px;
+  opacity: 0.6;
+  pointer-events: none;
+  mask-image:
+    linear-gradient(to right, transparent 25%, #000 85%),
+    linear-gradient(to top, #000 15%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.ridge svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ridge .area {
+  fill: url("#ridge-fill");
+}
+
+.ridge .tint {
+  stop-color: var(--accent);
+}
+
+.ridge .edge {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0.8;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 56px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.brand svg {
+  color: var(--accent);
+}
+
+.brand .sub {
+  margin-left: 2px;
+  padding-left: 10px;
+  border-left: 1px solid var(--axis);
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.topbar .right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.iconbtn:hover {
+  color: var(--ink);
+}
+
+.hero h1 {
+  margin: 10px 0 14px;
+  font-size: 68px;
+  font-weight: 720;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.lede {
+  max-width: 760px;
+  color: var(--ink-2);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.lede b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.chip svg {
+  color: var(--ink-3);
+}
+
+.chip b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.chip.mono b {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  margin: 34px -12px 0;
+  padding: 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  border-radius: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 550;
+  text-decoration: none;
+}
+
+.nav a svg {
+  color: var(--ink-3);
+}
+
+.nav a:hover svg {
+  color: var(--accent-ink);
+}
+
+.nav a:hover {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  color: var(--ink);
+}
+
+.notice {
+  max-width: 760px;
+  margin-top: 18px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--warn-wash);
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .hero h1 {
+    font-size: 44px;
+  }
+}

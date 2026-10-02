@@ -1,0 +1,5 @@
+---
+"codesaga": minor
+---
+
+`analyze` now fills `stories` and the badges of contributors and territories. Stories are notable facts about the history and the team, ranked and capped at six: truck-factor alert, orphaned knowledge, anniversary, longest streak, busiest day, newcomers, biggest cleanup, quiet territory, night owls, weekend share and rename record. Each appears only when it passes a threshold, and all thresholds are reported under `thresholds.stories` and `thresholds.badges`. Contributor badges (all-rounder, specialist, tidier, founder, keeper, tester, documenter, steady, new-here, back-again) are positive or neutral and carry their rule as evidence; `reviewer` is not awarded yet. A specialist reads "api specialist" and a keeper "Keeper of api". Territory badges carry a `category` of `knowledge`, `code` or `activity`: knowledge island, orphaned, one expert, shared knowledge, knowledge fading, handover and newcomer-friendly are knowledge, well tested is code, new territory, in focus and quiet are activity. The terminal view shows the top three stories and hides the Automation line when no bot or agent was detected.

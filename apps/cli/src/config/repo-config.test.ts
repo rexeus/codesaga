@@ -42,7 +42,7 @@ describe("decodeRepoConfig", () => {
     expect(decodeRepoConfig("{}")).toStrictEqual(Result.succeed({}));
   });
 
-  it("names an unknown key at any depth", () => {
+  it("names an unknown key at any detail", () => {
     expect(
       problemsOf(
         '{"sinse":"6m","signatures":{"bots":[{"name":"x","email":"y"}]}}',
@@ -126,6 +126,29 @@ describe("decodeRepoConfig gates", () => {
       "gates.minTruckFactors: unknown key",
       "gates.maxAgentShare: Expected a value between 0 and 1",
       "gates.minActiveContributors: Expected a value greater than or equal to 0",
+    ]);
+  });
+});
+
+describe("decodeRepoConfig detail", () => {
+  it("accepts a whole number from 1", () => {
+    expect(decodeRepoConfig('{"detail":2}')).toStrictEqual(
+      Result.succeed({ detail: 2 }),
+    );
+  });
+
+  it("names a detail below 1", () => {
+    expect(problemsOf('{"detail":0}')).toStrictEqual([
+      "detail: Expected a value greater than or equal to 1",
+    ]);
+  });
+
+  it("accepts the deprecated depth with the same rule", () => {
+    expect(decodeRepoConfig('{"depth":2}')).toStrictEqual(
+      Result.succeed({ depth: 2 }),
+    );
+    expect(problemsOf('{"depth":0}')).toStrictEqual([
+      "depth: Expected a value greater than or equal to 1",
     ]);
   });
 });
