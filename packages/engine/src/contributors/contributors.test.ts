@@ -201,3 +201,33 @@ describe("contributors activity", () => {
     ]);
   });
 });
+
+describe("contributors badges in a solo repository", () => {
+  const areas = Array.from({ length: 4 }, (_, i) => ({
+    path: `pkg${i}`,
+    kind: "package" as const,
+    paths: [`pkg${i}/a.ts`],
+    activeExperts: ["ada@example.com"],
+  }));
+  const ada = areas.map(({ path }) => touching(`${path}/a.ts`));
+  const badgesOfAda = (history: Parameters<typeof run>[0]) =>
+    contributors({
+      commits: ada,
+      history,
+      scope: ".",
+      now,
+      isCodePath: () => false,
+      universePaths: [],
+      areas,
+    })[0]?.badges.map(({ kind }) => kind);
+
+  it("withholds all-rounder and keeper from the only contributor over the full history", () => {
+    expect(badgesOfAda(ada)).toStrictEqual([]);
+  });
+
+  it("awards them once someone else has committed, even outside the window", () => {
+    expect(badgesOfAda([...ada, classifiedCommit({ author: grace })])).toEqual(
+      expect.arrayContaining(["all-rounder", "keeper"]),
+    );
+  });
+});

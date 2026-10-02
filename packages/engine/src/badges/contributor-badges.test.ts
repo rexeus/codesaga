@@ -34,6 +34,7 @@ const facts = (
   now,
   isCodePath: (path) => path.endsWith(".ts"),
   repositoryStart: 0,
+  historyContributors: 2,
   founded: { files: 0, ofFiles: 100 },
   ...overrides,
 });
@@ -176,6 +177,24 @@ describe("contributorBadges founder and keeper", () => {
     expect(
       kindsOf(old(1), { areas: [{ ...area("pkg"), kind: "rest" }] }),
     ).not.toContain("keeper");
+  });
+});
+
+describe("contributorBadges in a solo repository", () => {
+  const solo = { historyContributors: 1, areas: areas8 };
+
+  it("withholds all-rounder and keeper from the only contributor of the history", () => {
+    expect(kindsOf(touching(8), { ...solo })).not.toContain("all-rounder");
+    expect(kindsOf(touching(8), { ...solo })).not.toContain("keeper");
+    expect(kindsOf(touching(8), { ...solo, historyContributors: 2 })).toEqual(
+      expect.arrayContaining(["all-rounder", "keeper"]),
+    );
+  });
+
+  it("still awards the badges that compare with nobody", () => {
+    expect(
+      kindsOf([commit(daysAgo(30), ["src/a.ts"], 800)], solo),
+    ).toStrictEqual(["cleaner", "welcome"]);
   });
 });
 

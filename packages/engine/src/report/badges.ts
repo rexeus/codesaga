@@ -55,11 +55,13 @@ export type AreaBadge = typeof AreaBadge.Type;
 export const ContributorBadge = Schema.Struct({
   /**
    * `all-rounder`: commits in at least `thresholds.badges.allRounderAreaShare`
-   * of the areas, and in at least `allRounderMinAreas`. `specialist`: at least
+   * of the areas, and in at least `allRounderMinAreas`; never awarded when
+   * the full history has a single contributor. `specialist`: at least
    * `specialistShare` of the commits fall into one area. `cleaner`: net
    * deletions of at least `cleanerNetDeletedLines` code lines. `founder`: first
    * author of at least `founderShare` of today's files. `keeper`: the only
-   * active expert of an area. `tester`: at least `testerShare` of the changed
+   * active expert of an area; never awarded when the full history has a single
+   * contributor. `tester`: at least `testerShare` of the changed
    * files are tests. `documenter`: at least `documenterShare` of the commits
    * touch documentation. `steady`: a commit in each of the last
    * `steadyMonths` months. `welcome`: the first commit lies at most

@@ -59,6 +59,8 @@ export type ContributorBadgeFacts = {
    * and keeper, which are withheld without them.
    */
   readonly areas?: ReadonlyArray<ContributorBadgeArea>;
+  /** How many people count as contributors over the full history; with one, `all-rounder` and `keeper` compare against nobody and are withheld. */
+  readonly historyContributors: number;
   /** Whether a changed path counts toward code lines. */
   readonly isCodePath: (path: string) => boolean;
   /** The universe files the contributor created, and all universe files, for `founder`. */
@@ -104,10 +106,17 @@ const namedAreas = (
 ): ReadonlyArray<ContributorBadgeArea> =>
   areas.filter(({ kind }) => kind !== "rest");
 
-const allRounder = ({ commits, areas = [] }: Context) => {
+/** With one contributor in the history there is nobody to set a person against. */
+const isSolo = ({ historyContributors }: Context): boolean =>
+  historyContributors <= 1;
+
+const allRounder = (context: Context) => {
+  const { commits, areas = [] } = context;
   const total = namedAreas(areas).length;
   const touched = areaActivity(commits, areas).perArea.size;
-  return touched >= allRounderMinAreas && touched / total >= allRounderAreaShare
+  return !isSolo(context) &&
+    touched >= allRounderMinAreas &&
+    touched / total >= allRounderAreaShare
     ? {
         kind: "all-rounder" as const,
         label: "All-rounder",
@@ -153,7 +162,11 @@ const founder = ({ founded }: Context) =>
       }
     : undefined;
 
-const keeper = ({ email, areas = [] }: Context) => {
+const keeper = (context: Context) => {
+  const { email, areas = [] } = context;
+  if (isSolo(context)) {
+    return undefined;
+  }
   const [largest] = namedAreas(areas)
     .filter(
       ({ activeExperts }) =>
@@ -208,7 +221,9 @@ const RULES: ReadonlyArray<(context: Context) => ContributorBadge | undefined> =
  * only, and none about working hours. `welcome` stands in for the "new" status
  * pill. Each carries its rule and the numbers behind it as evidence.
  * `reviewer` is never awarded: GitHub reviews are not tied to identities yet.
- * Without `facts.areas` the three badges that need areas are withheld.
+ * Without `facts.areas` the three badges that need areas are withheld; in a
+ * repository with one contributor over the full history `all-rounder` and
+ * `keeper` are too, since they would compare the person with nobody.
  */
 export const contributorBadges = (
   email: string,

@@ -72,6 +72,8 @@ const createdFilesByEmail = (
 
 type Context = Omit<ContributorsInput, "commits" | "history"> & {
   readonly created: ReadonlyMap<string, number>;
+  /** How many people count as contributors over the full history. */
+  readonly historyContributors: number;
   /** The time of the first commit of anyone who counts as a contributor. */
   readonly repositoryStart: number;
 };
@@ -86,6 +88,7 @@ const contributorOf = (
     universePaths,
     areas,
     created,
+    historyContributors,
     repositoryStart,
   }: Context,
 ): Contributor => {
@@ -118,6 +121,7 @@ const contributorOf = (
       commits: ownHistory,
       now,
       repositoryStart,
+      historyContributors,
       isCodePath,
       founded: {
         files: created.get(email) ?? 0,
@@ -143,6 +147,7 @@ export const contributors = ({
   const context = {
     ...input,
     created: createdFilesByEmail(history, input.universePaths),
+    historyContributors: everyone.size,
     repositoryStart: [...everyone.values()]
       .flat()
       .reduce((first, { time }) => Math.min(first, time), Infinity),
