@@ -85,6 +85,19 @@ describe("chips", () => {
     ]);
   });
 
+  it("says a single week of history in the singular", () => {
+    const report = sampleReport();
+    const week = report.activity.weeks.slice(0, 1);
+    const young: Report = {
+      ...report,
+      activity: { ...report.activity, weeks: week },
+    };
+
+    expect(chips(young).map(({ parts }) => sentence(parts))).toContain(
+      "*1 week* of history",
+    );
+  });
+
   it("leaves out the branch of a detached HEAD", () => {
     const report = sampleReport();
     const detached: Report = {

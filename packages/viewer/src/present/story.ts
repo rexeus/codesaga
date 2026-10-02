@@ -18,6 +18,9 @@ const SHORT_SHA_LENGTH = 7;
 const plain = (text: string): Segment => ({ text, strong: false });
 const strong = (text: string): Segment => ({ text, strong: true });
 
+const weeksOf = (count: number): string =>
+  `${formatCount(count)} ${count === 1 ? "week" : "weeks"}`;
+
 const commitsPhrase = ({ window, repository, overview }: Report): Segment[] => {
   const covered =
     repository.firstCommitAt !== null &&
@@ -109,10 +112,7 @@ export const chips = ({
   {
     icon: "sun",
     mono: false,
-    parts: [
-      strong(`${formatCount(activity.weeks.length)} weeks`),
-      plain(" of history"),
-    ],
+    parts: [strong(weeksOf(activity.weeks.length)), plain(" of history")],
   },
   ...(comparison === undefined
     ? []
