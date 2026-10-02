@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { servicesWithoutParser } from "../testing/no-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { inspect } from "./inspect.js";
@@ -38,34 +38,37 @@ const commitsOfG = (repo: TempRepository, cache: boolean) =>
     return result.matches[0]?.commits;
   });
 
-layer(NodeServices.layer)("inspect a file renamed within one history", (it) => {
-  it.effect.each([
-    [
-      "commits made in the same second",
+layer(servicesWithoutParser)(
+  "inspect a file renamed within one history",
+  (it) => {
+    it.effect.each([
       [
-        "2024-01-01T12:00:00Z",
-        "2024-01-01T12:00:00Z",
-        "2024-01-01T12:00:00Z",
-        "2024-01-01T12:00:00Z",
+        "commits made in the same second",
+        [
+          "2024-01-01T12:00:00Z",
+          "2024-01-01T12:00:00Z",
+          "2024-01-01T12:00:00Z",
+          "2024-01-01T12:00:00Z",
+        ],
       ],
-    ],
-    [
-      "a commit dated before its parent",
       [
-        "2024-01-01T12:00:00Z",
-        "2024-01-11T12:00:00Z",
-        "2024-01-05T12:00:00Z",
-        "2024-01-12T12:00:00Z",
+        "a commit dated before its parent",
+        [
+          "2024-01-01T12:00:00Z",
+          "2024-01-11T12:00:00Z",
+          "2024-01-05T12:00:00Z",
+          "2024-01-12T12:00:00Z",
+        ],
       ],
-    ],
-  ] as const)("counts all four commits of %s, cached or not", ([, dates]) =>
-    Effect.gen(function* () {
-      const repo = yield* makeTempRepository;
-      yield* commitRenameChain(repo, dates);
+    ] as const)("counts all four commits of %s, cached or not", ([, dates]) =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitRenameChain(repo, dates);
 
-      assert.strictEqual(yield* commitsOfG(repo, false), 4);
-      assert.strictEqual(yield* commitsOfG(repo, true), 4);
-      assert.strictEqual(yield* commitsOfG(repo, true), 4);
-    }),
-  );
-});
+        assert.strictEqual(yield* commitsOfG(repo, false), 4);
+        assert.strictEqual(yield* commitsOfG(repo, true), 4);
+        assert.strictEqual(yield* commitsOfG(repo, true), 4);
+      }),
+    );
+  },
+);

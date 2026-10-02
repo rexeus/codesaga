@@ -4,6 +4,7 @@
 import { Schema } from "effect";
 
 import { AutomationTotals } from "./automation-totals.js";
+import { InspectTypeScript } from "./inspect-typescript.js";
 import { Expert, LineOwners } from "./knowledge-report.js";
 import { ActivityWindow } from "./report.js";
 
@@ -29,6 +30,8 @@ const InspectEntry = Schema.Struct({
   lastCommitAt: Schema.NullOr(Schema.String),
   /** The window's commits to the matched files by class. */
   automation: AutomationTotals,
+  /** What the deep dive says of the matched TypeScript and JavaScript files; absent when there is none, or the TypeScript parser did not load. */
+  typescript: Schema.optionalKey(InspectTypeScript),
   /** Plain-language explanations of the flags and of notable automation. */
   reasons: Schema.Array(Schema.String),
 });
