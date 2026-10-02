@@ -11,6 +11,7 @@ import { comparison } from "../compare/comparison.js";
 import { ACTIVE_DAYS } from "../contributors/activeness.js";
 import { contributors } from "../contributors/contributors.js";
 import { highlights } from "../highlights/highlights.js";
+import type { HighlightFacts } from "../highlights/highlights.js";
 import { HIGHLIGHT_THRESHOLDS } from "../highlights/thresholds.js";
 import {
   AREA_THRESHOLDS,
@@ -35,12 +36,18 @@ const highlightsOf = (
   { now, isCodePath }: RepositoryFacts,
   commits: Analysis["scoped"],
   knowledgeSection: Report["knowledge"],
+  areas: HighlightFacts["areas"],
 ): Report["highlights"] =>
-  highlights({ commits, now, isCodePath, knowledge: knowledgeSection });
+  highlights({
+    commits,
+    now,
+    isCodePath,
+    knowledge: knowledgeSection,
+    ...(areas === undefined ? {} : { areas }),
+  });
 
 /** Builds the report from the facts, each section over the commits it covers. */
 export const buildReport = (facts: RepositoryFacts): Report => {
-  const { scope } = facts.repository;
   const {
     scoped,
     commits,
@@ -50,11 +57,12 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     firstCommitAt,
     lastCommitAt,
   } = prepareAnalysis(facts);
-  const knowledgeSection = knowledge({
+  const { section: knowledgeSection, recommendedAreas } = knowledge({
     commits: scoped,
     universe: facts.universe,
-    scope,
+    scope: facts.repository.scope,
     packageRoots: facts.packageRoots,
+    window,
     depth: facts.depth,
     headTime,
     now: facts.now,
@@ -64,10 +72,11 @@ export const buildReport = (facts: RepositoryFacts): Report => {
   const people = contributors({
     commits,
     history: scoped,
-    scope,
+    scope: facts.repository.scope,
     now: facts.now,
     isCodePath: facts.isCodePath,
     universePaths: facts.universe.map(({ path }) => path),
+    areas: recommendedAreas,
   });
   return {
     schemaVersion: 1,
@@ -86,7 +95,7 @@ export const buildReport = (facts: RepositoryFacts): Report => {
     contributors: people,
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
-    highlights: highlightsOf(facts, scoped, knowledgeSection),
+    highlights: highlightsOf(facts, scoped, knowledgeSection, recommendedAreas),
     ...(previous === undefined
       ? {}
       : {

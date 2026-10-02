@@ -4,6 +4,13 @@
 
 import { Array as Arr } from "effect";
 
+import type { TimeRange } from "../analyze/analysis-window.js";
+import {
+  areaBadgeInputs,
+  areaHistoryOf,
+  storyAreaOf,
+} from "../badges/area-badge-inputs.js";
+import { areaBadges } from "../badges/area-badges.js";
 import { lineOwnersField } from "../blame/line-owners.js";
 import { isActiveWithin } from "../contributors/activeness.js";
 import { countContributors } from "../contributors/count-contributors.js";
@@ -53,6 +60,8 @@ type KnowledgeFacts = KnowledgeInput & {
   readonly scope: string;
   /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
   readonly packageRoots: ReadonlyArray<string>;
+  /** The activity window, which decides the area in focus. */
+  readonly window: TimeRange;
   /** The level to start at, from 1, rounded down; a level beyond the deepest one means the deepest. The recommended level when absent, not finite or below 1. */
   readonly depth?: number | undefined;
 };
@@ -66,10 +75,16 @@ const startDepth = (
     ? Math.floor(requested)
     : recommended;
 
+type AreasResult = {
+  readonly section: NonNullable<Report["knowledge"]["areas"]>;
+  /** The areas of the recommended level with their files and experts, for the contributor badges and the highlights. */
+  readonly recommended: ReadonlyArray<ReturnType<typeof storyAreaOf>>;
+};
+
 const areasSection = (
   facts: KnowledgeFacts,
   model: KnowledgeModel,
-): Report["knowledge"]["areas"] => {
+): AreasResult => {
   const levels = areaLevels({
     paths: facts.universe.map(({ path }) => path),
     packageRoots: facts.packageRoots,
@@ -88,19 +103,36 @@ const areasSection = (
     ),
     historyContributors: countContributors(facts.commits),
   });
+  const history = areaHistoryOf(facts.commits, facts.window);
   return {
-    depth: Math.min(startDepth(facts.depth, recommendedDepth), levels.length),
-    recommendedDepth,
-    reason,
-    levels: Arr.map(levels, ({ depth, totalAreas, areas }) => ({
-      depth,
-      totalAreas,
-      areas: areas.map(({ paths: _paths, ...area }) => ({
-        ...area,
-        badges: [],
-      })),
-    })),
+    section: {
+      depth: Math.min(startDepth(facts.depth, recommendedDepth), levels.length),
+      recommendedDepth,
+      reason,
+      levels: Arr.map(levels, ({ depth, totalAreas, areas }) => {
+        const badges = areaBadgeInputs(areas, history, model).map((input) =>
+          areaBadges(input, facts.now),
+        );
+        return {
+          depth,
+          totalAreas,
+          areas: areas.map(({ paths: _paths, ...area }, index) => ({
+            ...area,
+            badges: badges[index] ?? [],
+          })),
+        };
+      }),
+    },
+    recommended: (levels[recommendedDepth - 1]?.areas ?? []).map((area) =>
+      storyAreaOf(area, model),
+    ),
   };
+};
+
+/** The report's knowledge section and the facts about the recommended areas the other sections read. */
+type KnowledgeResult = {
+  readonly section: Report["knowledge"];
+  readonly recommendedAreas: AreasResult["recommended"];
 };
 
 /**
@@ -109,22 +141,27 @@ const areasSection = (
  * `commits` are the classified commits of the scope over the full history,
  * newest first, independent of the activity window; `universe` is the scope's
  * files. Only humans are experts. Returns every directory and every area of
- * every level; truncating for output belongs to the caller.
+ * every level, each area with its badges; truncating for output belongs to
+ * the caller. `recommendedAreas` serve the contributor badges and highlights.
  */
-export const knowledge = (facts: KnowledgeFacts): Report["knowledge"] => {
+export const knowledge = (facts: KnowledgeFacts): KnowledgeResult => {
   const model = knowledgeModel(facts);
   const paths = facts.universe.map(({ path }) => path);
   const repository = describeFileSet(paths, model);
+  const areas = areasSection(facts, model);
   return {
-    files: repository.files,
-    withoutExpert: repository.withoutExpert,
-    withoutActiveExpert: repository.withoutActiveExpert,
-    truckFactor: {
-      value: repository.truckFactor.length,
-      people: repository.truckFactor,
+    section: {
+      files: repository.files,
+      withoutExpert: repository.withoutExpert,
+      withoutActiveExpert: repository.withoutActiveExpert,
+      truckFactor: {
+        value: repository.truckFactor.length,
+        people: repository.truckFactor,
+      },
+      directories: directoryKnowledge(paths, facts.scope, model),
+      areas: areas.section,
+      ...lineOwnersField(repository.lineOwners),
     },
-    directories: directoryKnowledge(paths, facts.scope, model),
-    areas: areasSection(facts, model),
-    ...lineOwnersField(repository.lineOwners),
+    recommendedAreas: areas.recommended,
   };
 };

@@ -8,7 +8,7 @@ import { isoDateOfDay, localDayOf } from "../activity/buckets.js";
 import { ACTIVE_DAYS, isActiveWithin } from "../contributors/activeness.js";
 import { ORPHANED_SHARE } from "../knowledge/file-set.js";
 import type { AreaBadge } from "../report/badges.js";
-import { percentOf } from "../report/sentences.js";
+import { nounOf, percentOf } from "../report/sentences.js";
 import { isTestPath } from "../universe/path-kinds.js";
 
 /** The rules behind the area badges, for the report's `thresholds.badges`. */
@@ -69,7 +69,9 @@ export type AreaBadgeInput = {
   readonly commitsInWindow: number;
   /** The most commits in the activity window that touched any other area of the same level. */
   readonly peerCommitsInWindow: number;
-  /** The first commit of every person over the full history, with the paths it changed. */
+  /** The time of the repository's first commit; files created then are the founding ones, never `new`. */
+  readonly startTime: number;
+  /** The first commit of every person who arrived after the repository started, with the paths it changed. */
   readonly firstCommits: ReadonlyArray<{
     readonly time: number;
     readonly paths: ReadonlyArray<string>;
@@ -164,9 +166,11 @@ const handover = ({ experts, now }: Context) => {
     : undefined;
 };
 
-const newArea = ({ fileFirstCommits, now, nowSeconds }: Context) => {
+const newArea = ({ fileFirstCommits, startTime, now, nowSeconds }: Context) => {
   const created = Math.min(...fileFirstCommits);
-  return fileFirstCommits.length > 0 && isActiveWithin(created, now, newDays)
+  return fileFirstCommits.length > 0 &&
+    created > startTime &&
+    isActiveWithin(created, now, newDays)
     ? {
         kind: "new" as const,
         label: "New",
@@ -180,7 +184,7 @@ const inFocus = ({ commitsInWindow, peerCommitsInWindow }: Context) =>
     ? {
         kind: "in-focus" as const,
         label: "In focus",
-        evidence: `${commitsInWindow} commits in the window, the most of any area at this level.`,
+        evidence: `${nounOf(commitsInWindow, "commit")} in the window, the most of any area at this level.`,
       }
     : undefined;
 

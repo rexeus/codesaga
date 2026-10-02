@@ -34,6 +34,7 @@ const quietArea = (
   lastChangeTime: daysAgo(1),
   commitsInWindow: 0,
   peerCommitsInWindow: 0,
+  startTime: 0,
   firstCommits: [],
   ...overrides,
 });
@@ -198,6 +199,12 @@ describe("areaBadges evidence and order", () => {
         fileFirstCommits: [daysAgo(5)],
       }),
     ).toStrictEqual(["island", "orphaned", "new", "quiet", "well-tested"]);
+  });
+
+  it("does not call an area new when its files are the repository's first", () => {
+    expect(
+      kindsOf({ startTime: daysAgo(10), fileFirstCommits: [daysAgo(10)] }),
+    ).not.toContain("new");
   });
 
   it("awards no badge to a rest area", () => {

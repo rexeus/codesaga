@@ -129,7 +129,7 @@ const Areas = Schema.Struct({
 
 /**
  * Who knows the code and whether they are still around. Covers the whole
- * history and the universe files of the scope, independent of `window`. Only
+ * history and the universe files of the scope, independent of `window` except for the `in-focus` area badge. Only
  * humans are experts: a file changed only by bots and agents has no expert.
  * Expertise is an estimate from history, not a fact.
  */

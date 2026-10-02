@@ -24,8 +24,5 @@
       "entry": ["src/main.ts!"],
       "project": ["src/**/*.ts!", "!src/testing/**!"]
     }
-  },
-  "ignore": [
-    "packages/engine/src/badges/area-badges.ts"
-  ]
+  }
 }

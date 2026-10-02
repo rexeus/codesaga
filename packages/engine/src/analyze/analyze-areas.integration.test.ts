@@ -85,6 +85,52 @@ layer(NodeServices.layer)("analyze knowledge areas", (it) => {
   );
 });
 
+layer(NodeServices.layer)("analyze area badges", (it) => {
+  it.effect(
+    "awards the badges that need areas to the sole active expert of each",
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
+        const repo = yield* makeTempRepository;
+        yield* commitTwoPackages(repo);
+
+        const report = yield* analyze(analyzeOptionsFor(repo));
+
+        assert.deepStrictEqual(
+          report.contributors.map(({ name, badges }) => [
+            name,
+            badges.map(({ kind, label }) => `${kind}: ${label}`),
+          ]),
+          [
+            [
+              "Ada Lovelace",
+              ["founder: Founder", "keeper: Keeper of apps/web"],
+            ],
+            [
+              "Grace",
+              [
+                "founder: Founder",
+                "keeper: Keeper of packages/cli",
+                "welcome: Welcome",
+              ],
+            ],
+          ],
+        );
+        assert.deepStrictEqual(
+          report.knowledge.areas.levels[0]?.areas.map(({ path, badges }) => [
+            path,
+            badges.map(({ kind }) => kind),
+          ]),
+          [
+            ["apps/web", ["island"]],
+            ["packages/cli", ["island", "new"]],
+            ["packages/lib", ["island", "new"]],
+          ],
+        );
+      }),
+  );
+});
+
 layer(NodeServices.layer)("analyze knowledge areas options", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 

@@ -1,0 +1,215 @@
+// Owns gathering what the area badge rules read, from the knowledge model and the commits.
+// One pass over the commits per level for the area facts, one for the history facts shared by all levels.
+// Cost: every change of every commit once per level, plus one lookup per universe file and expert.
+
+import { toEpochSeconds } from "../analyze/analysis-window.js";
+import type { TimeRange } from "../analyze/analysis-window.js";
+import { isContributorCommit } from "../automation/classify.js";
+import type { ClassifiedCommit } from "../automation/classify.js";
+import type { AreaWithFiles } from "../knowledge/areas.js";
+import type { Human } from "../knowledge/contributions.js";
+import { isActive } from "../knowledge/model.js";
+import type { KnowledgeModel } from "../knowledge/model.js";
+import type { AreaBadgeInput } from "./area-badges.js";
+
+/** What every level shares: the commits, the window and when files and people started. */
+export type AreaHistory = {
+  readonly commits: ReadonlyArray<ClassifiedCommit>;
+  readonly window: TimeRange;
+  /** The time of each path's first commit in the life of the path. */
+  readonly fileFirstCommits: ReadonlyMap<string, number>;
+  /** The time of the repository's first commit. */
+  readonly startTime: number;
+  /** The first commit of every contributor who arrived after the repository started, with the paths it changed. */
+  readonly firstCommits: AreaBadgeInput["firstCommits"];
+};
+
+/** The first commits of files and of people, from commits newest first. */
+export const areaHistoryOf = (
+  commits: ReadonlyArray<ClassifiedCommit>,
+  window: TimeRange,
+): AreaHistory => {
+  const fileFirstCommits = new Map<string, number>();
+  const firstByPerson = new Map<
+    string,
+    { readonly time: number; readonly paths: ReadonlyArray<string> }
+  >();
+  for (const commit of commits) {
+    for (const { path, previousLife } of commit.changes) {
+      if (previousLife !== true) {
+        fileFirstCommits.set(
+          path,
+          Math.min(fileFirstCommits.get(path) ?? Infinity, commit.time),
+        );
+      }
+    }
+    const before = firstByPerson.get(commit.author.email);
+    if (
+      isContributorCommit(commit) &&
+      (before === undefined || commit.time <= before.time)
+    ) {
+      firstByPerson.set(commit.author.email, {
+        time: commit.time,
+        paths: commit.changes.map(({ path }) => path),
+      });
+    }
+  }
+  const startTime = commits.reduce(
+    (first, { time }) => Math.min(first, time),
+    Infinity,
+  );
+  return {
+    commits,
+    window,
+    fileFirstCommits,
+    startTime,
+    firstCommits: [...firstByPerson.values()].filter(
+      ({ time }) => time > startTime,
+    ),
+  };
+};
+
+type AreaFacts = {
+  lastChangeTime: number | undefined;
+  commitsInWindow: number;
+  /** When each person first committed to a file of the area. */
+  readonly personFirst: Map<string, number>;
+};
+
+/** For each area of one level, the last change, the window commits and when each person arrived. */
+const areaFactsOf = (
+  areas: ReadonlyArray<AreaWithFiles>,
+  { commits, window }: AreaHistory,
+): ReadonlyArray<AreaFacts> => {
+  const areaOfPath = new Map(
+    areas.flatMap(({ paths }, index) => paths.map((path) => [path, index])),
+  );
+  const facts = areas.map((): AreaFacts => ({
+    lastChangeTime: undefined,
+    commitsInWindow: 0,
+    personFirst: new Map(),
+  }));
+  const since = toEpochSeconds(window.since);
+  const until = toEpochSeconds(window.until);
+  for (const commit of commits) {
+    const touched = new Set(
+      commit.changes.flatMap(({ path }) => areaOfPath.get(path) ?? []),
+    );
+    for (const index of touched) {
+      const area = facts[index];
+      if (area === undefined) {
+        continue;
+      }
+      area.lastChangeTime = Math.max(area.lastChangeTime ?? 0, commit.time);
+      area.commitsInWindow +=
+        commit.time >= since && commit.time <= until ? 1 : 0;
+      if (isContributorCommit(commit)) {
+        const { email } = commit.author;
+        area.personFirst.set(
+          email,
+          Math.min(area.personFirst.get(email) ?? Infinity, commit.time),
+        );
+      }
+    }
+  }
+  return facts;
+};
+
+/** Every expert of the area with the files they know, most files first, as the rules read them. */
+const expertsOf = (
+  area: AreaWithFiles,
+  model: KnowledgeModel,
+  personFirst: ReadonlyMap<string, number>,
+): AreaBadgeInput["experts"] => {
+  const tallies = new Map<
+    string,
+    { human: Human; files: number; soleFiles: number }
+  >();
+  for (const path of area.paths) {
+    const experts = model.experts.get(path) ?? [];
+    for (const human of experts) {
+      const before = tallies.get(human.email);
+      tallies.set(human.email, {
+        human,
+        files: (before?.files ?? 0) + 1,
+        soleFiles: (before?.soleFiles ?? 0) + (experts.length === 1 ? 1 : 0),
+      });
+    }
+  }
+  return [...tallies.values()]
+    .toSorted(
+      (a, b) => b.files - a.files || a.human.email.localeCompare(b.human.email),
+    )
+    .map(({ human, files, soleFiles }) => ({
+      files,
+      soleFiles,
+      firstTime: personFirst.get(human.email) ?? human.lastTime,
+      lastTime: human.lastTime,
+    }));
+};
+
+/**
+ * The badge input of every area of one level, in the order of `areas`. The
+ * area in focus is chosen among the named areas: the commits of a `rest` area
+ * add up many small ones and do not compete.
+ */
+export const areaBadgeInputs = (
+  areas: ReadonlyArray<AreaWithFiles>,
+  history: AreaHistory,
+  model: KnowledgeModel,
+): ReadonlyArray<AreaBadgeInput> => {
+  const facts = areaFactsOf(areas, history);
+  return areas.map((area, index) => {
+    const own = facts[index];
+    const peers = facts.flatMap((peer, other) =>
+      other === index || areas[other]?.kind === "rest"
+        ? []
+        : [peer.commitsInWindow],
+    );
+    return {
+      kind: area.kind,
+      paths: area.paths,
+      truckFactor: area.truckFactor,
+      island: area.island,
+      orphaned: area.orphaned,
+      experts: expertsOf(area, model, own?.personFirst ?? new Map()),
+      fileFirstCommits: area.paths.flatMap(
+        (path) => history.fileFirstCommits.get(path) ?? [],
+      ),
+      lastChangeTime: own?.lastChangeTime,
+      commitsInWindow: own?.commitsInWindow ?? 0,
+      peerCommitsInWindow: peers.reduce(
+        (most, count) => Math.max(most, count),
+        0,
+      ),
+      startTime: history.startTime,
+      firstCommits: history.firstCommits,
+    };
+  });
+};
+
+/**
+ * An area as the contributor badges and the highlights read it: its files, the
+ * emails of its active experts and how many files have none.
+ */
+export const storyAreaOf = (area: AreaWithFiles, model: KnowledgeModel) => {
+  const active = new Set<string>();
+  let withoutActiveExpert = 0;
+  for (const path of area.paths) {
+    const activeHere = (model.experts.get(path) ?? []).filter((human) =>
+      isActive(human, model),
+    );
+    withoutActiveExpert += activeHere.length === 0 ? 1 : 0;
+    for (const { email } of activeHere) {
+      active.add(email);
+    }
+  }
+  return {
+    path: area.path,
+    kind: area.kind,
+    paths: area.paths,
+    orphaned: area.orphaned,
+    withoutActiveExpert,
+    activeExperts: [...active],
+  };
+};
