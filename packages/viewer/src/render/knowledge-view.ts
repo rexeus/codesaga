@@ -14,7 +14,7 @@ import {
 import type { Badge, PersonLine } from "../present/knowledge.js";
 import type { RowLimit } from "../present/row-limit.js";
 import { h } from "./dom.js";
-import { section } from "./section.js";
+import { panel, section } from "./section.js";
 import { dataTable } from "./table.js";
 import type { Column } from "./table.js";
 
@@ -144,28 +144,31 @@ export const renderKnowledge = (report: Report): HTMLElement => {
   return section(
     "knowledge",
     "Knowledge",
+    "Who knows which part",
     "Who knows the code, and whether they are still around. Covers the whole history.",
-    h("p", "", coverageSentence(knowledge)),
-    ...(knowledge.truckFactor.people.length === 0
-      ? []
-      : [truckFactorPanel(knowledge)]),
-    ...(knowledge.directories.length === 0
-      ? [h("p", "empty", "No directory is large enough to report.")]
-      : directoryTable(knowledge)),
-    ...(limited === null ? [] : [h("p", "note", limited)]),
-    ...(hasLineOwners(knowledge)
-      ? [
-          h(
-            "p",
-            "note",
-            "Line owners count the lines at HEAD that git blame attributes to each author. Unlike experts, bots and agents own lines too.",
-          ),
-        ]
-      : []),
-    h(
-      "p",
-      "note",
-      "Expertise is an estimate from the history, not a fact. An island is a directory where one person is the sole expert on most files; orphaned means most files have no active expert.",
+    panel(
+      h("p", "", coverageSentence(knowledge)),
+      ...(knowledge.truckFactor.people.length === 0
+        ? []
+        : [truckFactorPanel(knowledge)]),
+      ...(knowledge.directories.length === 0
+        ? [h("p", "empty", "No directory is large enough to report.")]
+        : directoryTable(knowledge)),
+      ...(limited === null ? [] : [h("p", "note", limited)]),
+      ...(hasLineOwners(knowledge)
+        ? [
+            h(
+              "p",
+              "note",
+              "Line owners count the lines at HEAD that git blame attributes to each author. Unlike experts, bots and agents own lines too.",
+            ),
+          ]
+        : []),
+      h(
+        "p",
+        "note",
+        "Expertise is an estimate from the history, not a fact. An island is a directory where one person is the sole expert on most files; orphaned means most files have no active expert.",
+      ),
     ),
   );
 };

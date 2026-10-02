@@ -121,18 +121,25 @@ export const responsiveChart = (
   render();
 };
 
-/** A titled chart container; the caller fills `.chart-host`. */
+/** A chart card with its title and subtitle; the caller fills `.chart-host`. */
 export const chartFigure = (
   title: string,
+  subtitle: string,
   ...headExtras: readonly Node[]
-): { figure: HTMLElement; host: HTMLElement; caption: HTMLElement } => {
+): {
+  figure: HTMLElement;
+  host: HTMLElement;
+  caption: HTMLElement;
+  note: HTMLElement;
+} => {
   const host = h("div", "chart-host");
   const caption = h("figcaption", "chart-title", title);
+  const note = h("p", "chart-sub", subtitle);
   const figure = h(
     "figure",
-    "chart",
-    h("div", "chart-head", caption, ...headExtras),
+    "card chart",
+    h("div", "chart-head", h("div", "", caption, note), ...headExtras),
     host,
   );
-  return { figure, host, caption };
+  return { figure, host, caption, note };
 };

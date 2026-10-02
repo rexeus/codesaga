@@ -1,0 +1,138 @@
+import type { Report } from "@codesaga/engine";
+
+import { describeComparison } from "./comparison-note.js";
+import { formatAge, formatCount, formatDateLong } from "./format.js";
+
+/** A run of text of the header; `strong` runs are set in the primary ink. */
+export type Segment = { readonly text: string; readonly strong: boolean };
+
+/** A pill under the lede. `icon` names a glyph of the render layer. */
+export type Chip = {
+  readonly icon: "branch" | "hash" | "calendar" | "sun" | "compare";
+  readonly mono: boolean;
+  readonly parts: readonly Segment[];
+};
+
+const SHORT_SHA_LENGTH = 7;
+
+const plain = (text: string): Segment => ({ text, strong: false });
+const strong = (text: string): Segment => ({ text, strong: true });
+
+const commitsPhrase = ({ window, repository, overview }: Report): Segment[] => {
+  const covered =
+    repository.firstCommitAt !== null &&
+    window.since <= repository.firstCommitAt;
+  return [
+    strong(`${formatCount(overview.commits)} commits`),
+    ...(covered ? [] : [plain(` since ${formatDateLong(window.since)}`)]),
+  ];
+};
+
+const peoplePhrase = ({ overview }: Report): Segment[] => {
+  const { total, active90 } = overview.contributors;
+  if (total === 1) {
+    return [
+      plain(" from a single author, "),
+      strong(`${formatCount(overview.loc)} lines`),
+      plain(` in ${formatCount(overview.files)} files.`),
+    ];
+  }
+  const active = active90 === 0 ? "none" : `${formatCount(active90)} of them`;
+  return [
+    plain(" from "),
+    strong(`${formatCount(total)} people`),
+    plain(`, ${active} active in the last 90 days.`),
+  ];
+};
+
+/** One sentence that says what the repository is: its main language, age, commits and people. */
+export const lede = (report: Report): Segment[] => {
+  const { repository, generatedAt, overview } = report;
+  if (repository.firstCommitAt === null) {
+    return [plain("A repository without commits yet.")];
+  }
+  const language = overview.languages[0]?.name;
+  return [
+    plain(`A ${language === undefined ? "" : `${language} `}project that is `),
+    strong(formatAge(repository.firstCommitAt, generatedAt)),
+    plain(" old: "),
+    ...commitsPhrase(report),
+    ...peoplePhrase(report),
+  ];
+};
+
+/** The facts under the lede: branch, HEAD, the window, the weeks of history and the comparison, when there are any. */
+export const chips = ({
+  repository,
+  window,
+  activity,
+  comparison,
+}: Report): Chip[] => [
+  ...(repository.branch === null
+    ? []
+    : [
+        {
+          icon: "branch",
+          mono: false,
+          parts: [plain("Branch "), strong(repository.branch)],
+        } satisfies Chip,
+      ]),
+  ...(repository.head === null
+    ? []
+    : [
+        {
+          icon: "hash",
+          mono: true,
+          parts: [
+            plain("HEAD "),
+            strong(repository.head.slice(0, SHORT_SHA_LENGTH)),
+          ],
+        } satisfies Chip,
+      ]),
+  {
+    icon: "calendar",
+    mono: false,
+    parts: [
+      strong(formatDateLong(window.since)),
+      plain(" to "),
+      strong(formatDateLong(window.until)),
+    ],
+  },
+  {
+    icon: "sun",
+    mono: false,
+    parts: [
+      strong(`${formatCount(activity.weeks.length)} weeks`),
+      plain(" of history"),
+    ],
+  },
+  ...(comparison === undefined
+    ? []
+    : [
+        {
+          icon: "compare",
+          mono: false,
+          parts: [plain(describeComparison(comparison.previous))],
+        } satisfies Chip,
+      ]),
+];
+
+/** A link of the section navigation. */
+export type NavItem = { readonly id: string; readonly label: string };
+
+/** The sections the page has, in page order; Highlights only exist when the report has some. */
+export const navItems = ({ highlights, pullRequests }: Report): NavItem[] => [
+  ...(highlights.length === 0
+    ? []
+    : [{ id: "highlights", label: "Highlights" }]),
+  { id: "activity", label: "Activity" },
+  ...(pullRequests === undefined
+    ? []
+    : [{ id: "pull-requests", label: "Pull requests" }]),
+  { id: "knowledge", label: "Knowledge" },
+  { id: "contributors", label: "People" },
+];
+
+/** "Generated 2 Oct 2026". */
+export const generatedNote = ({ generatedAt }: Report): string =>
+  `Generated ${formatDateLong(generatedAt)}`;

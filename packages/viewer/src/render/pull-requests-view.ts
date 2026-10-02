@@ -20,7 +20,7 @@ import {
 import type { Plot } from "./chart-frame.js";
 import { h, s } from "./dom.js";
 import { hoverZones } from "./hover.js";
-import { legend, legendItem, section, tableView } from "./section.js";
+import { legend, legendItem, panel, section, tableView } from "./section.js";
 import { dataTable } from "./table.js";
 
 const CHART_HEIGHT = 190;
@@ -75,6 +75,7 @@ const pairsPlot = (layout: PullRequestsLayout): Required<Plot> => {
 const monthlyChart = (months: PullRequests["months"]): HTMLElement => {
   const { figure, host } = chartFigure(
     "Pull requests opened and merged per month",
+    "Opened and merged, by month",
     legend(legendItem("c-opened", "Opened"), legendItem("c-merged", "Merged")),
   );
   const description =
@@ -176,29 +177,31 @@ export const renderPullRequests = (report: Report): HTMLElement | null => {
   const description =
     "Opened and merged, how long they took, and who reviewed. Counts give context, not a ranking.";
   const notice = emptyWindowNotice(report);
-  if (notice !== null) {
-    return section(
-      "pull-requests",
-      "Pull requests",
-      description,
-      h("p", "empty", notice),
-    );
-  }
+  const content =
+    notice === null
+      ? [
+          figures(pullRequests),
+          monthlyChart(pullRequests.months),
+          panel(
+            pullRequests.authors.length === 0
+              ? h("p", "empty", "No pull requests by people in the window.")
+              : authorsTable(pullRequests),
+            pullRequests.reviewers.length === 0
+              ? h("p", "empty", "No reviews by others in the window.")
+              : reviewersTable(pullRequests),
+            ...[
+              ...listLimitNotes(pullRequests),
+              ...pullRequestNotes(pullRequests),
+            ].map((note) => h("p", "note", note)),
+            tableView(() => [monthTable(pullRequests)]),
+          ),
+        ]
+      : [h("p", "empty", notice)];
   return section(
     "pull-requests",
     "Pull requests",
+    "How the review flow moved",
     description,
-    figures(pullRequests),
-    monthlyChart(pullRequests.months),
-    pullRequests.authors.length === 0
-      ? h("p", "empty", "No pull requests by people in the window.")
-      : authorsTable(pullRequests),
-    pullRequests.reviewers.length === 0
-      ? h("p", "empty", "No reviews by others in the window.")
-      : reviewersTable(pullRequests),
-    ...[...listLimitNotes(pullRequests), ...pullRequestNotes(pullRequests)].map(
-      (note) => h("p", "note", note),
-    ),
-    tableView(() => [monthTable(pullRequests)]),
+    h("div", "stack", ...content),
   );
 };

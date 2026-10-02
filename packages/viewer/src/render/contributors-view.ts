@@ -7,7 +7,7 @@ import {
 } from "../present/contributors.js";
 import { formatCount, formatDate } from "../present/format.js";
 import { h } from "./dom.js";
-import { section } from "./section.js";
+import { panel, section } from "./section.js";
 import { dataTable } from "./table.js";
 import type { Column } from "./table.js";
 
@@ -69,18 +69,21 @@ export const renderContributors = (report: Report): HTMLElement => {
   const limited = truncation(report);
   return section(
     "contributors",
+    "People",
     "Contributors",
     "People with a commit in the window. Counts give context, not a ranking.",
-    report.contributors.length === 0
-      ? h("p", "empty", "No contributors in the window.")
-      : dataTable("Contributors", columns, report.contributors, {
-          sorting: {
-            initial: { key: "commits", direction: "desc" },
-            sort: sortContributors,
-            natural: naturalDirection,
-          },
-          rowLimit: { rows: 100, noun: "contributors" },
-        }),
-    ...(limited === null ? [] : [h("p", "note", limited)]),
+    panel(
+      report.contributors.length === 0
+        ? h("p", "empty", "No contributors in the window.")
+        : dataTable("Contributors", columns, report.contributors, {
+            sorting: {
+              initial: { key: "commits", direction: "desc" },
+              sort: sortContributors,
+              natural: naturalDirection,
+            },
+            rowLimit: { rows: 100, noun: "contributors" },
+          }),
+      ...(limited === null ? [] : [h("p", "note", limited)]),
+    ),
   );
 };

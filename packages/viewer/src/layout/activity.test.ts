@@ -5,9 +5,9 @@ import { layoutActivity } from "./activity.js";
 
 type Activity = Report["activity"];
 
-// 366 x 132 leaves a 310 x 100 plot (margins: 8 top, 24 bottom, 44 left, 12
-// right). January 2024 spans 31 days, so one day is 10 px and a week 70 px.
-const SIZE = { width: 366, height: 132 };
+// 359 x 140 leaves a 315 x 100 plot (margins: 14 top, 26 bottom, 38 left, 6
+// right). The three weeks span 21 days, so one day is 15 px and a week 105 px.
+const SIZE = { width: 359, height: 140 };
 
 const week = (start: string, commits: number, added = 0, deleted = 0) => ({
   start,
@@ -34,15 +34,15 @@ const layoutOf = (activity: Activity) => {
 };
 
 describe("layoutActivity weekly bars", () => {
-  it("places one bar per week, centred in its 70 px slot and capped at 24 px", () => {
+  it("places one bar per week, centred in its 105 px slot and capped at 16 px", () => {
     const { commits, plot, resolution } = layoutOf(threeWeeks);
 
-    expect(plot).toEqual({ width: 310, height: 100 });
+    expect(plot).toEqual({ width: 315, height: 100 });
     expect(resolution).toBe("weeks");
     expect(commits.bars.map(({ x, width }) => [x, width])).toEqual([
-      [23, 24],
-      [93, 24],
-      [163, 24],
+      [44.5, 16],
+      [149.5, 16],
+      [254.5, 16],
     ]);
   });
 
@@ -70,13 +70,57 @@ describe("layoutActivity weekly bars", () => {
     ]);
   });
 
-  it("puts each month's contributors on the shared time axis", () => {
+  it("draws each month's contributors as a bar over the month's span of the shared time axis", () => {
     const { contributors } = layoutOf(threeWeeks);
 
-    // mid-January is 15.5 days after the domain start
-    expect(contributors.points.map(({ x, contributors: n }) => [x, n])).toEqual(
-      [[155, 2]],
-    );
+    // January alone spans the 315 px; the bar is 12 px wide at most
+    expect(
+      contributors.bars.map(({ bar, month, contributors: n }) => [
+        bar.x,
+        bar.width,
+        month,
+        n,
+      ]),
+    ).toEqual([[151.5, 12, "Jan 2024", 2]]);
+  });
+});
+
+const manyWeeks = (count: number): Activity => ({
+  weeks: Array.from({ length: count }, (_, index) =>
+    week(
+      new Date(Date.UTC(2024, 0, 1 + index * 7)).toISOString().slice(0, 10),
+      1,
+    ),
+  ),
+  months: [{ month: "2024-01", commits: count, contributors: 1 }],
+});
+
+describe("layoutActivity commit marks", () => {
+  it("marks the busiest week as the peak", () => {
+    const { commits } = layoutOf(threeWeeks);
+
+    // the third week's 16 px bar is centred at 262.5 and its top is the plot
+    // top; the label has under 60 px to the right of it
+    expect(commits.peak).toEqual({
+      x: 262.5,
+      y: 0,
+      commits: 8,
+      anchor: "end",
+    });
+  });
+
+  it("puts the average of all weeks on the same scale as the bars", () => {
+    const { commits } = layoutOf(threeWeeks);
+
+    // (4 + 0 + 8) / 3 = 4 commits of an axis up to 8
+    expect(commits.average).toEqual({ value: 4, y: 50 });
+  });
+
+  it("emphasises the last 12 weeks only for a history of at least 26 weeks", () => {
+    const wide = { width: 1000, height: 140 };
+
+    expect(layoutActivity(manyWeeks(26), wide)?.commits.recentFrom).toBe(14);
+    expect(layoutActivity(manyWeeks(25), wide)?.commits.recentFrom).toBeNull();
   });
 });
 
@@ -102,8 +146,8 @@ describe("layoutActivity resolution", () => {
 
     expect(resolution).toBe("months");
     expect(buckets.map(({ label, commits }) => [label, commits])).toEqual([
-      ["2020-01", 4],
-      ["2020-02", 5],
+      ["Jan 2020", 4],
+      ["Feb 2020", 5],
     ]);
   });
 

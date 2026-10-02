@@ -1,21 +1,31 @@
 import { h } from "./dom.js";
 
-/** A dashboard card with a heading and a one-line description. */
+/** A section of the page: an eyebrow, a title and a line, then its content. */
 export const section = (
   id: string,
+  eyebrow: string,
   title: string,
   description: string,
   ...content: readonly Node[]
 ): HTMLElement => {
-  const card = h(
+  const block = h(
     "section",
-    "card",
-    h("header", "", h("h2", "", title), h("p", "", description)),
+    "block",
+    h(
+      "div",
+      "sec-head",
+      h("div", "", h("div", "eyebrow", eyebrow), h("h2", "", title)),
+      h("p", "", description),
+    ),
     ...content,
   );
-  card.id = id;
-  return card;
+  block.id = id;
+  return block;
 };
+
+/** A card holding stacked content, such as a table with its notes. */
+export const panel = (...content: readonly Node[]): HTMLElement =>
+  h("div", "card panel", ...content);
 
 /** One legend entry: an entity-colored swatch, its name and optional figure. */
 export const legendItem = (

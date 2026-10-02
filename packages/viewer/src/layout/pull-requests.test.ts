@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { layoutPullRequests } from "./pull-requests.js";
 
-// 366 x 132 leaves a 310 x 100 plot; 20 pull requests in the busiest month
+// 354 x 140 leaves a 310 x 100 plot; 20 pull requests in the busiest month
 // make the axis 0 to 20, so one pull request is 5 px.
-const SIZE = { width: 366, height: 132 };
+const SIZE = { width: 354, height: 140 };
 
 const months = [
   { month: "2024-01", opened: 10, merged: 5 },

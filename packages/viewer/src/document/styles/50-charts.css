@@ -1,0 +1,228 @@
+.chart {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 18px 20px 14px;
+}
+
+.chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+}
+
+.chart-sub {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.chart-host {
+  width: 100%;
+  min-width: 0;
+}
+
+.chart svg {
+  overflow: visible;
+}
+
+svg .grid {
+  stroke: var(--grid);
+  stroke-width: 1;
+  shape-rendering: crispedges;
+}
+
+svg .baseline {
+  stroke: var(--axis);
+  stroke-width: 1;
+  shape-rendering: crispedges;
+}
+
+svg .average {
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.7;
+}
+
+svg .tick-label {
+  fill: var(--ink-3);
+  font-size: 11px;
+}
+
+svg .annotation {
+  fill: var(--ink-2);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+svg .mark {
+  fill: var(--mark);
+}
+
+svg .mark.earlier {
+  opacity: 0.55;
+}
+
+svg .cell {
+  fill: var(--cell0);
+}
+
+svg .cell.h1 {
+  fill: var(--h1);
+}
+
+svg .cell.h2 {
+  fill: var(--h2);
+}
+
+svg .cell.h3 {
+  fill: var(--h3);
+}
+
+svg .cell.h4 {
+  fill: var(--h4);
+}
+
+svg .cell.h5 {
+  fill: var(--h5);
+}
+
+svg .crosshair {
+  stroke: var(--ink);
+  stroke-width: 1;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+svg .zone {
+  fill: transparent;
+}
+
+svg .zone.active {
+  fill: var(--wash);
+  stroke: var(--ink-2);
+  stroke-width: 1;
+}
+
+.scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+.scale i {
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.scale .l0 {
+  background: var(--cell0);
+}
+
+.scale .l1 {
+  background: var(--h1);
+}
+
+.scale .l2 {
+  background: var(--h2);
+}
+
+.scale .l3 {
+  background: var(--h3);
+}
+
+.scale .l4 {
+  background: var(--h4);
+}
+
+.scale .l5 {
+  background: var(--h5);
+}
+
+.rhythm {
+  display: flex;
+  gap: 28px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--grid);
+}
+
+.rhythm strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.rhythm span {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  max-width: 280px;
+  padding: 8px 11px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.4);
+  font-size: 12.5px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip-title {
+  margin-bottom: 4px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-row strong {
+  font-weight: 650;
+}
+
+.tooltip-row .label {
+  opacity: 0.7;
+}
+
+.key {
+  width: 12px;
+  height: 3px;
+  flex: none;
+  border-radius: 2px;
+  background: var(--mark);
+}
+
+.table-view {
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.table-view summary {
+  cursor: pointer;
+  width: fit-content;
+}

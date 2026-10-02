@@ -10,8 +10,8 @@ table.data {
 
 table.data th {
   padding: 6px 10px;
-  border-bottom: 1px solid var(--baseline);
-  color: var(--text-2);
+  border-bottom: 1px solid var(--axis);
+  color: var(--ink-2);
   font-weight: 600;
   text-align: left;
   white-space: nowrap;
@@ -19,7 +19,7 @@ table.data th {
 
 table.data td {
   padding: 6px 10px;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--grid);
   vertical-align: top;
 }
 
@@ -34,13 +34,13 @@ table.data .num {
   border: 0;
   border-radius: 8px;
   background: var(--wash);
-  color: var(--text);
+  color: var(--ink);
   font: inherit;
   cursor: pointer;
 }
 
 .show-all:hover {
-  background: var(--hairline);
+  background: var(--grid);
 }
 
 table.data th button.sort {
@@ -56,7 +56,7 @@ table.data th button.sort {
 }
 
 table.data th button.sort:hover {
-  color: var(--text);
+  color: var(--ink);
 }
 
 table.data th .arrow {
@@ -75,7 +75,7 @@ table.data th .arrow {
 }
 
 .note {
-  color: var(--muted);
+  color: var(--ink-3);
   font-size: 12px;
 }
 
@@ -86,31 +86,13 @@ table.data th .arrow {
   padding: 1px 8px;
   border-radius: 999px;
   background: var(--wash);
-  color: var(--text-2);
+  color: var(--ink-2);
   font-size: 12px;
   white-space: nowrap;
 }
 
 .badge.active {
-  color: var(--active-text);
-}
-
-.lang-bar {
-  display: flex;
-  gap: 2px;
-  height: 28px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.lang-segment {
-  flex-basis: 0;
-  min-width: 2px;
-  background: var(--mark);
-}
-
-.lang-segment:hover {
-  filter: brightness(1.1);
+  color: var(--good);
 }
 
 .plain {
@@ -127,7 +109,7 @@ table.data th .arrow {
 }
 
 .person-line.inactive strong {
-  color: var(--text-2);
+  color: var(--ink-2);
   font-weight: 500;
 }
 
@@ -140,7 +122,7 @@ table.data th .arrow {
 }
 
 .marker.inactive {
-  color: var(--muted);
+  color: var(--ink-3);
 }
 
 .truck-factor {
@@ -173,11 +155,11 @@ table.data th .arrow {
 }
 
 .flag-orphaned .symbol {
-  color: var(--serious);
+  color: var(--crit-ink);
 }
 
 .flag-island .symbol {
-  color: var(--warning);
+  color: var(--warn-ink);
 }
 
 .reasons {

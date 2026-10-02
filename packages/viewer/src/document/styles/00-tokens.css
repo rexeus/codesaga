@@ -1,92 +1,97 @@
 /*
- * Design tokens. The categorical slots follow the dataviz reference palette in
- * its fixed order (blue, orange, aqua, yellow, magenta, green, violet); the
- * dark values are the same hues stepped for the dark surface, validated as
- * sets with the palette validator. Entities keep their hue across charts.
+ * Design tokens, one role per name and a light and a dark value per role
+ * (`light-dark()` follows `color-scheme`, which the theme toggle overrides).
+ * The categorical slots follow the dataviz reference palette in its fixed
+ * order (blue, orange, aqua, yellow, magenta, green, violet); the dark values
+ * are the same hues stepped for the dark surface, validated as sets with the
+ * palette validator. Entities keep their hue across charts.
  */
 :root {
   color-scheme: light dark;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --text: #0b0b0b;
-  --text-2: #52514e;
-  --muted: #6b6a66;
-  --hairline: #e1e0d9;
-  --baseline: #c3c2b7;
-  --ring: rgb(11 11 11 / 0.1);
-  --wash: rgb(11 11 11 / 0.04);
-  --shadow: 0 6px 20px rgb(11 11 11 / 0.14);
-  --focus: #2a78d6;
+  --page: light-dark(#f4f4f1, #0d0d0d);
+  --surface: light-dark(#fcfcfb, #1a1a19);
+  --surface-2: light-dark(#f4f4f1, #232322);
+  --ink: light-dark(#0b0b0b, #ffffff);
+  --ink-2: light-dark(#52514e, #c3c2b7);
+  --ink-3: light-dark(#6f6e69, #9a9890);
+  --grid: light-dark(#e1e0d9, #2c2c2a);
+  --axis: light-dark(#c3c2b7, #383835);
+  --border: light-dark(rgb(11 11 11 / 0.09), rgb(255 255 255 / 0.09));
+  --wash: light-dark(rgb(11 11 11 / 0.04), rgb(255 255 255 / 0.06));
+  --shadow-ink: light-dark(rgb(11 11 11 / 0.12), rgb(0 0 0 / 0.6));
+  --shadow: 0 1px 0 var(--wash), 0 8px 24px -12px var(--shadow-ink);
+  --accent: light-dark(#2a78d6, #3987e5);
+  --accent-ink: light-dark(#1c5cab, #86b6ef);
+  --accent-wash: light-dark(rgb(42 120 214 / 0.1), rgb(57 135 229 / 0.16));
+  --good: light-dark(#006300, #0ca30c);
+  --good-wash: light-dark(rgb(12 163 12 / 0.13), rgb(12 163 12 / 0.13));
+  --warn-wash: light-dark(rgb(237 161 0 / 0.16), rgb(250 178 25 / 0.16));
+  --warn-ink: light-dark(#7a5200, #fab219);
+  --crit-wash: light-dark(rgb(208 59 59 / 0.12), rgb(236 100 100 / 0.16));
+  --crit-ink: light-dark(#a42525, #f08a8a);
 
-  --s1: #2a78d6;
-  --s2: #eb6834;
-  --s3: #1baf7a;
-  --s4: #eda100;
-  --s5: #e87ba4;
+  --s1: light-dark(#2a78d6, #3987e5);
+  --s2: light-dark(#eb6834, #d95926);
+  --s3: light-dark(#1baf7a, #199e70);
+  --s4: light-dark(#eda100, #c98500);
+  --s5: light-dark(#e87ba4, #d55181);
   --s6: #008300;
-  --s7: #4a3aa7;
-  --other: #898781;
+  --s7: light-dark(#4a3aa7, #9085e9);
+  --other: light-dark(#c3c2b7, #4a4a46);
 
-  --good: #0ca30c;
-  --warning: #fab219;
-  --serious: #ec835a;
-  --active-text: #006300;
+  /* The sequential ramp of the weekday and hour heatmap, empty cell first. */
+  --cell0: light-dark(#ecebe6, #242423);
+  --h1: light-dark(#cde2fb, #104281);
+  --h2: light-dark(#9ec5f4, #1c5cab);
+  --h3: light-dark(#5598e7, #2a78d6);
+  --h4: light-dark(#2a78d6, #5598e7);
+  --h5: light-dark(#184f95, #9ec5f4);
+
+  --hero-a: light-dark(#dbe8fb, #10223d);
+  --hero-b: light-dark(#e6e0f8, #1b1840);
+  --hero-c: light-dark(#fbe7dc, #2a1a14);
+
+  --radius: 16px;
+  --mono:
+    ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #0d0d0d;
-    --surface: #1a1a19;
-    --text: #ffffff;
-    --text-2: #c3c2b7;
-    --muted: #a3a29a;
-    --hairline: #2c2c2a;
-    --baseline: #383835;
-    --ring: rgb(255 255 255 / 0.1);
-    --wash: rgb(255 255 255 / 0.06);
-    --shadow: 0 6px 20px rgb(0 0 0 / 0.6);
-    --focus: #3987e5;
+:root[data-theme="light"] {
+  color-scheme: light;
+}
 
-    --s1: #3987e5;
-    --s2: #d95926;
-    --s3: #199e70;
-    --s4: #c98500;
-    --s5: #d55181;
-    --s6: #008300;
-    --s7: #9085e9;
-    --active-text: #0ca30c;
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 /* Entity colors: a mark, a legend swatch and a tooltip key share one class. */
 .c-commits,
-.c-human,
 .c-opened,
+.c-people,
+.c-added,
 .slot-1 {
   --mark: var(--s1);
 }
-.c-assisted,
+.c-deleted,
 .slot-2 {
   --mark: var(--s2);
 }
-.c-agent,
 .slot-3 {
   --mark: var(--s3);
 }
-.c-bot,
 .slot-4 {
   --mark: var(--s4);
 }
-.c-deleted,
 .slot-5 {
   --mark: var(--s5);
 }
-.c-people,
 .c-merged,
 .slot-6 {
   --mark: var(--s6);
 }
-.c-added,
 .slot-7 {
   --mark: var(--s7);
 }

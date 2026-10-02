@@ -11,23 +11,23 @@ export type Bar = {
 };
 
 const BAR_RADIUS = 4;
-const MAX_BAR_WIDTH = 24;
+const DEFAULT_MAX_WIDTH = 16;
 const BAR_GAP = 2;
 const MIN_GAPPED_STEP = 6;
 
 /**
- * A thin bar centred in its zone between `top` and `bottom` (plot pixels):
- * at most 24 px wide, 2 px narrower than a zone of 6 px or more, with a
- * rounded data end of up to 4 px.
+ * A thin bar centred in its zone from `top` to `bottom` (plot pixels):
+ * at most `maxWidth` (16 px by default) wide, 2 px narrower than a zone of 6 px
+ * or more, with a rounded data end of up to 4 px.
  */
 export const barInZone = (
   { x, width: zoneWidth }: Zone,
-  top: number,
-  bottom: number,
+  [top, bottom]: readonly [number, number],
   direction: Bar["direction"],
+  maxWidth = DEFAULT_MAX_WIDTH,
 ): Bar => {
   const gap = zoneWidth >= MIN_GAPPED_STEP ? BAR_GAP : 0;
-  const width = Math.max(1, Math.min(MAX_BAR_WIDTH, zoneWidth - gap));
+  const width = Math.max(1, Math.min(maxWidth, zoneWidth - gap));
   const height = bottom - top;
   return {
     x: x + (zoneWidth - width) / 2,

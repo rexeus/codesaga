@@ -1,3 +1,5 @@
+import type { Segment } from "../present/story.js";
+
 type Child = Node | string;
 type Attributes = Readonly<Record<string, string | number>>;
 
@@ -50,3 +52,7 @@ export const s = (
   }
   return element;
 };
+
+/** Text with its strong runs wrapped in `<b>`; every run is a text node, so nothing parses as markup. */
+export const richText = (segments: readonly Segment[]): Child[] =>
+  segments.map(({ text, strong }) => (strong ? h("b", "", text) : text));
