@@ -1,14 +1,11 @@
 import type { Report } from "@codesaga/engine";
 
 import { layoutSparkline } from "../layout/sparkline.js";
-import { formatCount } from "../present/format.js";
 import { keyFigures } from "../present/key-figures.js";
 import type { Foot, KeyFigure, Trend } from "../present/key-figures.js";
-import type { LanguageShare } from "../present/languages.js";
 import { h, s } from "./dom.js";
 import { icon } from "./icons.js";
-import { legend, legendItem } from "./section.js";
-import { bindTooltip } from "./tooltip.js";
+import { languageBar } from "./language-bar.js";
 
 const SPARK_WIDTH = 232;
 const LEGEND_LANGUAGES = 3;
@@ -39,48 +36,6 @@ const sparkline = (trend: Trend | null, height: number): SVGElement[] => {
       s("path", { class: "history", d: layout.history }),
       s("path", { class: "recent", d: layout.recent }),
       s("circle", { class: "end", cx: layout.end.x, cy: layout.end.y, r: 4.5 }),
-    ),
-  ];
-};
-
-const segment = (share: LanguageShare): HTMLElement => {
-  const element = h("div", `lang-segment ${share.entity}`);
-  element.style.flexGrow = String(share.loc);
-  bindTooltip(element, {
-    title: share.name,
-    rows: [
-      {
-        label: "of the lines of code",
-        value: `${share.percent.toFixed(1)}%`,
-        key: share.entity,
-      },
-      { label: "lines of code", value: formatCount(share.loc) },
-      { label: "files", value: formatCount(share.files) },
-    ],
-  });
-  return element;
-};
-
-const languageBar = (shares: readonly LanguageShare[]): HTMLElement[] => {
-  if (shares.length === 0) {
-    return [];
-  }
-  const bar = h("div", "lang-bar", ...shares.map((share) => segment(share)));
-  bar.setAttribute("role", "img");
-  bar.setAttribute(
-    "aria-label",
-    shares
-      .map(({ name, percent }) => `${name} ${percent.toFixed(1)}%`)
-      .join(", "),
-  );
-  return [
-    bar,
-    legend(
-      ...shares
-        .slice(0, LEGEND_LANGUAGES)
-        .map(({ entity, name, percent }) =>
-          legendItem(entity, `${name} ${Math.round(percent)}%`),
-        ),
     ),
   ];
 };
@@ -134,7 +89,7 @@ const footOf = (foot: Foot): HTMLElement[] => {
     return personFoot(foot);
   }
   return foot.kind === "languages"
-    ? languageBar(foot.shares)
+    ? languageBar(foot.shares, LEGEND_LANGUAGES)
     : peopleFoot(foot);
 };
 

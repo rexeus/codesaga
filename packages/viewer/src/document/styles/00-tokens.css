@@ -39,6 +39,11 @@
   --s7: light-dark(#4a3aa7, #9085e9);
   --other: light-dark(#c3c2b7, #4a4a46);
 
+  /* Badge categories take three of the categorical hues; risk badges keep the warning colors. */
+  --cat-knowledge: var(--s3);
+  --cat-code: var(--s7);
+  --cat-activity: var(--s4);
+
   /* The sequential ramp of the weekday and hour heatmap, empty cell first. */
   --cell0: light-dark(#ecebe6, #242423);
   --h1: light-dark(#cde2fb, #104281);
@@ -97,4 +102,13 @@
 }
 .slot-other {
   --mark: var(--other);
+}
+.cat-knowledge {
+  --mark: var(--cat-knowledge);
+}
+.cat-code {
+  --mark: var(--cat-code);
+}
+.cat-activity {
+  --mark: var(--cat-activity);
 }

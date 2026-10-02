@@ -46,6 +46,13 @@ const recommendation = (
     ),
   );
 
+/** The detail control and the way to move it from outside. */
+export type DetailSlider = {
+  readonly element: HTMLElement;
+  /** Moves the slider to the detail at `index`, as if the reader had; `onSelect` follows. */
+  readonly select: (index: number) => void;
+};
+
 /**
  * The detail control: a slider over the details with a labelled stop each, the
  * recommendation and a button that jumps to it. The slider is a native range
@@ -57,7 +64,7 @@ export const detailSlider = (
   territories: Territories,
   start: number,
   onSelect: (index: number) => void,
-): HTMLElement => {
+): DetailSlider => {
   const ticks = detailTicks(territories);
   const stops = ticks.map((tick) => stopOf(tick));
   const input = h("input", "");
@@ -113,5 +120,5 @@ export const detailSlider = (
     recommendation(territories, choosable ? jump : null),
   );
   select(start);
-  return element;
+  return { element, select };
 };

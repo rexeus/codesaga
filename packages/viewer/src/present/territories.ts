@@ -2,15 +2,17 @@ import type { Report } from "@codesaga/engine";
 
 import { territoryBadges } from "./badges.js";
 import type { BadgeRow } from "./badges.js";
-import { formatAgo, formatCount, formatPercent } from "./format.js";
+import { formatAgo, formatPercent } from "./format.js";
 import { personEntities } from "./people.js";
-import type { Detail, Territory } from "./territory-details.js";
+import type { Territory } from "./territory-details.js";
+import { insideOf, territoryKey } from "./territory-tree.js";
+import type { Inside } from "./territory-tree.js";
 
-/** How many cards of a detail are drawn before the reader asks for all. */
+/** How many first-cut cards are drawn before the reader asks for all. */
 export const TERRITORY_CARDS_SHOWN = 12;
 const EXPERTS_SHOWN = 3;
-const LOW_TRUCK_FACTOR = 2;
-const DAYS_PER_MONTH = 30.4;
+/** A territory at or below this truck factor counts as risky. */
+export const LOW_TRUCK_FACTOR = 2;
 
 /** One expert of a territory as a bar segment and a row. */
 export type ExpertView = {
@@ -32,6 +34,9 @@ type OwnerView = {
 
 /** One territory as a card: where it is, how big, how safe, who knows it, and its badges. */
 export type TerritoryView = {
+  /** The territory as the report has it: its code stats and the territories inside it. */
+  readonly node: Territory;
+  /** Identifies the territory in the whole tree, see `territoryKey`. */
   readonly key: string;
   /** The path above the territory with its trailing slash, dimmed: `packages/`. */
   readonly parent: string;
@@ -39,12 +44,16 @@ export type TerritoryView = {
   readonly leaf: string;
   /** The small territories below `path`, grouped as "other files". */
   readonly other: boolean;
+  /** The scoped file itself, when `analyze` was given a file: a territory of one file, named without a trailing slash. */
+  readonly file: boolean;
+  /** The territories it splits into, or null when it does not split. */
+  readonly inside: Inside | null;
   readonly files: number;
   /** When anyone last changed a file of the territory: `5 weeks ago`. */
   readonly changed: string;
   /** The territory's share of all universe files: `19%`. */
   readonly share: string;
-  /** The share as a fraction of the biggest territory of the detail, for the solo card's size bar. */
+  /** The share as a fraction of the biggest of its sibling territories, for the solo card's size bar. */
   readonly sizeFraction: number;
   readonly truckFactor: number;
   readonly risk: "crit" | "warn" | "none";
@@ -59,12 +68,15 @@ export type TerritoryView = {
   readonly badges: BadgeRow;
 };
 
-const parentOf = (path: string): { parent: string; leaf: string } => {
+const parentOf = (
+  path: string,
+  file: boolean,
+): { parent: string; leaf: string } => {
   if (path === ".") {
     return { parent: "", leaf: "/ (root)" };
   }
   const steps = path.split("/");
-  const leaf = `${steps.pop() ?? ""}/`;
+  const leaf = `${steps.pop() ?? ""}${file ? "" : "/"}`;
   return { parent: steps.length === 0 ? "" : `${steps.join("/")}/`, leaf };
 };
 
@@ -102,21 +114,26 @@ const SOLO_BADGES = new Set([
   "well-tested",
 ]);
 
+const isFile = (
+  { kind, path, files }: Territory,
+  { repository }: Report,
+): boolean => kind === "folder" && files === 1 && path === repository.scope;
+
 /**
- * The cards of `detail` in the engine's order (riskiest first, other files
- * last), sized against the report's files and dated against its day. A solo
- * repository keeps only the badges that do not rest on several people.
+ * The cards of `territories` in the engine's order (riskiest first, other
+ * files last), sized against the report's files and dated against its day. A
+ * solo repository keeps only the badges that do not rest on several people.
  */
 export const territoryViews = (
-  detail: Detail,
+  territories: ReadonlyArray<Territory>,
   report: Report,
 ): TerritoryView[] => {
   const totalFiles = report.knowledge.files;
   const now = report.generatedAt;
   const solo = isSolo(report);
   const entityOf = personEntities(report.contributors);
-  const biggest = Math.max(1, ...detail.territories.map(({ files }) => files));
-  return detail.territories.map((territory) => {
+  const biggest = Math.max(1, ...territories.map(({ files }) => files));
+  return territories.map((territory) => {
     const segments = territory.experts.map(
       ({ name, email, active, files, share }): ExpertView => ({
         name,
@@ -128,9 +145,12 @@ export const territoryViews = (
     );
     const claimed = segments.reduce((sum, { weight }) => sum + weight, 0);
     return {
-      key: `${territory.kind}:${territory.path}`,
-      ...parentOf(territory.path),
+      node: territory,
+      key: territoryKey(territory),
+      ...parentOf(territory.path, isFile(territory, report)),
       other: territory.kind === "other",
+      file: isFile(territory, report),
+      inside: insideOf(territory),
       files: territory.files,
       changed: formatAgo(territory.lastChangedAt, now),
       share: shareOfFiles(territory.files, totalFiles),
@@ -159,58 +179,3 @@ export const territoryViews = (
     };
   });
 };
-
-/**
- * The territories of a detail that stand for themselves, without the groups of other
- * files. The engine's recommendation counts these, so the slider does too; a
- * detail the output limit cut counts all its territories, since the cut-off ones
- * cannot be told apart.
- */
-export const namedTerritories = (detail: Detail): number =>
-  detail.totalTerritories > detail.territories.length
-    ? detail.totalTerritories
-    : detail.territories.filter(({ kind }) => kind !== "other").length;
-
-/** What the line above the cards counts: territories, covered files and the risky ones. */
-export type DetailSummary = {
-  readonly territories: number;
-  /** The groups of other files beside the territories. */
-  readonly otherGroups: number;
-  readonly coveredFiles: number;
-  readonly totalFiles: number;
-  readonly lowTruckFactor: number;
-  readonly islands: number;
-  readonly orphaned: number;
-  /** A note when the report's output limit cut territories off; null otherwise. */
-  readonly truncated: string | null;
-};
-
-const countWhere = (
-  territories: readonly Territory[],
-  test: (territory: Territory) => boolean,
-): number => territories.filter((territory) => test(territory)).length;
-
-/** The summary of a detail against the repository's `totalFiles`. */
-export const detailSummary = (
-  detail: Detail,
-  totalFiles: number,
-): DetailSummary => ({
-  territories: namedTerritories(detail),
-  otherGroups: countWhere(detail.territories, ({ kind }) => kind === "other"),
-  coveredFiles: detail.territories.reduce((sum, { files }) => sum + files, 0),
-  totalFiles,
-  lowTruckFactor: countWhere(
-    detail.territories,
-    ({ truckFactor }) => truckFactor <= LOW_TRUCK_FACTOR,
-  ),
-  islands: countWhere(detail.territories, ({ island }) => island),
-  orphaned: countWhere(detail.territories, ({ orphaned }) => orphaned),
-  truncated:
-    detail.totalTerritories > detail.territories.length
-      ? `Showing the ${formatCount(detail.territories.length)} riskiest of ${formatCount(detail.totalTerritories)} territories: the report was limited.`
-      : null,
-});
-
-/** The legend entry for dormant experts: months from `thresholds.activeDays`. */
-export const dormantLegend = (activeDays: number): string =>
-  `Dormant for ${Math.round(activeDays / DAYS_PER_MONTH)}+ months`;

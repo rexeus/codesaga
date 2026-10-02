@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { territoryBadges, contributorBadges } from "./badges.js";
 
-const badge = <Kind extends string>(kind: Kind, label: string = kind) => ({
+const badge = <Kind extends string>(
+  kind: Kind,
+  label: string = kind,
+  category: "knowledge" | "code" | "activity" = "knowledge",
+) => ({
   kind,
-  category: "knowledge" as const,
+  category,
   label,
   evidence: `${label} because of the numbers`,
 });
@@ -33,7 +37,25 @@ describe("territoryBadges", () => {
     ]);
   });
 
-  it("folds the badges beyond the third into a count that names them", () => {
+  it("tints a badge by its category, and only the three risks keep a warning color", () => {
+    const row = territoryBadges([
+      badge("shared-knowledge", "Shared knowledge", "knowledge"),
+      badge("hotspot", "Hotspot", "code"),
+      badge("quiet", "Quiet", "activity"),
+      badge("one-expert", "One expert", "knowledge"),
+      badge("knowledge-fading", "Knowledge fading", "knowledge"),
+    ]);
+
+    expect(row.all.map(({ label, tone }) => [label, tone])).toEqual([
+      ["Shared knowledge", "knowledge"],
+      ["Hotspot", "code"],
+      ["Quiet", "activity"],
+      ["One expert", "knowledge"],
+      ["Knowledge fading", "warn"],
+    ]);
+  });
+
+  it("folds the badges beyond the third into a count that names them, and keeps every one in `all`", () => {
     const row = territoryBadges([
       badge("orphaned", "Orphaned"),
       badge("island", "Island"),
@@ -51,6 +73,7 @@ describe("territoryBadges", () => {
       count: 2,
       labels: "New territory, Well tested",
     });
+    expect(row.all).toHaveLength(5);
   });
 });
 
@@ -68,6 +91,6 @@ describe("contributorBadges", () => {
   });
 
   it("has an empty row without badges", () => {
-    expect(contributorBadges([])).toEqual({ chips: [], more: null });
+    expect(contributorBadges([])).toEqual({ chips: [], more: null, all: [] });
   });
 });

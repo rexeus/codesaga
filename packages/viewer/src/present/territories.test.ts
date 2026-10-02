@@ -2,8 +2,7 @@ import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
 import { sampleReport } from "../testing/reports.js";
-import { detailStatus, detailTicks } from "./detail-slider.js";
-import { territoryViews, dormantLegend, detailSummary } from "./territories.js";
+import { territoryViews } from "./territories.js";
 
 type Territory = Report["knowledge"]["territories"]["territories"][number];
 
@@ -39,12 +38,6 @@ const territory = (overrides: Partial<Territory>): Territory => ({
   ...overrides,
 });
 
-const detail = (
-  at: number,
-  territories: Territory[],
-  totalTerritories = territories.length,
-) => ({ detail: at, totalTerritories, territories });
-
 const NOW = "2026-10-02T09:00:00.000Z";
 
 /** The sample report with 100 universe files, dated `NOW`; `solo` leaves one contributor. */
@@ -67,7 +60,7 @@ const reportOf = (solo = false): Report => {
 
 describe("territoryViews", () => {
   const [card, other, root] = territoryViews(
-    detail(1, [
+    [
       territory({
         experts: [
           expert("Ann", 12, 0.6),
@@ -78,7 +71,7 @@ describe("territoryViews", () => {
       }),
       territory({ path: "src", kind: "other", files: 5, truckFactor: 1 }),
       territory({ path: ".", files: 10, truckFactor: 2 }),
-    ]),
+    ],
     reportOf(),
   );
 
@@ -106,7 +99,7 @@ describe("territoryViews", () => {
 
   it("writes a handful of files out of thousands as under one percent, not zero", () => {
     const report = reportOf();
-    const [few] = territoryViews(detail(1, [territory({ files: 1 })]), {
+    const [few] = territoryViews([territory({ files: 1 })], {
       ...report,
       knowledge: { ...report.knowledge, files: 435 },
     });
@@ -123,9 +116,32 @@ describe("territoryViews", () => {
   });
 });
 
+describe("the scoped file", () => {
+  it("is named without a trailing slash, unlike a folder of one file", () => {
+    const scoped: Report = {
+      ...reportOf(),
+      repository: { ...reportOf().repository, scope: "src/bin.ts" },
+    };
+    const [file, folder] = territoryViews(
+      [
+        territory({ path: "src/bin.ts", kind: "folder", files: 1 }),
+        territory({ path: "src/lib", kind: "folder", files: 1 }),
+      ],
+      scoped,
+    );
+
+    expect([file?.parent, file?.leaf, file?.file]).toEqual([
+      "src/",
+      "bin.ts",
+      true,
+    ]);
+    expect([folder?.leaf, folder?.file]).toEqual(["lib/", false]);
+  });
+});
+
 describe("the experts of a card", () => {
   const [card, other] = territoryViews(
-    detail(1, [
+    [
       territory({
         experts: [
           expert("Ann", 12, 0.6),
@@ -135,7 +151,7 @@ describe("the experts of a card", () => {
         ],
       }),
       territory({ path: "src", kind: "other", files: 5 }),
-    ]),
+    ],
     reportOf(),
   );
 
@@ -184,7 +200,7 @@ describe("the badges of a solo repository", () => {
   });
 
   it("keeps only the badges that do not rest on several people", () => {
-    const [solo] = territoryViews(detail(1, [withBadges]), reportOf(true));
+    const [solo] = territoryViews([withBadges], reportOf(true));
 
     expect(solo?.badges.chips.map(({ label }) => label)).toEqual([
       "well-tested",
@@ -201,13 +217,13 @@ describe("the badges of a solo repository", () => {
         contributors: { ...report.overview.contributors, total: 1 },
       },
     };
-    const [team] = territoryViews(detail(1, [withBadges]), narrow);
+    const [team] = territoryViews([withBadges], narrow);
 
     expect(team?.badges.chips).toHaveLength(3);
   });
 
   it("keeps every badge with a team", () => {
-    const [team] = territoryViews(detail(1, [withBadges]), reportOf());
+    const [team] = territoryViews([withBadges], reportOf());
 
     expect(team?.badges.chips).toHaveLength(3);
     expect(team?.badges.more?.count).toBe(1);
@@ -228,7 +244,7 @@ describe("the line owners of a card", () => {
 
   it("lists the three authors of the most lines, bots named as such, when blame ran", () => {
     const [card] = territoryViews(
-      detail(1, [territory({ lineOwners: owners })]),
+      [territory({ lineOwners: owners })],
       reportOf(),
     );
 
@@ -240,71 +256,8 @@ describe("the line owners of a card", () => {
   });
 
   it("has none without blame", () => {
-    const [card] = territoryViews(detail(1, [territory({})]), reportOf());
+    const [card] = territoryViews([territory({})], reportOf());
 
     expect(card?.lineOwners).toBeNull();
-  });
-});
-
-describe("detailSummary", () => {
-  it("counts the territories, their files and the risky ones", () => {
-    const summary = detailSummary(
-      detail(1, [
-        territory({ files: 30, truckFactor: 1, island: true }),
-        territory({ files: 20, truckFactor: 2, orphaned: true }),
-        territory({ files: 10, truckFactor: 5 }),
-      ]),
-      80,
-    );
-
-    expect(summary).toEqual({
-      territories: 3,
-      otherGroups: 0,
-      coveredFiles: 60,
-      totalFiles: 80,
-      lowTruckFactor: 2,
-      islands: 1,
-      orphaned: 1,
-      truncated: null,
-    });
-  });
-
-  it("counts territories without the groups of other files, as the engine's recommendation does", () => {
-    const detailWithOtherFiles = detail(1, [
-      territory({ files: 30 }),
-      territory({ path: "src", kind: "folder", files: 20 }),
-      territory({ path: "src", kind: "other", files: 4 }),
-    ]);
-
-    expect(detailSummary(detailWithOtherFiles, 80)).toMatchObject({
-      territories: 2,
-      otherGroups: 1,
-    });
-    expect(detailStatus(detailWithOtherFiles)).toBe(
-      "2 non-overlapping territories",
-    );
-    expect(
-      detailTicks({
-        detail: 1,
-        recommendedDetail: 1,
-        reason:
-          "detail 1: 2 territories (without other files) for 3 active contributors",
-        details: [detailWithOtherFiles],
-      })[0]?.count,
-    ).toBe("2 territories");
-  });
-
-  it("says so when the report's limit cut territories off", () => {
-    const summary = detailSummary(detail(1, [territory({})], 40), 80);
-
-    expect(summary.truncated).toBe(
-      "Showing the 1 riskiest of 40 territories: the report was limited.",
-    );
-  });
-});
-
-describe("dormantLegend", () => {
-  it("names the months after which an expert is dormant", () => {
-    expect(dormantLegend(183)).toBe("Dormant for 6+ months");
   });
 });

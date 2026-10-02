@@ -6,8 +6,13 @@ type TerritoryBadge =
   Report["knowledge"]["territories"]["territories"][number]["badges"][number];
 type ContributorBadge = Report["contributors"][number]["badges"][number];
 
-/** How a badge is tinted: a warning, something good, plain news, or nothing special. */
-type Tone = "crit" | "warn" | "good" | "info" | "plain";
+/**
+ * How a badge is tinted. A territory badge wears the color of its category,
+ * except the three that name a risk, which keep a warning color: `crit` for
+ * orphaned knowledge, `warn` for an island and for fading knowledge. A
+ * contributor badge is plain, or `info` when it is news.
+ */
+type Tone = TerritoryBadge["category"] | "crit" | "warn" | "info" | "plain";
 
 /** A badge ready to draw: its glyph and tint, its label, and the rule and numbers behind it for a tooltip. */
 export type BadgeChip = {
@@ -22,30 +27,35 @@ export type BadgeRow = {
   readonly chips: readonly BadgeChip[];
   /** The badges that did not fit, as a "+n" chip whose tooltip names them; null when all fit. */
   readonly more: { readonly count: number; readonly labels: string } | null;
+  /** Every badge, for the places that have room to spell each one out. */
+  readonly all: readonly BadgeChip[];
 };
 
 /** At most this many badges are drawn on a card. */
 const MAX_BADGES = 3;
 
-const TERRITORY_LOOKS: Record<
-  TerritoryBadge["kind"],
-  { icon: IconName; tone: Tone }
-> = {
-  island: { icon: "tree-palm", tone: "warn" },
-  orphaned: { icon: "ghost", tone: "crit" },
-  "one-expert": { icon: "user", tone: "warn" },
-  "shared-knowledge": { icon: "users", tone: "good" },
-  "knowledge-fading": { icon: "hourglass", tone: "warn" },
-  handover: { icon: "arrow-right-left", tone: "info" },
-  "new-territory": { icon: "sprout", tone: "info" },
-  "in-focus": { icon: "crosshair", tone: "info" },
-  quiet: { icon: "snowflake", tone: "plain" },
-  "newcomer-friendly": { icon: "user-plus", tone: "good" },
-  heavyweight: { icon: "weight", tone: "plain" },
-  hotspot: { icon: "flame", tone: "warn" },
-  churning: { icon: "refresh-cw", tone: "plain" },
-  "deeply-nested": { icon: "indent-increase", tone: "plain" },
-  "well-tested": { icon: "shield-check", tone: "good" },
+const TERRITORY_ICONS: Record<TerritoryBadge["kind"], IconName> = {
+  island: "tree-palm",
+  orphaned: "ghost",
+  "one-expert": "user",
+  "shared-knowledge": "users",
+  "knowledge-fading": "hourglass",
+  handover: "arrow-right-left",
+  "newcomer-friendly": "user-plus",
+  "new-territory": "sprout",
+  "in-focus": "crosshair",
+  quiet: "snowflake",
+  heavyweight: "weight",
+  hotspot: "flame",
+  churning: "refresh-cw",
+  "deeply-nested": "indent-increase",
+  "well-tested": "shield-check",
+};
+
+const RISK_TONES: Partial<Record<TerritoryBadge["kind"], "crit" | "warn">> = {
+  orphaned: "crit",
+  island: "warn",
+  "knowledge-fading": "warn",
 };
 
 const CONTRIBUTOR_LOOKS: Record<
@@ -76,6 +86,7 @@ const rowOf = (chips: readonly BadgeChip[]): BadgeRow => {
             count: rest.length,
             labels: rest.map(({ label }) => label).join(", "),
           },
+    all: chips,
   };
 };
 
@@ -85,8 +96,9 @@ const rowOf = (chips: readonly BadgeChip[]): BadgeRow => {
  */
 export const territoryBadges = (badges: readonly TerritoryBadge[]): BadgeRow =>
   rowOf(
-    badges.map(({ kind, label, evidence }) => ({
-      ...TERRITORY_LOOKS[kind],
+    badges.map(({ kind, category, label, evidence }) => ({
+      icon: TERRITORY_ICONS[kind],
+      tone: RISK_TONES[kind] ?? category,
       label,
       evidence,
     })),

@@ -6,6 +6,7 @@ import {
   formatCompact,
   formatDateLong,
   formatMonth,
+  formatNoun,
   formatSignedCompact,
 } from "./format.js";
 
@@ -74,5 +75,15 @@ describe("formatAgo", () => {
     ["2024-06-30T10:00:00.000Z", "2 years ago"],
   ])("reads %s as %s", (timestamp, expected) => {
     expect(formatAgo(timestamp, "2026-10-02T09:00:00.000Z")).toBe(expected);
+  });
+});
+
+describe("formatNoun", () => {
+  it("keeps the noun singular for one and pluralizes everything else, zero included", () => {
+    expect([
+      formatNoun(1, "file"),
+      formatNoun(0, "file"),
+      formatNoun(1204, "line"),
+    ]).toEqual(["1 file", "0 files", "1,204 lines"]);
   });
 });

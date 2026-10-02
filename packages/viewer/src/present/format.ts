@@ -3,6 +3,10 @@ const counts = new Intl.NumberFormat("en");
 /** An integer with thousands separators: `60,942`. */
 export const formatCount = (value: number): string => counts.format(value);
 
+/** A count with its noun, plural unless the count is one: `1 file`, `1,204 files`. */
+export const formatNoun = (value: number, noun: string): string =>
+  `${formatCount(value)} ${noun}${value === 1 ? "" : "s"}`;
+
 const MINUS = "−";
 const THOUSAND = 1000;
 const MILLION = 1_000_000;
