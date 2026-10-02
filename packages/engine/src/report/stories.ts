@@ -9,7 +9,7 @@ import { Schema } from "effect";
  * of them are set, and what `value` counts, depends on `kind`:
  *
  * - `anniversary`: `value` is the age in `unit`, years or days for the 100, 500 and 1000 day milestones; `date` is the anniversary, up to seven days from now.
- * - `streak`: `value` is the days of the longest run of days with a commit (author's local days), `date` its first day.
+ * - `streak`: `value` is the days of the longest run of days with a human or agent-assisted commit (author's local days), `date` its first day.
  * - `night-owls`: `value` is the share (0 to 1) of human commits at 22:00 to 05:00 local time.
  * - `weekend`: `value` is the share (0 to 1) of human commits on a Saturday or Sunday local time.
  * - `newcomers`: `value` is the people whose first commit lies in the last 90 days, `people` the first five.

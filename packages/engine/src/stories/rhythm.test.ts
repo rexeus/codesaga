@@ -74,6 +74,36 @@ describe("rhythmStories streak", () => {
   });
 });
 
+describe("rhythmStories streak contributors", () => {
+  it("does not count bot and agent commits towards the streak", () => {
+    expect(
+      kindsOf(days(10, 20), { class: "bot", tools: ["Dependabot"] }),
+    ).not.toContain("streak");
+    expect(
+      kindsOf(days(10, 20), { class: "agent", tools: ["Claude Code"] }),
+    ).not.toContain("streak");
+  });
+
+  it("counts agent-assisted commits and breaks the streak where only a bot committed", () => {
+    const assisted = {
+      class: "agent-assisted" as const,
+      tools: ["Claude Code"],
+    };
+    const commits = [
+      ...commitsAt([...days(1, 7), ...days(9, 15)], assisted),
+      ...commitsAt(days(8, 8), { class: "bot", tools: ["Dependabot"] }),
+    ];
+
+    const [streak] = rhythmStories(storyFacts({ commits }));
+
+    expect(streak).toMatchObject({
+      kind: "streak",
+      value: 7,
+      date: "2026-06-01",
+    });
+  });
+});
+
 describe("rhythmStories busiest day", () => {
   it("reports the day with the most commits at 5 commits", () => {
     const [busiest] = storiesOf([...dayOf(5), "2026-03-11T09:00:00Z"]);

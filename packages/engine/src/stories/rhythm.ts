@@ -49,9 +49,10 @@ const longestRun = (days: ReadonlyArray<number>): DayRun =>
   );
 
 const streakStory = (
-  days: ReadonlyMap<number, number>,
+  commits: ReadonlyArray<ClassifiedCommit>,
 ): ReadonlyArray<Story> => {
-  const { start, length } = longestRun([...days.keys()]);
+  const people = commits.filter((commit) => isContributorCommit(commit));
+  const { start, length } = longestRun([...commitsPerDay(people).keys()]);
   return length < streakMinDays
     ? []
     : [
@@ -136,17 +137,18 @@ const habitStories = (
 
 /**
  * The `streak`, `busiest-day`, `night-owls` and `weekend` findings that pass
- * their thresholds. Days are the author's local days. The streak and the
- * busiest day count commits of every class; night owls (22:00 to 05:00 local
- * time) and the weekend share count human and agent-assisted commits only and
- * need at least `rhythmMinCommits` of them.
+ * their thresholds. Days are the author's local days. The busiest day counts
+ * commits of every class; the streak, night owls (22:00 to 05:00 local time)
+ * and the weekend share count human and agent-assisted commits only, as the
+ * Unbroken achievement does, and the last two need at least `rhythmMinCommits`
+ * of them.
  */
 export const rhythmStories = ({
   commits,
 }: StoryFacts): ReadonlyArray<Story> => {
   const days = commitsPerDay(commits);
   return [
-    ...streakStory(days),
+    ...streakStory(commits),
     ...busiestDayStory(days),
     ...habitStories(commits),
   ];

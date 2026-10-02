@@ -68,7 +68,7 @@ The words codesaga uses in the report, the terminal, the dashboard and the code.
 
 ## Stories, badges and achievements
 
-**Story** — a notable fact about the repository's history or team (`stories` in the report): an anniversary, the longest streak, night or weekend work, newcomers, a quiet territory, the most renamed file, the biggest cleanup, the busiest day, a truck factor of one, or orphaned knowledge. Each has a threshold in `thresholds.stories` and appears only when it passes, ranked by notability, six at most. A story names an event or a team fact and never ranks one person against another. An anniversary says in `unit` whether its `value` counts years or days.
+**Story** — a notable fact about the repository's history or team (`stories` in the report): an anniversary, the longest streak, night or weekend work, newcomers, a quiet territory, the most renamed file, the biggest cleanup, the busiest day, a truck factor of one, or orphaned knowledge. Each has a threshold in `thresholds.stories` and appears only when it passes, ranked by notability, six at most. A story names an event or a team fact and never ranks one person against another. An anniversary says in `unit` whether its `value` counts years or days. The longest streak counts human and agent-assisted commits only, like the Unbroken achievement.
 
 **Badge** — a labelled fact about a territory or a contributor that passes a fixed threshold in `thresholds.badges`; each carries its `kind`, `label`, and the `evidence` behind it. A badge is positive or neutral for people, never a score, and there are none about working hours. Territory badges also carry a `category`: _Knowledge_, _Code_ or _Activity_. A card shows three badges at most and counts the rest.
 
