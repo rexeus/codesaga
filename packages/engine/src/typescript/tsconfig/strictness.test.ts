@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { loadedConfig } from "../../testing/tsconfig.js";
 import { strictnessOf } from "./strictness.js";
 
-const typescript = { declared: "^5.9.0", major: 5 };
+const typescript = { declared: "^5.9.0", majors: [5] };
 
 const analysis = (
   configs: ReadonlyArray<ReturnType<typeof loadedConfig>>,
@@ -76,5 +76,18 @@ describe("strictnessOf counts", () => {
       ungovernedFiles: 2,
       jsFilesOutsideConfigs: 2,
     });
+  });
+});
+
+const byDefault = (majors: ReadonlyArray<number>) =>
+  strictnessOf({ configs: [], typescript: { declared: "x", majors } }, [])
+    .section.typescript.strictByDefault;
+
+describe("strictnessOf strict by default", () => {
+  it("is on when every declared major defaults strict, off when none does, unknown when they differ or none is known", () => {
+    expect(byDefault([6, 7])).toBe(true);
+    expect(byDefault([5])).toBe(false);
+    expect(byDefault([5, 6])).toBe("unknown");
+    expect(byDefault([])).toBe("unknown");
   });
 });

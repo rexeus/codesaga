@@ -8,14 +8,39 @@ const manifest = (section: string, version: string): string =>
 describe("declaredTypeScript", () => {
   it("reads the range and its major from the root manifest", () => {
     expect(
-      declaredTypeScript(manifest("devDependencies", "^5.9.2"), undefined),
-    ).toStrictEqual({ declared: "^5.9.2", major: 5 });
+      declaredTypeScript(manifest("devDependencies", "^5.9.2"), [], undefined),
+    ).toStrictEqual({ declared: "^5.9.2", majors: [5] });
     expect(
-      declaredTypeScript(manifest("dependencies", "~6.0.0-beta"), undefined),
-    ).toStrictEqual({ declared: "~6.0.0-beta", major: 6 });
+      declaredTypeScript(
+        manifest("dependencies", "~6.0.0-beta"),
+        [],
+        undefined,
+      ),
+    ).toStrictEqual({ declared: "~6.0.0-beta", majors: [6] });
   });
 
-  it("resolves the default catalog and a named catalog of pnpm-workspace.yaml", () => {
+  it("names every major of a range and of every workspace manifest, root first, each range once", () => {
+    expect(
+      declaredTypeScript(
+        manifest("devDependencies", "^5.9 || ^6.0"),
+        ["^5.9 || ^6.0", "~5.4.0", "^7.0.0"],
+        undefined,
+      ),
+    ).toStrictEqual({
+      declared: "^5.9 || ^6.0, ~5.4.0, ^7.0.0",
+      majors: [5, 6, 7],
+    });
+  });
+
+  it("finds TypeScript in the workspace manifests when the root declares none", () => {
+    expect(
+      declaredTypeScript('{ "name": "root" }', ["^6.0.2"], undefined),
+    ).toStrictEqual({ declared: "^6.0.2", majors: [6] });
+  });
+});
+
+describe("declaredTypeScript catalogs", () => {
+  it("resolves the default catalog and a named catalog of pnpm-workspace.yaml, in manifests too", () => {
     const yaml = [
       "packages:",
       "  - packages/*",
@@ -30,28 +55,32 @@ describe("declaredTypeScript", () => {
     ].join("\n");
 
     expect(
-      declaredTypeScript(manifest("devDependencies", "catalog:"), yaml),
-    ).toStrictEqual({ declared: "^5.8.0", major: 5 });
+      declaredTypeScript(manifest("devDependencies", "catalog:"), [], yaml),
+    ).toStrictEqual({ declared: "^5.8.0", majors: [5] });
     expect(
-      declaredTypeScript(manifest("devDependencies", "catalog:next"), yaml),
-    ).toStrictEqual({ declared: "^6.0.0", major: 6 });
+      declaredTypeScript(undefined, ["catalog:", "catalog:next"], yaml),
+    ).toStrictEqual({ declared: "^5.8.0, ^6.0.0", majors: [5, 6] });
   });
 
   it("declares nothing for a catalog it cannot read, a missing manifest or no typescript", () => {
-    const none = { declared: null, major: null };
+    const none = { declared: null, majors: [] };
 
     expect(
-      declaredTypeScript(manifest("devDependencies", "catalog:"), undefined),
+      declaredTypeScript(
+        manifest("devDependencies", "catalog:"),
+        [],
+        undefined,
+      ),
     ).toStrictEqual(none);
-    expect(declaredTypeScript(undefined, undefined)).toStrictEqual(none);
+    expect(declaredTypeScript(undefined, [], undefined)).toStrictEqual(none);
     expect(
-      declaredTypeScript('{"devDependencies": {"vite": "^6"}}', undefined),
+      declaredTypeScript('{"devDependencies": {"vite": "^6"}}', [], undefined),
     ).toStrictEqual(none);
   });
 
   it("keeps a tag as the declared text without a major", () => {
     expect(
-      declaredTypeScript(manifest("devDependencies", "latest"), undefined),
-    ).toStrictEqual({ declared: "latest", major: null });
+      declaredTypeScript(manifest("devDependencies", "latest"), [], undefined),
+    ).toStrictEqual({ declared: "latest", majors: [] });
   });
 });

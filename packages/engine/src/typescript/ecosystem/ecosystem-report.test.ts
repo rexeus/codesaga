@@ -33,6 +33,7 @@ const manifest = (
   dependencies: [],
   devDependencies: [],
   peerDependencies: [],
+  typescript: null,
   ...parts,
 });
 

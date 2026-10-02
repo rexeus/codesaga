@@ -20,6 +20,7 @@ const manifest = (type: PackageManifest["type"]): PackageManifest => ({
   dependencies: [],
   devDependencies: [],
   peerDependencies: [],
+  typescript: null,
 });
 
 describe("modulesOf", () => {

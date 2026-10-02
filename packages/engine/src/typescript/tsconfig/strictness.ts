@@ -37,8 +37,14 @@ export type StrictnessAnalysis = {
 const isPlainName = (path: string): boolean =>
   path === "tsconfig.json" || path.endsWith("/tsconfig.json");
 
-const strictByDefaultOf = ({ major }: DeclaredTypeScript): Tri =>
-  major === null ? "unknown" : major >= FIRST_STRICT_BY_DEFAULT_MAJOR;
+/** On when every declared major defaults `strict` to true, off when none does, `unknown` when they differ or none is known. */
+const strictByDefaultOf = ({ majors }: DeclaredTypeScript): Tri => {
+  const strict = majors.map((major) => major >= FIRST_STRICT_BY_DEFAULT_MAJOR);
+  if (strict.length === 0 || strict.includes(true) === strict.includes(false)) {
+    return "unknown";
+  }
+  return strict.includes(true);
+};
 
 const summarize = (values: ReadonlySet<Tri>): TerritoryStrict | undefined => {
   if (values.has(true) && values.has(false)) {

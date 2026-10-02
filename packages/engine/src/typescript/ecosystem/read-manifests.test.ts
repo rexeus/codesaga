@@ -30,7 +30,7 @@ layer(NodeServices.layer)("readManifests", (it) => {
             type: "module",
             dependencies: { react: "^19", "@acme/b": "workspace:*" },
             optionalDependencies: { fsevents: "^2" },
-            devDependencies: { vitest: "^3" },
+            devDependencies: { vitest: "^3", typescript: "^5.9" },
             peerDependencies: { "react-dom": "^19" },
           }),
         });
@@ -45,8 +45,9 @@ layer(NodeServices.layer)("readManifests", (it) => {
             name: "@acme/a",
             type: "module",
             dependencies: ["react", "fsevents"],
-            devDependencies: ["vitest"],
+            devDependencies: ["vitest", "typescript"],
             peerDependencies: ["react-dom"],
+            typescript: "^5.9",
           },
         ]);
       }),
@@ -70,6 +71,7 @@ layer(NodeServices.layer)("readManifests", (it) => {
             dependencies: [],
             devDependencies: [],
             peerDependencies: [],
+            typescript: null,
           },
         ]);
       }),

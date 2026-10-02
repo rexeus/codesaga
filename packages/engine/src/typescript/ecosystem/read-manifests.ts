@@ -5,6 +5,7 @@ import { Effect, FileSystem, Path } from "effect";
 
 import { isTestPath } from "../../universe/path-kinds.js";
 import { parseJsonc } from "../tsconfig/jsonc.js";
+import { typescriptRangeOf } from "../tsconfig/typescript-version.js";
 
 /** What a `package.json` declares, as far as the ecosystem block reads it. */
 export type PackageManifest = {
@@ -18,6 +19,8 @@ export type PackageManifest = {
   readonly dependencies: ReadonlyArray<string>;
   readonly devDependencies: ReadonlyArray<string>;
   readonly peerDependencies: ReadonlyArray<string>;
+  /** The `typescript` range as written, a `catalog:` reference included; null when it declares none. */
+  readonly typescript: string | null;
 };
 
 const field = (value: unknown, key: string): unknown =>
@@ -56,6 +59,7 @@ const manifestOf = (
     ],
     devDependencies: externalNames(field(json, "devDependencies")),
     peerDependencies: externalNames(field(json, "peerDependencies")),
+    typescript: typescriptRangeOf(json) ?? null,
   };
 };
 

@@ -5,16 +5,16 @@ import { parseJsonc } from "./jsonc.js";
 
 /** The TypeScript the repository declares. */
 export type DeclaredTypeScript = {
-  /** The range as written, a catalog entry resolved; null when none is readable. */
+  /** The distinct ranges as written, a catalog entry resolved, the root manifest's first, joined by a comma; null when none is readable. */
   readonly declared: string | null;
-  /** The first number of the range; null when it has none, as in `latest`. */
-  readonly major: number | null;
+  /** The distinct major versions the ranges name, ascending; empty when none names one, as `latest` does. */
+  readonly majors: ReadonlyArray<number>;
 };
 
 /** The first TypeScript major that defaults `strict` to true. */
 export const FIRST_STRICT_BY_DEFAULT_MAJOR = 6;
 
-const NOT_DECLARED: DeclaredTypeScript = { declared: null, major: null };
+const NOT_DECLARED: DeclaredTypeScript = { declared: null, majors: [] };
 
 const stringField = (value: unknown, key: string): string | undefined => {
   if (typeof value !== "object" || value === null) {
@@ -24,7 +24,8 @@ const stringField = (value: unknown, key: string): string | undefined => {
   return typeof field === "string" ? field : undefined;
 };
 
-const dependencyIn = (manifest: unknown): string | undefined => {
+/** The `typescript` range in `devDependencies`, `dependencies` or `peerDependencies` of manifest JSON, undefined when none. */
+export const typescriptRangeOf = (manifest: unknown): string | undefined => {
   for (const section of [
     "devDependencies",
     "dependencies",
@@ -93,24 +94,41 @@ const resolveCatalog = (
       );
 };
 
+const VERSION_TOKEN = /\d+(?:\.[\dx*]+)*/gu;
+
+/** The major versions a range names: every version in it, so `^5.9 || ^6.0` names 5 and 6. */
+const majorsOf = (range: string): ReadonlyArray<number> =>
+  (range.match(VERSION_TOKEN) ?? []).map((token) =>
+    Number(token.split(".")[0]),
+  );
+
 /**
- * The TypeScript the root `package.json` text declares, in
- * `devDependencies`, `dependencies` or `peerDependencies`, resolving a
- * `catalog:` range through `pnpm-workspace.yaml`. Not declared, or a catalog
- * that cannot be read, is `declared: null`.
+ * The TypeScript the root `package.json` text and the workspace manifests
+ * declare, in `devDependencies`, `dependencies` or `peerDependencies`,
+ * resolving a `catalog:` range through `pnpm-workspace.yaml`. A range that
+ * cannot be resolved, and a repository that declares none, is `declared: null`.
+ * `manifestRanges` are the ranges as the manifests wrote them, `catalog:`
+ * included.
  */
 export const declaredTypeScript = (
-  packageJson: string | undefined,
+  rootPackageJson: string | undefined,
+  manifestRanges: ReadonlyArray<string>,
   workspaceYaml: string | undefined,
 ): DeclaredTypeScript => {
-  const range = dependencyIn(
-    packageJson === undefined ? undefined : parseJsonc(packageJson),
+  const rootRange = typescriptRangeOf(
+    rootPackageJson === undefined ? undefined : parseJsonc(rootPackageJson),
   );
-  const declared =
-    range === undefined ? undefined : resolveCatalog(range, workspaceYaml);
-  if (declared === undefined) {
+  const resolved = [
+    ...(rootRange === undefined ? [] : [rootRange]),
+    ...manifestRanges,
+  ].flatMap((range) => resolveCatalog(range, workspaceYaml) ?? []);
+  const distinct = [...new Set(resolved)];
+  if (distinct.length === 0) {
     return NOT_DECLARED;
   }
-  const major = /\d+/u.exec(declared)?.[0];
-  return { declared, major: major === undefined ? null : Number(major) };
+  const majors = [...new Set(distinct.flatMap((range) => majorsOf(range)))];
+  return {
+    declared: distinct.join(", "),
+    majors: majors.toSorted((left, right) => left - right),
+  };
 };

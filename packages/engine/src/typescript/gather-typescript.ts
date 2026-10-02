@@ -121,7 +121,14 @@ const readProject = (
     );
     const manifest = yield* readText(root, "package.json");
     const workspace = yield* readText(root, "pnpm-workspace.yaml");
-    return { configs, typescript: declaredTypeScript(manifest, workspace) };
+    return {
+      configs,
+      typescript: declaredTypeScript(
+        manifest,
+        manifests.flatMap(({ typescript }) => typescript ?? []),
+        workspace,
+      ),
+    };
   });
 
 /**

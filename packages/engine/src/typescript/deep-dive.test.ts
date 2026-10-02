@@ -13,7 +13,7 @@ const skipped = (reason: "too-deep" | "syntax-error"): FactsResult => ({
 
 /** What reading the repository's configs and manifests found, when there are none. */
 const NOTHING_READ: Pick<TypeScriptFacts, "project" | "manifests"> = {
-  project: { configs: [], typescript: { declared: null, major: null } },
+  project: { configs: [], typescript: { declared: null, majors: [] } },
   manifests: [],
 };
 
