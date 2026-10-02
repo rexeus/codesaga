@@ -7,6 +7,7 @@ import type { CodeStats } from "../report/code-stats.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { codeStats } from "./code-stats.js";
 import { commitHabits } from "./commit-habits.js";
+import { withRepositoryDetail } from "./repository-detail.js";
 import { revisionsOf } from "./revisions.js";
 
 /** The stats of a universe: of all of it, and of any subset of its files. */
@@ -39,7 +40,7 @@ export const universeStats = ({
   const stats = codeStats(universe, revisions);
   return {
     repository: {
-      ...stats,
+      ...withRepositoryDetail(stats, universe, revisions),
       style: { ...stats.style, ...commitHabits(window, isCodePath) },
     },
     forPaths: (paths) =>

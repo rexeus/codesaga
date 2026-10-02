@@ -14,7 +14,11 @@ import { fileLengthStats } from "./file-length.js";
 import { sum } from "./measures.js";
 import { styleStats } from "./style.js";
 
-const byPath = Order.mapInput(Order.String, (file: InventoryFile) => file.path);
+/** Files in path order, which is where ties between files break. */
+export const byPath = Order.mapInput(
+  Order.String,
+  (file: InventoryFile) => file.path,
+);
 
 /**
  * The stats of `files`, a set of universe files at HEAD, with the `revisions`

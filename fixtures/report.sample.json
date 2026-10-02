@@ -2319,32 +2319,6 @@
               "min": 6,
               "median": 83,
               "max": 551,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 3
-                },
-                {
-                  "label": "51–100",
-                  "files": 3
-                },
-                {
-                  "label": "101–200",
-                  "files": 6
-                },
-                {
-                  "label": "201–400",
-                  "files": 2
-                },
-                {
-                  "label": "401–800",
-                  "files": 0
-                },
-                {
-                  "label": "800+",
-                  "files": 0
-                }
-              ],
               "longestFile": "docs/index.ts"
             },
             "languages": [
@@ -2363,32 +2337,6 @@
               "p90": 24,
               "revisions": 112,
               "revisionLines": 9869,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 2
-                },
-                {
-                  "label": "2",
-                  "files": 2
-                },
-                {
-                  "label": "3–4",
-                  "files": 6
-                },
-                {
-                  "label": "5–9",
-                  "files": 3
-                },
-                {
-                  "label": "10–19",
-                  "files": 1
-                },
-                {
-                  "label": "20+",
-                  "files": 0
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "docs/file1.ts",
@@ -2408,32 +2356,6 @@
               "perLine": 1.9,
               "medianFile": 1.71,
               "deepestLevel": 8,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 0
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 0
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 5
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 4
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 3
-                },
-                {
-                  "label": "2+",
-                  "files": 2
-                }
-              ],
               "deepestFile": {
                 "path": "docs/handler.ts",
                 "perLine": 3.4
@@ -2552,32 +2474,6 @@
               "min": 5,
               "median": 85,
               "max": 455,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 12
-                },
-                {
-                  "label": "51–100",
-                  "files": 13
-                },
-                {
-                  "label": "101–200",
-                  "files": 15
-                },
-                {
-                  "label": "201–400",
-                  "files": 8
-                },
-                {
-                  "label": "401–800",
-                  "files": 3
-                },
-                {
-                  "label": "800+",
-                  "files": 1
-                }
-              ],
               "longestFile": "packages/db/index.ts"
             },
             "languages": [
@@ -2596,32 +2492,6 @@
               "p90": 20,
               "revisions": 468,
               "revisionLines": 42574,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 10
-                },
-                {
-                  "label": "2",
-                  "files": 7
-                },
-                {
-                  "label": "3–4",
-                  "files": 12
-                },
-                {
-                  "label": "5–9",
-                  "files": 13
-                },
-                {
-                  "label": "10–19",
-                  "files": 7
-                },
-                {
-                  "label": "20+",
-                  "files": 3
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "packages/db/file1.ts",
@@ -2641,32 +2511,6 @@
               "perLine": 1.3,
               "medianFile": 1.17,
               "deepestLevel": 6,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 1
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 3
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 13
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 15
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 13
-                },
-                {
-                  "label": "2+",
-                  "files": 7
-                }
-              ],
               "deepestFile": {
                 "path": "packages/db/handler.ts",
                 "perLine": 2.8
@@ -2736,32 +2580,6 @@
                   "min": 8,
                   "median": 83,
                   "max": 664,
-                  "histogram": [
-                    {
-                      "label": "1–50",
-                      "files": 7
-                    },
-                    {
-                      "label": "51–100",
-                      "files": 7
-                    },
-                    {
-                      "label": "101–200",
-                      "files": 9
-                    },
-                    {
-                      "label": "201–400",
-                      "files": 5
-                    },
-                    {
-                      "label": "401–800",
-                      "files": 2
-                    },
-                    {
-                      "label": "800+",
-                      "files": 0
-                    }
-                  ],
                   "longestFile": "packages/db/migrations/index.ts"
                 },
                 "languages": [
@@ -2780,32 +2598,6 @@
                   "p90": 26,
                   "revisions": 300,
                   "revisionLines": 26552,
-                  "histogram": [
-                    {
-                      "label": "1",
-                      "files": 6
-                    },
-                    {
-                      "label": "2",
-                      "files": 4
-                    },
-                    {
-                      "label": "3–4",
-                      "files": 8
-                    },
-                    {
-                      "label": "5–9",
-                      "files": 7
-                    },
-                    {
-                      "label": "10–19",
-                      "files": 4
-                    },
-                    {
-                      "label": "20+",
-                      "files": 1
-                    }
-                  ],
                   "mostChanged": [
                     {
                       "path": "packages/db/migrations/file1.ts",
@@ -2825,32 +2617,6 @@
                   "perLine": 2,
                   "medianFile": 1.8,
                   "deepestLevel": 6,
-                  "histogram": [
-                    {
-                      "label": "<0.25",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.25–0.5",
-                      "files": 2
-                    },
-                    {
-                      "label": "0.5–1",
-                      "files": 8
-                    },
-                    {
-                      "label": "1–1.5",
-                      "files": 9
-                    },
-                    {
-                      "label": "1.5–2",
-                      "files": 7
-                    },
-                    {
-                      "label": "2+",
-                      "files": 4
-                    }
-                  ],
                   "deepestFile": {
                     "path": "packages/db/migrations/handler.ts",
                     "perLine": 3.5
@@ -2934,32 +2700,6 @@
                   "min": 8,
                   "median": 89,
                   "max": 596,
-                  "histogram": [
-                    {
-                      "label": "1–50",
-                      "files": 4
-                    },
-                    {
-                      "label": "51–100",
-                      "files": 4
-                    },
-                    {
-                      "label": "101–200",
-                      "files": 6
-                    },
-                    {
-                      "label": "201–400",
-                      "files": 3
-                    },
-                    {
-                      "label": "401–800",
-                      "files": 1
-                    },
-                    {
-                      "label": "800+",
-                      "files": 0
-                    }
-                  ],
                   "longestFile": "packages/db/src/index.ts"
                 },
                 "languages": [
@@ -2978,32 +2718,6 @@
                   "p90": 23,
                   "revisions": 126,
                   "revisionLines": 12018,
-                  "histogram": [
-                    {
-                      "label": "1",
-                      "files": 3
-                    },
-                    {
-                      "label": "2",
-                      "files": 2
-                    },
-                    {
-                      "label": "3–4",
-                      "files": 6
-                    },
-                    {
-                      "label": "5–9",
-                      "files": 4
-                    },
-                    {
-                      "label": "10–19",
-                      "files": 2
-                    },
-                    {
-                      "label": "20+",
-                      "files": 1
-                    }
-                  ],
                   "mostChanged": [
                     {
                       "path": "packages/db/src/file1.ts",
@@ -3023,32 +2737,6 @@
                   "perLine": 1.6,
                   "medianFile": 1.44,
                   "deepestLevel": 10,
-                  "histogram": [
-                    {
-                      "label": "<0.25",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.25–0.5",
-                      "files": 1
-                    },
-                    {
-                      "label": "0.5–1",
-                      "files": 6
-                    },
-                    {
-                      "label": "1–1.5",
-                      "files": 5
-                    },
-                    {
-                      "label": "1.5–2",
-                      "files": 4
-                    },
-                    {
-                      "label": "2+",
-                      "files": 2
-                    }
-                  ],
                   "deepestFile": {
                     "path": "packages/db/src/handler.ts",
                     "perLine": 3.1
@@ -3127,32 +2815,6 @@
                       "min": 11,
                       "median": 85,
                       "max": 452,
-                      "histogram": [
-                        {
-                          "label": "1–50",
-                          "files": 2
-                        },
-                        {
-                          "label": "51–100",
-                          "files": 3
-                        },
-                        {
-                          "label": "101–200",
-                          "files": 5
-                        },
-                        {
-                          "label": "201–400",
-                          "files": 2
-                        },
-                        {
-                          "label": "401–800",
-                          "files": 0
-                        },
-                        {
-                          "label": "800+",
-                          "files": 0
-                        }
-                      ],
                       "longestFile": "packages/db/src/queries/index.ts"
                     },
                     "languages": [
@@ -3171,32 +2833,6 @@
                       "p90": 14,
                       "revisions": 96,
                       "revisionLines": 8685,
-                      "histogram": [
-                        {
-                          "label": "1",
-                          "files": 2
-                        },
-                        {
-                          "label": "2",
-                          "files": 1
-                        },
-                        {
-                          "label": "3–4",
-                          "files": 5
-                        },
-                        {
-                          "label": "5–9",
-                          "files": 3
-                        },
-                        {
-                          "label": "10–19",
-                          "files": 1
-                        },
-                        {
-                          "label": "20+",
-                          "files": 0
-                        }
-                      ],
                       "mostChanged": [
                         {
                           "path": "packages/db/src/queries/file1.ts",
@@ -3216,32 +2852,6 @@
                       "perLine": 1.9,
                       "medianFile": 1.71,
                       "deepestLevel": 10,
-                      "histogram": [
-                        {
-                          "label": "<0.25",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.25–0.5",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.5–1",
-                          "files": 5
-                        },
-                        {
-                          "label": "1–1.5",
-                          "files": 3
-                        },
-                        {
-                          "label": "1.5–2",
-                          "files": 3
-                        },
-                        {
-                          "label": "2+",
-                          "files": 1
-                        }
-                      ],
                       "deepestFile": {
                         "path": "packages/db/src/queries/handler.ts",
                         "perLine": 3.4
@@ -3294,32 +2904,6 @@
                       "min": 8,
                       "median": 103,
                       "max": 688,
-                      "histogram": [
-                        {
-                          "label": "1–50",
-                          "files": 1
-                        },
-                        {
-                          "label": "51–100",
-                          "files": 1
-                        },
-                        {
-                          "label": "101–200",
-                          "files": 3
-                        },
-                        {
-                          "label": "201–400",
-                          "files": 1
-                        },
-                        {
-                          "label": "401–800",
-                          "files": 0
-                        },
-                        {
-                          "label": "800+",
-                          "files": 0
-                        }
-                      ],
                       "longestFile": "packages/db/src/index.ts"
                     },
                     "languages": [
@@ -3338,32 +2922,6 @@
                       "p90": 23,
                       "revisions": 42,
                       "revisionLines": 4626,
-                      "histogram": [
-                        {
-                          "label": "1",
-                          "files": 1
-                        },
-                        {
-                          "label": "2",
-                          "files": 0
-                        },
-                        {
-                          "label": "3–4",
-                          "files": 4
-                        },
-                        {
-                          "label": "5–9",
-                          "files": 1
-                        },
-                        {
-                          "label": "10–19",
-                          "files": 0
-                        },
-                        {
-                          "label": "20+",
-                          "files": 0
-                        }
-                      ],
                       "mostChanged": [
                         {
                           "path": "packages/db/src/file1.ts",
@@ -3383,32 +2941,6 @@
                       "perLine": 1.6,
                       "medianFile": 1.44,
                       "deepestLevel": 10,
-                      "histogram": [
-                        {
-                          "label": "<0.25",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.25–0.5",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.5–1",
-                          "files": 4
-                        },
-                        {
-                          "label": "1–1.5",
-                          "files": 1
-                        },
-                        {
-                          "label": "1.5–2",
-                          "files": 1
-                        },
-                        {
-                          "label": "2+",
-                          "files": 0
-                        }
-                      ],
                       "deepestFile": {
                         "path": "packages/db/src/handler.ts",
                         "perLine": 3.1
@@ -3470,32 +3002,6 @@
                   "min": 5,
                   "median": 119,
                   "max": 633,
-                  "histogram": [
-                    {
-                      "label": "1–50",
-                      "files": 0
-                    },
-                    {
-                      "label": "51–100",
-                      "files": 1
-                    },
-                    {
-                      "label": "101–200",
-                      "files": 3
-                    },
-                    {
-                      "label": "201–400",
-                      "files": 0
-                    },
-                    {
-                      "label": "401–800",
-                      "files": 0
-                    },
-                    {
-                      "label": "800+",
-                      "files": 0
-                    }
-                  ],
                   "longestFile": "packages/db/index.ts"
                 },
                 "languages": [
@@ -3514,32 +3020,6 @@
                   "p90": 20,
                   "revisions": 36,
                   "revisionLines": 4558,
-                  "histogram": [
-                    {
-                      "label": "1",
-                      "files": 0
-                    },
-                    {
-                      "label": "2",
-                      "files": 0
-                    },
-                    {
-                      "label": "3–4",
-                      "files": 3
-                    },
-                    {
-                      "label": "5–9",
-                      "files": 1
-                    },
-                    {
-                      "label": "10–19",
-                      "files": 0
-                    },
-                    {
-                      "label": "20+",
-                      "files": 0
-                    }
-                  ],
                   "mostChanged": [
                     {
                       "path": "packages/db/file1.ts",
@@ -3559,32 +3039,6 @@
                   "perLine": 1.3,
                   "medianFile": 1.17,
                   "deepestLevel": 6,
-                  "histogram": [
-                    {
-                      "label": "<0.25",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.25–0.5",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.5–1",
-                      "files": 2
-                    },
-                    {
-                      "label": "1–1.5",
-                      "files": 1
-                    },
-                    {
-                      "label": "1.5–2",
-                      "files": 1
-                    },
-                    {
-                      "label": "2+",
-                      "files": 0
-                    }
-                  ],
                   "deepestFile": {
                     "path": "packages/db/handler.ts",
                     "perLine": 2.8
@@ -3655,32 +3109,6 @@
               "min": 4,
               "median": 90,
               "max": 717,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 4
-                },
-                {
-                  "label": "51–100",
-                  "files": 4
-                },
-                {
-                  "label": "101–200",
-                  "files": 7
-                },
-                {
-                  "label": "201–400",
-                  "files": 3
-                },
-                {
-                  "label": "401–800",
-                  "files": 1
-                },
-                {
-                  "label": "800+",
-                  "files": 0
-                }
-              ],
               "longestFile": "packages/auth/index.ts"
             },
             "languages": [
@@ -3699,32 +3127,6 @@
               "p90": 16,
               "revisions": 190,
               "revisionLines": 18152,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 3
-                },
-                {
-                  "label": "2",
-                  "files": 2
-                },
-                {
-                  "label": "3–4",
-                  "files": 7
-                },
-                {
-                  "label": "5–9",
-                  "files": 4
-                },
-                {
-                  "label": "10–19",
-                  "files": 2
-                },
-                {
-                  "label": "20+",
-                  "files": 1
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "packages/auth/file1.ts",
@@ -3744,32 +3146,6 @@
               "perLine": 2.2,
               "medianFile": 1.98,
               "deepestLevel": 6,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 0
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 1
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 7
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 5
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 4
-                },
-                {
-                  "label": "2+",
-                  "files": 2
-                }
-              ],
               "deepestFile": {
                 "path": "packages/auth/handler.ts",
                 "perLine": 3.7
@@ -3844,32 +3220,6 @@
               "min": 3,
               "median": 84,
               "max": 446,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 13
-                },
-                {
-                  "label": "51–100",
-                  "files": 14
-                },
-                {
-                  "label": "101–200",
-                  "files": 17
-                },
-                {
-                  "label": "201–400",
-                  "files": 9
-                },
-                {
-                  "label": "401–800",
-                  "files": 4
-                },
-                {
-                  "label": "800+",
-                  "files": 1
-                }
-              ],
               "longestFile": "apps/admin/index.ts"
             },
             "languages": [
@@ -3888,32 +3238,6 @@
               "p90": 21,
               "revisions": 580,
               "revisionLines": 51752,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 11
-                },
-                {
-                  "label": "2",
-                  "files": 8
-                },
-                {
-                  "label": "3–4",
-                  "files": 14
-                },
-                {
-                  "label": "5–9",
-                  "files": 14
-                },
-                {
-                  "label": "10–19",
-                  "files": 8
-                },
-                {
-                  "label": "20+",
-                  "files": 3
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "apps/admin/file1.ts",
@@ -3933,32 +3257,6 @@
               "perLine": 0.9,
               "medianFile": 0.81,
               "deepestLevel": 8,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 1
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 4
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 14
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 17
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 14
-                },
-                {
-                  "label": "2+",
-                  "files": 8
-                }
-              ],
               "deepestFile": {
                 "path": "apps/admin/handler.ts",
                 "perLine": 2.4
@@ -4027,32 +3325,6 @@
               "min": 4,
               "median": 83,
               "max": 444,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 6
-                },
-                {
-                  "label": "51–100",
-                  "files": 6
-                },
-                {
-                  "label": "101–200",
-                  "files": 10
-                },
-                {
-                  "label": "201–400",
-                  "files": 4
-                },
-                {
-                  "label": "401–800",
-                  "files": 1
-                },
-                {
-                  "label": "800+",
-                  "files": 0
-                }
-              ],
               "longestFile": "infra/index.ts"
             },
             "languages": [
@@ -4071,32 +3343,6 @@
               "p90": 22,
               "revisions": 162,
               "revisionLines": 14376,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 5
-                },
-                {
-                  "label": "2",
-                  "files": 4
-                },
-                {
-                  "label": "3–4",
-                  "files": 8
-                },
-                {
-                  "label": "5–9",
-                  "files": 6
-                },
-                {
-                  "label": "10–19",
-                  "files": 3
-                },
-                {
-                  "label": "20+",
-                  "files": 1
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "infra/file1.ts",
@@ -4116,32 +3362,6 @@
               "perLine": 1.1,
               "medianFile": 0.99,
               "deepestLevel": 7,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 0
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 1
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 8
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 8
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 6
-                },
-                {
-                  "label": "2+",
-                  "files": 4
-                }
-              ],
               "deepestFile": {
                 "path": "infra/handler.ts",
                 "perLine": 2.6
@@ -4203,32 +3423,6 @@
               "min": 5,
               "median": 91,
               "max": 609,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 2
-                },
-                {
-                  "label": "51–100",
-                  "files": 2
-                },
-                {
-                  "label": "101–200",
-                  "files": 4
-                },
-                {
-                  "label": "201–400",
-                  "files": 1
-                },
-                {
-                  "label": "401–800",
-                  "files": 0
-                },
-                {
-                  "label": "800+",
-                  "files": 0
-                }
-              ],
               "longestFile": ".github/index.ts"
             },
             "languages": [
@@ -4247,32 +3441,6 @@
               "p90": 23,
               "revisions": 63,
               "revisionLines": 6138,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 1
-                },
-                {
-                  "label": "2",
-                  "files": 1
-                },
-                {
-                  "label": "3–4",
-                  "files": 4
-                },
-                {
-                  "label": "5–9",
-                  "files": 2
-                },
-                {
-                  "label": "10–19",
-                  "files": 1
-                },
-                {
-                  "label": "20+",
-                  "files": 0
-                }
-              ],
               "mostChanged": [
                 {
                   "path": ".github/file1.ts",
@@ -4292,32 +3460,6 @@
               "perLine": 2.2,
               "medianFile": 1.98,
               "deepestLevel": 6,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 0
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 0
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 4
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 2
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 2
-                },
-                {
-                  "label": "2+",
-                  "files": 1
-                }
-              ],
               "deepestFile": {
                 "path": ".github/handler.ts",
                 "perLine": 3.7
@@ -4379,32 +3521,6 @@
               "min": 5,
               "median": 88,
               "max": 707,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 1
-                },
-                {
-                  "label": "51–100",
-                  "files": 2
-                },
-                {
-                  "label": "101–200",
-                  "files": 4
-                },
-                {
-                  "label": "201–400",
-                  "files": 1
-                },
-                {
-                  "label": "401–800",
-                  "files": 0
-                },
-                {
-                  "label": "800+",
-                  "files": 0
-                }
-              ],
               "longestFile": "index.ts"
             },
             "languages": [
@@ -4423,32 +3539,6 @@
               "p90": 20,
               "revisions": 72,
               "revisionLines": 6790,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 1
-                },
-                {
-                  "label": "2",
-                  "files": 1
-                },
-                {
-                  "label": "3–4",
-                  "files": 3
-                },
-                {
-                  "label": "5–9",
-                  "files": 2
-                },
-                {
-                  "label": "10–19",
-                  "files": 1
-                },
-                {
-                  "label": "20+",
-                  "files": 0
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "file1.ts",
@@ -4468,32 +3558,6 @@
               "perLine": 1.7,
               "medianFile": 1.53,
               "deepestLevel": 10,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 0
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 0
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 3
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 2
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 2
-                },
-                {
-                  "label": "2+",
-                  "files": 1
-                }
-              ],
               "deepestFile": {
                 "path": "handler.ts",
                 "perLine": 3.2
@@ -4555,32 +3619,6 @@
               "min": 3,
               "median": 83,
               "max": 445,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 1
-                },
-                {
-                  "label": "51–100",
-                  "files": 1
-                },
-                {
-                  "label": "101–200",
-                  "files": 4
-                },
-                {
-                  "label": "201–400",
-                  "files": 1
-                },
-                {
-                  "label": "401–800",
-                  "files": 0
-                },
-                {
-                  "label": "800+",
-                  "files": 0
-                }
-              ],
               "longestFile": "scripts/index.ts"
             },
             "languages": [
@@ -4599,32 +3637,6 @@
               "p90": 21,
               "revisions": 70,
               "revisionLines": 6232,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 1
-                },
-                {
-                  "label": "2",
-                  "files": 1
-                },
-                {
-                  "label": "3–4",
-                  "files": 4
-                },
-                {
-                  "label": "5–9",
-                  "files": 1
-                },
-                {
-                  "label": "10–19",
-                  "files": 0
-                },
-                {
-                  "label": "20+",
-                  "files": 0
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "scripts/file1.ts",
@@ -4644,32 +3656,6 @@
               "perLine": 2.2,
               "medianFile": 1.98,
               "deepestLevel": 6,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 0
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 0
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 3
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 2
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 1
-                },
-                {
-                  "label": "2+",
-                  "files": 1
-                }
-              ],
               "deepestFile": {
                 "path": "scripts/handler.ts",
                 "perLine": 3.7
@@ -4756,32 +3742,6 @@
               "min": 6,
               "median": 84,
               "max": 557,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 26
-                },
-                {
-                  "label": "51–100",
-                  "files": 28
-                },
-                {
-                  "label": "101–200",
-                  "files": 30
-                },
-                {
-                  "label": "201–400",
-                  "files": 19
-                },
-                {
-                  "label": "401–800",
-                  "files": 7
-                },
-                {
-                  "label": "800+",
-                  "files": 2
-                }
-              ],
               "longestFile": "apps/web/index.ts"
             },
             "languages": [
@@ -4800,32 +3760,6 @@
               "p90": 15,
               "revisions": 1008,
               "revisionLines": 89842,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 22
-                },
-                {
-                  "label": "2",
-                  "files": 16
-                },
-                {
-                  "label": "3–4",
-                  "files": 25
-                },
-                {
-                  "label": "5–9",
-                  "files": 28
-                },
-                {
-                  "label": "10–19",
-                  "files": 15
-                },
-                {
-                  "label": "20+",
-                  "files": 6
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "apps/web/file1.ts",
@@ -4845,32 +3779,6 @@
               "perLine": 1.3,
               "medianFile": 1.17,
               "deepestLevel": 6,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 3
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 7
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 25
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 33
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 28
-                },
-                {
-                  "label": "2+",
-                  "files": 16
-                }
-              ],
               "deepestFile": {
                 "path": "apps/web/handler.ts",
                 "perLine": 2.8
@@ -4964,32 +3872,6 @@
                   "min": 4,
                   "median": 83,
                   "max": 666,
-                  "histogram": [
-                    {
-                      "label": "1–50",
-                      "files": 18
-                    },
-                    {
-                      "label": "51–100",
-                      "files": 19
-                    },
-                    {
-                      "label": "101–200",
-                      "files": 22
-                    },
-                    {
-                      "label": "201–400",
-                      "files": 13
-                    },
-                    {
-                      "label": "401–800",
-                      "files": 5
-                    },
-                    {
-                      "label": "800+",
-                      "files": 1
-                    }
-                  ],
                   "longestFile": "apps/web/src/index.ts"
                 },
                 "languages": [
@@ -5008,32 +3890,6 @@
                   "p90": 25,
                   "revisions": 702,
                   "revisionLines": 62374,
-                  "histogram": [
-                    {
-                      "label": "1",
-                      "files": 15
-                    },
-                    {
-                      "label": "2",
-                      "files": 11
-                    },
-                    {
-                      "label": "3–4",
-                      "files": 19
-                    },
-                    {
-                      "label": "5–9",
-                      "files": 19
-                    },
-                    {
-                      "label": "10–19",
-                      "files": 10
-                    },
-                    {
-                      "label": "20+",
-                      "files": 4
-                    }
-                  ],
                   "mostChanged": [
                     {
                       "path": "apps/web/src/file1.ts",
@@ -5053,32 +3909,6 @@
                   "perLine": 1.5,
                   "medianFile": 1.35,
                   "deepestLevel": 9,
-                  "histogram": [
-                    {
-                      "label": "<0.25",
-                      "files": 2
-                    },
-                    {
-                      "label": "0.25–0.5",
-                      "files": 5
-                    },
-                    {
-                      "label": "0.5–1",
-                      "files": 18
-                    },
-                    {
-                      "label": "1–1.5",
-                      "files": 23
-                    },
-                    {
-                      "label": "1.5–2",
-                      "files": 19
-                    },
-                    {
-                      "label": "2+",
-                      "files": 11
-                    }
-                  ],
                   "deepestFile": {
                     "path": "apps/web/src/handler.ts",
                     "perLine": 3
@@ -5148,32 +3978,6 @@
                       "min": 10,
                       "median": 84,
                       "max": 561,
-                      "histogram": [
-                        {
-                          "label": "1–50",
-                          "files": 8
-                        },
-                        {
-                          "label": "51–100",
-                          "files": 8
-                        },
-                        {
-                          "label": "101–200",
-                          "files": 11
-                        },
-                        {
-                          "label": "201–400",
-                          "files": 5
-                        },
-                        {
-                          "label": "401–800",
-                          "files": 2
-                        },
-                        {
-                          "label": "800+",
-                          "files": 0
-                        }
-                      ],
                       "longestFile": "apps/web/src/routes/index.ts"
                     },
                     "languages": [
@@ -5192,32 +3996,6 @@
                       "p90": 25,
                       "revisions": 306,
                       "revisionLines": 27490,
-                      "histogram": [
-                        {
-                          "label": "1",
-                          "files": 6
-                        },
-                        {
-                          "label": "2",
-                          "files": 5
-                        },
-                        {
-                          "label": "3–4",
-                          "files": 9
-                        },
-                        {
-                          "label": "5–9",
-                          "files": 8
-                        },
-                        {
-                          "label": "10–19",
-                          "files": 4
-                        },
-                        {
-                          "label": "20+",
-                          "files": 2
-                        }
-                      ],
                       "mostChanged": [
                         {
                           "path": "apps/web/src/routes/file1.ts",
@@ -5237,32 +4015,6 @@
                       "perLine": 2.5,
                       "medianFile": 2.25,
                       "deepestLevel": 11,
-                      "histogram": [
-                        {
-                          "label": "<0.25",
-                          "files": 1
-                        },
-                        {
-                          "label": "0.25–0.5",
-                          "files": 2
-                        },
-                        {
-                          "label": "0.5–1",
-                          "files": 8
-                        },
-                        {
-                          "label": "1–1.5",
-                          "files": 10
-                        },
-                        {
-                          "label": "1.5–2",
-                          "files": 8
-                        },
-                        {
-                          "label": "2+",
-                          "files": 5
-                        }
-                      ],
                       "deepestFile": {
                         "path": "apps/web/src/routes/handler.ts",
                         "perLine": 4
@@ -5349,32 +4101,6 @@
                       "min": 6,
                       "median": 86,
                       "max": 574,
-                      "histogram": [
-                        {
-                          "label": "1–50",
-                          "files": 6
-                        },
-                        {
-                          "label": "51–100",
-                          "files": 7
-                        },
-                        {
-                          "label": "101–200",
-                          "files": 10
-                        },
-                        {
-                          "label": "201–400",
-                          "files": 4
-                        },
-                        {
-                          "label": "401–800",
-                          "files": 2
-                        },
-                        {
-                          "label": "800+",
-                          "files": 0
-                        }
-                      ],
                       "longestFile": "apps/web/src/components/index.ts"
                     },
                     "languages": [
@@ -5393,32 +4119,6 @@
                       "p90": 15,
                       "revisions": 261,
                       "revisionLines": 23962,
-                      "histogram": [
-                        {
-                          "label": "1",
-                          "files": 5
-                        },
-                        {
-                          "label": "2",
-                          "files": 4
-                        },
-                        {
-                          "label": "3–4",
-                          "files": 8
-                        },
-                        {
-                          "label": "5–9",
-                          "files": 7
-                        },
-                        {
-                          "label": "10–19",
-                          "files": 4
-                        },
-                        {
-                          "label": "20+",
-                          "files": 1
-                        }
-                      ],
                       "mostChanged": [
                         {
                           "path": "apps/web/src/components/file1.ts",
@@ -5438,32 +4138,6 @@
                       "perLine": 1.1,
                       "medianFile": 0.99,
                       "deepestLevel": 7,
-                      "histogram": [
-                        {
-                          "label": "<0.25",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.25–0.5",
-                          "files": 2
-                        },
-                        {
-                          "label": "0.5–1",
-                          "files": 8
-                        },
-                        {
-                          "label": "1–1.5",
-                          "files": 8
-                        },
-                        {
-                          "label": "1.5–2",
-                          "files": 7
-                        },
-                        {
-                          "label": "2+",
-                          "files": 4
-                        }
-                      ],
                       "deepestFile": {
                         "path": "apps/web/src/components/handler.ts",
                         "perLine": 2.6
@@ -5532,32 +4206,6 @@
                       "min": 8,
                       "median": 90,
                       "max": 361,
-                      "histogram": [
-                        {
-                          "label": "1–50",
-                          "files": 2
-                        },
-                        {
-                          "label": "51–100",
-                          "files": 2
-                        },
-                        {
-                          "label": "101–200",
-                          "files": 4
-                        },
-                        {
-                          "label": "201–400",
-                          "files": 1
-                        },
-                        {
-                          "label": "401–800",
-                          "files": 0
-                        },
-                        {
-                          "label": "800+",
-                          "files": 0
-                        }
-                      ],
                       "longestFile": "apps/web/src/hooks/index.ts"
                     },
                     "languages": [
@@ -5576,32 +4224,6 @@
                       "p90": 14,
                       "revisions": 72,
                       "revisionLines": 6925,
-                      "histogram": [
-                        {
-                          "label": "1",
-                          "files": 1
-                        },
-                        {
-                          "label": "2",
-                          "files": 1
-                        },
-                        {
-                          "label": "3–4",
-                          "files": 4
-                        },
-                        {
-                          "label": "5–9",
-                          "files": 2
-                        },
-                        {
-                          "label": "10–19",
-                          "files": 1
-                        },
-                        {
-                          "label": "20+",
-                          "files": 0
-                        }
-                      ],
                       "mostChanged": [
                         {
                           "path": "apps/web/src/hooks/file1.ts",
@@ -5621,32 +4243,6 @@
                       "perLine": 0.9,
                       "medianFile": 0.81,
                       "deepestLevel": 11,
-                      "histogram": [
-                        {
-                          "label": "<0.25",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.25–0.5",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.5–1",
-                          "files": 4
-                        },
-                        {
-                          "label": "1–1.5",
-                          "files": 2
-                        },
-                        {
-                          "label": "1.5–2",
-                          "files": 2
-                        },
-                        {
-                          "label": "2+",
-                          "files": 1
-                        }
-                      ],
                       "deepestFile": {
                         "path": "apps/web/src/hooks/handler.ts",
                         "perLine": 2.4
@@ -5699,32 +4295,6 @@
                       "min": 4,
                       "median": 93,
                       "max": 743,
-                      "histogram": [
-                        {
-                          "label": "1–50",
-                          "files": 1
-                        },
-                        {
-                          "label": "51–100",
-                          "files": 1
-                        },
-                        {
-                          "label": "101–200",
-                          "files": 3
-                        },
-                        {
-                          "label": "201–400",
-                          "files": 1
-                        },
-                        {
-                          "label": "401–800",
-                          "files": 0
-                        },
-                        {
-                          "label": "800+",
-                          "files": 0
-                        }
-                      ],
                       "longestFile": "apps/web/src/index.ts"
                     },
                     "languages": [
@@ -5743,32 +4313,6 @@
                       "p90": 25,
                       "revisions": 54,
                       "revisionLines": 5350,
-                      "histogram": [
-                        {
-                          "label": "1",
-                          "files": 1
-                        },
-                        {
-                          "label": "2",
-                          "files": 0
-                        },
-                        {
-                          "label": "3–4",
-                          "files": 4
-                        },
-                        {
-                          "label": "5–9",
-                          "files": 1
-                        },
-                        {
-                          "label": "10–19",
-                          "files": 0
-                        },
-                        {
-                          "label": "20+",
-                          "files": 0
-                        }
-                      ],
                       "mostChanged": [
                         {
                           "path": "apps/web/src/file1.ts",
@@ -5788,32 +4332,6 @@
                       "perLine": 1.5,
                       "medianFile": 1.35,
                       "deepestLevel": 9,
-                      "histogram": [
-                        {
-                          "label": "<0.25",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.25–0.5",
-                          "files": 0
-                        },
-                        {
-                          "label": "0.5–1",
-                          "files": 4
-                        },
-                        {
-                          "label": "1–1.5",
-                          "files": 1
-                        },
-                        {
-                          "label": "1.5–2",
-                          "files": 1
-                        },
-                        {
-                          "label": "2+",
-                          "files": 0
-                        }
-                      ],
                       "deepestFile": {
                         "path": "apps/web/src/handler.ts",
                         "perLine": 3
@@ -5884,32 +4402,6 @@
                   "min": 4,
                   "median": 117,
                   "max": 937,
-                  "histogram": [
-                    {
-                      "label": "1–50",
-                      "files": 5
-                    },
-                    {
-                      "label": "51–100",
-                      "files": 5
-                    },
-                    {
-                      "label": "101–200",
-                      "files": 7
-                    },
-                    {
-                      "label": "201–400",
-                      "files": 3
-                    },
-                    {
-                      "label": "401–800",
-                      "files": 1
-                    },
-                    {
-                      "label": "800+",
-                      "files": 0
-                    }
-                  ],
                   "longestFile": "apps/web/test/index.ts"
                 },
                 "languages": [
@@ -5928,32 +4420,6 @@
                   "p90": 13,
                   "revisions": 147,
                   "revisionLines": 18374,
-                  "histogram": [
-                    {
-                      "label": "1",
-                      "files": 4
-                    },
-                    {
-                      "label": "2",
-                      "files": 3
-                    },
-                    {
-                      "label": "3–4",
-                      "files": 6
-                    },
-                    {
-                      "label": "5–9",
-                      "files": 5
-                    },
-                    {
-                      "label": "10–19",
-                      "files": 2
-                    },
-                    {
-                      "label": "20+",
-                      "files": 1
-                    }
-                  ],
                   "mostChanged": [
                     {
                       "path": "apps/web/test/file1.ts",
@@ -5973,32 +4439,6 @@
                   "perLine": 2.2,
                   "medianFile": 1.98,
                   "deepestLevel": 6,
-                  "histogram": [
-                    {
-                      "label": "<0.25",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.25–0.5",
-                      "files": 1
-                    },
-                    {
-                      "label": "0.5–1",
-                      "files": 6
-                    },
-                    {
-                      "label": "1–1.5",
-                      "files": 6
-                    },
-                    {
-                      "label": "1.5–2",
-                      "files": 5
-                    },
-                    {
-                      "label": "2+",
-                      "files": 3
-                    }
-                  ],
                   "deepestFile": {
                     "path": "apps/web/test/handler.ts",
                     "perLine": 3.7
@@ -6060,32 +4500,6 @@
                   "min": 6,
                   "median": 92,
                   "max": 611,
-                  "histogram": [
-                    {
-                      "label": "1–50",
-                      "files": 3
-                    },
-                    {
-                      "label": "51–100",
-                      "files": 3
-                    },
-                    {
-                      "label": "101–200",
-                      "files": 5
-                    },
-                    {
-                      "label": "201–400",
-                      "files": 2
-                    },
-                    {
-                      "label": "401–800",
-                      "files": 0
-                    },
-                    {
-                      "label": "800+",
-                      "files": 0
-                    }
-                  ],
                   "longestFile": "apps/web/index.ts"
                 },
                 "languages": [
@@ -6104,32 +4518,6 @@
                   "p90": 15,
                   "revisions": 117,
                   "revisionLines": 11434,
-                  "histogram": [
-                    {
-                      "label": "1",
-                      "files": 2
-                    },
-                    {
-                      "label": "2",
-                      "files": 1
-                    },
-                    {
-                      "label": "3–4",
-                      "files": 6
-                    },
-                    {
-                      "label": "5–9",
-                      "files": 3
-                    },
-                    {
-                      "label": "10–19",
-                      "files": 1
-                    },
-                    {
-                      "label": "20+",
-                      "files": 0
-                    }
-                  ],
                   "mostChanged": [
                     {
                       "path": "apps/web/file1.ts",
@@ -6149,32 +4537,6 @@
                   "perLine": 1.3,
                   "medianFile": 1.17,
                   "deepestLevel": 6,
-                  "histogram": [
-                    {
-                      "label": "<0.25",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.25–0.5",
-                      "files": 0
-                    },
-                    {
-                      "label": "0.5–1",
-                      "files": 6
-                    },
-                    {
-                      "label": "1–1.5",
-                      "files": 3
-                    },
-                    {
-                      "label": "1.5–2",
-                      "files": 3
-                    },
-                    {
-                      "label": "2+",
-                      "files": 1
-                    }
-                  ],
                   "deepestFile": {
                     "path": "apps/web/handler.ts",
                     "perLine": 2.8
@@ -6256,32 +4618,6 @@
               "min": 9,
               "median": 85,
               "max": 676,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 17
-                },
-                {
-                  "label": "51–100",
-                  "files": 17
-                },
-                {
-                  "label": "101–200",
-                  "files": 20
-                },
-                {
-                  "label": "201–400",
-                  "files": 12
-                },
-                {
-                  "label": "401–800",
-                  "files": 4
-                },
-                {
-                  "label": "800+",
-                  "files": 1
-                }
-              ],
               "longestFile": "packages/api/index.ts"
             },
             "languages": [
@@ -6300,32 +4636,6 @@
               "p90": 18,
               "revisions": 497,
               "revisionLines": 44806,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 14
-                },
-                {
-                  "label": "2",
-                  "files": 10
-                },
-                {
-                  "label": "3–4",
-                  "files": 17
-                },
-                {
-                  "label": "5–9",
-                  "files": 17
-                },
-                {
-                  "label": "10–19",
-                  "files": 9
-                },
-                {
-                  "label": "20+",
-                  "files": 4
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "packages/api/file1.ts",
@@ -6345,32 +4655,6 @@
               "perLine": 2,
               "medianFile": 1.8,
               "deepestLevel": 11,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 2
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 4
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 17
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 21
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 17
-                },
-                {
-                  "label": "2+",
-                  "files": 10
-                }
-              ],
               "deepestFile": {
                 "path": "packages/api/handler.ts",
                 "perLine": 3.5
@@ -6457,32 +4741,6 @@
               "min": 8,
               "median": 83,
               "max": 668,
-              "histogram": [
-                {
-                  "label": "1–50",
-                  "files": 23
-                },
-                {
-                  "label": "51–100",
-                  "files": 24
-                },
-                {
-                  "label": "101–200",
-                  "files": 26
-                },
-                {
-                  "label": "201–400",
-                  "files": 16
-                },
-                {
-                  "label": "401–800",
-                  "files": 6
-                },
-                {
-                  "label": "800+",
-                  "files": 1
-                }
-              ],
               "longestFile": "packages/ui/index.ts"
             },
             "languages": [
@@ -6501,32 +4759,6 @@
               "p90": 14,
               "revisions": 768,
               "revisionLines": 68397,
-              "histogram": [
-                {
-                  "label": "1",
-                  "files": 19
-                },
-                {
-                  "label": "2",
-                  "files": 14
-                },
-                {
-                  "label": "3–4",
-                  "files": 21
-                },
-                {
-                  "label": "5–9",
-                  "files": 24
-                },
-                {
-                  "label": "10–19",
-                  "files": 13
-                },
-                {
-                  "label": "20+",
-                  "files": 5
-                }
-              ],
               "mostChanged": [
                 {
                   "path": "packages/ui/file1.ts",
@@ -6546,32 +4778,6 @@
               "perLine": 2,
               "medianFile": 1.8,
               "deepestLevel": 8,
-              "histogram": [
-                {
-                  "label": "<0.25",
-                  "files": 2
-                },
-                {
-                  "label": "0.25–0.5",
-                  "files": 6
-                },
-                {
-                  "label": "0.5–1",
-                  "files": 22
-                },
-                {
-                  "label": "1–1.5",
-                  "files": 28
-                },
-                {
-                  "label": "1.5–2",
-                  "files": 24
-                },
-                {
-                  "label": "2+",
-                  "files": 14
-                }
-              ],
               "deepestFile": {
                 "path": "packages/ui/handler.ts",
                 "perLine": 3.5
@@ -6614,32 +4820,7 @@
       "min": 5,
       "median": 96,
       "max": 1204,
-      "histogram": [
-        {
-          "label": "1–50",
-          "files": 113
-        },
-        {
-          "label": "51–100",
-          "files": 118
-        },
-        {
-          "label": "101–200",
-          "files": 120
-        },
-        {
-          "label": "201–400",
-          "files": 80
-        },
-        {
-          "label": "401–800",
-          "files": 33
-        },
-        {
-          "label": "800+",
-          "files": 9
-        }
-      ],
+      "histogram": [113, 118, 120, 80, 33, 9],
       "longestFile": "apps/web/src/routes/checkout.ts"
     },
     "languages": [
@@ -6688,32 +4869,7 @@
       "p90": 20,
       "revisions": 4257,
       "revisionLines": 438782,
-      "histogram": [
-        {
-          "label": "1",
-          "files": 94
-        },
-        {
-          "label": "2",
-          "files": 70
-        },
-        {
-          "label": "3–4",
-          "files": 97
-        },
-        {
-          "label": "5–9",
-          "files": 118
-        },
-        {
-          "label": "10–19",
-          "files": 66
-        },
-        {
-          "label": "20+",
-          "files": 28
-        }
-      ],
+      "histogram": [94, 70, 97, 118, 66, 28],
       "mostChanged": [
         {
           "path": "apps/web/src/routes/checkout.ts",
@@ -6741,32 +4897,7 @@
       "perLine": 1.7,
       "medianFile": 1.53,
       "deepestLevel": 10,
-      "histogram": [
-        {
-          "label": "<0.25",
-          "files": 14
-        },
-        {
-          "label": "0.25–0.5",
-          "files": 33
-        },
-        {
-          "label": "0.5–1",
-          "files": 97
-        },
-        {
-          "label": "1–1.5",
-          "files": 141
-        },
-        {
-          "label": "1.5–2",
-          "files": 118
-        },
-        {
-          "label": "2+",
-          "files": 70
-        }
-      ],
+      "histogram": [14, 33, 97, 141, 118, 70],
       "deepestFile": {
         "path": "packages/api/src/routes/orders.ts",
         "perLine": 4.1

@@ -121,6 +121,13 @@ layer(NodeServices.layer)("analyze territory stats", (it) => {
         assert.deepStrictEqual(src?.stats.churn.revisions, 6);
         assert.deepStrictEqual(src?.stats.style.conventionalCommits, undefined);
         assert.deepStrictEqual(src?.stats.style.commitSize, undefined);
+        assert.deepStrictEqual(src?.stats.fileLength.histogram, undefined);
+        assert.deepStrictEqual(src?.stats.churn.histogram, undefined);
+        assert.deepStrictEqual(src?.stats.complexity.histogram, undefined);
+        assert.deepStrictEqual(
+          report.stats.fileLength.histogram,
+          [6, 0, 0, 0, 0, 0],
+        );
         assert.deepStrictEqual(report.stats.files, 6);
         assert.deepStrictEqual(
           territories.reduce((sum, { stats }) => sum + stats.files, 0),

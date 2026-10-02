@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { inventoryFile, linesOf } from "../testing/inventory-file.js";
+import { inventoryFile } from "../testing/inventory-file.js";
 import { codeStats } from "./code-stats.js";
 
 /** Tab-indented lines at the given levels: complexity is their sum over their count. */
@@ -39,14 +39,6 @@ describe("codeStats of a small set", () => {
       min: 3,
       median: 4,
       max: 5,
-      histogram: [
-        { label: "1–50", files: 3 },
-        { label: "51–100", files: 0 },
-        { label: "101–200", files: 0 },
-        { label: "201–400", files: 0 },
-        { label: "401–800", files: 0 },
-        { label: "800+", files: 0 },
-      ],
       longestFile: "src/a.ts",
     });
   });
@@ -67,19 +59,10 @@ describe("codeStats of a small set", () => {
       p90: 9.3,
       revisions: 17,
       revisionLines: 55,
-      histogram: [
-        { label: "1", files: 2 },
-        { label: "2", files: 0 },
-        { label: "3–4", files: 1 },
-        { label: "5–9", files: 0 },
-        { label: "10–19", files: 1 },
-        { label: "20+", files: 0 },
-      ],
       mostChanged: [
         { path: "lib/c.py", revisions: 12 },
         { path: "src/a.ts", revisions: 3 },
         { path: "lib/empty.ts", revisions: 1 },
-        { path: "src/b.test.ts", revisions: 1 },
       ],
     });
   });
@@ -92,14 +75,6 @@ describe("codeStats complexity and style of a small set", () => {
       perLine: 0.5,
       medianFile: 0.3333,
       deepestLevel: 2,
-      histogram: [
-        { label: "<0.25", files: 0 },
-        { label: "0.25–0.5", files: 2 },
-        { label: "0.5–1", files: 1 },
-        { label: "1–1.5", files: 0 },
-        { label: "1.5–2", files: 0 },
-        { label: "2+", files: 0 },
-      ],
       deepestFile: { path: "src/a.ts", perLine: 0.8 },
     });
   });
@@ -137,9 +112,6 @@ describe("codeStats of no files and of one", () => {
         commentLines: { lines: 0, share: 0 },
       },
     });
-    expect(stats.fileLength.histogram.every(({ files }) => files === 0)).toBe(
-      true,
-    );
   });
 
   it("reports a single file as its own median, maximum and deepest file", () => {
@@ -191,7 +163,7 @@ describe("codeStats indentation style", () => {
 });
 
 describe("codeStats most changed files", () => {
-  it("lists the five files with the most revisions, ties in path order", () => {
+  it("lists the three files with the most revisions of a territory, ties in path order", () => {
     const counts = [3, 9, 9, 1, 5, 9, 2];
     const stats = codeStats(
       counts.map((_, index) => inventoryFile(`f${index + 1}.ts`)),
@@ -202,54 +174,6 @@ describe("codeStats most changed files", () => {
       { path: "f2.ts", revisions: 9 },
       { path: "f3.ts", revisions: 9 },
       { path: "f6.ts", revisions: 9 },
-      { path: "f5.ts", revisions: 5 },
-      { path: "f1.ts", revisions: 3 },
-    ]);
-  });
-});
-
-describe("codeStats buckets", () => {
-  it("puts lengths of 50, 51, 100 ... 801 lines on either side of each file length edge", () => {
-    const lengths = [50, 51, 100, 101, 200, 201, 400, 401, 800, 801];
-    const stats = codeStats(
-      lengths.map((length) => inventoryFile(`f${length}.ts`, linesOf(length))),
-      none,
-    );
-
-    expect(stats.fileLength.histogram.map(({ files }) => files)).toStrictEqual([
-      1, 2, 2, 2, 2, 1,
-    ]);
-  });
-
-  it("puts revisions of 1, 2, 3, 4, 5, 9, 10, 19 and 20 on either side of each churn edge", () => {
-    const counts = [1, 2, 3, 4, 5, 9, 10, 19, 20];
-    const stats = codeStats(
-      counts.map((count) => inventoryFile(`f${count}.ts`)),
-      new Map(counts.map((count) => [`f${count}.ts`, count])),
-    );
-
-    expect(stats.churn.histogram.map(({ files }) => files)).toStrictEqual([
-      1, 1, 2, 2, 2, 1,
-    ]);
-  });
-
-  it("puts levels per line of 0.2, 0.25, 0.5, 1, 1.5 and 2 into the next bucket from each edge", () => {
-    // four lines each, except 0.2 which is one level over five lines
-    const files = [
-      ["a", withLevels(1, 0, 0, 0, 0)],
-      ["b", withLevels(1, 0, 0, 0)],
-      ["c", withLevels(1, 1, 0, 0)],
-      ["d", withLevels(1, 1, 1, 1)],
-      ["e", withLevels(2, 2, 1, 1)],
-      ["f", withLevels(2, 2, 2, 2)],
-    ] as const;
-    const stats = codeStats(
-      files.map(([name, text]) => inventoryFile(`${name}.ts`, text)),
-      none,
-    );
-
-    expect(stats.complexity.histogram.map(({ files: n }) => n)).toStrictEqual([
-      1, 1, 1, 1, 1, 1,
     ]);
   });
 });

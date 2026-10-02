@@ -1,33 +1,20 @@
-// Owns counting files into labelled buckets, as the report's histograms do.
-
-/** A bucket holds the values below `below` and at or above the previous bucket's `below`. */
-export type Bucket = {
-  readonly label: string;
-  readonly below: number;
-};
-
-/** The report's histogram entry: a bucket's label and the number of files in it. */
-export type Bin = {
-  readonly label: string;
-  readonly files: number;
-};
+// Owns counting values into the fixed buckets of the report's histograms.
 
 /**
- * Counts `values` into `buckets`, which must ascend; the last bucket should
- * be unbounded (`below: Infinity`) so that no value is dropped.
+ * Counts `values` into one more bucket than there are `edges`, in ascending
+ * order: the first bucket takes the values below `edges[0]`, each next one
+ * those from its own edge up to the next, and the last everything from the
+ * last edge on, so no value is dropped. `edges` must ascend.
  */
 export const histogram = (
   values: ReadonlyArray<number>,
-  buckets: ReadonlyArray<Bucket>,
-): ReadonlyArray<Bin> => {
-  const counts = buckets.map(() => 0);
+  edges: ReadonlyArray<number>,
+): ReadonlyArray<number> => {
+  const counts = [...edges, Infinity].map(() => 0);
   for (const value of values) {
-    const found = buckets.findIndex(({ below }) => value < below);
-    const slot = found === -1 ? counts.length - 1 : found;
+    const found = edges.findIndex((edge) => value < edge);
+    const slot = found === -1 ? edges.length : found;
     counts[slot] = (counts[slot] ?? 0) + 1;
   }
-  return buckets.map(({ label }, index) => ({
-    label,
-    files: counts[index] ?? 0,
-  }));
+  return counts;
 };

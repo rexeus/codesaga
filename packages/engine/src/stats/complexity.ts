@@ -7,20 +7,23 @@ import { percentile, tallyOf } from "./distribution.js";
 import { histogram } from "./histogram.js";
 import { highestBy, ratioOf, sum } from "./measures.js";
 
-const BUCKETS = [
-  { label: "<0.25", below: 0.25 },
-  { label: "0.25–0.5", below: 0.5 },
-  { label: "0.5–1", below: 1 },
-  { label: "1–1.5", below: 1.5 },
-  { label: "1.5–2", below: 2 },
-  { label: "2+", below: Infinity },
-];
+/** Where the buckets "<0.25", "0.25–0.5", "0.5–1", "1–1.5", "1.5–2" and "2+" levels per line start after the first. */
+const BUCKET_EDGES = [0.25, 0.5, 1, 1.5, 2];
 
 /** The levels per non-blank line of one file. */
 const perLineOf = ({ levels, loc }: InventoryFile): number =>
   loc === 0 ? 0 : levels / loc;
 
-/** The complexity stats of `files`, sorted by path; files without a code line are left out of the per-file figures. */
+/** The files of `files` that have a code line, counted into the levels-per-line buckets. */
+export const complexityHistogram = (
+  files: ReadonlyArray<InventoryFile>,
+): ReadonlyArray<number> =>
+  histogram(
+    files.filter(({ loc }) => loc > 0).map((file) => perLineOf(file)),
+    BUCKET_EDGES,
+  );
+
+/** The complexity stats of `files`, sorted by path, without the histogram; files without a code line are left out of the per-file figures. */
 export const complexityStats = (
   files: ReadonlyArray<InventoryFile>,
 ): CodeStats["complexity"] => {
@@ -37,7 +40,6 @@ export const complexityStats = (
       (deepestLevel, file) => Math.max(deepestLevel, file.deepestLevel),
       0,
     ),
-    histogram: histogram(perFile, BUCKETS),
     deepestFile:
       deepest === undefined
         ? null

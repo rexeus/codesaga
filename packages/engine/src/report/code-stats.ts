@@ -5,13 +5,6 @@ import { Schema } from "effect";
 const Count = Schema.Natural;
 const Share = Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 }));
 
-/** Files that fall into a bucket of a histogram. */
-const Bin = Schema.Struct({
-  /** The bucket's range, such as "101–200". */
-  label: Schema.String,
-  files: Count,
-});
-
 /** A file and the number of times it changed. */
 const ChangedFile = Schema.Struct({
   path: Schema.String,
@@ -21,8 +14,12 @@ const ChangedFile = Schema.Struct({
 /**
  * Facts about a set of universe files at HEAD and the history behind them.
  * Medians and percentiles interpolate between the two closest ranks, and
- * fractional values keep 4 decimals. Every `histogram` lists its buckets in
- * ascending order, empty ones included.
+ * fractional values keep 4 decimals. A territory's stats leave out the
+ * histograms and list fewer of the most changed files than the repository's.
+ *
+ * A `histogram` is the number of files per bucket, in ascending order of the
+ * measure and with empty buckets included, so its position names the bucket.
+ * The edges are fixed; a value on an edge belongs to the bucket that starts there.
  */
 export const CodeStats = Schema.Struct({
   /** Universe files in the set. */
@@ -38,8 +35,11 @@ export const CodeStats = Schema.Struct({
     min: Count,
     median: Schema.Finite,
     max: Count,
-    /** Buckets "1–50", "51–100", "101–200", "201–400", "401–800" and "800+" lines. */
-    histogram: Schema.Array(Bin),
+    /**
+     * Only in the report's own `stats`. Files by lines, in 6 buckets: 1–50,
+     * 51–100, 101–200, 201–400, 401–800 and more than 800 lines.
+     */
+    histogram: Schema.optionalKey(Schema.Array(Count)),
     /** Path of the file with the most lines, the first by path on a tie; null for no such file. */
     longestFile: Schema.NullOr(Schema.String),
   }),
@@ -62,9 +62,15 @@ export const CodeStats = Schema.Struct({
     revisions: Count,
     /** The sum over the files of revisions times code lines; the weight that `thresholds.badges.hotspotShare` compares, after codeheat's churn times size. */
     revisionLines: Count,
-    /** Buckets "1", "2", "3–4", "5–9", "10–19" and "20+" revisions. */
-    histogram: Schema.Array(Bin),
-    /** The five files with the most revisions, most first, then by path. */
+    /**
+     * Only in the report's own `stats`. Files by revisions, in 6 buckets: 1, 2,
+     * 3–4, 5–9, 10–19 and 20 or more.
+     */
+    histogram: Schema.optionalKey(Schema.Array(Count)),
+    /**
+     * The files with the most revisions, most first, then by path: the five
+     * most changed of the repository, the three of a territory.
+     */
     mostChanged: Schema.Array(ChangedFile).check(Schema.isMaxLength(5)),
   }),
   /**
@@ -79,8 +85,12 @@ export const CodeStats = Schema.Struct({
     medianFile: Schema.Finite,
     /** The deepest level of any line. */
     deepestLevel: Count,
-    /** Files by their levels per line: "<0.25", "0.25–0.5", "0.5–1", "1–1.5", "1.5–2" and "2+". */
-    histogram: Schema.Array(Bin),
+    /**
+     * Only in the report's own `stats`. Files by their levels per line, in 6
+     * buckets: below 0.25, 0.25 to below 0.5, 0.5 to below 1, 1 to below 1.5,
+     * 1.5 to below 2, and 2 or more.
+     */
+    histogram: Schema.optionalKey(Schema.Array(Count)),
     /** The file with the most levels per line, the first by path on a tie; null for no such file. */
     deepestFile: Schema.NullOr(
       Schema.Struct({ path: Schema.String, perLine: Schema.Finite }),
