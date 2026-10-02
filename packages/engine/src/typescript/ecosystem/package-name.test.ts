@@ -82,6 +82,8 @@ describe("tableKeyOf", () => {
     expect(tableKeyOf("node:fs/promises")).toBe("node:fs");
     expect(tableKeyOf("fs")).toBe("fs");
     expect(tableKeyOf("vitest")).toBe("vitest");
+    expect(tableKeyOf("bun:test")).toBe("bun:test");
+    expect(tableKeyOf("bun:")).toBeUndefined();
     expect(tableKeyOf("./a")).toBeUndefined();
   });
 });

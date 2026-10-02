@@ -18,7 +18,7 @@ describe("ECOSYSTEM_TABLE", () => {
     expect(new Set(packages).size).toBe(packages.length);
     for (const name of packages) {
       expect(name).toMatch(
-        /^(?:node:[a-z]+|(?:@[a-z0-9-]+\/(?:\*|[a-z0-9.-]+)|[a-z0-9][a-z0-9.-]*))$/u,
+        /^(?:(?:node|bun):[a-z]+|(?:@[a-z0-9-]+\/(?:\*|[a-z0-9.-]+)|[a-z0-9][a-z0-9.-]*))$/u,
       );
     }
   });

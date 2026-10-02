@@ -160,3 +160,80 @@ it("a", () => {
     expect(facts.assertions).toStrictEqual([0, 0, 1, 0]);
   });
 });
+
+describe("test facts: effect-vitest and mocha shapes", () => {
+  it("counts any member of it as a case, with the variants and modifiers anywhere in the chain", () => {
+    const facts = testsOf(`
+it.effect("a", () => Effect.sync(() => {}));
+it.live("b", () => Effect.sync(() => {}));
+it.scoped("c", () => Effect.sync(() => {}));
+it.scopedLive("d", () => Effect.sync(() => {}));
+it.prop("e", [fc.integer()], ([n]) => { expect(n).toBe(n); });
+it.effect.only("f", () => Effect.sync(() => {}));
+it.live.skip("g", () => Effect.sync(() => {}));
+it.effect.skip.each([1, 2])("h %i", (n) => Effect.sync(() => {}));
+it.effect.each([1, 2])("i %i", (n) => Effect.sync(() => {}));
+it.effect.fails("j", () => Effect.sync(() => {}));
+it.effect.todo("k");`);
+
+    expect(facts).toMatchObject({
+      cases: 11,
+      parameterized: 2,
+      skipped: 2,
+      focused: 1,
+      todo: 1,
+    });
+  });
+
+  it("counts the cases inside it.layer as cases and the layer as a suite", () => {
+    const facts = testsOf(`
+it.layer(TestLayer)("service", (it) => {
+  it.effect("a", () => Effect.sync(() => { assert.strictEqual(1, 1); }));
+  it.effect("b", () => Effect.sync(() => {}));
+});
+it.layer(TestLayer, { timeout: 1 }).skip("other", (it) => {});`);
+
+    expect(facts).toMatchObject({ cases: 2, skipped: 1 });
+    expect(facts.assertions).toStrictEqual([1, 1, 0, 0]);
+  });
+});
+
+describe("test facts: assertion helpers and mocha shapes", () => {
+  it("counts bare assertion helpers inside a case", () => {
+    const facts = testsOf(
+      oneCallPerCase([
+        "assertTrue(x)",
+        "assertSome(x, 1)",
+        "strictEqual(a, 1)",
+        "deepStrictEqual(a, b)",
+        "assertJsonSchemaDocument(d)",
+        "assertions(x)",
+        "equal(a, b)",
+      ]),
+    );
+
+    expect(facts.assertions).toStrictEqual([2, 5, 0, 0]);
+  });
+
+  it("takes mocha's specify and context, and a pending it without a function as a todo case", () => {
+    const facts = testsOf(`
+context("a", () => {
+  specify("b", () => { expect(1); });
+  it("pending");
+  test.skip("c");
+});`);
+
+    expect(facts).toMatchObject({ cases: 3, todo: 2, skipped: 1 });
+    expect(facts.assertions).toStrictEqual([0, 1, 0, 0]);
+  });
+
+  it("still leaves out steps, hooks and fixtures of the same roots", () => {
+    const facts = testsOf(`
+test.step("a", async () => {});
+test.beforeAll("setup", async () => {});
+test.describe.configure("x", () => {});
+it.layer.use("x", () => {});`);
+
+    expect(facts.cases).toBe(0);
+  });
+});

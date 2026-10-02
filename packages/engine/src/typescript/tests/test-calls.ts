@@ -19,26 +19,65 @@ export type TestCall = {
   readonly todo: boolean;
 };
 
-const CASE_ROOTS = new Set(["it", "test", "fit", "xit", "xtest"]);
-const SUITE_ROOTS = new Set(["describe", "suite", "fdescribe", "xdescribe"]);
-const SKIP_ROOTS = new Set(["xit", "xtest", "xdescribe"]);
-const FOCUS_ROOTS = new Set(["fit", "fdescribe"]);
-/** Modifiers written as a property: `it.only`, `test.describe.serial`. */
-const PROPERTY_MODIFIERS = new Set([
-  "only",
-  "skip",
-  "todo",
-  "concurrent",
-  "sequential",
-  "fails",
-  "failing",
-  "serial",
-  "parallel",
+const CASE_ROOTS = new Set(["it", "test", "specify", "fit", "xit", "xtest"]);
+const SUITE_ROOTS = new Set([
   "describe",
   "suite",
+  "context",
+  "fdescribe",
+  "xdescribe",
 ]);
-/** Modifiers that are called with a table or a condition before the name: `it.each(table)(name, fn)`. */
-const APPLIED_MODIFIERS = new Set(["each", "skipIf", "runIf", "for"]);
+const SKIP_ROOTS = new Set(["xit", "xtest", "xdescribe"]);
+const FOCUS_ROOTS = new Set(["fit", "fdescribe"]);
+/** Members of `it` and `test` that do something else than declare: hooks, fixtures and steps. */
+const NOT_DECLARING = new Set([
+  "step",
+  "beforeEach",
+  "afterEach",
+  "beforeAll",
+  "afterAll",
+  "use",
+  "extend",
+  "configure",
+  "setTimeout",
+  "expect",
+]);
+/** Members that turn a declaration into a suite: `test.describe`, `it.layer(layer)("name", ...)`. */
+const SUITE_MODIFIERS = new Set(["describe", "suite", "layer"]);
+
+/** A callee read as a chain: its root name, the members after it in order, and which of them were called on the way. */
+type Chain = {
+  readonly root: string;
+  readonly members: ReadonlyArray<string>;
+  readonly called: ReadonlyArray<string>;
+};
+
+/** The callee a call or a tagged template applies, undefined for any other node. */
+const appliedCallee = (node: Node): Node | undefined => {
+  if (node.type === "CallExpression") {
+    return node.callee;
+  }
+  return node.type === "TaggedTemplateExpression" ? node.tag : undefined;
+};
+
+/** The chain of `it.effect.each(table)("name", fn)`'s callee, undefined for anything that is not names, members and calls. */
+const chainOf = (callee: Node): Chain | undefined => {
+  if (callee.type === "Identifier") {
+    return { root: callee.name, members: [], called: [] };
+  }
+  if (callee.type === "MemberExpression" && !callee.computed) {
+    const inner = chainOf(callee.object);
+    return inner === undefined || callee.property.type !== "Identifier"
+      ? undefined
+      : { ...inner, members: [...inner.members, callee.property.name] };
+  }
+  const target = appliedCallee(callee);
+  const applied = target === undefined ? undefined : chainOf(target);
+  const last = applied?.members.at(-1);
+  return applied === undefined || last === undefined
+    ? undefined
+    : { ...applied, called: [...applied.called, last] };
+};
 
 type Shape = {
   readonly root: string;
@@ -47,7 +86,7 @@ type Shape = {
   readonly applied?: string;
 };
 
-/** The dotted path of a callee, the root name and the properties after it. */
+/** The dotted path of an assertion's callee: the root name and the members after it; a call only where a modifier is applied. */
 const shapeOf = (callee: Node): Shape | undefined => {
   if (callee.type === "Identifier") {
     return { root: callee.name, modifiers: [] };
@@ -60,21 +99,11 @@ const shapeOf = (callee: Node): Shape | undefined => {
       ? undefined
       : { ...inner, modifiers: [...inner.modifiers, callee.property.name] };
   }
-  if (callee.type === "CallExpression") {
-    return appliedShape(shapeOf(callee.callee));
-  }
-  return callee.type === "TaggedTemplateExpression"
-    ? appliedShape(shapeOf(callee.tag))
-    : undefined;
-};
-
-/** The shape once its last modifier has been called, or undefined when that modifier is not one that is. */
-const appliedShape = (shape: Shape | undefined): Shape | undefined => {
-  const last = shape?.modifiers.at(-1);
-  return shape !== undefined &&
-    last !== undefined &&
-    APPLIED_MODIFIERS.has(last)
-    ? { ...shape, applied: last }
+  const target = appliedCallee(callee);
+  const tagged = target === undefined ? undefined : shapeOf(target);
+  const last = tagged?.modifiers.at(-1);
+  return tagged !== undefined && last !== undefined && last === "each"
+    ? { ...tagged, applied: last }
     : undefined;
 };
 
@@ -82,66 +111,76 @@ const isFunction = (node: Node | undefined): boolean =>
   node?.type === "ArrowFunctionExpression" ||
   node?.type === "FunctionExpression";
 
-/** Whether the arguments read like a test's: a title, and a body unless the title is a literal. */
-const hasTestArguments = (
-  [title, body]: CallExpression["arguments"],
-  todo: boolean,
-): boolean => {
+/** How a call's arguments read as a test's: no test, a pending one without a body, or one with a body. */
+const bodyOf = (
+  args: CallExpression["arguments"],
+): "none" | "pending" | "body" => {
+  const [title] = args;
   if (title === undefined) {
-    return false;
+    return "none";
   }
   if (stringValue(title) !== undefined || title.type === "TemplateLiteral") {
-    return todo || body !== undefined;
+    return args.length === 1 ? "pending" : "body";
   }
   const named =
     title.type === "Identifier" ||
     title.type === "MemberExpression" ||
     (title.type === "BinaryExpression" && title.operator === "+");
-  return named && isFunction(body);
+  return named && args.some((argument) => isFunction(argument))
+    ? "body"
+    : "none";
 };
 
-const isKnownShape = ({ modifiers, applied }: Shape): boolean => {
-  const called = modifiers.filter((modifier) =>
-    APPLIED_MODIFIERS.has(modifier),
-  );
-  return (
-    modifiers.every(
-      (modifier) =>
-        PROPERTY_MODIFIERS.has(modifier) || APPLIED_MODIFIERS.has(modifier),
-    ) && (applied === undefined ? called.length === 0 : called.length === 1)
-  );
+/** Whether the chain is rooted at a test or suite name and uses no member that does something else than declare. */
+const isDeclaringChain = ({ root, members }: Chain): boolean =>
+  (CASE_ROOTS.has(root) || SUITE_ROOTS.has(root)) &&
+  !members.some((member) => NOT_DECLARING.has(member));
+
+/** The declaration a chain makes, read from its root and members. */
+const callOf = (chain: Chain, pending: boolean): TestCall => {
+  const marked = (name: string): boolean => chain.members.includes(name);
+  const isSuite =
+    SUITE_ROOTS.has(chain.root) ||
+    chain.members.some((member) => SUITE_MODIFIERS.has(member));
+  return {
+    kind: isSuite ? "suite" : "case",
+    each: chain.called.includes("each"),
+    skipped: SKIP_ROOTS.has(chain.root) || marked("skip") || marked("fixme"),
+    focused: FOCUS_ROOTS.has(chain.root) || marked("only"),
+    todo: marked("todo") || pending,
+  };
 };
 
-/** The test case or suite a call declares, undefined for any other call. */
+/**
+ * The test case or suite a call declares, undefined for any other call. Any
+ * member chain rooted at `it`, `test` or `describe` (and their aliases) counts
+ * that ends in a call with a title and a function, so `it.effect`, `it.live`,
+ * `it.prop`, `it.effect.each(table)(...)`, `it.layer(layer)(...)` and
+ * `.only`, `.skip` and `.todo` anywhere in the chain are seen; a title alone
+ * is a pending case, which Mocha reports as todo.
+ */
 export const testCallOf = ({
   callee,
   arguments: args,
 }: CallExpression): TestCall | undefined => {
-  const shape = shapeOf(callee);
-  if (
-    shape === undefined ||
-    !(CASE_ROOTS.has(shape.root) || SUITE_ROOTS.has(shape.root)) ||
-    !isKnownShape(shape)
-  ) {
+  const chain = chainOf(callee);
+  if (chain === undefined || !isDeclaringChain(chain)) {
     return undefined;
   }
-  const todo = shape.modifiers.includes("todo");
-  if (!hasTestArguments(args, todo)) {
-    return undefined;
-  }
-  const isSuite =
-    SUITE_ROOTS.has(shape.root) ||
-    shape.modifiers.includes("describe") ||
-    shape.modifiers.includes("suite");
-  return {
-    kind: isSuite ? "suite" : "case",
-    each: shape.applied === "each",
-    skipped: SKIP_ROOTS.has(shape.root) || shape.modifiers.includes("skip"),
-    focused: FOCUS_ROOTS.has(shape.root) || shape.modifiers.includes("only"),
-    todo,
-  };
+  const body = bodyOf(args);
+  return body === "none" ? undefined : callOf(chain, body === "pending");
 };
 
+/** A bare call that asserts: `assert(...)` and the `assertX(...)` helpers, and node's equality functions imported by name. */
+const ASSERT_HELPER = /^assert(?:[A-Z]\w*)?$/u;
+const EQUALITY = new Set([
+  "strictEqual",
+  "deepStrictEqual",
+  "notStrictEqual",
+  "notDeepStrictEqual",
+  "deepEqual",
+  "notDeepEqual",
+]);
 const EXPECT_VARIANTS = new Set(["soft", "poll"]);
 const TYPE_TESTS = new Set(["expectTypeOf", "assertType", "expectType"]);
 const SNAPSHOT_MATCHERS = new Set([
@@ -159,10 +198,17 @@ export type TestSignal = "assertion" | "type-test" | "snapshot";
 
 /**
  * Whether the call asserts: `expect(x)`, `expect.soft(x)`, `expect.poll(fn)`,
- * `assert(x)`, `assert.equal(a, b)` and `chai.assert.equal(a, b)`, and a
- * member named `expect` such as supertest's `request(app).get("/").expect(200)`.
+ * `assert(x)`, `assert.equal(a, b)` and `chai.assert.equal(a, b)`, a bare
+ * `assertTrue(x)` or `strictEqual(a, b)`, and a member named `expect` such as
+ * supertest's `request(app).get("/").expect(200)`.
  */
 const isAssertion = (callee: Node): boolean => {
+  if (
+    callee.type === "Identifier" &&
+    (ASSERT_HELPER.test(callee.name) || EQUALITY.has(callee.name))
+  ) {
+    return true;
+  }
   const path = shapeOf(callee);
   if (path === undefined) {
     return callee.type === "MemberExpression" && isNamedExpect(callee);
