@@ -228,6 +228,26 @@ describe("renderAnalysis territories", () => {
     );
   });
 
+  it("indents the territories a split territory opens into at the chosen detail, other files last", () => {
+    const lines = atDetail(2);
+    const db = lines.findIndex((line) => line.startsWith("  packages/db "));
+
+    expect(lines.slice(db + 1, db + 4)).toStrictEqual([
+      "    migrations                30  orphaned, island  Dmitri Volkov 100% (dormant)",
+      "    src                       18                    Tomás Herrera 72%",
+      "    other files                4                    Tomás Herrera 100%",
+    ]);
+  });
+
+  it("shows no more than two levels, however deep the split goes", () => {
+    const lines = atDetail(3);
+
+    expect(lines).toContain(
+      "    src                       18                    Tomás Herrera 72%",
+    );
+    expect(lines.some((line) => line.includes("queries"))).toBe(false);
+  });
+
   it("marks the small territories of a directory as its other files", () => {
     const report = mapTerritories(sampleReport(), (territories) =>
       territories.map((territory, index) =>

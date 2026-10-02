@@ -1,4 +1,4 @@
-// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest first-cut territories.
+// Owns the knowledge block of the `analyze` view: the truck factor with its people, then the riskiest territories at the chosen detail as a small tree.
 // Every name and path that came from git passes through terminal-safe escaping.
 import type { Report } from "@codesaga/engine";
 
@@ -14,7 +14,9 @@ import { plain, renderTable } from "./table.js";
 import type { Column } from "./table.js";
 
 const TOP_TERRITORIES = 5;
+const TOP_CHILDREN = 4;
 const MAX_PATH_WIDTH = 24;
+const CHILD_INDENT = "  ";
 const MAX_TRUCK_FACTOR_NAMES = 3;
 
 type Knowledge = Report["knowledge"];
@@ -81,21 +83,49 @@ const leadingLineOwner = (lineOwners: LineOwners | undefined): string => {
 
 const OTHER_FILES = " (other)";
 
-type Row = { readonly label: string; readonly territory: Territory };
-
 /** The territory's path, escaped and cut to the column; the small territories of a directory are marked as its other files. */
 const territoryLabel = ({ path, kind }: Territory): string =>
   kind === "other"
     ? `${fitEscaped(path, MAX_PATH_WIDTH - OTHER_FILES.length)}${OTHER_FILES}`
     : fitEscaped(path, MAX_PATH_WIDTH);
 
-/** The riskiest first-cut territories. */
+/** A child's path below its parent, escaped and cut to the column; its other files are named as such. */
+const childLabel = (child: Territory, parent: Territory): string =>
+  child.kind === "other"
+    ? "other files"
+    : fitEscaped(
+        child.path.startsWith(`${parent.path}/`)
+          ? child.path.slice(parent.path.length + 1)
+          : child.path,
+        MAX_PATH_WIDTH - CHILD_INDENT.length,
+      );
+
+type Row = { readonly label: string; readonly territory: Territory };
+
+/** Whether the territory is shown through its children at `detail`. */
+const isOpen = ({ splitDetail }: Territory, detail: number): boolean =>
+  splitDetail !== undefined && splitDetail <= detail;
+
+/** The row of a first-cut territory and, when it is open at `detail`, the rows of its riskiest children. */
+const rowsOf = (root: Territory, detail: number): ReadonlyArray<Row> => {
+  const children = isOpen(root, detail)
+    ? root.territories.slice(0, TOP_CHILDREN).map((child) => ({
+        label: `${CHILD_INDENT}${childLabel(child, root)}`,
+        territory: child,
+      }))
+    : [];
+  return [{ label: territoryLabel(root), territory: root }, ...children];
+};
+
+/**
+ * The riskiest first-cut territories and, below each one that is open at the
+ * detail, its riskiest children: two levels, however deep the tree goes.
+ */
 const territoryRows = ({
   territories,
+  detail,
 }: Knowledge["territories"]): ReadonlyArray<Row> =>
-  territories
-    .slice(0, TOP_TERRITORIES)
-    .map((territory) => ({ label: territoryLabel(territory), territory }));
+  territories.slice(0, TOP_TERRITORIES).flatMap((root) => rowsOf(root, detail));
 
 const territoryLines = (
   { territories }: Knowledge,
