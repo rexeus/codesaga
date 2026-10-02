@@ -41,7 +41,7 @@ export const analyze = (
     const typescript = yield* gatherTypeScript(
       facts.root,
       facts.universe,
-      facts.tracked,
+      facts.projectFiles,
     );
     return buildReport({ ...facts, typescript });
   });

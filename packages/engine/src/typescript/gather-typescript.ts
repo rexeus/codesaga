@@ -4,6 +4,7 @@
 import { Array as Arr, Effect, FileSystem, Path } from "effect";
 
 import type { InventoryFile } from "../universe/inventory.js";
+import type { ProjectFiles } from "../universe/project-files.js";
 import { readManifests } from "./ecosystem/read-manifests.js";
 import type { PackageManifest } from "./ecosystem/read-manifests.js";
 import type { FactsResult, SourceText } from "./facts-of-source.js";
@@ -80,8 +81,6 @@ const verdicts = (
     return [...judged, ...unreadable];
   });
 
-const TSCONFIG_NAME = /(?:^|\/)tsconfig(?:\.[^/]+)?\.json$/u;
-
 const readText = (
   root: string,
   file: string,
@@ -96,16 +95,13 @@ const readText = (
     return yield* fs.readFileString(path.join(root, file));
   }).pipe(Effect.orElseSucceed(() => undefined));
 
-/** The configs among the tracked files, read with their `extends`, and the TypeScript the root manifest declares. */
+/** The project's configs, read with their `extends`, and the TypeScript the root manifest declares. */
 const readProject = (
   root: string,
-  tracked: ReadonlyArray<string>,
+  projectFiles: ProjectFiles,
 ): Effect.Effect<TsconfigProject, never, FileSystem.FileSystem | Path.Path> =>
   Effect.gen(function* () {
-    const configs = yield* readTsconfigs(
-      root,
-      tracked.filter((path) => TSCONFIG_NAME.test(path)),
-    );
+    const configs = yield* readTsconfigs(root, projectFiles.tsconfigs);
     const manifest = yield* readText(root, "package.json");
     const workspace = yield* readText(root, "pnpm-workspace.yaml");
     return { configs, typescript: declaredTypeScript(manifest, workspace) };
@@ -120,7 +116,7 @@ const readProject = (
 export const gatherTypeScript = (
   root: string,
   universe: ReadonlyArray<InventoryFile>,
-  tracked: ReadonlyArray<string>,
+  projectFiles: ProjectFiles,
 ): Effect.Effect<
   TypeScriptFacts | undefined,
   never,
@@ -144,8 +140,8 @@ export const gatherTypeScript = (
     return {
       status: yield* parser.status,
       declarationFiles,
-      project: yield* readProject(root, tracked),
-      manifests: yield* readManifests(root, tracked),
+      project: yield* readProject(root, projectFiles),
+      manifests: yield* readManifests(root, projectFiles.manifests),
       files: batches.flat(),
     };
   });

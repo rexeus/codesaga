@@ -62,12 +62,12 @@ const manifestOf = (
 const READ_CONCURRENCY = 16;
 
 /**
- * The manifests among the tracked files, tests' fixtures left out, in path
- * order. One that cannot be read or is not JSON is skipped.
+ * The manifests among the project files, those under a test path left out, in
+ * path order. One that cannot be read or is not JSON is skipped.
  */
 export const readManifests = (
   root: string,
-  tracked: ReadonlyArray<string>,
+  manifestPaths: ReadonlyArray<string>,
 ): Effect.Effect<
   ReadonlyArray<PackageManifest>,
   never,
@@ -76,7 +76,7 @@ export const readManifests = (
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const paths = tracked
+    const paths = manifestPaths
       .filter(
         (file) =>
           (file === "package.json" || file.endsWith("/package.json")) &&
