@@ -7,3 +7,8 @@ export { locateRepository } from "./git/repository.js";
 export { inspect } from "./inspect/inspect.js";
 export { InspectResult } from "./report/inspect-result.js";
 export { Report } from "./report/report.js";
+export {
+  TypeScriptParser,
+  readyParser,
+  unavailableParser,
+} from "./typescript/typescript-parser.js";

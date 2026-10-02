@@ -13,6 +13,7 @@ import {
 import type { Cause, Scope } from "effect";
 
 import { runCli } from "../cli.js";
+import { oxcParserLayer } from "../typescript/oxc-parser.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { stubGithub, unscripted } from "./stub-github.js";
 import type { GithubReply, GithubRequest } from "./stub-github.js";
@@ -68,6 +69,7 @@ const startServer = (cwd: string, options: McpSessionOptions) =>
       Effect.provideService(WorkingDirectory, cwd),
       Effect.provide([
         NodeServices.layer,
+        oxcParserLayer,
         stubGithub(options.github ?? (() => unscripted)).layer,
         Layer.succeed(
           ConfigProvider.ConfigProvider,

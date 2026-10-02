@@ -23,6 +23,7 @@ import type { HistoryCommit } from "../history/history.js";
 import { readHistory } from "../history/history.js";
 import { packageRootsOf } from "../knowledge/package-roots.js";
 import type { Report } from "../report/report.js";
+import type { TypeScriptFacts } from "../typescript/gather-typescript.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { inventory, namedAsCode } from "../universe/inventory.js";
 import { listTrackedFiles } from "../universe/tracked-files.js";
@@ -35,6 +36,8 @@ import type { InvalidSince, TimeRange } from "./analysis-window.js";
 
 /** Everything `analyze` and `inspect` read; gathering it is this module's job. */
 export type RepositoryFacts = {
+  /** Absolute path of the work tree root, where the universe's files lie. */
+  readonly root: string;
   readonly toolVersion: string;
   readonly now: DateTime.Utc;
   /** The resolved `--since` instant, or undefined for the first commit in scope. */
@@ -60,6 +63,12 @@ export type RepositoryFacts = {
   readonly isCodePath: (path: string) => boolean;
   /** The table that classifies commits: the built-in rows, then the custom ones. */
   readonly signatures: ReadonlyArray<Signature>;
+  /**
+   * What the TypeScript parser made of the universe's TypeScript and
+   * JavaScript files; absent for `inspect`, which does not parse, and for a
+   * universe without such files.
+   */
+  readonly typescript?: TypeScriptFacts | undefined;
 };
 
 /** Every expected failure of `analyze`. */
@@ -180,6 +189,7 @@ const gatherInRepository = (
     const blame =
       options.blame === true ? yield* blameUniverse(head, universe) : undefined;
     return {
+      root,
       toolVersion: options.toolVersion,
       now: yield* DateTime.now,
       ...windows,

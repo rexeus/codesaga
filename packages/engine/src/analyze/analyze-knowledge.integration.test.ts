@@ -1,4 +1,3 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
@@ -6,12 +5,13 @@ import { TestClock } from "effect/testing";
 import type { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { commitKnowledgeHistory } from "../testing/knowledge-history.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
 
 const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
-layer(NodeServices.layer)("analyze knowledge", (it) => {
+layer(analyzeServices)("analyze knowledge", (it) => {
   it.effect(
     "names both people in the truck factor after .mailmap merges Ada's emails",
     () =>
@@ -45,7 +45,7 @@ layer(NodeServices.layer)("analyze knowledge", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze knowledge directories", (it) => {
+layer(analyzeServices)("analyze knowledge directories", (it) => {
   it.effect(
     "reports src as Ada's island and web as shared, and counts the directories",
     () =>
@@ -103,7 +103,7 @@ const withoutFocus = (section: Report["knowledge"]) => ({
   },
 });
 
-layer(NodeServices.layer)("analyze knowledge window and scope", (it) => {
+layer(analyzeServices)("analyze knowledge window and scope", (it) => {
   it.effect("ignores --since: knowledge covers the whole history", () =>
     Effect.gen(function* () {
       yield* setNow;

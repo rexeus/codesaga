@@ -1,4 +1,3 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { ConfigProvider, Effect, Schema } from "effect";
 import { TestClock } from "effect/testing";
@@ -11,6 +10,7 @@ import { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { fieldsOf } from "../testing/error-fields.js";
 import { installFakeGh } from "../testing/fake-gh.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { searchPage, stubGithub } from "../testing/stub-github.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { analyzeWithGithub } from "./analyze-github.js";
@@ -92,7 +92,7 @@ const commitHistory = (
       ),
     );
 
-layer(NodeServices.layer)("analyzeWithGithub", (it) => {
+layer(analyzeServices)("analyzeWithGithub", (it) => {
   it.effect("adds the pull requests of the window to the report", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -150,7 +150,7 @@ layer(NodeServices.layer)("analyzeWithGithub", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyzeWithGithub failures", (it) => {
+layer(analyzeServices)("analyzeWithGithub failures", (it) => {
   it.effect(
     "fails before reading history or calling GitHub without a token or a GitHub remote",
     () =>

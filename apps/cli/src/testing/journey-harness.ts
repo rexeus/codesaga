@@ -3,6 +3,7 @@ import { NodeServices } from "@effect/platform-node";
 import { ConfigProvider, Console, Effect, Layer, Runtime, Stdio } from "effect";
 
 import { runCli } from "../cli.js";
+import { oxcParserLayer } from "../typescript/oxc-parser.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { stubGithub, unscripted } from "./stub-github.js";
 import type { GithubReply, GithubRequest } from "./stub-github.js";
@@ -50,6 +51,7 @@ export const journey = (
     const github = stubGithub(options.github ?? (() => unscripted));
     const environment = Layer.mergeAll(
       NodeServices.layer,
+      oxcParserLayer,
       github.layer,
       Stdio.layerTest({
         stdoutIsTerminal: Effect.succeed(options.stdoutIsTerminal ?? false),

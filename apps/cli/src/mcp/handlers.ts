@@ -1,6 +1,6 @@
 // Owns what each MCP tool does: the CLI's settings resolution and engine calls, answered as documents.
 import { analyze, analyzeWithGithub, inspect } from "@codesaga/engine";
-import type { AnalyzeOptions } from "@codesaga/engine";
+import type { AnalyzeOptions, TypeScriptParser } from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import type { FileSystem, Path } from "effect";
 import type { HttpClient } from "effect/http";
@@ -32,7 +32,8 @@ type Services =
   | ChildProcessSpawner.ChildProcessSpawner
   | FileSystem.FileSystem
   | HttpClient.HttpClient
-  | Path.Path;
+  | Path.Path
+  | TypeScriptParser;
 
 type Params = {
   readonly path?: string | undefined;
