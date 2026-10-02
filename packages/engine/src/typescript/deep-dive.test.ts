@@ -11,9 +11,10 @@ const skipped = (reason: "too-deep" | "syntax-error"): FactsResult => ({
   reason,
 });
 
-const NO_PROJECT: TypeScriptFacts["project"] = {
-  configs: [],
-  typescript: { declared: null, major: null },
+/** What reading the repository's configs and manifests found, when there are none. */
+const NOTHING_READ: Pick<TypeScriptFacts, "project" | "manifests"> = {
+  project: { configs: [], typescript: { declared: null, major: null } },
+  manifests: [],
 };
 
 const ready = { kind: "ready", name: "oxc-parser", version: "9.9.9" } as const;
@@ -23,7 +24,7 @@ describe("typescriptDeepDive", () => {
     const facts: TypeScriptFacts = {
       status: ready,
       declarationFiles: ["types/a.d.ts"],
-      project: NO_PROJECT,
+      ...NOTHING_READ,
       files: [
         { path: "a.ts", lines: 10, result: parsed },
         { path: "b.ts", lines: 10, result: parsed },
@@ -46,7 +47,7 @@ describe("typescriptDeepDive", () => {
     const section = typescriptAnalysis({
       status: ready,
       declarationFiles: [],
-      project: NO_PROJECT,
+      ...NOTHING_READ,
       files: [{ path: "a.ts", lines: 10, result: parsed }],
     }).section;
 
@@ -65,7 +66,7 @@ describe("typescriptDeepDive without a parser", () => {
     const section = typescriptAnalysis({
       status: unavailable,
       declarationFiles: ["a.d.ts"],
-      project: NO_PROJECT,
+      ...NOTHING_READ,
       files: [
         {
           path: "a.ts",
@@ -92,7 +93,7 @@ describe("typescriptAnalysis blocks", () => {
     const { section } = typescriptAnalysis({
       status: ready,
       declarationFiles: [],
-      project: NO_PROJECT,
+      ...NOTHING_READ,
       files: [{ path: "a.ts", lines: 10, result: skipped("syntax-error") }],
     });
 
@@ -107,7 +108,7 @@ describe("typescriptAnalysis blocks", () => {
     const { forPaths } = typescriptAnalysis({
       status: ready,
       declarationFiles: [],
-      project: NO_PROJECT,
+      ...NOTHING_READ,
       files: [
         { path: "api/a.ts", lines: 300, result: loud },
         { path: "api/b.ts", lines: 100, result: parsed },

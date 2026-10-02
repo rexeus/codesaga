@@ -14,6 +14,8 @@ The words codesaga uses in the report, the terminal, the dashboard and the code.
 
 **Escape hatch** — a place where TypeScript code switches the type system or the linter off or around: an explicit `any`, an `as` assertion other than `as const`, a non-null `x!`, a `@ts-ignore`, `@ts-expect-error` or `@ts-nocheck` comment, or an `eslint-disable`, `oxlint-disable` or `biome-ignore` comment. Its counterparts, which keep types honest, are `satisfies`, `unknown` and type predicates. The deep dive counts both, per 1,000 non-blank lines and for production code and tests apart; a count describes the code and is never a score.
 
+**Idiom** — one of two or more ways of writing the same thing in TypeScript, such as `interface` against an object `type`, or `await` against `.then(`. The deep dive counts the production code's use of each side of a pair (`idioms`) and never labels the result: an idiom is a count of syntax, not a paradigm and not a verdict. Beside them, `modules` counts the module systems of the files and `ecosystem` the frameworks and tools the code uses, detected from imports and manifests through a curated table.
+
 **Revision** — a commit that changed a file, counted in the current life of its path and following renames. Churn is the revisions per file: their median, 90th percentile and total.
 
 **Complexity** — the indentation levels of a line, ported from codeheat: a tab is one level, spaces count `floor(spaces / width)` with the width (2 to 8) detected per file. `complexity.perLine` is the levels over the non-blank lines of the set; a file's own value is its levels per line.

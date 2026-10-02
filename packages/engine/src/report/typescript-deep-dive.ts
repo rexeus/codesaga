@@ -2,6 +2,9 @@
 // Later blocks of the deep dive join as further optional keys beside `coverage`.
 import { Schema } from "effect";
 
+import { Ecosystem } from "./typescript-ecosystem.js";
+import { Idioms } from "./typescript-idioms.js";
+import { Modules } from "./typescript-modules.js";
 import { Strictness } from "./typescript-strictness.js";
 import { TypeSafety } from "./typescript-type-safety.js";
 
@@ -59,6 +62,12 @@ export const TypeScriptDeepDive = Schema.Struct({
   typeSafety: Schema.optionalKey(TypeSafety),
   /** The compiler posture of each `tsconfig`. */
   strictness: Schema.optionalKey(Strictness),
+  /** The module systems in use. */
+  modules: Schema.optionalKey(Modules),
+  /** Paired counts of ways of writing the same thing, in production code. */
+  idioms: Schema.optionalKey(Idioms),
+  /** The frameworks and tools in use. */
+  ecosystem: Schema.optionalKey(Ecosystem),
 });
 export type TypeScriptDeepDive = typeof TypeScriptDeepDive.Type;
 

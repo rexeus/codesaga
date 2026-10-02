@@ -39,11 +39,21 @@ export const walk = (root: Node, visitor: NodeVisitor): void => {
   }
 };
 
+/**
+ * The node interfaces whose `type` can be `Type`. `Extract` would miss the
+ * interfaces whose `type` is a union of several, such as `Function` or `Class`.
+ */
+export type NodeOfType<Type extends string> = Node extends infer Candidate
+  ? Candidate extends { readonly type: infer Own }
+    ? Type extends Own
+      ? Candidate
+      : never
+    : never
+  : never;
+
 /** What to do for the nodes of each type; a handler receives its type's node. */
 export type NodeHandlers = {
-  readonly [Type in Node["type"]]?: (
-    node: Extract<Node, { type: Type }>,
-  ) => void;
+  readonly [Type in Node["type"]]?: (node: NodeOfType<Type>) => void;
 };
 
 /**

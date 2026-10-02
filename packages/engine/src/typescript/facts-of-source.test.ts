@@ -20,7 +20,7 @@ describe("factsOfSource parsed files", () => {
     // Program, VariableDeclaration, VariableDeclarator, Identifier, Literal
     expect(judge("a.ts", "const a = 1;\n")).toMatchObject({
       kind: "parsed",
-      facts: { version: 2, nodes: 5 },
+      facts: { nodes: 5 },
     });
   });
 

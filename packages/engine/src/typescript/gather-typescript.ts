@@ -4,6 +4,8 @@
 import { Array as Arr, Effect, FileSystem, Path } from "effect";
 
 import type { InventoryFile } from "../universe/inventory.js";
+import { readManifests } from "./ecosystem/read-manifests.js";
+import type { PackageManifest } from "./ecosystem/read-manifests.js";
 import type { FactsResult, SourceText } from "./facts-of-source.js";
 import { isDeclarationPath, isScriptPath } from "./source-kinds.js";
 import { readTsconfigs } from "./tsconfig/read-tsconfigs.js";
@@ -17,6 +19,8 @@ export type TypeScriptFacts = {
   readonly status: ParserStatus;
   /** Declaration files, which are counted and not parsed. */
   readonly declarationFiles: ReadonlyArray<string>;
+  /** The `package.json` files of the repository. */
+  readonly manifests: ReadonlyArray<PackageManifest>;
   /** The `tsconfig` files and the declared TypeScript version. */
   readonly project: TsconfigProject;
   /** Every other file with its verdict and the non-blank lines the universe measured for it. */
@@ -141,6 +145,7 @@ export const gatherTypeScript = (
       status: yield* parser.status,
       declarationFiles,
       project: yield* readProject(root, tracked),
+      manifests: yield* readManifests(root, tracked),
       files: batches.flat(),
     };
   });

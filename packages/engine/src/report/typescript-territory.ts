@@ -25,5 +25,14 @@ export const TerritoryTypeScript = Schema.Struct({
    * config governs one of its files.
    */
   strict: Schema.optionalKey(TerritoryStrict),
+  /**
+   * The share of ES module files among the files that use a module system:
+   * the files with ESM syntax over those and the files with CommonJS, as
+   * `deepDives.typescript.modules` counts them. Absent when no file of the
+   * territory uses either.
+   */
+  esmShare: Schema.optionalKey(
+    Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 })),
+  ),
 });
 export type TerritoryTypeScript = typeof TerritoryTypeScript.Type;

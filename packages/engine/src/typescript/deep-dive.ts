@@ -6,7 +6,10 @@ import type {
   TypeScriptDeepDive,
 } from "../report/typescript-deep-dive.js";
 import type { TerritoryTypeScript } from "../report/typescript-territory.js";
+import { ecosystemOf } from "./ecosystem/ecosystem-report.js";
 import type { TypeScriptFacts } from "./gather-typescript.js";
+import { idiomsOf } from "./idioms/idiom-report.js";
+import { modulesOf } from "./modules/module-report.js";
 import { parsedFilesOf } from "./parsed-file.js";
 import { territoryTypeScriptOf } from "./territory-typescript.js";
 import { strictnessOf } from "./tsconfig/strictness.js";
@@ -68,7 +71,13 @@ export const typescriptAnalysis = (
     section: {
       coverage: coverageOf(facts),
       ...(hasFacts
-        ? { typeSafety: typeSafetyOf(parsed), strictness: strictness.section }
+        ? {
+            typeSafety: typeSafetyOf(parsed),
+            strictness: strictness.section,
+            modules: modulesOf(parsed, facts.manifests),
+            idioms: idiomsOf(parsed),
+            ecosystem: ecosystemOf(parsed, facts.manifests),
+          }
         : {}),
     },
     forPaths: (paths) =>

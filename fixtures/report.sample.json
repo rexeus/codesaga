@@ -3146,7 +3146,8 @@
             "files": 38,
             "codeLines": 4300,
             "escapesPer1000": 4.1,
-            "strict": true
+            "strict": true,
+            "esmShare": 1
           }
         },
         {
@@ -3263,7 +3264,8 @@
             "files": 14,
             "codeLines": 1700,
             "escapesPer1000": 2.4,
-            "strict": "unknown"
+            "strict": "unknown",
+            "esmShare": 1
           }
         },
         {
@@ -3374,7 +3376,8 @@
             "files": 40,
             "codeLines": 4700,
             "escapesPer1000": 9.8,
-            "strict": "mixed"
+            "strict": "mixed",
+            "esmShare": 0.9167
           }
         },
         {
@@ -3478,7 +3481,8 @@
             "files": 20,
             "codeLines": 2300,
             "escapesPer1000": 1.3,
-            "strict": true
+            "strict": true,
+            "esmShare": 1
           }
         },
         {
@@ -3680,7 +3684,8 @@
             "files": 6,
             "codeLines": 700,
             "escapesPer1000": 0,
-            "strict": true
+            "strict": true,
+            "esmShare": 1
           }
         },
         {
@@ -3791,7 +3796,8 @@
             "files": 5,
             "codeLines": 600,
             "escapesPer1000": 8.3,
-            "strict": true
+            "strict": true,
+            "esmShare": 0.6
           }
         },
         {
@@ -4673,7 +4679,8 @@
             "files": 84,
             "codeLines": 9800,
             "escapesPer1000": 5.1,
-            "strict": true
+            "strict": true,
+            "esmShare": 1
           }
         },
         {
@@ -4802,7 +4809,8 @@
             "files": 52,
             "codeLines": 6200,
             "escapesPer1000": 6.4,
-            "strict": true
+            "strict": true,
+            "esmShare": 1
           }
         },
         {
@@ -4931,7 +4939,8 @@
             "files": 70,
             "codeLines": 8100,
             "escapesPer1000": 3.2,
-            "strict": true
+            "strict": true,
+            "esmShare": 1
           }
         }
       ]
@@ -5439,6 +5448,163 @@
         "totalConfigs": 7,
         "governedFiles": 338,
         "ungovernedFiles": 7
+      },
+      "modules": {
+        "files": 338,
+        "esmFiles": 312,
+        "commonjsFiles": 9,
+        "bothFiles": 2,
+        "imports": {
+          "declarations": 1640,
+          "typeOnly": 402
+        },
+        "nonErasable": {
+          "files": 6,
+          "enums": 4,
+          "namespaces": 0,
+          "parameterProperties": 9,
+          "decorators": 0
+        },
+        "packageTypes": {
+          "module": 7,
+          "commonjs": 1,
+          "unspecified": 3
+        }
+      },
+      "idioms": {
+        "files": 262,
+        "declarations": {
+          "interfaces": 58,
+          "objectTypes": 131
+        },
+        "enums": {
+          "enums": 3,
+          "stringUnions": 47
+        },
+        "topLevel": {
+          "classes": 11,
+          "functions": 146,
+          "arrowConsts": 402
+        },
+        "async": {
+          "awaits": 418,
+          "thenCalls": 23
+        },
+        "privacy": {
+          "hashPrivate": 2,
+          "privateModifiers": 7
+        },
+        "exports": {
+          "defaultExports": 64,
+          "namedExports": 780
+        },
+        "bindings": {
+          "consts": 3120,
+          "lets": 214,
+          "vars": 3
+        },
+        "iteration": {
+          "forOf": 96,
+          "forEachCalls": 71
+        },
+        "mutation": {
+          "mutationCalls": 84,
+          "transformCalls": 512,
+          "spreads": 266
+        },
+        "nullish": {
+          "optionalChains": 390,
+          "nullishCoalescing": 171
+        }
+      },
+      "ecosystem": {
+        "tools": [
+          {
+            "name": "React",
+            "category": "framework",
+            "files": 141,
+            "declaredIn": 3
+          },
+          {
+            "name": "Next.js",
+            "category": "framework",
+            "files": 58,
+            "declaredIn": 1
+          },
+          {
+            "name": "Vitest",
+            "category": "test",
+            "files": 44,
+            "declaredIn": 4
+          },
+          {
+            "name": "zod",
+            "category": "validation",
+            "files": 31,
+            "declaredIn": 2
+          },
+          {
+            "name": "Prisma",
+            "category": "data",
+            "files": 12,
+            "declaredIn": 1
+          },
+          {
+            "name": "ESLint",
+            "category": "lint",
+            "files": 0,
+            "declaredIn": 3
+          },
+          {
+            "name": "Prettier",
+            "category": "format",
+            "files": 0,
+            "declaredIn": 1
+          },
+          {
+            "name": "Turborepo",
+            "category": "monorepo",
+            "files": 0,
+            "declaredIn": 1
+          }
+        ],
+        "packages": [
+          {
+            "name": "react",
+            "files": 141
+          },
+          {
+            "name": "next",
+            "files": 58
+          },
+          {
+            "name": "zod",
+            "files": 31
+          }
+        ],
+        "nodeBuiltins": [
+          {
+            "name": "path",
+            "files": 14
+          },
+          {
+            "name": "fs",
+            "files": 9
+          },
+          {
+            "name": "crypto",
+            "files": 6
+          }
+        ],
+        "dependencies": {
+          "manifests": 11,
+          "runtime": 38,
+          "dev": 41
+        },
+        "hooks": {
+          "calls": 412,
+          "files": 97
+        }
       }
     }
   }
