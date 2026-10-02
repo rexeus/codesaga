@@ -31,10 +31,10 @@ describe("function facts: which functions count", () => {
     expect(facts.count).toBe(3);
   });
 
-  it("counts a function nested in a function with structure of its own as part of it", () => {
+  it("counts a function nested in another as a function of its own", () => {
     const facts = functionsOf(`function f(a) { if (a) { return () => 1; } }`);
 
-    expect(facts.count).toBe(1);
+    expect(facts.count).toBe(2);
   });
 });
 
@@ -159,6 +159,15 @@ describe("function facts: distributions", () => {
     expect(facts.hardLines).toBe(18 + 27);
   });
 
+  it("counts the lines of a function of 15 or more inside another once", () => {
+    const facts = functionsOf(
+      `function outer(c) {\n  const f = (d) => {\n${manyIfs(16)}\n  };\n${manyIfs(16)}\n}`,
+    );
+
+    expect(facts.complexity).toStrictEqual([0, 0, 0, 2, 0]);
+    expect(facts.hardLines).toBe(36);
+  });
+
   it("bands the length in non-blank lines, blank lines not counted and comment lines counted", () => {
     const facts = functionsOf(
       [
@@ -187,11 +196,14 @@ describe("function facts: shape", () => {
     expect(facts.longParameterLists).toBe(2);
   });
 
-  it("measures the deepest nesting of structures, a nested function deepening it", () => {
-    const facts = functionsOf(`
-function a(x) { if (x) { for (;;) { while (x) {} } } }
-function b(xs) { if (xs) { xs.map((x) => { if (x) {} }); } }`);
+  it("measures the deepest nesting of structures within one function, and a nested function starts again", () => {
+    const deep = functionsOf(
+      "function a(x) { if (x) { for (;;) { while (x) {} } } }",
+    );
+    const nested = functionsOf(
+      "function b(xs) { if (xs) { xs.map((x) => { if (x) {} }); } }",
+    );
 
-    expect(facts.maxDepth).toBe(3);
+    expect([deep.maxDepth, nested.maxDepth]).toStrictEqual([3, 1]);
   });
 });

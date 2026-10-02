@@ -1,12 +1,13 @@
 // Owns the increments of cognitive complexity: which syntax adds to the function it sits in, and which syntax deepens the nesting.
 // The rules are the SonarSource whitepaper's (v1.7, https://www.sonarsource.com/docs/CognitiveComplexity.pdf); the table below is its Appendix B on ESTree.
+// Unlike the whitepaper's total for a method, each function is scored apart, as eslint-plugin-sonarjs reports it.
 //
 //   +1, and +nesting level, and raises the nesting of its body:
 //       `if`, ternary, `switch` (once for all its cases), `for`, `for in`, `for of`, `while`, `do while`, `catch`
 //   +1 flat, and raises the nesting of its body: `else if`, `else`
 //   +1 per run of like operators: `&&` and `||` sequences (`??` and `?.` add nothing, as the whitepaper does not list them)
 //   +1 flat: `break` or `continue` to a label, and a function that calls itself by name, once however often
-//   0, but the nesting of a function inside another is one deeper: a nested function, arrow function or method
+//   0: a nested function, arrow function or method; it is scored on its own, from nesting 0, and the function around it adds nothing for it
 //   0: `try`, `finally`, `return`, `await`, spread
 //
 // Recursion is only found for a direct call by the function's own name (`f()`, or `this.m()` in a method); indirect cycles are not.
@@ -69,7 +70,7 @@ const nestingHandlers = (scope: Scope): NodeHandlers => {
         return;
       }
       if (elseIfs.has(node)) {
-        frame.flat += 1;
+        frame.complexity += 1;
       } else {
         countStructure(frame);
       }
@@ -78,7 +79,7 @@ const nestingHandlers = (scope: Scope): NodeHandlers => {
       if (alternate?.type === "IfStatement") {
         elseIfs.add(alternate);
       } else if (alternate !== null) {
-        frame.flat += 1;
+        frame.complexity += 1;
         scope.raise(alternate);
       }
     },
@@ -103,7 +104,7 @@ const flatHandlers = (scope: Scope): NodeHandlers => {
   const jump = ({ label }: { readonly label: Node | null }): void => {
     const frame = currentOf(scope);
     if (frame !== undefined && label !== null) {
-      frame.flat += 1;
+      frame.complexity += 1;
     }
   };
   return {
@@ -114,7 +115,7 @@ const flatHandlers = (scope: Scope): NodeHandlers => {
         isCountedOperator(node.operator) &&
         !sequences.has(node)
       ) {
-        frame.flat += sequenceIncrements(node, sequences);
+        frame.complexity += sequenceIncrements(node, sequences);
       }
     },
     BreakStatement: jump,

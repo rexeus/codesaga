@@ -12,19 +12,18 @@ const FunctionEntry = Schema.Struct({
   /** The line the function starts on, 1-based. */
   line: Count,
   complexity: Count,
-  /** Non-blank lines of the function, the functions inside it included. */
+  /** Non-blank lines of the function, the functions inside it included, though their structures are not scored in it. */
   lines: Count,
 });
 
 /**
- * The functions of one set of parsed files. A function is one that no other
- * function contains, scored with the functions inside it; a function that
- * has no complexity of its own and only holds others, such as a `describe`
- * callback or a module wrapper, scores 0 and leaves the functions directly in
- * it to stand alone (the whitepaper's JavaScript exception). `??` and `?.`
- * add nothing, and recursion counts for a direct call by the function's own
- * name. React components score what their JSX conditionals add; they are
- * not treated apart.
+ * The functions of one set of parsed files: every function, callbacks and
+ * nested functions included, scored from its own body. The structures of a
+ * function nested in another are the nested one's, and the function around it
+ * adds no nesting, which is how eslint-plugin-sonarjs reports a function.
+ * `??` and `?.` add nothing, and recursion counts for a direct call by the
+ * function's own name. React components score what their JSX conditionals add;
+ * they are not treated apart.
  */
 const FunctionsPart = Schema.Struct({
   /** Parsed files in the set. */
@@ -47,7 +46,7 @@ const FunctionsPart = Schema.Struct({
     functions: Count,
     /** `functions` over all functions of the set; 0 for none. */
     share: Share,
-    /** Non-blank lines inside those functions. */
+    /** Non-blank lines inside those functions, a function inside another one of them counted once. */
     lines: Count,
     /** `lines` over `codeLines`, how much of the code sits in them; 0 for none. */
     lineShare: Share,
@@ -58,7 +57,7 @@ const FunctionsPart = Schema.Struct({
   lengths: Schema.Array(Count),
   /** Functions with more than 4 parameters; a destructured parameter counts once. */
   longParameterLists: Count,
-  /** The deepest nesting of control structures in any function, nested functions counted as the whitepaper has them. */
+  /** The deepest nesting of control structures within any one function. */
   maxDepth: Count,
 });
 export type FunctionsPart = typeof FunctionsPart.Type;

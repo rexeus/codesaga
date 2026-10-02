@@ -118,11 +118,13 @@ export const nameHandlers = (names: FunctionNames): NodeHandlers => ({
       }
     }
   },
-  Property: ({ key, value, computed, method }) => {
+  Property: ({ key, value, computed, method, kind, start }) => {
     const member = keyName(key, computed);
+    const accessor = method || kind !== "init";
     register(names, value, {
       name: member,
-      ...(method ? { method: member } : {}),
+      start,
+      ...(accessor ? { method: member } : {}),
     });
   },
   ClassDeclaration: (node) => {

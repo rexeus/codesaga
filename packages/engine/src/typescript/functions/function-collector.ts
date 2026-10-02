@@ -8,10 +8,11 @@ import type { NodeOfType } from "../walk.js";
 import { complexityHandlers } from "./complexity-handlers.js";
 import { functionFactsOf } from "./function-facts.js";
 import type { FunctionFacts, MeasuredFunction } from "./function-facts.js";
-import { newFrame, scoredFramesOf } from "./function-frame.js";
-import type { Frame, ScoredFrame } from "./function-frame.js";
+import { newFrame } from "./function-frame.js";
+import type { Frame } from "./function-frame.js";
 import { ANONYMOUS, nameHandlers, shortName } from "./function-names.js";
 import type { FunctionNames } from "./function-names.js";
+import { COMPLEXITY_LIMIT } from "./function-thresholds.js";
 import { lineIndexOf } from "./line-index.js";
 
 /** The syntax that is a function for complexity: its own scope, and a nesting level of its own. */
@@ -38,17 +39,14 @@ const frameOf = (
   const own = node.type === "StaticBlock" ? undefined : node.id?.name;
   const inherited =
     parent === undefined ? ANONYMOUS : `${parent.name} > ${ANONYMOUS}`;
-  return newFrame(
-    {
-      name: shortName(own ?? named?.name ?? inherited),
-      binding: own ?? named?.binding,
-      method: named?.method,
-      start: named?.start ?? node.start,
-      end: node.end,
-      parameters: parametersOf(node),
-    },
-    parent,
-  );
+  return newFrame({
+    name: shortName(own ?? named?.name ?? inherited),
+    binding: own ?? named?.binding,
+    method: named?.method,
+    start: named?.start ?? node.start,
+    end: node.end,
+    parameters: parametersOf(node),
+  });
 };
 
 const deepen = (frame: Frame | undefined, by: number): void => {
@@ -62,18 +60,24 @@ const functionStack = (names: FunctionNames, text: string) => {
   const lines = lineIndexOf(text);
   const frames: Frame[] = [];
   const measured: MeasuredFunction[] = [];
-  const measure = ({
-    frame,
-    complexity,
-    depth,
-  }: ScoredFrame): MeasuredFunction => ({
-    name: frame.name,
-    line: lines.lineAt(frame.start),
-    complexity,
-    lines: lines.nonBlankLines(frame.start, frame.end),
-    parameters: frame.parameters,
-    depth,
-  });
+  /** The measures of a function and of the functions in it, outermost first. */
+  const measure = (
+    frame: Frame,
+    insideHard: boolean,
+  ): ReadonlyArray<MeasuredFunction> => [
+    {
+      name: frame.name,
+      line: lines.lineAt(frame.start),
+      complexity: frame.complexity,
+      lines: lines.nonBlankLines(frame.start, frame.end),
+      parameters: frame.parameters,
+      depth: frame.depth,
+      insideHard,
+    },
+    ...frame.children.flatMap((child) =>
+      measure(child, insideHard || frame.complexity >= COMPLEXITY_LIMIT),
+    ),
+  ];
   const open = (node: FunctionNode): void => {
     const frame = frameOf(node, names, frames.at(-1));
     frames.at(-1)?.children.push(frame);
@@ -84,9 +88,9 @@ const functionStack = (names: FunctionNames, text: string) => {
     if (frame === undefined) {
       return;
     }
-    frame.flat += frame.recursive ? 1 : 0;
+    frame.complexity += frame.recursive ? 1 : 0;
     if (frames.length === 0) {
-      measured.push(...scoredFramesOf(frame).map((scored) => measure(scored)));
+      measured.push(...measure(frame, false));
     }
   };
   return { frames, measured, open, close };

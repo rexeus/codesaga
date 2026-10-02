@@ -23,12 +23,10 @@ type NotableFunction = {
 };
 
 /**
- * The functions of one file. A function is the unit complexity is read
- * for: a function that no other function contains, with the functions
- * inside it counted in its score; a function that has no complexity of its
- * own and only holds other functions, such as a `describe` callback or a
- * module wrapper, scores 0 and leaves the functions directly inside it to
- * stand alone, as the whitepaper says for JavaScript. Every count is
+ * The functions of one file, every function including callbacks and nested
+ * functions, each scored from its own body: the structures of a function
+ * nested in it are the nested one's, and the function around adds no nesting
+ * (the way eslint-plugin-sonarjs reports a function). Every count is
  * additive across files. Functions of 15 or more are `complexity[3]` plus
  * `complexity[4]`.
  */
@@ -40,11 +38,11 @@ export type FunctionFacts = {
   readonly lengths: ReadonlyArray<number>;
   /** How many functions have each score, as `[score, functions]` pairs in ascending score order. */
   readonly scores: ReadonlyArray<readonly [number, number]>;
-  /** Non-blank lines inside the functions of 15 or more. */
+  /** Non-blank lines inside the functions of 15 or more, a function inside another such function not counted again. */
   readonly hardLines: number;
   /** Functions with more than 4 parameters, a destructured parameter counting once. */
   readonly longParameterLists: number;
-  /** The deepest nesting of control structures in a function, nested functions raising it as the whitepaper has them. */
+  /** The deepest nesting of control structures within one function. */
   readonly maxDepth: number;
   /** Functions of at least 3, hardest first and then by line, at most 40. */
   readonly notable: ReadonlyArray<NotableFunction>;
@@ -54,6 +52,8 @@ export type FunctionFacts = {
 export type MeasuredFunction = NotableFunction & {
   readonly parameters: number;
   readonly depth: number;
+  /** Whether a function of 15 or more contains it, so that its lines are inside those counted already. */
+  readonly insideHard: boolean;
 };
 
 const byHardness = (left: NotableFunction, right: NotableFunction): number =>
@@ -64,7 +64,8 @@ export const functionFactsOf = (
   measured: ReadonlyArray<MeasuredFunction>,
 ): FunctionFacts => {
   const hard = measured.filter(
-    ({ complexity }) => complexity >= COMPLEXITY_LIMIT,
+    ({ complexity, insideHard }) =>
+      complexity >= COMPLEXITY_LIMIT && !insideHard,
   );
   return {
     count: measured.length,

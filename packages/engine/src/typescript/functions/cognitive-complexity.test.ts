@@ -97,7 +97,7 @@ function overriddenSymbolFrom(classType: ClassType): Method | null {
 });
 
 describe("cognitive complexity: the whitepaper's JavaScript example", () => {
-  it("charges the nested callbacks of a JavaScript method by their depth (model.js save = 20)", () => {
+  it("scores each callback of the model.js save method from its own body (2, 3 and 7; the whitepaper's total is 20)", () => {
     const scores = scoresOf(
       `
 const model = {
@@ -109,19 +109,19 @@ const model = {
     }
     options || (options = {});                          // +1
     self._validate(self.toJSON(), function (err) {
-      if (err) {                                        // +2
+      if (err) {                                        // +1
         callback && callback.call(null, err);           // +1
         return;
       }
-      self.sync(self.isNew() ? 'create' : 'update', options, function (err, response) { // +2
+      self.sync(self.isNew() ? 'create' : 'update', options, function (err, response) { // +1
         var facade = { options: options, response: response }, parsed;
-        if (err) {                                      // +3
+        if (err) {                                      // +1
           facade.error = err;
         } else {                                        // +1
-          if (!self._saveEvent) {                       // +4
+          if (!self._saveEvent) {                       // +2
             self._saveEvent = self.publish(EVT_SAVE, { preventable: false });
           }
-          if (response) {                               // +4
+          if (response) {                               // +2
             parsed = facade.parsed = self._parse(response);
             self.setAttrs(parsed, options);
           }
@@ -136,12 +136,16 @@ const model = {
       "model.js",
     );
 
-    expect(scores).toStrictEqual([[20, 1]]);
+    expect(scores).toStrictEqual([
+      [2, 1],
+      [3, 1],
+      [7, 1],
+    ]);
   });
 });
 
 describe("cognitive complexity: JavaScript wrappers", () => {
-  it("ignores a function that only declares, so the functions inside start at nesting 0 (total 1)", () => {
+  it("scores a function that only declares as 0 and the function inside it on its own (total 1)", () => {
     const scores = scoresOf(
       `(function () {
   var foo;
@@ -158,7 +162,7 @@ describe("cognitive complexity: JavaScript wrappers", () => {
     ]);
   });
 
-  it("scores one function with structure of its own and the nested function one level deeper (total 3)", () => {
+  it("scores the structure of the wrapper and of the function inside it apart (the whitepaper's total of 3 adds a nesting level)", () => {
     const scores = scoresOf(
       `(function () {
   var foo;
@@ -170,7 +174,7 @@ describe("cognitive complexity: JavaScript wrappers", () => {
       "wrapper.js",
     );
 
-    expect(scores).toStrictEqual([[3, 1]]);
+    expect(scores).toStrictEqual([[1, 2]]);
   });
 
   it("scores the callbacks of a describe block one by one, however deep the describes nest", () => {

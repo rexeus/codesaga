@@ -131,17 +131,17 @@ function select(a, b) {
 });
 
 describe("cognitive complexity: nested functions", () => {
-  it("scores a nested arrow function into the function that has structure of its own, one level deeper", () => {
+  it("scores a nested arrow function on its own, from nesting 0, and not in the function around it", () => {
     const scores = scoresOf(`
 function f(xs) {
   if (xs) {                       // +1
-    xs.forEach((x) => {           // nesting 2 inside
-      if (x) {}                   // +3
+    xs.forEach((x) => {
+      if (x) {}                   // +1 in the arrow function
     });
   }
 }`);
 
-    expect(scores).toStrictEqual([[4, 1]]);
+    expect(scores).toStrictEqual([[1, 2]]);
   });
 });
 
