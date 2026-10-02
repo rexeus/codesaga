@@ -149,7 +149,7 @@ export const renderActivity = (report: Report): HTMLElement => {
       h("p", "empty", notice),
     );
   }
-  const solo = report.overview.contributors.total === 1;
+  const solo = report.overview.contributors.allTime === 1;
   return section(
     "activity",
     "Activity",

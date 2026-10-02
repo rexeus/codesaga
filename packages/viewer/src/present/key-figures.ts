@@ -144,8 +144,8 @@ const soloFoot = ({ contributors, repository, generatedAt }: Report): Foot => {
 
 const contributorsFigure = (report: Report): KeyFigure => {
   const { overview, activity } = report;
-  const { total, active90 } = overview.contributors;
-  if (total === 1) {
+  const { allTime, active90 } = overview.contributors;
+  if (allTime === 1) {
     return {
       label: "Contributors",
       value: "1",
@@ -157,7 +157,7 @@ const contributorsFigure = (report: Report): KeyFigure => {
   return {
     label: "Active contributors",
     value: formatCount(active90),
-    unit: `of ${formatCount(total)} all-time`,
+    unit: `of ${formatCount(allTime)} all-time`,
     trend: {
       values: activity.months.map(({ contributors }) => contributors),
       recent: RECENT_MONTHS,
@@ -206,7 +206,7 @@ const truckFigure = ({ knowledge, overview }: Report): KeyFigure => {
       kind: "people",
       count: Math.min(value, MAX_TRUCK_DOTS),
       caption: "must leave before half the files lose every expert",
-      solo: overview.contributors.total === 1,
+      solo: overview.contributors.allTime === 1,
     },
   };
 };

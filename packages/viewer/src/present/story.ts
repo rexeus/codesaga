@@ -28,20 +28,28 @@ const commitsPhrase = ({ window, repository, overview }: Report): Segment[] => {
   ];
 };
 
-const peoplePhrase = ({ overview }: Report): Segment[] => {
-  const { total, active90 } = overview.contributors;
+const activePhrase = (active90: number, total: number): string => {
   if (total === 1) {
+    return active90 === 0 ? "not active" : "active";
+  }
+  return active90 === 0
+    ? "none active"
+    : `${formatCount(active90)} of them active`;
+};
+
+const peoplePhrase = ({ overview }: Report): Segment[] => {
+  const { total, active90, allTime } = overview.contributors;
+  if (allTime === 1) {
     return [
       plain(" from a single author, "),
       strong(`${formatCount(overview.loc)} lines`),
       plain(` in ${formatCount(overview.files)} files.`),
     ];
   }
-  const active = active90 === 0 ? "none" : `${formatCount(active90)} of them`;
   return [
     plain(" from "),
-    strong(`${formatCount(total)} people`),
-    plain(`, ${active} active in the last 90 days.`),
+    strong(`${formatCount(total)} ${total === 1 ? "person" : "people"}`),
+    plain(`, ${activePhrase(active90, total)} in the last 90 days.`),
   ];
 };
 

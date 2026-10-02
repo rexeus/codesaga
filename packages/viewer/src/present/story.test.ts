@@ -34,7 +34,13 @@ describe("lede", () => {
 
   it("tells a solo repository by its lines instead of its people", () => {
     const solo = withOverview({
-      contributors: { total: 1, active30: 1, active90: 1, active365: 1 },
+      contributors: {
+        total: 1,
+        active30: 1,
+        active90: 1,
+        active365: 1,
+        allTime: 1,
+      },
     });
 
     expect(sentence(lede(solo))).toContain(
@@ -44,7 +50,13 @@ describe("lede", () => {
 
   it("says none when nobody was active lately", () => {
     const quiet = withOverview({
-      contributors: { total: 5, active30: 0, active90: 0, active365: 2 },
+      contributors: {
+        total: 5,
+        active30: 0,
+        active90: 0,
+        active365: 2,
+        allTime: 8,
+      },
     });
 
     expect(sentence(lede(quiet))).toContain(
@@ -95,5 +107,23 @@ describe("navItems", () => {
     expect(
       navItems({ ...sampleReport(), highlights: [] }).map(({ id }) => id),
     ).not.toContain("highlights");
+  });
+});
+
+describe("lede of a narrow window", () => {
+  it("does not call a repository solo because the window shows one author", () => {
+    const narrow = withOverview({
+      contributors: {
+        total: 1,
+        active30: 1,
+        active90: 1,
+        active365: 1,
+        allTime: 8,
+      },
+    });
+
+    expect(sentence(lede(narrow))).toContain(
+      " from *1 person*, active in the last 90 days.",
+    );
   });
 });

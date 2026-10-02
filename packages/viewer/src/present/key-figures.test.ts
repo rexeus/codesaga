@@ -60,7 +60,13 @@ describe("keyFigures", () => {
       ...report,
       overview: {
         ...report.overview,
-        contributors: { total: 1, active30: 1, active90: 1, active365: 1 },
+        contributors: {
+          total: 1,
+          active30: 1,
+          active90: 1,
+          active365: 1,
+          allTime: 1,
+        },
       },
       knowledge: {
         ...report.knowledge,
@@ -181,5 +187,32 @@ describe("the lines of code trend", () => {
 
   it("has no trend for a single week", () => {
     expect(figureOf("Lines of code", withWeeks([1])).trend).toBeNull();
+  });
+});
+
+describe("the figures of a narrow window", () => {
+  it("counts the people of the whole history, not of the window", () => {
+    const report = sampleReport();
+    const narrow: Report = {
+      ...report,
+      overview: {
+        ...report.overview,
+        contributors: {
+          total: 1,
+          active30: 1,
+          active90: 1,
+          active365: 1,
+          allTime: 8,
+        },
+      },
+    };
+
+    expect(figureOf("Active contributors", narrow)).toMatchObject({
+      value: "1",
+      unit: "of 8 all-time",
+    });
+    expect(figureOf("Truck factor", narrow).foot).toMatchObject({
+      solo: false,
+    });
   });
 });
