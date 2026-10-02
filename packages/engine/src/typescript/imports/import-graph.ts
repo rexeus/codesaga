@@ -31,6 +31,8 @@ export type ImportGraph = {
     readonly resolved: number;
     readonly external: number;
     readonly assets: number;
+    /** Calls to `import()` and `require()` with a computed argument. */
+    readonly dynamicUnresolvable: number;
     readonly unresolved: UnresolvedCounts;
   };
 };
@@ -63,6 +65,7 @@ type Tally = {
   resolved: number;
   external: number;
   assets: number;
+  dynamicUnresolvable: number;
   readonly unresolved: Map<string, number>;
 };
 
@@ -102,9 +105,11 @@ export const importGraphOf = (
     resolved: 0,
     external: 0,
     assets: 0,
+    dynamicUnresolvable: 0,
     unresolved: new Map(),
   };
   for (const file of parsed) {
+    counts.dynamicUnresolvable += file.facts.modules.dynamicUnresolvable;
     const { targets, outcomes } = requestsOf(file, indexOf, resolve);
     const from = indexOf.get(file.path);
     tally(counts, outcomes);

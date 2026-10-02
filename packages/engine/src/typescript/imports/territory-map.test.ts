@@ -75,13 +75,15 @@ describe("territoryMapOf coupling", () => {
     ]);
   });
 
-  it("finds a cycle between territories only with the type-only edge counted", () => {
-    expect(map.cycles).toStrictEqual([]);
-    expect(map.cyclesWithTypes).toBe(1);
+  it("finds territories that import each other only with the type-only edge counted", () => {
+    expect(map.mutualImports).toStrictEqual([]);
+    expect(map.totalMutualImports).toBe(0);
+    expect(map.mutualImportsWithTypes).toBe(1);
+    expect(map.totalTowardLessStable).toBe(1);
   });
 });
 
-describe("territoryMapOf cycles", () => {
+describe("territoryMapOf mutual imports", () => {
   it("lists the territories of a cycle by value edges in path order, and leaves out those that only lead into it", () => {
     const cyclic = graphOf([
       ["app/p1.ts", "core/k1.ts"],
@@ -90,16 +92,16 @@ describe("territoryMapOf cycles", () => {
       ["tool/t1.ts", "core/k1.ts"],
     ]);
 
-    const { cycles, cyclesWithTypes } = territoryMapOf(
+    const { mutualImports, mutualImportsWithTypes } = territoryMapOf(
       cyclic,
       assignmentOf(cyclic, territories),
       1,
     );
 
-    expect(cycles).toStrictEqual([
+    expect(mutualImports).toStrictEqual([
       { territories: [ref("app"), ref("core"), ref("util")] },
     ]);
-    expect(cyclesWithTypes).toBe(1);
+    expect(mutualImportsWithTypes).toBe(1);
   });
 
   it("gives no instability to a territory without edges and omits territories that hold no production file", () => {
@@ -114,6 +116,37 @@ describe("territoryMapOf cycles", () => {
     expect(listed).toStrictEqual([{ ...ref("app"), files: 2, ca: 0, ce: 0 }]);
   });
 
+  it("sees a group of territories through an other-files territory", () => {
+    const through: ReadonlyArray<VisibleTerritory> = [
+      { path: "app", kind: "folder", paths: ["app/p1.ts"] },
+      { path: "x", kind: "other", paths: ["x/o1.ts"] },
+      { path: "util", kind: "folder", paths: ["util/u1.ts"] },
+    ];
+    const chain = graphOf([
+      ["app/p1.ts", "x/o1.ts"],
+      ["x/o1.ts", "util/u1.ts"],
+      ["util/u1.ts", "app/p1.ts"],
+    ]);
+
+    const { mutualImports } = territoryMapOf(
+      chain,
+      assignmentOf(chain, through),
+      1,
+    );
+
+    expect(mutualImports).toStrictEqual([
+      {
+        territories: [
+          ref("app"),
+          { path: "util", kind: "folder" },
+          { path: "x", kind: "other" },
+        ].toSorted((left, right) => left.path.localeCompare(right.path)),
+      },
+    ]);
+  });
+});
+
+describe("territoryMapOf other files", () => {
   it("takes other files as nodes but never judges them", () => {
     const withOther: ReadonlyArray<VisibleTerritory> = [
       { path: "x", kind: "other", paths: ["x/o1.ts", "x/o2.ts"] },
@@ -131,6 +164,13 @@ describe("territoryMapOf cycles", () => {
 
     expect(result.edges).toHaveLength(2);
     expect(result.towardLessStable).toStrictEqual([]);
-    expect(result.cycles).toStrictEqual([]);
+    expect(result.mutualImports).toStrictEqual([
+      {
+        territories: [
+          { path: "app", kind: "folder" },
+          { path: "x", kind: "other" },
+        ],
+      },
+    ]);
   });
 });

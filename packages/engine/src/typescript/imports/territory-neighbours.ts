@@ -1,18 +1,10 @@
-// Owns what the import edges say of any one territory, whatever its detail: the territories of the map it imports, the ones that import it, and whether a file cycle leaves it.
+// Owns what the import edges say of any one territory, whatever its detail: how many territories of the map it imports, how many import it, and whether a file cycle leaves it.
 // A territory of the map is judged against the others; a territory above or below the map's detail is judged against the map's territories it shares no file with.
 
-import type {
-  TerritoryImports,
-  TerritoryRef,
-} from "../../report/typescript-imports.js";
+import type { TerritoryImports } from "../../report/typescript-imports.js";
 import type { FileCycles } from "./file-cycles.js";
 import type { ImportGraph } from "./import-graph.js";
-import { refOf } from "./territory-assignment.js";
 import type { Assignment } from "./territory-assignment.js";
-
-const byRef = (left: TerritoryRef, right: TerritoryRef): number =>
-  Number(left.path > right.path) - Number(left.path < right.path) ||
-  Number(left.kind > right.kind) - Number(left.kind < right.kind);
 
 /** For each node, the territories of the production files it imports and the ones that import it. */
 const neighboursOf = (
@@ -73,13 +65,6 @@ export const territoryImportsOf = (
 ): ((paths: ReadonlyArray<string>) => TerritoryImports | undefined) => {
   const { imports, importedBy } = neighboursOf(graph, assignment);
   const membership = cycleMembership(graph, cycles);
-  const refsOf = (
-    territories: ReadonlySet<number>,
-  ): ReadonlyArray<TerritoryRef> =>
-    [...territories]
-      .flatMap((index) => assignment.territories[index] ?? [])
-      .map((territory) => refOf(territory))
-      .toSorted(byRef);
   return (paths) => {
     const nodes = paths.flatMap((path) => graph.indexOf.get(path) ?? []);
     if (nodes.length === 0) {
@@ -100,8 +85,8 @@ export const territoryImportsOf = (
       }
     }
     return {
-      imports: refsOf(reached(imports)),
-      importedBy: refsOf(reached(importedBy)),
+      importsCount: reached(imports).size,
+      importedByCount: reached(importedBy).size,
       inCycle: [...inside].some(
         ([id, count]) => count < (membership.sizes[id] ?? 0),
       ),

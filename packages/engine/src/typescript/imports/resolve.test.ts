@@ -8,7 +8,7 @@ import { aliasesOf } from "./ts-aliases.js";
 
 const manifest = (
   path: string,
-  name: string,
+  name: string | null,
   entry: Partial<PackageManifest["entry"]> = {},
 ): PackageManifest => ({
   path,
@@ -18,7 +18,7 @@ const manifest = (
   devDependencies: [],
   peerDependencies: [],
   typescript: null,
-  entry: { exports: undefined, fields: [], ...entry },
+  entry: { exports: undefined, imports: undefined, fields: [], ...entry },
 });
 
 const file = (path: string): Resolution => ({ kind: "file", path });
@@ -73,6 +73,25 @@ describe("relative specifiers", () => {
       kind: "asset",
     });
     expect(resolve("src/a.ts", "./data.json")).toStrictEqual({ kind: "asset" });
+    for (const extension of [
+      "vue",
+      "svelte",
+      "astro",
+      "mdx",
+      "csv",
+      "tsv",
+      "yaml",
+      "yml",
+      "toml",
+      "txt",
+      "wasm",
+      "graphql",
+      "gql",
+    ]) {
+      expect(resolve("src/a.ts", `./view.${extension}`)).toStrictEqual({
+        kind: "asset",
+      });
+    }
   });
 });
 
@@ -189,7 +208,7 @@ describe("paths and baseUrl", () => {
 });
 
 describe("specifiers that leave the repository", () => {
-  it("counts built-ins and other schemes as outside, and # imports and absolute paths as unresolved", () => {
+  it("counts built-ins and other schemes as outside, and a # import without a manifest and an absolute path as unresolved", () => {
     const resolve = resolverOver(["src/main.ts"]);
 
     expect(resolve("src/main.ts", "node:fs")).toStrictEqual(EXTERNAL);
@@ -197,5 +216,92 @@ describe("specifiers that leave the repository", () => {
     expect(resolve("src/main.ts", "npm:chalk")).toStrictEqual(EXTERNAL);
     expect(resolve("src/main.ts", "#internal/x")).toStrictEqual(UNRESOLVED);
     expect(resolve("src/main.ts", "/src/main.ts")).toStrictEqual(UNRESOLVED);
+  });
+});
+
+describe("# imports", () => {
+  const resolve = resolverOver(
+    ["pkg/src/lib/a.ts", "pkg/src/main.ts", "pkg/src/config.ts", "other/x.ts"],
+    {
+      manifests: [
+        manifest("pkg/package.json", "pkg", {
+          imports: {
+            "#lib/*": "./src/lib/*.js",
+            "#config": { node: "./nope.js", default: "./src/config.ts" },
+            "#dep": "some-package",
+            "#gone": "./src/gone.ts",
+          },
+        }),
+      ],
+    },
+  );
+
+  it("resolves an exact key and a star pattern through the nearest manifest", () => {
+    expect(resolve("pkg/src/main.ts", "#config")).toStrictEqual(
+      file("pkg/src/config.ts"),
+    );
+    expect(resolve("pkg/src/main.ts", "#lib/a")).toStrictEqual(
+      file("pkg/src/lib/a.ts"),
+    );
+  });
+
+  it("takes a key that maps to a package for a package outside, and one that maps to nothing found for unresolved", () => {
+    expect(resolve("pkg/src/main.ts", "#dep")).toStrictEqual(EXTERNAL);
+    expect(resolve("pkg/src/main.ts", "#gone")).toStrictEqual(UNRESOLVED);
+    expect(resolve("pkg/src/main.ts", "#unknown")).toStrictEqual(UNRESOLVED);
+  });
+
+  it("does not read the manifest of a package the file does not lie in", () => {
+    expect(resolve("other/x.ts", "#config")).toStrictEqual(UNRESOLVED);
+  });
+});
+
+describe("a directory with its own manifest", () => {
+  const resolve = resolverOver(
+    [
+      "src/vendor/lib/main.ts",
+      "src/vendor/lib/index.ts",
+      "src/app.ts",
+      "src/plain/index.ts",
+    ],
+    {
+      manifests: [
+        manifest("src/vendor/lib/package.json", null, {
+          fields: ["./main.js"],
+        }),
+      ],
+    },
+  );
+
+  it("resolves through its main field before its index file", () => {
+    expect(resolve("src/app.ts", "./vendor/lib")).toStrictEqual(
+      file("src/vendor/lib/main.ts"),
+    );
+  });
+
+  it("still resolves a directory without a manifest to its index", () => {
+    expect(resolve("src/app.ts", "./plain")).toStrictEqual(
+      file("src/plain/index.ts"),
+    );
+  });
+});
+
+describe("workspace packages sharing a name", () => {
+  it("resolves to the manifest with the shortest path, whatever the order", () => {
+    const manifests = [
+      manifest("deep/er/copy/package.json", "dup", { fields: ["./a.js"] }),
+      manifest("pkg/package.json", "dup", { fields: ["./b.js"] }),
+    ];
+    const files = ["deep/er/copy/a.ts", "pkg/b.ts", "app/main.ts"];
+
+    expect(
+      resolverOver(files, { manifests })("app/main.ts", "dup"),
+    ).toStrictEqual(file("pkg/b.ts"));
+    expect(
+      resolverOver(files, { manifests: manifests.toReversed() })(
+        "app/main.ts",
+        "dup",
+      ),
+    ).toStrictEqual(file("pkg/b.ts"));
   });
 });

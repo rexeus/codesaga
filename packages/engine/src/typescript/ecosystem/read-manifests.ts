@@ -25,9 +25,10 @@ export type PackageManifest = {
   readonly entry: PackageEntry;
 };
 
-/** The entry points of a package as written: the `exports` field, and the strings of `types`, `typings`, `module` and `main` that are present, in that order. */
+/** The entry points of a package as written: the `exports` and `imports` fields, and the strings of `types`, `typings`, `module` and `main` that are present, in that order. */
 type PackageEntry = {
   readonly exports: unknown;
+  readonly imports: unknown;
   readonly fields: ReadonlyArray<string>;
 };
 
@@ -50,6 +51,7 @@ const ENTRY_FIELDS = ["types", "typings", "module", "main"] as const;
 
 const entryOf = (json: object): PackageEntry => ({
   exports: field(json, "exports"),
+  imports: field(json, "imports"),
   fields: ENTRY_FIELDS.flatMap((key) => {
     const value = field(json, key);
     return typeof value === "string" ? [value] : [];

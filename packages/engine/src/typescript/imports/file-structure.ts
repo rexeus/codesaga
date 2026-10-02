@@ -104,6 +104,7 @@ export const fileStructureOf = (
     edges: edgesOf(graph),
     external: graph.requests.external,
     assets: graph.requests.assets,
+    dynamicUnresolvable: graph.requests.dynamicUnresolvable,
     unresolved: unresolvedOf(graph),
     cycles: cyclesFigures(graph, cycles, spanOf),
     fanIn: {

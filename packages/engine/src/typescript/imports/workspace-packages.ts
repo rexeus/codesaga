@@ -1,61 +1,15 @@
 // Owns finding the source file a workspace package's name, with or without a subpath, stands for.
-// A manifest points at build output (`./dist/index.js`) that a checkout does not hold, so every target is also tried where such a package keeps its source (`src`, or the package directory itself); a name that maps to nothing found stays unresolved.
+// A name that maps to nothing found stays unresolved; the manifest's targets are read by `sourceOfTargets`.
 
 import type { PackageManifest } from "../ecosystem/read-manifests.js";
-import { directoryOf, joinPosix } from "../tsconfig/posix-path.js";
-import { exportTargets } from "./exports-map.js";
-import { sourceFileOf, withoutScriptExtension } from "./source-file.js";
-
-const OUTPUT_DIRECTORIES: ReadonlySet<string> = new Set([
-  "dist",
-  "build",
-  "lib",
-  "out",
-  "esm",
-  "cjs",
-  "es",
-  "types",
-]);
-
-/** `path` below `directory`; a path that climbs out of the package is dropped. */
-const below = (directory: string, path: string): string | undefined => {
-  const joined = joinPosix(directory, path);
-  return directory === "" || joined.startsWith(`${directory}/`)
-    ? joined
-    : undefined;
-};
-
-/** The places a package-relative target may stand for: as written, with its output directory replaced by `src`, and with it removed, for a package whose sources lie beside its output. */
-const placesOf = (directory: string, target: string): ReadonlyArray<string> => {
-  const relative = withoutScriptExtension(target.replace(/^\.\//u, ""));
-  const [first = "", ...rest] = relative.split("/");
-  const places = [relative];
-  if (rest.length > 0 && OUTPUT_DIRECTORIES.has(first)) {
-    places.push(["src", ...rest].join("/"), rest.join("/"));
-  }
-  return places.flatMap((place) => below(directory, place) ?? []);
-};
+import { directoryOf } from "../tsconfig/posix-path.js";
+import { manifestTargets } from "./manifest-targets.js";
+import { sourceOfTargets } from "./package-targets.js";
 
 /** What a workspace package is: where its manifest lies and what the manifest says. */
 type Package = {
   readonly directory: string;
   readonly entry: PackageManifest["entry"];
-};
-
-const withSource = (
-  directory: string,
-  targets: ReadonlyArray<string>,
-  has: (path: string) => boolean,
-): string | undefined => {
-  for (const target of targets) {
-    for (const place of placesOf(directory, target)) {
-      const found = sourceFileOf(place, has);
-      if (found !== undefined) {
-        return found;
-      }
-    }
-  }
-  return undefined;
 };
 
 const entryOf = (
@@ -65,18 +19,40 @@ const entryOf = (
 ): string | undefined => {
   if (entry.exports !== undefined) {
     const key = subpath === "" ? "." : `./${subpath}`;
-    const targets = exportTargets(entry.exports, key);
-    const mapped = withSource(directory, targets, has);
+    const targets = manifestTargets(entry.exports, key);
+    const mapped = sourceOfTargets(directory, targets, has);
     return (
       mapped ??
       (subpath === "" && targets.length > 0
-        ? withSource(directory, ["./src/index"], has)
+        ? sourceOfTargets(directory, ["./src/index"], has)
         : undefined)
     );
   }
   return subpath === ""
-    ? withSource(directory, [...entry.fields, "./src/index", "./index"], has)
-    : withSource(directory, [`./${subpath}`, `./src/${subpath}`], has);
+    ? sourceOfTargets(
+        directory,
+        [...entry.fields, "./src/index", "./index"],
+        has,
+      )
+    : sourceOfTargets(directory, [`./${subpath}`, `./src/${subpath}`], has);
+};
+
+/** The packages by name; where two manifests share a name the one with the shortest path wins, then the first in path order. */
+const packagesOf = (
+  manifests: ReadonlyArray<PackageManifest>,
+): ReadonlyMap<string, Package> => {
+  const packages = new Map<string, Package>();
+  const ordered = manifests.toSorted(
+    (left, right) =>
+      left.path.length - right.path.length ||
+      Number(left.path > right.path) - Number(left.path < right.path),
+  );
+  for (const { name, path, entry } of ordered) {
+    if (name !== null && !packages.has(name)) {
+      packages.set(name, { directory: directoryOf(path), entry });
+    }
+  }
+  return packages;
 };
 
 /**
@@ -93,13 +69,7 @@ export const workspaceResolver = (
   readonly isWorkspace: (name: string) => boolean;
   readonly resolve: (name: string, subpath: string) => string | undefined;
 } => {
-  const packages = new Map<string, Package>(
-    manifests.flatMap(({ name, path, entry }) =>
-      name === null
-        ? []
-        : [[name, { directory: directoryOf(path), entry }] as const],
-    ),
-  );
+  const packages = packagesOf(manifests);
   return {
     isWorkspace: (name) => packages.has(name),
     resolve: (name, subpath) => {

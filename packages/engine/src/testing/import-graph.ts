@@ -23,6 +23,12 @@ export const graphOf = (
       to: indexOf.get(to) ?? -1,
       isType: kind === "type",
     })),
-    requests: { resolved: 0, external: 0, assets: 0, unresolved: new Map() },
+    requests: {
+      resolved: 0,
+      external: 0,
+      assets: 0,
+      dynamicUnresolvable: 0,
+      unresolved: new Map(),
+    },
   };
 };

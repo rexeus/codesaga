@@ -105,13 +105,13 @@ layer(analyzeServices)("analyze the unresolved specifiers", (it) => {
         assert.deepStrictEqual(
           knowledge.territories.territories.map(({ path, typescript }) => [
             path,
-            typescript?.imports,
-            typescript?.importedBy,
+            typescript?.importsCount,
+            typescript?.importedByCount,
             typescript?.inCycle,
           ]),
           [
-            ["packages/a", [], [b], false],
-            ["packages/b", [a], [], false],
+            ["packages/a", 0, 1, false],
+            ["packages/b", 1, 0, false],
           ],
         );
       }),

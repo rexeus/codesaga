@@ -94,19 +94,15 @@ const instabilityOf = ({ ca, ce }: Member): number | undefined =>
 
 const isModule = ({ ref }: Member): boolean => ref.kind !== "other";
 
-/** The groups of territories that reach each other over `pairs`, by member positions; `other` territories are no module and stay out. */
-const cyclesBetween = (
+/** The groups of territories that reach each other over `pairs`, by member positions; `other` territories are nodes like the rest. */
+const groupsOf = (
   members: ReadonlyArray<Member>,
   pairs: ReadonlyArray<Pair>,
   includesTypes: boolean,
 ): ReadonlyArray<ReadonlyArray<number>> => {
   const successors = members.map((): Array<number> => []);
   for (const { from, to, files, typeOnlyFiles } of pairs) {
-    if (
-      isModule(from) &&
-      isModule(to) &&
-      (includesTypes || files > typeOnlyFiles)
-    ) {
+    if (includesTypes || files > typeOnlyFiles) {
       successors[from.index]?.push(to.index);
     }
   }
@@ -178,11 +174,22 @@ const towardLessStableEntry = (
   toInstability: ratioOfCoupling(pair.to),
 });
 
+const mutualImportsOf = (
+  members: ReadonlyArray<Member>,
+  pairs: ReadonlyArray<Pair>,
+): Imports["territories"]["mutualImports"] =>
+  groupsOf(members, pairs, false)
+    .map((group) =>
+      group.flatMap((index) => members[index]?.ref ?? []).toSorted(byRef),
+    )
+    .toSorted((left, right) => cycleKey(left).localeCompare(cycleKey(right)))
+    .map((territories) => ({ territories }));
+
 /**
  * The map over the territories of `assignment` at `detail`, from the edges
  * between production files: each territory with its coupling, the territory
- * pairs, the pairs toward a less stable territory and the cycles between
- * territories.
+ * pairs, the pairs toward a less stable territory and the groups of
+ * territories that import each other.
  */
 export const territoryMapOf = (
   graph: ImportGraph,
@@ -192,6 +199,10 @@ export const territoryMapOf = (
   const { members, of } = membersOf(graph, assignment);
   const shown = members.filter((member) => member.files > 0);
   const pairs = pairsOf(graph, of).toSorted(byFilesThenRefs);
+  const towardLessStable = pairs
+    .filter((pair) => pointsToLessStable(pair))
+    .map((pair) => towardLessStableEntry(pair));
+  const mutualImports = mutualImportsOf(members, pairs);
   return {
     detail,
     totalTerritories: shown.length,
@@ -200,15 +211,10 @@ export const territoryMapOf = (
       .map((member) => territoryEntry(member)),
     totalEdges: pairs.length,
     edges: pairs.map((pair) => edgeOf(pair)),
-    towardLessStable: pairs
-      .filter((pair) => pointsToLessStable(pair))
-      .map((pair) => towardLessStableEntry(pair)),
-    cycles: cyclesBetween(members, pairs, false)
-      .map((component) =>
-        component.flatMap((index) => members[index]?.ref ?? []).toSorted(byRef),
-      )
-      .toSorted((left, right) => cycleKey(left).localeCompare(cycleKey(right)))
-      .map((cycle) => ({ territories: cycle })),
-    cyclesWithTypes: cyclesBetween(members, pairs, true).length,
+    totalTowardLessStable: towardLessStable.length,
+    towardLessStable,
+    totalMutualImports: mutualImports.length,
+    mutualImports,
+    mutualImportsWithTypes: groupsOf(members, pairs, true).length,
   };
 };

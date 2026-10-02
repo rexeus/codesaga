@@ -1,4 +1,4 @@
-// Owns reading a package manifest's `exports` field for one subpath, with the conditions the import graph follows.
+// Owns reading a package manifest's `exports` or `imports` field for one key, with the conditions the import graph follows.
 // Only `types`, `import` and `default` are followed, in the order the manifest lists them; every other condition is skipped and never guessed at.
 
 const FOLLOWED_CONDITIONS: ReadonlySet<string> = new Set([
@@ -61,12 +61,16 @@ const patternTargets = (
   );
 };
 
+const isKey = (candidate: string): boolean =>
+  candidate.startsWith(".") || candidate.startsWith("#");
+
 /**
- * The files, relative to the package directory as written (`./dist/a.js`),
- * that `exports` maps `key` (`.` or `./sub`) to; empty when it maps it to
- * nothing. A conditions-only `exports` is the target of `.`.
+ * The targets, relative to the package directory as written (`./dist/a.js`),
+ * that the field maps `key` (`.`, `./sub` or an `imports` key such as `#a`)
+ * to; a target of `imports` may also be a package name. Empty when it maps
+ * the key to nothing. A conditions-only `exports` is the target of `.`.
  */
-export const exportTargets = (
+export const manifestTargets = (
   exports: unknown,
   key: string,
 ): ReadonlyArray<string> => {
@@ -76,7 +80,7 @@ export const exportTargets = (
   if (!isRecord(exports)) {
     return [];
   }
-  if (!Object.keys(exports).some((candidate) => candidate.startsWith("."))) {
+  if (!Object.keys(exports).some((candidate) => isKey(candidate))) {
     return key === "." ? targetsOf(exports) : [];
   }
   const exact = field(exports, key);

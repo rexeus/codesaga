@@ -37,27 +37,32 @@ export const withoutScriptExtension = (path: string): string => {
   return bare.endsWith(".d") ? bare.slice(0, -2) : bare;
 };
 
-/** The files `base` may mean, best first: as written, with its extension mapped to the source's, then with an extension appended, then as a directory. */
-const candidatesOf = (base: string): ReadonlyArray<string> => {
-  const mapped = (TYPESCRIPT_FOR.get(extensionOf(base)) ?? []).map(
-    (extension) =>
-      `${base.slice(0, base.length - extensionOf(base).length)}${extension}`,
+/** The files `base` may mean as a file, best first: as written, with its extension mapped to the source's, then with an extension appended. */
+const fileCandidates = (base: string): ReadonlyArray<string> => {
+  const extension = extensionOf(base);
+  const mapped = (TYPESCRIPT_FOR.get(extension) ?? []).map(
+    (mappedExtension) =>
+      `${base.slice(0, base.length - extension.length)}${mappedExtension}`,
   );
+  return [base, ...mapped, ...APPENDED.map((appended) => `${base}${appended}`)];
+};
+
+const indexCandidates = (base: string): ReadonlyArray<string> => {
   const directory = base === "" ? "index" : `${base}/index`;
-  return [
-    base,
-    ...mapped,
-    ...APPENDED.map((extension) => `${base}${extension}`),
-    ...APPENDED.map((extension) => `${directory}${extension}`),
-  ];
+  return APPENDED.map((extension) => `${directory}${extension}`);
 };
 
 /**
  * The first of the files `base` may mean that `has` knows: `./a.js` is `a.ts`
- * (or `a.tsx`, `a.d.ts`) when only that exists, `./a` is `a.ts`, `a/index.ts`
- * and so on. Undefined when none exists.
+ * (or `a.tsx`, `a.d.ts`) when only that exists, `./a` is `a.ts`, and a
+ * directory is the file its own `package.json` names, which `entryOf` finds
+ * from the directory, else its `index` file. Undefined when none exists.
  */
 export const sourceFileOf = (
   base: string,
   has: (path: string) => boolean,
-): string | undefined => candidatesOf(base).find((candidate) => has(candidate));
+  entryOf?: (directory: string) => string | undefined,
+): string | undefined =>
+  fileCandidates(base).find((candidate) => has(candidate)) ??
+  entryOf?.(base) ??
+  indexCandidates(base).find((candidate) => has(candidate));

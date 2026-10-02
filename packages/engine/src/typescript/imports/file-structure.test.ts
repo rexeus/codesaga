@@ -26,6 +26,7 @@ const graph = {
     resolved: 18,
     external: 4,
     assets: 1,
+    dynamicUnresolvable: 3,
     unresolved: new Map([
       ["./generated", 2],
       ["@acme/missing", 5],
@@ -90,5 +91,6 @@ describe("fileStructureOf figures", () => {
     });
     expect(structure.external).toBe(4);
     expect(structure.assets).toBe(1);
+    expect(structure.dynamicUnresolvable).toBe(3);
   });
 });

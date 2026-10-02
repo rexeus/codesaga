@@ -5,36 +5,15 @@ export const DEFAULT_LIMIT = 25;
 
 type Territory = Report["knowledge"]["territories"]["territories"][number];
 
-/** The territory's `typescript` with the territories it imports and is imported by cut to the first `limit`. */
-const limitTerritoryImports = (
-  typescript: NonNullable<Territory["typescript"]>,
-  limit: number,
-): NonNullable<Territory["typescript"]> =>
-  Object.assign({}, typescript, {
-    ...(typescript.imports === undefined
-      ? {}
-      : { imports: typescript.imports.slice(0, limit) }),
-    ...(typescript.importedBy === undefined
-      ? {}
-      : { importedBy: typescript.importedBy.slice(0, limit) }),
-  });
-
 /** The first `limit` territories, and below each the first `limit` of its own, recursively. */
 const limitTerritories = (
   territories: ReadonlyArray<Territory>,
   limit: number,
 ): ReadonlyArray<Territory> =>
   territories.slice(0, limit).map((territory) =>
-    Object.assign(
-      {},
-      territory,
-      {
-        territories: limitTerritories(territory.territories, limit),
-      },
-      territory.typescript === undefined
-        ? {}
-        : { typescript: limitTerritoryImports(territory.typescript, limit) },
-    ),
+    Object.assign({}, territory, {
+      territories: limitTerritories(territory.territories, limit),
+    }),
   );
 
 type TypeScriptDeepDive = NonNullable<
@@ -88,7 +67,7 @@ const limitTypeScript = (
   };
 };
 
-/** The import map's territories, edges, edges toward less stable territories and territory cycles cut to the first `limit`; the totals keep their counts. */
+/** The import map's territories, edges, edges toward less stable territories and groups of territories that import each other cut to the first `limit`; `totalTerritories`, `totalEdges`, `totalTowardLessStable` and `totalMutualImports` keep their counts. */
 const limitImports = (
   typescript: TypeScriptDeepDive,
   limit: number,
@@ -108,7 +87,7 @@ const limitImports = (
               0,
               limit,
             ),
-            cycles: imports.territories.cycles.slice(0, limit),
+            mutualImports: imports.territories.mutualImports.slice(0, limit),
           },
         },
       };

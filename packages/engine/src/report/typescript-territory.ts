@@ -2,7 +2,6 @@
 // The repository's own figures live in `deepDives.typescript`; these let a card be held against them.
 import { Schema } from "effect";
 
-import { TerritoryRef } from "./typescript-imports.js";
 import { TerritoryStrict } from "./typescript-strictness.js";
 
 /**
@@ -46,17 +45,18 @@ export const TerritoryTypeScript = Schema.Struct({
   /** The highest cognitive complexity of a production function of the territory; absent with `over15Share`. */
   maxComplexity: Schema.optionalKey(Schema.Natural),
   /**
-   * The territories of the import map (`deepDives.typescript.imports.territories`)
-   * that this territory's production files import, leaving out any territory
-   * that shares a file with it. Absent without the import map.
+   * How many territories of the import map
+   * (`deepDives.typescript.imports.territories`) this territory's production
+   * files import, leaving out any territory that shares a file with it; the
+   * map's `edges` say which. Absent without the import map.
    */
-  imports: Schema.optionalKey(Schema.Array(TerritoryRef)),
-  /** The territories of the import map whose production files import this territory's, on the same terms as `imports`. */
-  importedBy: Schema.optionalKey(Schema.Array(TerritoryRef)),
+  importsCount: Schema.optionalKey(Schema.Natural),
+  /** How many territories of the import map import this territory's production files, on the same terms as `importsCount`. */
+  importedByCount: Schema.optionalKey(Schema.Natural),
   /**
    * A cycle of production files by value imports runs through the territory
-   * and out of it: it needs at least one file outside. A cycle between
-   * territories of the map is listed in the map and can exist without one.
+   * and out of it: it needs at least one file outside. Territories that import
+   * each other without a file cycle are in the map's `mutualImports`.
    */
   inCycle: Schema.optionalKey(Schema.Boolean),
 });

@@ -35,7 +35,7 @@ const Cycles = Schema.Struct({
   count: Count,
   /** Files in the largest; 0 without a cycle. */
   largest: Count,
-  /** The three largest, largest first. */
+  /** The three largest, largest first. `files` lists the members sorted by path; it is not the route of the cycle. */
   top: Schema.Array(Cycle).check(Schema.isMaxLength(3)),
   /** The cycles, and the files in the largest, when type-only edges count too. */
   withTypes: Schema.Struct({ count: Count, largest: Count }),
@@ -70,6 +70,8 @@ const FileImports = Schema.Struct({
   external: Count,
   /** Specifiers that name a file that is not code, such as a style sheet, an image or JSON. */
   assets: Count,
+  /** `import()` and `require()` calls whose argument is computed, so no specifier is known. */
+  dynamicUnresolvable: Count,
   unresolved: Unresolved,
   cycles: Cycles,
   /** Files that import each file: the median over production files, and the five with the most, most first. */
@@ -119,27 +121,38 @@ const TowardLessStable = Schema.Struct({
  * Which territory imports which, at the detail the report opens at
  * (`knowledge.territories.detail`), with test files left out. Counts are in
  * import edges between files, not in files. `other` territories take part as
- * nodes and edges but are not judged: they appear in neither
- * `towardLessStable` nor `cycles`.
+ * nodes and edges, and so in `mutualImports`, but are not judged: they never
+ * appear in `towardLessStable`.
  */
 const TerritoryMap = Schema.Struct({
   detail: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-  /** The territories before the output limit cut `territories`. */
+  /** The territories that hold a production file, before the output limit cut `territories`. */
   totalTerritories: Count,
-  /** Every territory of that detail, those with the most edges first. */
+  /** Those territories, the ones with the most edges first. */
   territories: Schema.Array(MapTerritory),
   /** The edges before the output limit cut `edges`. */
   totalEdges: Count,
   /** Territory pairs with their file counts, the most files first. */
   edges: Schema.Array(MapEdge),
+  /** The edges listed in `towardLessStable` before the output limit cut it. */
+  totalTowardLessStable: Count,
   /** Edges toward a territory whose instability is at least `thresholds.typescript.imports.instabilityGap` higher, between territories that each have at least `thresholds.typescript.imports.minEdges` edges. */
   towardLessStable: Schema.Array(TowardLessStable),
-  /** Groups of territories that all reach each other by value edges, in path order. */
-  cycles: Schema.Array(
+  /** The groups in `mutualImports` before the output limit cut it. */
+  totalMutualImports: Count,
+  /**
+   * Groups of territories that import each other, directly or through others,
+   * by value edges, each territory in at most one group, in path order. This
+   * is not a file cycle: two territories import each other when each has a
+   * file that imports a file of the other, however different those files
+   * are. A file cycle is `files.cycles`, and `typescript.inCycle` of a
+   * territory says that one runs through it.
+   */
+  mutualImports: Schema.Array(
     Schema.Struct({ territories: Schema.Array(TerritoryRef) }),
   ),
-  /** Cycles between territories when type-only edges count too. */
-  cyclesWithTypes: Count,
+  /** Groups of territories that import each other when type-only edges count too. */
+  mutualImportsWithTypes: Count,
 });
 
 /** How the code depends on itself. Absent when no file was parsed. */
@@ -151,7 +164,7 @@ export type Imports = typeof Imports.Type;
 
 /** What the import edges say of one territory; the territory's `typescript` carries these fields. */
 export type TerritoryImports = {
-  readonly imports: ReadonlyArray<TerritoryRef>;
-  readonly importedBy: ReadonlyArray<TerritoryRef>;
+  readonly importsCount: number;
+  readonly importedByCount: number;
   readonly inCycle: boolean;
 };

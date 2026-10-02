@@ -4,6 +4,8 @@
 import type { PackageManifest } from "../ecosystem/read-manifests.js";
 import { splitPackageSpecifier } from "../tsconfig/package-entry.js";
 import { directoryOf, joinPosix } from "../tsconfig/posix-path.js";
+import { packageImportsResolver } from "./package-imports.js";
+import { directoryEntries } from "./package-targets.js";
 import { sourceFileOf } from "./source-file.js";
 import { matchAlias } from "./ts-aliases.js";
 import type { PathAliases } from "./ts-aliases.js";
@@ -56,7 +58,6 @@ const ASSET_EXTENSIONS: ReadonlySet<string> = new Set([
   "mp4",
   "webm",
   "wasm",
-  "txt",
   "md",
   "mdx",
   "html",
@@ -64,6 +65,12 @@ const ASSET_EXTENSIONS: ReadonlySet<string> = new Set([
   "gql",
   "sql",
   "node",
+  "vue",
+  "svelte",
+  "astro",
+  "csv",
+  "tsv",
+  "txt",
 ]);
 
 const PROTOCOL = /^[a-z][a-z\d+.-]*:/iu;
@@ -82,13 +89,50 @@ const FILE = (path: string): Resolution => ({ kind: "file", path });
 const EXTERNAL: Resolution = { kind: "external" };
 const UNRESOLVED: Resolution = { kind: "unresolved" };
 
+/** What resolving a bare specifier reads. */
+type Bare = {
+  readonly has: (path: string) => boolean;
+  readonly workspace: ReturnType<typeof workspaceResolver>;
+  readonly aliasesFor: ResolverInputs["aliasesFor"];
+};
+
+const resolveBare = (
+  { has, workspace, aliasesFor }: Bare,
+  from: string,
+  specifier: string,
+): Resolution => {
+  const aliases = aliasesFor(from);
+  const alias =
+    aliases === undefined ? undefined : matchAlias(aliases, specifier);
+  const aliased = alias?.locations
+    .map((location) => sourceFileOf(location, has))
+    .find((found) => found !== undefined);
+  if (aliased !== undefined) {
+    return FILE(aliased);
+  }
+  const inBase =
+    aliases?.baseUrl === undefined
+      ? undefined
+      : sourceFileOf(joinPosix(aliases.baseUrl, specifier), has);
+  if (inBase !== undefined) {
+    return FILE(inBase);
+  }
+  const { name, subpath } = splitPackageSpecifier(specifier);
+  if (workspace.isWorkspace(name)) {
+    const entry = workspace.resolve(name, subpath);
+    return entry === undefined ? UNRESOLVED : FILE(entry);
+  }
+  return alias?.isSpecific === true ? UNRESOLVED : EXTERNAL;
+};
+
 /**
  * A function that resolves the specifier `specifier` of the file at `from`.
  * A relative specifier is resolved against the file's directory; a bare one
  * through the governing config's `paths`, then its `baseUrl`, then the
- * workspace packages. A `node:`, URL or other scheme specifier is external, a
- * `#` import of a manifest and an absolute path are unresolved, and a query or
- * fragment (`?raw`) is ignored.
+ * workspace packages. A `#` specifier is read through the `imports` field of
+ * the nearest `package.json`. A `node:`, URL or other scheme specifier is
+ * external, an absolute path is unresolved, and a query or fragment (`?raw`)
+ * is ignored.
  */
 export const createResolver = ({
   files,
@@ -96,35 +140,13 @@ export const createResolver = ({
   aliasesFor,
 }: ResolverInputs): ((from: string, specifier: string) => Resolution) => {
   const has = (path: string): boolean => files.has(path);
-  const workspace = workspaceResolver(manifests, has);
-  const firstFound = (locations: ReadonlyArray<string>): string | undefined =>
-    locations
-      .map((location) => sourceFileOf(location, has))
-      .find((found) => found !== undefined);
-
-  const resolveBare = (from: string, specifier: string): Resolution => {
-    const aliases = aliasesFor(from);
-    const alias =
-      aliases === undefined ? undefined : matchAlias(aliases, specifier);
-    const aliased =
-      alias === undefined ? undefined : firstFound(alias.locations);
-    if (aliased !== undefined) {
-      return FILE(aliased);
-    }
-    const inBase =
-      aliases?.baseUrl === undefined
-        ? undefined
-        : sourceFileOf(joinPosix(aliases.baseUrl, specifier), has);
-    if (inBase !== undefined) {
-      return FILE(inBase);
-    }
-    const { name, subpath } = splitPackageSpecifier(specifier);
-    if (workspace.isWorkspace(name)) {
-      const entry = workspace.resolve(name, subpath);
-      return entry === undefined ? UNRESOLVED : FILE(entry);
-    }
-    return alias?.isSpecific === true ? UNRESOLVED : EXTERNAL;
+  const bare: Bare = {
+    has,
+    workspace: workspaceResolver(manifests, has),
+    aliasesFor,
   };
+  const packageImports = packageImportsResolver(manifests, has);
+  const entryOf = directoryEntries(manifests, has);
 
   return (from, raw) => {
     const specifier = raw.startsWith("#") ? raw : raw.replace(QUERY, "");
@@ -132,15 +154,22 @@ export const createResolver = ({
       return EXTERNAL;
     }
     if (isRelative(specifier)) {
-      const found = sourceFileOf(joinPosix(directoryOf(from), specifier), has);
+      const found = sourceFileOf(
+        joinPosix(directoryOf(from), specifier),
+        has,
+        entryOf,
+      );
       if (found !== undefined) {
         return FILE(found);
       }
       return isAsset(specifier) ? { kind: "asset" } : UNRESOLVED;
     }
-    if (specifier.startsWith("/") || specifier.startsWith("#")) {
+    if (specifier.startsWith("#")) {
+      return packageImports(from, specifier);
+    }
+    if (specifier.startsWith("/")) {
       return UNRESOLVED;
     }
-    return resolveBare(from, specifier);
+    return resolveBare(bare, from, specifier);
   };
 };

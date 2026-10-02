@@ -1,3 +1,4 @@
+import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
 import { samplePullRequests } from "../testing/sample-pull-requests.js";
@@ -101,6 +102,40 @@ const withFocusedFiles = () => {
   };
 };
 
+/** The sample with three entries in each list of its import map that `--limit` cuts. */
+const crowdedReport = (): Report => {
+  const report = sampleReport();
+  const typescript = report.deepDives?.typescript;
+  const map = typescript?.imports?.territories;
+  const entry = map?.towardLessStable[0];
+  if (
+    typescript?.imports === undefined ||
+    map === undefined ||
+    entry === undefined
+  ) {
+    throw new Error("the sample has an import map");
+  }
+  const group = { territories: [entry.from] };
+  return {
+    ...report,
+    deepDives: {
+      typescript: {
+        ...typescript,
+        imports: {
+          ...typescript.imports,
+          territories: {
+            ...map,
+            totalTowardLessStable: 3,
+            towardLessStable: [entry, entry, entry],
+            totalMutualImports: 3,
+            mutualImports: [group, group, group],
+          },
+        },
+      },
+    },
+  };
+};
+
 describe("limitReport deep dives", () => {
   it("cuts the tsconfig postures to the limit and keeps their number", () => {
     const report = sampleReport();
@@ -150,16 +185,20 @@ describe("limitReport deep dives", () => {
     expect([limited?.totalTerritories, limited?.totalEdges]).toStrictEqual([
       9, 13,
     ]);
+    expect(limited?.towardLessStable).toHaveLength(1);
+    expect(limited?.totalTowardLessStable).toBe(1);
   });
 
-  it("cuts the territories a territory is imported by to the limit", () => {
-    const db = limitReport(sampleReport(), 2).knowledge.territories
-      .territories[1]?.typescript;
+  it("cuts the lists toward less stable territories and of mutual imports and keeps their totals", () => {
+    const limited = limitReport(crowdedReport(), 2).deepDives?.typescript
+      ?.imports?.territories;
 
-    expect(db?.importedBy?.map(({ path }) => path)).toStrictEqual([
-      "infra",
-      "packages/api",
-    ]);
+    expect(limited?.towardLessStable).toHaveLength(2);
+    expect(limited?.mutualImports).toHaveLength(2);
+    expect([
+      limited?.totalTowardLessStable,
+      limited?.totalMutualImports,
+    ]).toStrictEqual([3, 3]);
   });
 
   it("leaves a report without deep dives alone", () => {

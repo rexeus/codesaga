@@ -3,7 +3,7 @@
 
 import type { Node } from "@oxc-project/types";
 
-import { identifierName, stringValue } from "../node-guards.js";
+import { identifierName, staticString } from "../node-guards.js";
 import type { FactsCollector } from "../parsed-source.js";
 import { onNodes } from "../walk.js";
 import type { NodeHandlers, NodeOfType } from "../walk.js";
@@ -35,13 +35,15 @@ type ModuleRequest = {
  * `module.exports` and `exports.x` assignments, `import x = require()` and
  * `export =`; both add up over files. `imports` counts the import
  * declarations that bind something, `typeImports` those that bind only types.
- * `requests` lists each distinct request once.
+ * `requests` lists each distinct request once; `dynamicUnresolvable` counts
+ * the `import()` and `require()` calls whose argument is not a constant text.
  */
 export type ModuleFacts = {
   readonly esm: number;
   readonly commonjs: number;
   readonly imports: number;
   readonly typeImports: number;
+  readonly dynamicUnresolvable: number;
   readonly requests: ReadonlyArray<ModuleRequest>;
 };
 
@@ -77,6 +79,7 @@ type Tally = {
   commonjs: number;
   imports: number;
   typeImports: number;
+  dynamicUnresolvable: number;
   readonly requests: Map<string, ModuleRequest>;
 };
 
@@ -86,8 +89,15 @@ const record = (
   kind: ModuleRequestKind,
   isType: boolean,
 ): void => {
-  const specifier = stringValue(source);
-  if (specifier !== undefined) {
+  const specifier = staticString(source);
+  if (specifier === undefined) {
+    const isComputed =
+      source !== null &&
+      source !== undefined &&
+      kind !== "import" &&
+      kind !== "export";
+    tally.dynamicUnresolvable += isComputed ? 1 : 0;
+  } else {
     tally.requests.set(`${kind}\0${isType}\0${specifier}`, {
       specifier,
       kind,
@@ -174,6 +184,7 @@ export const moduleCollector = (): FactsCollector<ModuleFacts> => {
     commonjs: 0,
     imports: 0,
     typeImports: 0,
+    dynamicUnresolvable: 0,
     requests: new Map(),
   };
   const scope = shadowing();

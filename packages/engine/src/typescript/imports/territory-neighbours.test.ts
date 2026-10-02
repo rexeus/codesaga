@@ -15,8 +15,6 @@ const folder = (
   paths: files,
 });
 
-const ref = (path: string) => ({ path, kind: "folder" });
-
 const visible = [
   folder("app", ["app/a.ts", "app/sub/b.ts", "app/readme.md"]),
   folder("core", ["core/c.ts", "core/d.ts"]),
@@ -38,46 +36,46 @@ const forPaths = territoryImportsOf(
 );
 
 describe("territoryImportsOf", () => {
-  it("names the territories a map territory imports and the ones that import it, and sees a cycle that leaves it", () => {
+  it("counts the territories a map territory imports and the ones that import it, and sees a cycle that leaves it", () => {
     expect(
       forPaths(["app/a.ts", "app/sub/b.ts", "app/readme.md"]),
     ).toStrictEqual({
-      imports: [ref("core"), ref("util")],
-      importedBy: [ref("core")],
+      importsCount: 2,
+      importedByCount: 1,
       inCycle: true,
     });
     expect(forPaths(["core/c.ts", "core/d.ts"])).toStrictEqual({
-      imports: [ref("app")],
-      importedBy: [ref("app")],
+      importsCount: 1,
+      importedByCount: 1,
       inCycle: true,
     });
   });
 
   it("does not count a self-import, or edges inside the territory, as a cycle or a neighbour", () => {
     expect(forPaths(["util/u.ts"])).toStrictEqual({
-      imports: [],
-      importedBy: [ref("app")],
+      importsCount: 0,
+      importedByCount: 1,
       inCycle: false,
     });
   });
 
   it("reads a territory below the map's detail against the map's territories it shares no file with", () => {
     expect(forPaths(["app/sub/b.ts"])).toStrictEqual({
-      imports: [ref("util")],
-      importedBy: [],
+      importsCount: 1,
+      importedByCount: 0,
       inCycle: false,
     });
     expect(forPaths(["app/a.ts"])).toStrictEqual({
-      imports: [ref("core")],
-      importedBy: [ref("core")],
+      importsCount: 1,
+      importedByCount: 1,
       inCycle: true,
     });
   });
 
   it("is not in a cycle when every file of the cycle lies inside it", () => {
     expect(forPaths(["app/a.ts", "core/c.ts"])).toStrictEqual({
-      imports: [],
-      importedBy: [],
+      importsCount: 0,
+      importedByCount: 0,
       inCycle: false,
     });
   });

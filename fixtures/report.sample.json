@@ -3166,25 +3166,8 @@
             "esmShare": 1,
             "over15Share": 0.0211,
             "maxComplexity": 33,
-            "imports": [],
-            "importedBy": [
-              {
-                "path": "infra",
-                "kind": "folder"
-              },
-              {
-                "path": "packages/api",
-                "kind": "package"
-              },
-              {
-                "path": "packages/auth",
-                "kind": "package"
-              },
-              {
-                "path": "scripts",
-                "kind": "folder"
-              }
-            ],
+            "importsCount": 0,
+            "importedByCount": 4,
             "inCycle": false
           }
         },
@@ -3306,26 +3289,8 @@
             "esmShare": 1,
             "over15Share": 0.0,
             "maxComplexity": 12,
-            "imports": [
-              {
-                "path": "packages/db",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [
-              {
-                "path": "apps/admin",
-                "kind": "package"
-              },
-              {
-                "path": "apps/web",
-                "kind": "package"
-              },
-              {
-                "path": "packages/api",
-                "kind": "package"
-              }
-            ],
+            "importsCount": 1,
+            "importedByCount": 3,
             "inCycle": false
           }
         },
@@ -3441,21 +3406,8 @@
             "esmShare": 0.9167,
             "over15Share": 0.0402,
             "maxComplexity": 29,
-            "imports": [
-              {
-                "path": "packages/api",
-                "kind": "package"
-              },
-              {
-                "path": "packages/auth",
-                "kind": "package"
-              },
-              {
-                "path": "packages/ui",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [],
+            "importsCount": 3,
+            "importedByCount": 0,
             "inCycle": false
           }
         },
@@ -3564,13 +3516,8 @@
             "esmShare": 1,
             "over15Share": 0.0,
             "maxComplexity": 9,
-            "imports": [
-              {
-                "path": "packages/db",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [],
+            "importsCount": 1,
+            "importedByCount": 0,
             "inCycle": false
           }
         },
@@ -3777,8 +3724,8 @@
             "esmShare": 1,
             "over15Share": 0.0,
             "maxComplexity": 6,
-            "imports": [],
-            "importedBy": [],
+            "importsCount": 0,
+            "importedByCount": 0,
             "inCycle": false
           }
         },
@@ -3894,13 +3841,8 @@
             "esmShare": 0.6,
             "over15Share": 0.0,
             "maxComplexity": 14,
-            "imports": [
-              {
-                "path": "packages/db",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [],
+            "importsCount": 1,
+            "importedByCount": 0,
             "inCycle": false
           }
         },
@@ -4787,21 +4729,8 @@
             "esmShare": 1,
             "over15Share": 0.0198,
             "maxComplexity": 26,
-            "imports": [
-              {
-                "path": "packages/api",
-                "kind": "package"
-              },
-              {
-                "path": "packages/auth",
-                "kind": "package"
-              },
-              {
-                "path": "packages/ui",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [],
+            "importsCount": 3,
+            "importedByCount": 0,
             "inCycle": false
           }
         },
@@ -4935,34 +4864,8 @@
             "esmShare": 1,
             "over15Share": 0.0366,
             "maxComplexity": 41,
-            "imports": [
-              {
-                "path": "packages/auth",
-                "kind": "package"
-              },
-              {
-                "path": "packages/db",
-                "kind": "package"
-              },
-              {
-                "path": "packages/ui",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [
-              {
-                "path": "apps/admin",
-                "kind": "package"
-              },
-              {
-                "path": "apps/web",
-                "kind": "package"
-              },
-              {
-                "path": "packages/ui",
-                "kind": "package"
-              }
-            ],
+            "importsCount": 3,
+            "importedByCount": 3,
             "inCycle": false
           }
         },
@@ -5096,26 +4999,8 @@
             "esmShare": 1,
             "over15Share": 0.0123,
             "maxComplexity": 18,
-            "imports": [
-              {
-                "path": "packages/api",
-                "kind": "package"
-              }
-            ],
-            "importedBy": [
-              {
-                "path": "apps/admin",
-                "kind": "package"
-              },
-              {
-                "path": "apps/web",
-                "kind": "package"
-              },
-              {
-                "path": "packages/api",
-                "kind": "package"
-              }
-            ],
+            "importsCount": 1,
+            "importedByCount": 3,
             "inCycle": false
           }
         }
@@ -5972,6 +5857,7 @@
           },
           "external": 1184,
           "assets": 23,
+          "dynamicUnresolvable": 9,
           "unresolved": {
             "count": 14,
             "share": 0.0071,
@@ -6322,6 +6208,7 @@
               "typeOnlyFiles": 0
             }
           ],
+          "totalTowardLessStable": 1,
           "towardLessStable": [
             {
               "from": {
@@ -6337,8 +6224,9 @@
               "toInstability": 0.4242
             }
           ],
-          "cycles": [],
-          "cyclesWithTypes": 1
+          "totalMutualImports": 0,
+          "mutualImports": [],
+          "mutualImportsWithTypes": 1
         }
       }
     }
