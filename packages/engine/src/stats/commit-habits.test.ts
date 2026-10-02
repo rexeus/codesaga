@@ -18,6 +18,8 @@ describe("commitHabits conventional commits", () => {
     "refactor(a/b)!: rename it",
     "feat!: break it",
     "revert: undo it",
+    "Feat: add it",
+    "FIX(Engine): repair it",
   ])("recognizes %j", (subject) => {
     expect(
       commitHabits([commit(subject)], isCode).conventionalCommits.conventional,

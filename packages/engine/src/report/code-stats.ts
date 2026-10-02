@@ -120,7 +120,8 @@ export const CodeStats = Schema.Struct({
      * Only in the report's own `stats`, not in a territory's: the non-merge
      * commits of the activity window whose subject starts with a Conventional
      * Commits type (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
-     * `build`, `ci`, `chore`, `revert`) and an optional scope, `!` and `: `.
+     * `build`, `ci`, `chore`, `revert`, in any letter case) and an optional scope,
+     * `!` and `: `.
      */
     conventionalCommits: Schema.optionalKey(
       Schema.Struct({ commits: Count, conventional: Count, share: Share }),

@@ -8,7 +8,7 @@ import { percentiles, tallyOf } from "./distribution.js";
 import { ratioOf, sum } from "./measures.js";
 
 const CONVENTIONAL_SUBJECT =
-  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: /u;
+  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: /iu;
 
 type Habits = Pick<CodeStats["style"], "conventionalCommits" | "commitSize">;
 
