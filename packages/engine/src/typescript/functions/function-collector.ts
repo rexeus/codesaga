@@ -6,6 +6,7 @@ import type { FactsCollector } from "../parsed-source.js";
 import { onNodes } from "../walk.js";
 import type { NodeOfType } from "../walk.js";
 import { complexityHandlers } from "./complexity-handlers.js";
+import { declaredNames } from "./declared-names.js";
 import { functionFactsOf } from "./function-facts.js";
 import type { FunctionFacts, MeasuredFunction } from "./function-facts.js";
 import { newFrame } from "./function-frame.js";
@@ -30,6 +31,18 @@ const parametersOf = (node: FunctionNode): number =>
           !(parameter.type === "Identifier" && parameter.name === "this"),
       ).length;
 
+/** The names declared in the function's scope, found on first use and then kept. */
+const declaredOf = (node: FunctionNode): (() => ReadonlySet<string>) => {
+  let names: ReadonlySet<string> | undefined;
+  return () => {
+    names ??=
+      node.type === "StaticBlock"
+        ? declaredNames([], node)
+        : declaredNames(node.params, node.body);
+    return names;
+  };
+};
+
 const frameOf = (
   node: FunctionNode,
   names: FunctionNames,
@@ -41,7 +54,8 @@ const frameOf = (
     parent === undefined ? ANONYMOUS : `${parent.name} > ${ANONYMOUS}`;
   return newFrame({
     name: shortName(own ?? named?.name ?? inherited),
-    binding: own ?? named?.binding,
+    bindings: [own, named?.binding].filter((name) => name !== undefined),
+    declared: declaredOf(node),
     method: named?.method,
     start: named?.start ?? node.start,
     end: node.end,

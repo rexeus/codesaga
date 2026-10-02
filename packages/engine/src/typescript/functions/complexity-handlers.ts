@@ -27,13 +27,29 @@ export type Scope = {
   readonly raise: (...nodes: ReadonlyArray<Node | null | undefined>) => void;
 };
 
+/** The innermost function that `name` names, unless a function between declares a name of its own that hides it. */
+const frameNamed = (
+  frames: ReadonlyArray<Frame>,
+  name: string,
+): Frame | undefined => {
+  for (const frame of frames.toReversed()) {
+    if (frame.declared().has(name)) {
+      return undefined;
+    }
+    if (frame.bindings.includes(name)) {
+      return frame;
+    }
+  }
+  return undefined;
+};
+
 /** The innermost function whose own name or member name the callee spells, undefined for any other call. */
 const recursiveFrame = (
   frames: ReadonlyArray<Frame>,
   callee: Node,
 ): Frame | undefined => {
   if (callee.type === "Identifier") {
-    return frames.findLast(({ binding }) => binding === callee.name);
+    return frameNamed(frames, callee.name);
   }
   if (
     callee.type === "MemberExpression" &&

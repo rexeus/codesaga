@@ -171,3 +171,33 @@ function d(other) { other.d(); this.d; }`);
     expect(scores).toStrictEqual([[0, 4]]);
   });
 });
+
+describe("cognitive complexity: recursion and shadowing", () => {
+  it("does not take a call of a name that a parameter, a local or an inner function declares for a recursion", () => {
+    const scores = scoresOf(`
+function a(a) { a(); }
+function b(n) { const b = n.next; b(); }
+function c(xs) { xs.map((c) => c()); }
+function d() { function d() {} d(); }`);
+
+    expect(scores).toStrictEqual([[0, 6]]);
+  });
+
+  it("takes a named function expression's own name, and the variable it is assigned to, for a recursion", () => {
+    const scores = scoresOf(`
+const g = function f(n) { if (n) f(n - 1); };
+const h = function k(n) { if (n) h(n - 1); };`);
+
+    expect(scores).toStrictEqual([[2, 2]]);
+  });
+
+  it("still finds a recursion through a callback that does not shadow the name", () => {
+    const scores = scoresOf(`
+function walk(node) { node.children.forEach((child) => walk(child)); }`);
+
+    expect(scores).toStrictEqual([
+      [0, 1],
+      [1, 1],
+    ]);
+  });
+});

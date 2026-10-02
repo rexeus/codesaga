@@ -4,8 +4,10 @@
 /** One function being walked; the counters are those of its own body, nested functions apart. */
 export type Frame = {
   readonly name: string;
-  /** The identifier that names the function in its own scope, such as `f` in `function f` and `const f = () => ...`. */
-  readonly binding: string | undefined;
+  /** The identifiers that name the function from inside: its own name in `function f`, and the variable in `const f = () => ...`. */
+  readonly bindings: ReadonlyArray<string>;
+  /** The names declared in the function's own scope, read when a call might be a recursion; a call of one of them is not. */
+  readonly declared: () => ReadonlySet<string>;
   /** The member name that `this.name()` calls inside it mean, for a method. */
   readonly method: string | undefined;
   readonly start: number;
@@ -26,7 +28,7 @@ export type Frame = {
 export const newFrame = (
   identity: Pick<
     Frame,
-    "name" | "binding" | "method" | "start" | "end" | "parameters"
+    "name" | "bindings" | "declared" | "method" | "start" | "end" | "parameters"
   >,
 ): Frame => ({
   ...identity,
