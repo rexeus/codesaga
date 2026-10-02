@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -51,7 +51,7 @@ const reachedOf = (
     .filter(({ reached }) => reached)
     .map(({ kind, reachedAt }) => [kind, reachedAt]);
 
-layer(NodeServices.layer)("analyze achievements", (it) => {
+layer(analyzeServices)("analyze achievements", (it) => {
   it.effect(
     "reads the achievements off a real history, with the day each milestone was first passed",
     () =>
@@ -79,7 +79,7 @@ layer(NodeServices.layer)("analyze achievements", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze achievements window", (it) => {
+layer(analyzeServices)("analyze achievements window", (it) => {
   it.effect(
     "keeps the achievements of the whole history when the window is narrowed",
     () =>
@@ -98,7 +98,7 @@ layer(NodeServices.layer)("analyze achievements window", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze achievements shallow", (it) => {
+layer(analyzeServices)("analyze achievements shallow", (it) => {
   it.effect(
     "withholds the days and the states that need the full history in a shallow clone",
     () =>

@@ -14,6 +14,7 @@ import type { Report } from "../report/report.js";
 import { universeStats } from "../stats/universe-stats.js";
 import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
+import { typescriptDeepDive } from "../typescript/deep-dive.js";
 import type { RepositoryFacts } from "./gather.js";
 import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
@@ -85,6 +86,23 @@ const knowledgeOf = (
     signatures: facts.signatures,
   });
 
+const deepDivesField = ({
+  typescript,
+}: RepositoryFacts): Pick<Report, "deepDives"> =>
+  typescript === undefined
+    ? {}
+    : { deepDives: { typescript: typescriptDeepDive(typescript) } };
+
+/** The sections that exist only for some runs or some repositories. */
+const optionalSections = (
+  facts: RepositoryFacts,
+  current: Analysis["commits"],
+  previous: Analysis["previous"],
+): Pick<Report, "comparison" | "deepDives"> => ({
+  ...comparisonField(facts, current, previous),
+  ...deepDivesField(facts),
+});
+
 /** Builds the report from the facts, each section over the commits it covers. */
 export const buildReport = (facts: RepositoryFacts): Report => {
   const {
@@ -143,6 +161,6 @@ export const buildReport = (facts: RepositoryFacts): Report => {
       stats.repository,
       knowledgeSection,
     ),
-    ...comparisonField(facts, commits, previous),
+    ...optionalSections(facts, commits, previous),
   };
 };

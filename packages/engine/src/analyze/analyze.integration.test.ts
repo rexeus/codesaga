@@ -1,10 +1,10 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import type { Report } from "../report/report.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -111,7 +111,7 @@ const graceBadges: Report["contributors"][number]["badges"] = [
   },
 ];
 
-layer(NodeServices.layer)("analyze a known history", (it) => {
+layer(analyzeServices)("analyze a known history", (it) => {
   it.effect("reports the exact window and overview", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -142,7 +142,7 @@ layer(NodeServices.layer)("analyze a known history", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze automation", (it) => {
+layer(analyzeServices)("analyze automation", (it) => {
   it.effect("reports automation totals, months and tools", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -206,7 +206,7 @@ layer(NodeServices.layer)("analyze automation", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze weeks and punch card", (it) => {
+layer(analyzeServices)("analyze weeks and punch card", (it) => {
   it.effect(
     "fills every week and month and counts the punch card in local time",
     () =>
@@ -265,7 +265,7 @@ layer(NodeServices.layer)("analyze weeks and punch card", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze since and scope", (it) => {
+layer(analyzeServices)("analyze since and scope", (it) => {
   it.effect(
     "narrows the activity sections to since but keeps the repository's first commit",
     () =>

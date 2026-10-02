@@ -18,7 +18,9 @@
     "@codesaga/tsconfig": "workspace:*",
     "@effect/platform-node": "catalog:",
     "@effect/vitest": "catalog:",
+    "@oxc-project/types": "catalog:",
     "@types/picomatch": "catalog:",
+    "oxc-parser": "catalog:",
     "vitest": "catalog:"
   }
 }

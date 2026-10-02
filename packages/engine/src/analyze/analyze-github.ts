@@ -12,6 +12,7 @@ import { searchPullRequests } from "../github/pull-request-search.js";
 import { resolveGithubSource } from "../github/source.js";
 import { pullRequestsSection } from "../pull-requests/pull-requests.js";
 import type { Report } from "../report/report.js";
+import type { TypeScriptParser } from "../typescript/typescript-parser.js";
 import { analyze } from "./analyze.js";
 import type { AnalyzeError, AnalyzeOptions } from "./gather.js";
 
@@ -36,6 +37,7 @@ export const analyzeWithGithub = (
   | FileSystem.FileSystem
   | HttpClient.HttpClient
   | Path.Path
+  | TypeScriptParser
 > =>
   Effect.gen(function* () {
     const source = yield* resolveGithubSource(

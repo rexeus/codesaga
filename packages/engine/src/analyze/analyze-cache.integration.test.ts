@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -59,7 +59,7 @@ const commitMainThenMergeOlderBranch = (repo: TempRepository) =>
     yield* analyzeBothWays(repo);
   });
 
-layer(NodeServices.layer)("analyze with the history cache", (it) => {
+layer(analyzeServices)("analyze with the history cache", (it) => {
   it.effect(
     "reports what an uncached run reports after the history grew, was rewritten, or the mailmap changed",
     () =>

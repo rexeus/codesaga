@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -52,7 +52,7 @@ const commitNightShifts = (repo: TempRepository) =>
     }
   });
 
-layer(NodeServices.layer)("analyze contributor badges", (it) => {
+layer(analyzeServices)("analyze contributor badges", (it) => {
   it.effect(
     "awards night owl and pair partner from the dates, offsets and trailers of a real history",
     () =>

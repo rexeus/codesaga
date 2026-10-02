@@ -5158,5 +5158,22 @@
         "unit": "newcomers in 90 days"
       }
     }
-  ]
+  ],
+  "deepDives": {
+    "typescript": {
+      "coverage": {
+        "files": 345,
+        "parsed": 338,
+        "declarationFiles": 5,
+        "skipped": {
+          "minified": 1,
+          "syntax-error": 1
+        },
+        "parser": {
+          "name": "oxc-parser",
+          "version": "0.152.0"
+        }
+      }
+    }
+  }
 }

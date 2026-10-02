@@ -27,11 +27,14 @@ Run `npx codesaga inspect <path> --json` (a file, a directory, or a quoted glob)
 | "Did activity or agent use change lately?"      | `codesaga analyze --compare 3m --json`                | Full report plus a `comparison` section                  |
 | "Who wrote the lines that exist today?"         | `codesaga inspect <path> --json --blame`              | Adds `lineOwners`; one `git blame` per file              |
 | "How fast do pull requests merge, who reviews?" | `codesaga analyze --github --json`                    | Adds `pullRequests`; needs a token, see the README       |
+| "How much TypeScript did codesaga read?"        | `codesaga analyze --json`                             | `deepDives.typescript.coverage`; see below               |
 | "Everything, for a dashboard or a script"       | `codesaga analyze --json --limit 0`                   | Full report                                              |
 
 The first call in a clone reads the whole history (seconds on a repository with a few thousand commits) and caches it in `.git/codesaga`; later calls read only the commits made since and take well under a second. Call `analyze` once per task, and `inspect` per path you are about to change. `--no-cache` skips the cache. A `.codesaga.json` in the repository root supplies defaults for `--since`, `--include`, `--exclude`, `--limit` and `--detail` and can name in-house bots and agents; flags override it (see the README's Configuration section).
 
 `--compare <duration>` (such as `3m`) makes the window the last duration and adds a `comparison` section: the figures of the window and of the span of the same length before it, and their differences. `delta.aiShare` is `null` when either span has no commits, and `previous.partial` is `true` when the previous span starts before the first commit, so it covers less history than the window.
+
+`deepDives` carries the language analyses; today `deepDives.typescript.coverage` counts the TypeScript and JavaScript files codesaga parsed (`parsed`), the declaration files it only counted, and the files it skipped by reason. It is absent for a repository without such files. Before you rely on a deep-dive figure, read the coverage: `parsed` against `files` says how much of the code it covers, and `unavailable` (a string) means the parser did not load, so every file was skipped as `parser-unavailable` and no code figure exists.
 
 `codesaga check --json` is for gates, not for exploration: it answers whether the repository meets limits such as `--min-truck-factor 2`, with `passed` and one `reason` per gate, and exits 5 when a gate fails. Use it in CI or before a release, and `analyze` or `inspect` to learn why a gate failed.
 

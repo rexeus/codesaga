@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -54,7 +54,7 @@ const commitHistory = (repo: TempRepository) =>
     );
   });
 
-layer(NodeServices.layer)("analyze a shallow clone's story", (it) => {
+layer(analyzeServices)("analyze a shallow clone's story", (it) => {
   it.effect(
     "says nothing that needs the first commits it cannot see, though a complete clone does",
     () =>
