@@ -53,9 +53,18 @@ type KnowledgeFacts = KnowledgeInput & {
   readonly scope: string;
   /** The directories of the scope that hold a package manifest, from `packageRootsOf`. */
   readonly packageRoots: ReadonlyArray<string>;
-  /** The level to start at, from 1; a level beyond the deepest one means the deepest. The recommended level when absent. */
+  /** The level to start at, from 1, rounded down; a level beyond the deepest one means the deepest. The recommended level when absent, not finite or below 1. */
   readonly depth?: number | undefined;
 };
+
+/** The requested level rounded down; the recommended one when it is absent, not finite or below 1. */
+const startDepth = (
+  requested: number | undefined,
+  recommended: number,
+): number =>
+  requested !== undefined && Number.isFinite(requested) && requested >= 1
+    ? Math.floor(requested)
+    : recommended;
 
 const areasSection = (
   facts: KnowledgeFacts,
@@ -80,10 +89,7 @@ const areasSection = (
     historyContributors: countContributors(facts.commits),
   });
   return {
-    depth: Math.min(
-      Math.max(facts.depth ?? recommendedDepth, 1),
-      levels.length,
-    ),
+    depth: Math.min(startDepth(facts.depth, recommendedDepth), levels.length),
     recommendedDepth,
     reason,
     levels: Arr.map(levels, ({ depth, totalAreas, areas }) => ({

@@ -106,4 +106,15 @@ describe("knowledge areas", () => {
       recommendedDepth: 2,
     });
   });
+
+  it.each([0, 0.5, -3, Number.NaN, Number.POSITIVE_INFINITY])(
+    "starts at the recommended level for the requested depth %s",
+    (depth) => {
+      expect(areasOf(threeActive, depth).depth).toBe(2);
+    },
+  );
+
+  it("rounds a fractional depth down", () => {
+    expect(areasOf(threeActive, 1.9).depth).toBe(1);
+  });
 });
