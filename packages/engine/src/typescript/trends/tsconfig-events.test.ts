@@ -124,6 +124,80 @@ describe("flagEventsOf over extends and presets", () => {
   });
 });
 
+describe("flagEventsOf over a key that is no longer set", () => {
+  it("reports no turning off when a config stops setting strict", () => {
+    const events = flagEventsOf({
+      commits: [
+        { time: at("2024-01-05"), changes: [change("tsconfig.json", "set")] },
+        {
+          time: at("2026-07-28"),
+          changes: [change("tsconfig.json", "unset", "set")],
+        },
+      ],
+      texts: new Map([
+        ["set", config({ strict: true })],
+        ["unset", config({ target: "es2022" })],
+      ]),
+    });
+
+    expect(events.map(({ date, from, to }) => [date, from, to])).toStrictEqual([
+      ["2024-01-05", null, true],
+    ]);
+  });
+
+  it("reports no turning off when a root becomes a solution-style config of references", () => {
+    const solution = JSON.stringify({
+      files: [],
+      references: [{ path: "./tsconfig.src.json" }],
+    });
+
+    const events = flagEventsOf({
+      commits: [
+        { time: at("2024-01-05"), changes: [change("tsconfig.json", "set")] },
+        {
+          time: at("2026-07-28"),
+          changes: [
+            change("tsconfig.json", "solution", "set"),
+            change("tsconfig.src.json", "src"),
+          ],
+        },
+      ],
+      texts: new Map([
+        ["set", config({ strict: true })],
+        ["solution", solution],
+        ["src", config({ strict: true })],
+      ]),
+    });
+
+    expect(events.map(({ path, date }) => [path, date])).toStrictEqual([
+      ["tsconfig.json", "2024-01-05"],
+    ]);
+  });
+});
+
+describe("flagEventsOf between two written values", () => {
+  it("still reports a flip between two written values", () => {
+    const events = flagEventsOf({
+      commits: [
+        { time: at("2024-01-05"), changes: [change("tsconfig.json", "on")] },
+        {
+          time: at("2025-01-05"),
+          changes: [change("tsconfig.json", "off", "on")],
+        },
+      ],
+      texts: new Map([
+        ["on", config({ strict: true })],
+        ["off", config({ strict: false })],
+      ]),
+    });
+
+    expect(events.map(({ from, to }) => [from, to])).toStrictEqual([
+      [null, true],
+      [true, false],
+    ]);
+  });
+});
+
 describe("flagEventsOf over a package preset", () => {
   it("does not report a flag that an extended package preset may decide", () => {
     const events = flagEventsOf({

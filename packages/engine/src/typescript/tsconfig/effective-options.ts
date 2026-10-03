@@ -53,6 +53,20 @@ const booleanOf = (found: Found, fallback: Tri): Tri => {
 const stringOf = (found: Found): string | null =>
   found.kind === "set" && typeof found.value === "string" ? found.value : null;
 
+/**
+ * What `key` is set to, a boolean written in the config or in one it extends,
+ * or `unknown` where nothing sets it (not a statement that it is off: the
+ * default depends on the TypeScript version) or a config that could not be
+ * read may. For callers that must not claim a change between a value and
+ * the lack of one.
+ */
+export const explicitFlagOf = (config: LoadedTsconfig, key: string): Tri => {
+  const found = lookup(config, key);
+  return found.kind === "set" && typeof found.value === "boolean"
+    ? found.value
+    : "unknown";
+};
+
 /** The effective posture of one config. */
 export type Posture = {
   readonly strict: Tri;

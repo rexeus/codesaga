@@ -1,11 +1,11 @@
 // Owns when a `tsconfig` started or stopped setting `strict` and `noUncheckedIndexedAccess`, from the versions of the configs over the history.
-// Effective values are the config's own over the configs it extends, resolved against the files the commit had; an `extends` that names a package cannot be followed and leaves the value unknown.
+// Effective values are the config's own over the configs it extends, resolved against the files the commit had; an `extends` that names a package cannot be followed and leaves the value unknown. A flag nothing sets is unknown too, never off: only changes between two written values are events.
 import type { FirstParentCommit } from "../../history/first-parent.js";
 import type { Trends } from "../../report/typescript-trends.js";
 import { isProjectTsconfigPath } from "../../universe/project-files.js";
 import { parseTsconfig } from "../tsconfig/config-file.js";
 import type { LoadedTsconfig, RawTsconfig } from "../tsconfig/config-file.js";
-import { postureOf } from "../tsconfig/effective-options.js";
+import { explicitFlagOf } from "../tsconfig/effective-options.js";
 import { directoryOf, joinPosix } from "../tsconfig/posix-path.js";
 
 type FlagEvent = Trends["events"][number];
@@ -77,8 +77,13 @@ const flagsOf = (configs: Configs, path: string): Flags | undefined => {
   if (config === undefined) {
     return undefined;
   }
-  const { strict, noUncheckedIndexedAccess } = postureOf(config, false);
-  return { strict, noUncheckedIndexedAccess };
+  return {
+    strict: explicitFlagOf(config, "strict"),
+    noUncheckedIndexedAccess: explicitFlagOf(
+      config,
+      "noUncheckedIndexedAccess",
+    ),
+  };
 };
 
 const allFlags = (configs: Configs): ReadonlyMap<string, Flags> =>
@@ -95,8 +100,12 @@ const dayOf = (seconds: number): string =>
 /**
  * The flips between `before` and `after`: a definite value that changed in a
  * config that existed, and a flag first switched on, by a new config, where
- * no config had it on before. A value that is `unknown` on either side is not
- * a flip.
+ * no config had it on before. Only a value written down in the config or in
+ * one it extends counts: `true` that becomes unset (a key removed, a root that
+ * turned into a solution-style config of references) or unresolvable is not
+ * "turned off", since the default is no claim, and a flag that becomes
+ * explicit after being unset is not a flip either, as nothing was known
+ * before.
  */
 const flipsOf = (
   before: ReadonlyMap<string, Flags>,
