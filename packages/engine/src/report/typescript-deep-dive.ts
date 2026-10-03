@@ -10,6 +10,7 @@ import { Markers } from "./typescript-markers.js";
 import { Modules } from "./typescript-modules.js";
 import { Strictness } from "./typescript-strictness.js";
 import { Tests } from "./typescript-tests.js";
+import { Trends } from "./typescript-trends.js";
 import { TypeSafety } from "./typescript-type-safety.js";
 
 const Count = Schema.Natural;
@@ -82,6 +83,8 @@ export const TypeScriptDeepDive = Schema.Struct({
   markers: Schema.optionalKey(Markers),
   /** How the code imports itself: cycles, fan-in and fan-out of files, and the territories' dependency map. */
   imports: Schema.optionalKey(Imports),
+  /** The code over the whole history; absent when the history was not parsed (the parser did not load, or the run was a `check`), and when no file of it parsed. */
+  trends: Schema.optionalKey(Trends),
 });
 export type TypeScriptDeepDive = typeof TypeScriptDeepDive.Type;
 

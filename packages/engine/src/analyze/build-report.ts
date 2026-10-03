@@ -11,16 +11,15 @@ import { contributors } from "../contributors/contributors.js";
 import { knowledge } from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import type { Report } from "../report/report.js";
-import type { Imports } from "../report/typescript-imports.js";
 import { universeStats } from "../stats/universe-stats.js";
 import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
-import { typescriptAnalysis } from "../typescript/deep-dive.js";
 import type { TypeScriptAnalysis } from "../typescript/deep-dive.js";
 import { prepareAnalysis } from "./prepare.js";
 import type { Analysis } from "./prepare.js";
 import type { ReportFacts } from "./report-facts.js";
 import { THRESHOLDS } from "./report-thresholds.js";
+import { deepDivesOf, typescriptOf } from "./typescript-analysis.js";
 
 const storiesOf = (
   { now, isCodePath, repository }: ReportFacts,
@@ -93,21 +92,6 @@ const knowledgeOf = (
     signatures: facts.signatures,
   });
 
-const deepDivesField = (
-  typescript: TypeScriptAnalysis | undefined,
-  imports: Imports | undefined,
-): Pick<Report, "deepDives"> =>
-  typescript === undefined
-    ? {}
-    : {
-        deepDives: {
-          typescript: {
-            ...typescript.section,
-            ...(imports === undefined ? {} : { imports }),
-          },
-        },
-      };
-
 const peopleOf = (
   facts: ReportFacts,
   { commits, scoped }: Pick<Analysis, "commits" | "scoped">,
@@ -123,14 +107,6 @@ const peopleOf = (
     universePaths: facts.universe.map(({ path }) => path),
     territories,
   });
-
-const typescriptOf = (
-  { typescript, repository }: ReportFacts,
-  revisions: ReadonlyMap<string, number>,
-): TypeScriptAnalysis | undefined =>
-  typescript === undefined
-    ? undefined
-    : typescriptAnalysis(typescript, revisions, repository.shallow);
 
 /** The sections that exist only for some runs or some repositories. */
 const optionalSections = (
@@ -155,7 +131,7 @@ export const buildReport = (facts: ReportFacts): Report => {
     lastCommitAt,
   } = prepareAnalysis(facts);
   const stats = statsOf(facts, scoped, commits);
-  const typescript = typescriptOf(facts, stats.revisions);
+  const typescript = typescriptOf(facts, stats.revisions, { commits });
   const {
     section: knowledgeSection,
     recommendedTerritories,
@@ -196,7 +172,7 @@ export const buildReport = (facts: ReportFacts): Report => {
       facts,
       commits,
       previous,
-      deepDivesField(typescript, imports),
+      deepDivesOf(typescript, imports),
     ),
   };
 };
