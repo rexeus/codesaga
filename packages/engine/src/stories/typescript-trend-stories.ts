@@ -7,7 +7,7 @@ import { percentOf } from "../report/sentences.js";
 import type { Story } from "../report/stories.js";
 import type { TypeScriptDeepDive } from "../report/typescript-deep-dive.js";
 import { SERIES, escapePointsOf, seriesAt } from "../typescript/trend-input.js";
-import type { TrendInput } from "../typescript/trend-input.js";
+import type { FlagChange, TrendInput } from "../typescript/trend-input.js";
 import type { StoryFacts } from "./stories.js";
 import { STORY_THRESHOLDS } from "./thresholds.js";
 
@@ -65,26 +65,53 @@ const strictSince = (
   ) {
     return [];
   }
-  const flippedIn =
-    [...main.extends, main.path].find((path) =>
-      trends.events.some(
+  const flip = [...main.extends, main.path]
+    .map((path) =>
+      trends.events.find(
         (event) =>
           event.path === path &&
           event.flag === "strict" &&
           event.to &&
           event.date === turnedOn.date,
       ),
-    ) ?? main.path;
+    )
+    .find((event) => event !== undefined);
+  const flipped = flip ?? turnedOn;
   return [
     {
       kind: "strict-since",
-      title: "Strict since",
-      detail: `strict has been on in ${flippedIn} since ${turnedOn.date}.`,
-      value: monthsBetween(turnedOn.date, last),
-      date: turnedOn.date,
-      path: flippedIn,
+      ...strictWording(flipped, trends.months[0]),
+      value: monthsBetween(flipped.date, last),
+      date: flipped.date,
+      path: flipped.path,
     },
   ];
+};
+
+/**
+ * What the flip says: a switch from off to on, a config created strict, or
+ * a config that was strict in the first commit the history read, which says
+ * nothing of how it came to be.
+ */
+const strictWording = (
+  { path, date, from }: FlagChange,
+  firstMonth: string | undefined,
+): Pick<Story, "title" | "detail"> => {
+  if (from !== null) {
+    return {
+      title: "Strict since",
+      detail: `strict was switched on in ${path} on ${date}.`,
+    };
+  }
+  return date.slice(0, 7) === firstMonth
+    ? {
+        title: "Strict from the start",
+        detail: `strict has been on in ${path} since the first commit read, in ${firstMonth}.`,
+      }
+    : {
+        title: "Strict since",
+        detail: `strict has been on in ${path} since the config was created on ${date}.`,
+      };
 };
 
 /** The production escape hatches per 1,000 lines against the same month a year ago, when they changed by at least `typeTrendMinChange`. */

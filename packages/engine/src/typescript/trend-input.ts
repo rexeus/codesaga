@@ -2,7 +2,7 @@
 // A structural subset of the report's `Trends`, so the readers do not depend on the part they ignore.
 
 /** A flag change in one `tsconfig`, as the trends report it. */
-type FlagChange = {
+export type FlagChange = {
   readonly date: string;
   readonly path: string;
   readonly flag: string;

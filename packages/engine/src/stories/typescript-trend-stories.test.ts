@@ -58,7 +58,7 @@ describe("strict-since", () => {
       {
         kind: "strict-since",
         title: "Strict since",
-        detail: "strict has been on in tsconfig.json since 2024-03-11.",
+        detail: "strict was switched on in tsconfig.json on 2024-03-11.",
         value: 24,
         date: "2024-03-11",
         path: "tsconfig.json",
@@ -82,7 +82,7 @@ describe("strict-since and base configs", () => {
     const [story] = storiesFor(trendsOf(27, {}, events), typescript);
 
     expect(story).toMatchObject({
-      detail: "strict has been on in tsconfig.base.json since 2024-03-11.",
+      detail: "strict was switched on in tsconfig.base.json on 2024-03-11.",
       path: "tsconfig.base.json",
     });
   });
@@ -264,5 +264,52 @@ describe("strict-since without a flip of the config itself", () => {
       date: "2024-03-11",
       path: "tsconfig.base.json",
     });
+  });
+});
+
+const created = (date: string): FlagChange => ({
+  ...strictOn("tsconfig.json"),
+  date,
+  from: null,
+});
+
+describe("strict-since wording", () => {
+  it("says a config created strict was created, not switched, and names the day", () => {
+    const [story] = storiesFor(
+      trendsOf(27, {}, [created("2024-03-11")]),
+      dive(true),
+    );
+
+    expect(story).toMatchObject({
+      title: "Strict since",
+      detail:
+        "strict has been on in tsconfig.json since the config was created on 2024-03-11.",
+      date: "2024-03-11",
+    });
+  });
+
+  it("says a config that was strict in the first commit read has been on from the start", () => {
+    const [story] = storiesFor(
+      trendsOf(27, {}, [created("2024-01-15")]),
+      dive(true),
+    );
+
+    expect(story).toMatchObject({
+      title: "Strict from the start",
+      detail:
+        "strict has been on in tsconfig.json since the first commit read, in 2024-01.",
+      value: 26,
+    });
+  });
+
+  it("keeps the switch wording for a flip in the first month", () => {
+    const [story] = storiesFor(
+      trendsOf(27, {}, [{ ...strictOn("tsconfig.json"), date: "2024-01-15" }]),
+      dive(true),
+    );
+
+    expect(story?.detail).toBe(
+      "strict was switched on in tsconfig.json on 2024-01-15.",
+    );
   });
 });

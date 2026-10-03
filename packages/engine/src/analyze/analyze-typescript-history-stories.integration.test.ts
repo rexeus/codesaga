@@ -63,7 +63,7 @@ layer(analyzeServices)("analyze the stories the history tells", (it) => {
             {
               kind: "strict-since",
               title: "Strict since",
-              detail: "strict has been on in tsconfig.json since 2025-03-10.",
+              detail: "strict was switched on in tsconfig.json on 2025-03-10.",
               value: 12,
               date: "2025-03-10",
               path: "tsconfig.json",
