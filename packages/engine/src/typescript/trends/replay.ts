@@ -1,6 +1,7 @@
 // Owns replaying the first-parent chain: which version of each file exists after each commit, and what the existing files add up to.
 // A trend point is exact for the files the digests cover and costs one add and one subtract per change; nothing is re-summed per month.
 import type { FirstParentCommit } from "../../history/first-parent.js";
+import { memoizedByPath } from "../../universe/memoized-path.js";
 import { isTestPath } from "../../universe/path-kinds.js";
 import type { FactsLookup } from "./facts-lookup.js";
 import { countsOf, MEASURES } from "./file-counts.js";
@@ -13,7 +14,9 @@ export type Totals = readonly [ReadonlyArray<number>, ReadonlyArray<number>];
 
 const ZEROS: ReadonlyArray<number> = MEASURES.map(() => 0);
 
-const groupOf = (path: string): 0 | 1 => (isTestPath(path) ? 1 : 0);
+const isTest = memoizedByPath(isTestPath);
+
+const groupOf = (path: string): 0 | 1 => (isTest(path) ? 1 : 0);
 
 /** The month of a time in seconds as a count of months since year 0, in UTC. */
 export const monthOf = (seconds: number): number => {

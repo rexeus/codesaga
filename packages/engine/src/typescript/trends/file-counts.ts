@@ -1,6 +1,9 @@
 // Owns what a file adds to a trend point: the counts of its digest that add up over files.
+import { memoizedByPath } from "../../universe/memoized-path.js";
 import { isToolingPath } from "../../universe/path-kinds.js";
 import type { FileDigest } from "../digest/file-digest.js";
+
+const isTooling = memoizedByPath(isToolingPath);
 
 /** The measures of a trend, in the order `countsOf` lists them; `tests.testCases` and `tests.focusedTests` exist for test files only. */
 export const MEASURES = [
@@ -26,7 +29,7 @@ export const countsOf = (
   digest: FileDigest,
   path: string,
 ): ReadonlyArray<number> => {
-  const counted = !isToolingPath(path);
+  const counted = !isTooling(path);
   return [
     1,
     digest.lines,
