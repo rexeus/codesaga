@@ -2,147 +2,101 @@ import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem } from "effect";
 
+import { oxcParse } from "../testing/oxc-parser.js";
 import { loadFactsCache, storeFactsCache } from "./facts-cache.js";
+import { digestOfSource } from "./facts-of-source.js";
 import type { DigestResult } from "./facts-of-source.js";
 
 const skipped: DigestResult = { kind: "skipped", reason: "syntax-error" };
+const parsed = digestOfSource(oxcParse, {
+  path: "a.ts",
+  text: "export const a: any = 1;\nexport function f() {\n  if (a) {\n    return 1;\n  }\n}\n",
+});
 
-const temporaryDirectory = Effect.gen(function* () {
+const temporaryFile = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
   const directory = yield* fs.makeTempDirectoryScoped({ prefix: "codesaga-" });
-  return `${directory}/syntax-v1`;
+  return `${directory}/syntax-v1.json`;
 });
 
 const none = new Map<string, DigestResult>();
-const key = (digit: string, tail = "ts:module") =>
-  `${digit.repeat(40)}:${tail}`;
 
-layer(NodeServices.layer)("the facts cache directory", (it) => {
-  it.effect("returns the verdicts it stored under the same fingerprint", () =>
-    Effect.gen(function* () {
-      const directory = yield* temporaryDirectory;
+layer(NodeServices.layer)("the facts cache file", (it) => {
+  it.effect(
+    "returns the digests it stored under the same fingerprint, a parsed one exactly",
+    () =>
+      Effect.gen(function* () {
+        const file = yield* temporaryFile;
+        const stored = new Map([
+          ["k1", parsed],
+          ["k2", skipped],
+        ]);
 
-      yield* storeFactsCache(
-        directory,
-        "fingerprint",
-        new Map([[key("a"), skipped]]),
-        none,
-      );
+        yield* storeFactsCache(file, "fingerprint", stored, none);
 
-      assert.deepStrictEqual(
-        [...(yield* loadFactsCache(directory, "fingerprint"))],
-        [[key("a"), skipped]],
-      );
-    }),
+        assert.deepStrictEqual(
+          yield* loadFactsCache(file, "fingerprint"),
+          stored,
+        );
+      }),
   );
 
   it.effect("returns nothing under another fingerprint", () =>
     Effect.gen(function* () {
-      const directory = yield* temporaryDirectory;
-      yield* storeFactsCache(
-        directory,
-        "old",
-        new Map([[key("a"), skipped]]),
-        none,
-      );
+      const file = yield* temporaryFile;
+      yield* storeFactsCache(file, "old", new Map([["k", skipped]]), none);
 
-      assert.strictEqual((yield* loadFactsCache(directory, "new")).size, 0);
+      assert.strictEqual((yield* loadFactsCache(file, "new")).size, 0);
+    }),
+  );
+
+  it.effect("returns nothing for a missing or a damaged file", () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const file = yield* temporaryFile;
+      assert.strictEqual((yield* loadFactsCache(file, "f")).size, 0);
+
+      yield* fs.writeFileString(file, '{"version":1,"fingerpr');
+
+      assert.strictEqual((yield* loadFactsCache(file, "f")).size, 0);
     }),
   );
 });
 
-layer(NodeServices.layer)("reading a damaged facts cache directory", (it) => {
-  it.effect("returns nothing for a missing directory or a damaged shard", () =>
+layer(NodeServices.layer)("the facts cache entries", (it) => {
+  it.effect("leaves out an entry that is neither a digest row nor a skip", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const directory = yield* temporaryDirectory;
-      assert.strictEqual((yield* loadFactsCache(directory, "f")).size, 0);
-
-      yield* fs.makeDirectory(directory, { recursive: true });
+      const file = yield* temporaryFile;
       yield* fs.writeFileString(
-        `${directory}/aa.json`,
-        '{"version":1,"fingerpr',
+        file,
+        JSON.stringify({
+          version: 1,
+          fingerprint: "f",
+          facts: {
+            short: [1, 2, 3],
+            odd: { skipped: "nonsense" },
+            bare: 7,
+            wrong: [1, 1, 1, 1, 1, 1, 0, "x", 1, 1, 1, 1, []],
+          },
+        }),
       );
 
-      assert.strictEqual((yield* loadFactsCache(directory, "f")).size, 0);
+      assert.strictEqual((yield* loadFactsCache(file, "f")).size, 0);
     }),
   );
 
-  it.effect(
-    "leaves out an entry that is neither facts of this version nor a skip",
-    () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const directory = yield* temporaryDirectory;
-        yield* fs.makeDirectory(directory, { recursive: true });
-        yield* fs.writeFileString(
-          `${directory}/aa.json`,
-          JSON.stringify({
-            version: 1,
-            fingerprint: "f",
-            facts: {
-              old: { version: 0 },
-              odd: { skipped: "nonsense" },
-              bare: 7,
-            },
-          }),
-        );
-
-        assert.strictEqual((yield* loadFactsCache(directory, "f")).size, 0);
-      }),
-  );
-});
-
-layer(NodeServices.layer)("storing the facts cache shards", (it) => {
-  it.effect(
-    "writes one shard per first byte and only the shards that changed",
-    () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const directory = yield* temporaryDirectory;
-        const first = new Map([
-          [key("a"), skipped],
-          [key("b"), skipped],
-        ]);
-        yield* storeFactsCache(directory, "f", first, none);
-        yield* fs.writeFileString(`${directory}/bb.json`, "marker");
-
-        yield* storeFactsCache(
-          directory,
-          "f",
-          new Map([...first, [key("c"), skipped]]),
-          first,
-        );
-
-        assert.deepStrictEqual(
-          (yield* fs.readDirectory(directory)).toSorted(),
-          ["aa.json", "bb.json", "cc.json"],
-        );
-        assert.strictEqual(
-          yield* fs.readFileString(`${directory}/bb.json`),
-          "marker",
-        );
-      }),
-  );
-
-  it.effect("removes a shard that no entry is left in", () =>
+  it.effect("does not rewrite a file whose keys did not change", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const directory = yield* temporaryDirectory;
-      const both = new Map([
-        [key("a"), skipped],
-        [key("b"), skipped],
-      ]);
-      yield* storeFactsCache(directory, "f", both, none);
+      const file = yield* temporaryFile;
+      const stored = new Map([["k", skipped]]);
+      yield* storeFactsCache(file, "f", stored, none);
+      yield* fs.writeFileString(file, "marker");
 
-      yield* storeFactsCache(
-        directory,
-        "f",
-        new Map([[key("a"), skipped]]),
-        both,
-      );
+      yield* storeFactsCache(file, "f", stored, stored);
 
-      assert.deepStrictEqual(yield* fs.readDirectory(directory), ["aa.json"]);
+      assert.strictEqual(yield* fs.readFileString(file), "marker");
     }),
   );
 });

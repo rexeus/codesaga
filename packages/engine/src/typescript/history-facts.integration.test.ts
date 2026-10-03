@@ -35,7 +35,7 @@ const commitHistory = (repo: TempRepository) =>
   });
 
 const cacheFile = (repo: TempRepository) =>
-  `${repo.directory}/.git/codesaga/syntax-v1`;
+  `${repo.directory}/.git/codesaga/syntax-v1.json`;
 
 /** One run: the parser it used and the blobs git was asked for. */
 const run = (
@@ -146,24 +146,14 @@ layer(NodeServices.layer)("gatherHistoryFacts without the cache", (it) => {
 
       yield* run(repo, { exclude: ["bad.ts"] });
 
-      const shards = yield* fs.readDirectory(cacheFile(repo));
-      const decode = Schema.decodeEffect(
+      const stored = yield* Schema.decodeEffect(
         Schema.fromJsonString(
           Schema.Struct({
             facts: Schema.Record(Schema.String, Schema.Unknown),
           }),
         ),
-      );
-      const entries = yield* Effect.forEach(shards, (name) =>
-        fs.readFileString(`${cacheFile(repo)}/${name}`).pipe(
-          Effect.flatMap(decode),
-          Effect.map(({ facts }) => Object.keys(facts).length),
-        ),
-      );
-      assert.strictEqual(
-        entries.reduce((sum, count) => sum + count, 0),
-        2,
-      );
+      )(yield* fs.readFileString(cacheFile(repo)));
+      assert.strictEqual(Object.keys(stored.facts).length, 2);
     }),
   );
 });

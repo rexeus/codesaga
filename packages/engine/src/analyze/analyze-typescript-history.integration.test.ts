@@ -46,7 +46,7 @@ layer(NodeServices.layer)("analyze with typescriptHistory", (it) => {
       // Two files at HEAD, then the three blobs of the history.
       assert.strictEqual(parsed, 5);
       assert.isTrue(
-        yield* fs.exists(`${repo.directory}/.git/codesaga/syntax-v1`),
+        yield* fs.exists(`${repo.directory}/.git/codesaga/syntax-v1.json`),
       );
     }),
   );
@@ -64,7 +64,7 @@ layer(NodeServices.layer)("analyze with typescriptHistory", (it) => {
 
         assert.strictEqual(parsed, 2);
         assert.isFalse(
-          yield* fs.exists(`${repo.directory}/.git/codesaga/syntax-v1`),
+          yield* fs.exists(`${repo.directory}/.git/codesaga/syntax-v1.json`),
         );
       }),
   );

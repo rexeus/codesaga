@@ -15,7 +15,7 @@ import {
   withoutGeneratedFiles,
 } from "../universe/tracked-files.js";
 import {
-  factsCacheDirectory,
+  factsCacheFile,
   factsFingerprint,
   loadFactsCache,
   storeFactsCache,
@@ -131,22 +131,20 @@ export const gatherHistoryFacts = (
       input,
       blobsOfHistory(input.commits, yield* readHeadBlobs(input.head)),
     );
-    const directory = input.useCache
-      ? yield* factsCacheDirectory(input.root)
-      : undefined;
+    const file = input.useCache ? yield* factsCacheFile(input.root) : undefined;
     const fingerprint = factsFingerprint(status);
     const cached =
-      directory === undefined
+      file === undefined
         ? new Map<string, DigestResult>()
-        : yield* loadFactsCache(directory, fingerprint);
+        : yield* loadFactsCache(file, fingerprint);
     const fresh = yield* parseMissing(
       wanted.filter(({ oid, path }) => !cached.has(factsKey(oid, path))),
       parser,
     );
     const keys = wanted.map(({ oid, path }) => factsKey(oid, path));
     const kept = keptOf(keys, cached, fresh);
-    if (directory !== undefined) {
-      yield* storeFactsCache(directory, fingerprint, kept, cached);
+    if (file !== undefined) {
+      yield* storeFactsCache(file, fingerprint, kept, cached);
     }
     return {
       factsByBlob: new Map(

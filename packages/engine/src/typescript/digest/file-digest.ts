@@ -39,6 +39,9 @@ export type FileDigest = {
   readonly exportedDeclarations: number;
 };
 
+/** The values of a `digestRow`. */
+const ROW_LENGTH = 13;
+
 const NUMBER_FIELDS = [
   "lines",
   "any",
@@ -65,3 +68,67 @@ export const isFileDigest = (value: unknown): value is FileDigest =>
   Array.isArray(Reflect.get(value, "notable")) &&
   typeof Reflect.get(value, "esm") === "boolean" &&
   typeof Reflect.get(value, "commonjs") === "boolean";
+
+/**
+ * A digest as a row of values, the form a cache stores it in: the field names
+ * of 59,000 digests would be half of the file. The order is the contract of
+ * `FILE_DIGEST_VERSION`: lines, any, escapes, suppressions, functions,
+ * complexFunctions, the module flags (1 for ESM, 2 for CommonJS), testCases,
+ * focusedTests, declarations, topLevelFunctions, exportedDeclarations, notable.
+ */
+export const digestRow = (digest: FileDigest): ReadonlyArray<unknown> => [
+  digest.lines,
+  digest.any,
+  digest.escapes,
+  digest.suppressions,
+  digest.functions,
+  digest.complexFunctions,
+  (digest.esm ? 1 : 0) + (digest.commonjs ? 2 : 0),
+  digest.testCases,
+  digest.focusedTests,
+  digest.declarations,
+  digest.topLevelFunctions,
+  digest.exportedDeclarations,
+  digest.notable,
+];
+
+/** The digest a row stands for, or undefined when it is not one. */
+export const digestOfRow = (row: unknown): FileDigest | undefined => {
+  if (!Array.isArray(row) || row.length !== ROW_LENGTH) {
+    return undefined;
+  }
+  const values: ReadonlyArray<unknown> = row;
+  const [
+    lines,
+    anys,
+    escapes,
+    suppressions,
+    functions,
+    complexFunctions,
+    modules,
+    testCases,
+    focusedTests,
+    declarations,
+    topLevelFunctions,
+    exportedDeclarations,
+    notable,
+  ] = values;
+  const digest = {
+    version: FILE_DIGEST_VERSION,
+    lines,
+    any: anys,
+    escapes,
+    suppressions,
+    functions,
+    complexFunctions,
+    notable,
+    esm: typeof modules === "number" && (modules & 1) === 1,
+    commonjs: typeof modules === "number" && (modules & 2) === 2,
+    testCases,
+    focusedTests,
+    declarations,
+    topLevelFunctions,
+    exportedDeclarations,
+  };
+  return isFileDigest(digest) ? digest : undefined;
+};
