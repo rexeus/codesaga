@@ -5,6 +5,8 @@ import type { Imports } from "../report/typescript-imports.js";
 import type { FlagEvent } from "../report/typescript-trends.js";
 import { typescriptAnalysis } from "../typescript/deep-dive.js";
 import type { TypeScriptAnalysis } from "../typescript/deep-dive.js";
+import { factsLookupOf } from "../typescript/trends/facts-lookup.js";
+import type { FactsLookup } from "../typescript/trends/facts-lookup.js";
 import { trendsOf } from "../typescript/trends/trends.js";
 import type { Analysis } from "./prepare.js";
 import type { ReportFacts } from "./report-facts.js";
@@ -52,6 +54,12 @@ export const typescriptOf = (
         allFlagEvents: built.allFlagEvents,
       };
 };
+
+/** The facts of the history's file versions, for the badges that compare code before and after a commit; undefined where the history was not parsed. */
+export const historyLookupOf = ({
+  historyFacts,
+}: ReportFacts): FactsLookup | undefined =>
+  historyFacts === undefined ? undefined : factsLookupOf(historyFacts);
 
 /** The report's `deepDives`: the TypeScript analysis with the import structure the knowledge pass found, absent when the universe has no TypeScript. */
 export const deepDivesOf = (

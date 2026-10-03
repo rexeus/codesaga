@@ -3,6 +3,7 @@
 import type { DateTime } from "effect";
 
 import type { ClassifiedCommit } from "../automation/classify.js";
+import type { FactsLookup } from "../typescript/trends/facts-lookup.js";
 
 /** A territory of the recommended detail as the badges read it. */
 export type ContributorBadgeTerritory = {
@@ -41,6 +42,12 @@ export type ContributorBadgeFacts = {
   readonly historyHasOtherOffsets: boolean;
   /** Whether a changed path counts toward code lines. */
   readonly isCodePath: (path: string) => boolean;
+  /**
+   * The facts of every historical TypeScript and JavaScript file version, for
+   * the craft badges that compare a file before and after a commit; without
+   * them (the history was not parsed) those badges are withheld.
+   */
+  readonly factsLookup?: FactsLookup;
   /** The universe files the contributor created, and all universe files, for `founder`. */
   readonly founded: { readonly files: number; readonly ofFiles: number };
 };

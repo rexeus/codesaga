@@ -24,6 +24,14 @@ export const CONTRIBUTOR_BADGE_THRESHOLDS = {
   explorerMinTerritories: 3,
   toolsmithShare: 0.3,
   toolsmithMinCommits: 10,
+  craftMaxFilesPerCommit: 50,
+  typeTightenerRemovedAny: 20,
+  typeTightenerMinCommits: 8,
+  sweeperRemovedDeclarations: 15,
+  simplifierFunctions: 10,
+  simplifierMinDrop: 3,
+  testCompanionCommits: 10,
+  testCompanionShare: 0.5,
   /** Reserved: `reviewer` needs GitHub logins mapped to identities and is not awarded yet. */
   reviewerReviews: 10,
 };

@@ -44,8 +44,10 @@ export type ClassifiedCommit = Classification & {
    * there is none, and for a co-author line that git did not parse as a trailer.
    */
   readonly humanCoAuthors: number;
-  /** Changes after rename resolution, every path, code or not. */
+  /** Changes after rename resolution, every path, code or not, cut to the analysis scope. */
   readonly changes: ReadonlyArray<FileChange>;
+  /** How many files the commit changed in the whole repository, whatever the scope: `changes` is shorter in a scoped analysis. */
+  readonly changedFiles: number;
 };
 
 const GITHUB_NOREPLY = /^(\d+)\+.+@users\.noreply\.github\.com$/iu;

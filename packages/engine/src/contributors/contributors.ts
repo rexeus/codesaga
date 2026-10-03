@@ -37,6 +37,8 @@ type ContributorsInput = {
   readonly shallow: boolean;
   /** The territories of the recommended detail; without them `all-rounder`, `specialist` and `keeper` are withheld. */
   readonly territories?: ContributorBadgeFacts["territories"];
+  /** The facts of the history's TypeScript and JavaScript file versions; without them the badges that compare code before and after a commit are withheld. */
+  readonly factsLookup?: ContributorBadgeFacts["factsLookup"] | undefined;
 };
 
 type Contributor = Report["contributors"][number];
@@ -91,6 +93,7 @@ const contributorOf = (
     isCodePath,
     universePaths,
     territories,
+    factsLookup,
     created,
     historyContributors,
     historyHasOtherOffsets,
@@ -134,6 +137,7 @@ const contributorOf = (
         ofFiles: universePaths.length,
       },
       ...(territories === undefined ? {} : { territories }),
+      ...(factsLookup === undefined ? {} : { factsLookup }),
     }),
   };
 };

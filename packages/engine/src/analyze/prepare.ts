@@ -14,22 +14,25 @@ import type { RepositoryFacts } from "./gather.js";
 const isUnder = (path: string, scope: string): boolean =>
   path === scope || path.startsWith(`${scope}/`);
 
+/** A commit cut to the scope, with the number of files it changed before the cut. */
+type ScopedCommit = HistoryCommit & { readonly changedFiles: number };
+
 /** The commits with a change under `scope`, with only those changes; empty commits count for the whole repository. */
 const inScope = (
   commits: ReadonlyArray<HistoryCommit>,
   scope: string,
-): ReadonlyArray<HistoryCommit> =>
-  scope === "."
-    ? commits
-    : commits.flatMap((commit) => {
-        const changes = commit.changes.filter(({ path }) =>
-          isUnder(path, scope),
-        );
-        return changes.length === 0 ? [] : [{ ...commit, changes }];
-      });
+): ReadonlyArray<ScopedCommit> =>
+  commits.flatMap((commit) => {
+    const changedFiles = commit.changes.length;
+    if (scope === ".") {
+      return [{ ...commit, changedFiles }];
+    }
+    const changes = commit.changes.filter(({ path }) => isUnder(path, scope));
+    return changes.length === 0 ? [] : [{ ...commit, changes, changedFiles }];
+  });
 
 const classify = (
-  commits: ReadonlyArray<HistoryCommit>,
+  commits: ReadonlyArray<ScopedCommit>,
   signatures: RepositoryFacts["signatures"],
 ): ReadonlyArray<ClassifiedCommit> => {
   const identities = buildIdentities(
@@ -47,6 +50,7 @@ const classify = (
       author: identities.get(email) ?? { email, name: commit.author.name },
       humanCoAuthors: humanCoAuthorsOf(commit, signatures),
       changes: commit.changes,
+      changedFiles: commit.changedFiles,
     };
   });
 };

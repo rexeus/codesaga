@@ -116,6 +116,22 @@ export const ContributorBadge = Schema.Struct({
    * (at least `toolsmithMinCommits`) change only tooling files: CI,
    * containers, package manifests and lockfiles, and the configuration files
    * of known tools such as `vite.config.ts` or `tsconfig.json`.
+   * `type-tightener`, `sweeper`, `simplifier` and `test-companion` read what the
+   * person's own human commits of the last `recentWindowDays` days did to the
+   * TypeScript and JavaScript files, by comparing the facts of each file before
+   * and after the commit; commits that change more than `craftMaxFilesPerCommit`
+   * files (mass changes and codemods) are left out, and agent-assisted commits
+   * are the agent's. `type-tightener`: the commits net-remove at least
+   * `typeTightenerRemovedAny` explicit `any` (as `as any` too), in at least
+   * `typeTightenerMinCommits` commits that each net-remove one; the inverse is
+   * never shown. `sweeper`: net removal of at least `sweeperRemovedDeclarations`
+   * top-level classes, functions and arrow-function constants; a move between
+   * files cancels out. `simplifier`: the commits lowered the cognitive
+   * complexity of at least `simplifierFunctions` functions by
+   * `simplifierMinDrop` or more, matched by name within the file, in commits
+   * that add no function to that file. `test-companion`: at least
+   * `testCompanionCommits` commits add an exported function to production code,
+   * and at least `testCompanionShare` of them also add test cases.
    * `reviewer`: at least `reviewerReviews`
    * reviews; only with `--github`.
    */
@@ -137,11 +153,16 @@ export const ContributorBadge = Schema.Struct({
     "long-hauler",
     "explorer",
     "toolsmith",
+    "type-tightener",
+    "sweeper",
+    "simplifier",
+    "test-companion",
     "reviewer",
   ]),
   /**
    * What the badge is about: `focus` (`all-rounder`, `specialist`, `keeper`),
-   * `craft` (`tidier`, `tester`, `documenter`, `toolsmith`), `rhythm`
+   * `craft` (`tidier`, `tester`, `documenter`, `toolsmith`, `type-tightener`, `sweeper`,
+   * `simplifier`, `test-companion`), `rhythm`
    * (`night-owl`, `early-bird`, `weekend-regular`), `collaboration`
    * (`pair-partner`, `reviewer`) or `journey` (`founder`, `long-hauler`,
    * `explorer`, `steady`, `new-here`, `back-again`).
