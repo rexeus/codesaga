@@ -65,6 +65,43 @@ describe("strict-since", () => {
       },
     ]);
   });
+});
+
+describe("strict-since and base configs", () => {
+  it("names the base config that flipped, not the config that only extends it", () => {
+    const child = {
+      ...configPosture("apps/web/tsconfig.json", 50, true),
+      extends: ["tsconfig.base.json"],
+    };
+    const typescript = deepDiveWith({ strictness: strictnessBlock([child]) });
+    const events = [
+      strictOn("tsconfig.base.json"),
+      strictOn("apps/web/tsconfig.json"),
+    ];
+
+    const [story] = storiesFor(trendsOf(27, {}, events), typescript);
+
+    expect(story).toMatchObject({
+      detail: "strict has been on in tsconfig.base.json since 2024-03-11.",
+      path: "tsconfig.base.json",
+    });
+  });
+
+  it("names the config itself when its base did not flip on that day", () => {
+    const child = {
+      ...configPosture("apps/web/tsconfig.json", 50, true),
+      extends: ["tsconfig.base.json"],
+    };
+    const typescript = deepDiveWith({ strictness: strictnessBlock([child]) });
+    const base = { ...strictOn("tsconfig.base.json"), date: "2023-01-05" };
+
+    const [story] = storiesFor(
+      trendsOf(27, {}, [base, strictOn("apps/web/tsconfig.json")]),
+      typescript,
+    );
+
+    expect(story?.path).toBe("apps/web/tsconfig.json");
+  });
 
   it("is not there when strict is off today, when the newest change turned it off, or for another config", () => {
     const events = [strictOn("tsconfig.json")];

@@ -31,7 +31,12 @@ const monthsBetween = (day: string, month: string): number => {
   return (toYear - fromYear) * 12 + (toMonth - fromMonth);
 };
 
-/** `strict` is on in the config that governs the most files, since the commit that last turned it on. */
+/**
+ * `strict` is on in the config that governs the most files, since the commit
+ * that last turned it on. A flip in a base config shows on every config that
+ * extends it, so the story names the first config of the extends chain, base
+ * first, that flipped on that day.
+ */
 const strictSince = (
   { strictness }: TypeScriptDeepDive,
   trends: TrendInput,
@@ -53,14 +58,24 @@ const strictSince = (
   ) {
     return [];
   }
+  const flippedIn =
+    [...main.extends, main.path].find((path) =>
+      trends.events.some(
+        (event) =>
+          event.path === path &&
+          event.flag === "strict" &&
+          event.to &&
+          event.date === turnedOn.date,
+      ),
+    ) ?? main.path;
   return [
     {
       kind: "strict-since",
       title: "Strict since",
-      detail: `strict has been on in ${main.path} since ${turnedOn.date}.`,
+      detail: `strict has been on in ${flippedIn} since ${turnedOn.date}.`,
       value: monthsBetween(turnedOn.date, last),
       date: turnedOn.date,
-      path: main.path,
+      path: flippedIn,
     },
   ];
 };

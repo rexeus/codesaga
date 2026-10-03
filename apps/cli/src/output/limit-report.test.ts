@@ -177,7 +177,7 @@ describe("limitReport TypeScript achievements", () => {
     expect(limited.deepDives?.typescript?.achievements).toStrictEqual(
       report.deepDives?.typescript?.achievements,
     );
-    expect(limited.deepDives?.typescript?.achievements).toHaveLength(4);
+    expect(limited.deepDives?.typescript?.achievements).toHaveLength(5);
     expect(limited.knowledge.territories.territories[0]?.badges).toStrictEqual(
       report.knowledge.territories.territories[0]?.badges,
     );

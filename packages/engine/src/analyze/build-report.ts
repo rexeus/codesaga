@@ -28,7 +28,7 @@ import {
 const storiesOf = (
   { now, isCodePath, repository }: ReportFacts,
   commits: Analysis["scoped"],
-  sections: Pick<StoryFacts, "territories" | "typescript"> & {
+  sections: Pick<StoryFacts, "territories" | "typescript" | "trends"> & {
     readonly knowledge: Report["knowledge"];
   },
 ): Report["stories"] =>
@@ -171,6 +171,7 @@ export const buildReport = (facts: ReportFacts): Report => {
       knowledge: knowledgeSection,
       territories: recommendedTerritories,
       typescript: deepDives.deepDives?.typescript,
+      trends: deepDives.deepDives?.typescript?.trends,
     }),
     achievements: achievementsOf(
       facts,

@@ -50,25 +50,28 @@ layer(analyzeServices)("analyze the stories of the TypeScript code", (it) => {
     }),
   );
 
-  it.effect("reaches the four TypeScript achievements of a clean project", () =>
-    Effect.gen(function* () {
-      const repo = yield* commitTypedProject;
+  it.effect(
+    "reaches the four state achievements of a clean project, with tightened still ahead",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* commitTypedProject;
 
-      const { deepDives } = yield* analyze(analyzeOptionsFor(repo));
+        const { deepDives } = yield* analyze(analyzeOptionsFor(repo));
 
-      assert.deepStrictEqual(
-        deepDives?.typescript?.achievements?.map(({ kind, reached }) => [
-          kind,
-          reached,
-        ]),
-        [
-          ["any-free", true],
-          ["strict-throughout", true],
-          ["esm-only", true],
-          ["no-ts-ignore", true],
-        ],
-      );
-    }),
+        assert.deepStrictEqual(
+          deepDives?.typescript?.achievements?.map(({ kind, reached }) => [
+            kind,
+            reached,
+          ]),
+          [
+            ["any-free", true],
+            ["strict-throughout", true],
+            ["esm-only", true],
+            ["no-ts-ignore", true],
+            ["tightened", false],
+          ],
+        );
+      }),
   );
 });
 

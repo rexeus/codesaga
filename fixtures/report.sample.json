@@ -6429,6 +6429,15 @@
             "target": 262,
             "unit": "production files without @ts-ignore or @ts-nocheck"
           }
+        },
+        {
+          "kind": "tightened",
+          "title": "Tightened",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "milestone",
+          "detail": "The production code has not held 20 escape hatches, so there is no peak to fall from.",
+          "progress": null
         }
       ]
     }

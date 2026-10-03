@@ -1,10 +1,13 @@
 // Owns the TypeScript part of a report: the deep dive at HEAD with, where the history was parsed, its trends.
 // Pure, like the rest of the report's composition.
+import { DateTime } from "effect";
+
 import type { Report } from "../report/report.js";
 import type { Imports } from "../report/typescript-imports.js";
 import type { FlagEvent } from "../report/typescript-trends.js";
 import { typescriptAnalysis } from "../typescript/deep-dive.js";
 import type { TypeScriptAnalysis } from "../typescript/deep-dive.js";
+import type { TypeScriptFacts } from "../typescript/gather-typescript.js";
 import { factsLookupOf } from "../typescript/trends/facts-lookup.js";
 import type { FactsLookup } from "../typescript/trends/facts-lookup.js";
 import { trendsOf } from "../typescript/trends/trends.js";
@@ -16,6 +19,9 @@ export type ReportTypeScript = TypeScriptAnalysis & {
   /** Every flip of `strict` and `noUncheckedIndexedAccess` over the whole history, oldest first; `trends.events` keeps the newest 20. Empty without trends. */
   readonly allFlagEvents: ReadonlyArray<FlagEvent>;
 };
+
+const hasParsedFile = ({ files }: TypeScriptFacts): boolean =>
+  files.some(({ result }) => result.kind === "parsed");
 
 /**
  * The deep dive over HEAD's files, or undefined when the universe has none.
@@ -32,13 +38,8 @@ export const typescriptOf = (
   if (typescript === undefined) {
     return undefined;
   }
-  const analysis = typescriptAnalysis(
-    typescript,
-    revisions,
-    repository.shallow,
-  );
   const built =
-    historyFacts === undefined || analysis.section.typeSafety === undefined
+    historyFacts === undefined || !hasParsedFile(typescript)
       ? undefined
       : trendsOf({
           window: commits,
@@ -46,6 +47,14 @@ export const typescriptOf = (
           scope: repository.scope,
           now,
         });
+  const analysis = typescriptAnalysis(
+    typescript,
+    revisions,
+    repository.shallow,
+    built === undefined
+      ? undefined
+      : { trends: built.trends, today: DateTime.formatIso(now).slice(0, 10) },
+  );
   return built === undefined
     ? { ...analysis, allFlagEvents: [] }
     : {
