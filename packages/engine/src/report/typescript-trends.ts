@@ -40,7 +40,8 @@ const ClassEscapes = Schema.Struct({
  * and `tests.*` for `files`, `lines` (non-blank lines, as `typeSafety` counts them), `any` (explicit `any` keywords), `escapes`
  * (escape sites, as `typeSafety` counts them), `suppressions` (`@ts-`
  * directives and lint disables), `functions`, `complexFunctions` (cognitive
- * complexity of 15 or more), `esmFiles` and `commonjsFiles`; `tests.testCases`
+ * complexity of 15 or more), `esmFiles` and `commonjsFiles` (tooling configs
+ * such as `jest.config.js` are left out of these two); `tests.testCases`
  * and `tests.focusedTests` besides. Each point is the total over the files
  * that exist at the end of that month, replayed along the first-parent chain of
  * the head: the state after the last commit dated in that month or before it,
