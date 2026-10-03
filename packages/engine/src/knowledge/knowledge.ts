@@ -139,7 +139,10 @@ const reportedTerritory = (
     lastChangedAt: isoOfEpochSeconds(input?.lastChangeTime ?? facts.headTime),
     stats: source.stats,
     ...(typescript === undefined ? {} : { typescript }),
-    badges: input === undefined ? [] : territoryBadges(input, facts.now),
+    badges:
+      input === undefined
+        ? []
+        : territoryBadges({ ...input, typescript }, facts.now),
     territories: territories.map((child) =>
       reportedTerritory(child, inputs, facts),
     ),

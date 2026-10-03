@@ -18,6 +18,10 @@ export const testsOf = (
   const testFiles = files.filter(({ path }) => isTestPath(path));
   const total = (count: (facts: TestFacts) => number): number =>
     sum(testFiles.map(({ facts }) => count(facts.tests)));
+  const focusedPaths = testFiles
+    .filter(({ facts }) => facts.tests.focused > 0)
+    .map(({ path }) => path)
+    .toSorted();
   return {
     files: testFiles.length,
     frameworks: ecosystem.tools
@@ -28,11 +32,8 @@ export const testsOf = (
     skipped: total((tests) => tests.skipped),
     focused: total((tests) => tests.focused),
     todo: total((tests) => tests.todo),
-    focusedFiles: testFiles
-      .filter(({ facts }) => facts.tests.focused > 0)
-      .map(({ path }) => path)
-      .toSorted()
-      .slice(0, MAX_FOCUSED_FILES),
+    focusedFiles: focusedPaths.slice(0, MAX_FOCUSED_FILES),
+    focusedFileCount: focusedPaths.length,
     assertions: sumColumns(
       testFiles.map(({ facts }) => facts.tests.assertions),
       ASSERTION_EDGES.length + 1,

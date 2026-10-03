@@ -17,6 +17,10 @@ export const isScriptPath = (path: string): boolean => {
   return language === "TypeScript" || language === "JavaScript";
 };
 
+/** Whether the path is a TypeScript file by its language, as against JavaScript. */
+export const isTypeScriptPath = (path: string): boolean =>
+  languageOf(path) === "TypeScript";
+
 /** Whether the path is a declaration file: it holds types only, so it is counted and never parsed. */
 export const isDeclarationPath = (path: string): boolean =>
   DECLARATION_FILE.test(path);

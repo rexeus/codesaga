@@ -15,4 +15,8 @@ export const ACHIEVEMENT_THRESHOLDS = {
   springCleaningNetLines: 1000,
   freshBloodPeople: 5,
   freshBloodDays: NEW_CONTRIBUTOR_DAYS,
+  anyFreeMinFiles: 50,
+  typeScriptMinFiles: 10,
+  tightenedFall: 0.5,
+  tightenedMinPeakEscapes: 20,
 };

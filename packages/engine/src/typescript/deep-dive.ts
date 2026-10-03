@@ -5,7 +5,7 @@ import type {
   SkipReason,
   TypeScriptDeepDive,
 } from "../report/typescript-deep-dive.js";
-import type { TerritoryTypeScript } from "../report/typescript-territory.js";
+import { achievementsOf } from "./achievements/achievements-of.js";
 import { ecosystemOf } from "./ecosystem/ecosystem-report.js";
 import { complexityAndChangeOf } from "./functions/complexity-and-change.js";
 import { functionsReportOf } from "./functions/function-report.js";
@@ -58,7 +58,7 @@ export type TypeScriptAnalysis = {
   /** The figures of the parsed files at `paths`, a territory's; undefined when there are none. */
   readonly forPaths: (
     paths: ReadonlyArray<string>,
-  ) => TerritoryTypeScript | undefined;
+  ) => ReturnType<typeof territoryTypeScriptOf>;
 };
 
 /**
@@ -67,12 +67,14 @@ export type TypeScriptAnalysis = {
  * blocks over the parsed files, which are absent when there are none.
  * `revisions` are the commits per path in its current life, which
  * `complexityAndChange` joins to the functions; `shallow` says the history
- * is a shallow clone.
+ * is a shallow clone. `history` is absent where the trends were not read; with it
+ * the section also judges the achievements that need them.
  */
 export const typescriptAnalysis = (
   facts: TypeScriptFacts,
   revisions: ReadonlyMap<string, number>,
   shallow: boolean,
+  history?: Parameters<typeof achievementsOf>[2],
 ): TypeScriptAnalysis => {
   const parsed = parsedFilesOf(facts.files);
   const byPath = new Map(parsed.map((file) => [file.path, file]));
@@ -111,6 +113,7 @@ export const typescriptAnalysis = (
             ...(changed === undefined ? {} : { complexityAndChange: changed }),
             tests: testsOf(parsed, ecosystem),
             markers: markersReportOf(parsed),
+            ...achievementsOf(parsed, strictness.section, history),
           }
         : {}),
     },
@@ -118,6 +121,7 @@ export const typescriptAnalysis = (
       territoryTypeScriptOf(
         paths.flatMap((path) => byPath.get(path) ?? []),
         strictness.strictOf(paths),
+        strictness.indexedAccessOf(paths),
       ),
   };
 };

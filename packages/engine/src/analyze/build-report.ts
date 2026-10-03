@@ -28,16 +28,16 @@ import {
 const storiesOf = (
   { now, isCodePath, repository }: ReportFacts,
   commits: Analysis["scoped"],
-  knowledgeSection: Report["knowledge"],
-  territories: StoryFacts["territories"],
+  sections: Pick<StoryFacts, "territories" | "typescript" | "trends"> & {
+    readonly knowledge: Report["knowledge"];
+  },
 ): Report["stories"] =>
   stories({
     commits,
     now,
     shallow: repository.shallow,
     isCodePath,
-    knowledge: knowledgeSection,
-    ...(territories === undefined ? {} : { territories }),
+    ...sections,
   });
 
 const achievementsOf = (
@@ -143,6 +143,7 @@ export const buildReport = (facts: ReportFacts): Report => {
     imports,
   } = knowledgeOf(facts, scoped, headTime, { stats, typescript });
   const people = peopleOf(facts, { commits, scoped }, recommendedTerritories);
+  const deepDives = deepDivesOf(typescript, imports);
   return {
     schemaVersion: 1,
     tool: { name: "codesaga", version: facts.toolVersion },
@@ -166,18 +167,18 @@ export const buildReport = (facts: ReportFacts): Report => {
     automation: automation({ commits, window }),
     knowledge: knowledgeSection,
     stats: stats.repository,
-    stories: storiesOf(facts, scoped, knowledgeSection, recommendedTerritories),
+    stories: storiesOf(facts, scoped, {
+      knowledge: knowledgeSection,
+      territories: recommendedTerritories,
+      typescript: deepDives.deepDives?.typescript,
+      trends: typescript?.history,
+    }),
     achievements: achievementsOf(
       facts,
       scoped,
       stats.repository,
       knowledgeSection,
     ),
-    ...optionalSections(
-      facts,
-      commits,
-      previous,
-      deepDivesOf(typescript, imports),
-    ),
+    ...optionalSections(facts, commits, previous, deepDives),
   };
 };

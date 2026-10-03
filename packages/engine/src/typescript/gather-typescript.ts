@@ -41,7 +41,8 @@ const READ_CONCURRENCY = 16;
 
 const UNREADABLE: FactsResult = { kind: "skipped", reason: "unreadable" };
 
-const readSource = (
+/** The text of a file below `root`, or undefined when it cannot be read. */
+export const readSource = (
   root: string,
   file: string,
 ): Effect.Effect<
@@ -108,7 +109,7 @@ const workspacePackagesOf = (
   );
 
 /** The project's configs, read with their `extends`, and the TypeScript the root manifest declares. */
-const readProject = (
+export const readProject = (
   root: string,
   projectFiles: ProjectFiles,
   manifests: ReadonlyArray<PackageManifest>,

@@ -34,6 +34,17 @@ export const TerritoryTypeScript = Schema.Struct({
   esmShare: Schema.optionalKey(
     Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 })),
   ),
+  /** The production files of the territory that are TypeScript (`.ts`, `.tsx`, `.mts`, `.cts`); the rest of the parsed files are JavaScript or tests. Absent when there is none. */
+  productionTypeScriptFiles: Schema.optionalKey(Schema.Natural),
+  /**
+   * `noUncheckedIndexedAccess` as the configs that govern the territory's
+   * files set it, on the same terms as `strict`.
+   */
+  noUncheckedIndexedAccess: Schema.optionalKey(TerritoryStrict),
+  /** The production functions of the territory, the denominator of `over15Share`; absent with it. */
+  functions: Schema.optionalKey(Schema.Natural),
+  /** The production functions of the territory with a cognitive complexity of 15 or more, the numerator of `over15Share`; absent with it. */
+  complexFunctions: Schema.optionalKey(Schema.Natural),
   /**
    * The share of the territory's production functions with a cognitive
    * complexity of 15 or more, as `deepDives.typescript.functions` counts

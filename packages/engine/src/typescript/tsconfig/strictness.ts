@@ -31,6 +31,10 @@ export type StrictnessAnalysis = {
   readonly strictOf: (
     paths: ReadonlyArray<string>,
   ) => TerritoryStrict | undefined;
+  /** `noUncheckedIndexedAccess` over the governed files among `paths`, on the same terms as `strictOf`. */
+  readonly indexedAccessOf: (
+    paths: ReadonlyArray<string>,
+  ) => TerritoryStrict | undefined;
   /** The path of the config that governs the file at `path`; undefined when none does or the path was not assigned. */
   readonly governingConfigOf: (path: string) => string | undefined;
 };
@@ -60,6 +64,26 @@ const summarize = (values: ReadonlySet<Tri>): TerritoryStrict | undefined => {
   }
   return values.has(false) ? false : undefined;
 };
+
+/** One flag over the governed files among `paths`, as the configs that govern them set it. */
+const summarizeFlag = (
+  paths: ReadonlyArray<string>,
+  governor: ReadonlyMap<string, string | undefined>,
+  postures: ReadonlyMap<string, Posture>,
+  flag: "strict" | "noUncheckedIndexedAccess",
+): TerritoryStrict | undefined =>
+  summarize(
+    new Set(
+      paths.flatMap((path) => {
+        const configPath = governor.get(path);
+        const value =
+          configPath === undefined
+            ? undefined
+            : postures.get(configPath)?.[flag];
+        return value === undefined ? [] : [value];
+      }),
+    ),
+  );
 
 /** The config each path is governed by, undefined for a path no config governs. */
 const assignmentOf = (
@@ -128,17 +152,13 @@ export const strictnessOf = (
     },
     governingConfigOf: (path) => governor.get(path),
     strictOf: (territoryPaths) =>
-      summarize(
-        new Set(
-          territoryPaths.flatMap((path) => {
-            const configPath = governor.get(path);
-            const strict =
-              configPath === undefined
-                ? undefined
-                : postures.get(configPath)?.strict;
-            return strict === undefined ? [] : [strict];
-          }),
-        ),
+      summarizeFlag(territoryPaths, governor, postures, "strict"),
+    indexedAccessOf: (territoryPaths) =>
+      summarizeFlag(
+        territoryPaths,
+        governor,
+        postures,
+        "noUncheckedIndexedAccess",
       ),
   };
 };

@@ -125,6 +125,7 @@ describe("typescriptAnalysis blocks", () => {
     ).toStrictEqual({
       files: 2,
       codeLines: 400,
+      productionTypeScriptFiles: 2,
       escapesPer1000: 7.5,
     });
     expect(forPaths(["README.md", "api/c.ts"])).toBeUndefined();
@@ -190,6 +191,7 @@ describe("typescriptAnalysis blocks of a repository", () => {
       "complexityAndChange",
       "tests",
       "markers",
+      "achievements",
     ]);
     expect(section.complexityAndChange).toMatchObject({
       files: 1,

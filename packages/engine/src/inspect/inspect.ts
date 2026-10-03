@@ -8,7 +8,10 @@ import type { ChildProcessSpawner } from "effect/process";
 import { gatherFacts } from "../analyze/gather.js";
 import type { AnalyzeError, AnalyzeOptions } from "../analyze/gather.js";
 import type { InspectResult } from "../report/inspect-result.js";
+import { gatherInspectedTypeScript } from "../typescript/inspect/gather-inspected.js";
+import type { TypeScriptParser } from "../typescript/typescript-parser.js";
 import { buildInspectResult } from "./build-inspect.js";
+import { pathsMatching } from "./match-paths.js";
 
 /**
  * Answers, for every pattern, who knows the files it matches and whether they
@@ -17,6 +20,10 @@ import { buildInspectResult } from "./build-inspect.js";
  * entry aggregated over its files. Patterns that match no universe file come
  * back in `unmatched`. Expertise covers the whole history; commits and
  * automation cover the `since` window.
+ *
+ * An entry that matches TypeScript or JavaScript files also carries what the
+ * deep dive says of them, and who imports and tests them: only those files
+ * and the files that may import them are parsed.
  *
  * Fails like `analyze`.
  */
@@ -27,8 +34,19 @@ export const inspect = (
 ): Effect.Effect<
   InspectResult,
   AnalyzeError,
-  ChildProcessSpawner.ChildProcessSpawner | FileSystem.FileSystem | Path.Path
+  | ChildProcessSpawner.ChildProcessSpawner
+  | FileSystem.FileSystem
+  | Path.Path
+  | TypeScriptParser
 > =>
-  Effect.map(gatherFacts(options), (facts) =>
-    buildInspectResult(facts, options.patterns),
-  );
+  Effect.gen(function* () {
+    const facts = yield* gatherFacts(options);
+    const paths = facts.universe.map(({ path }) => path);
+    const typescript = yield* gatherInspectedTypeScript(
+      facts.root,
+      facts.universe,
+      facts.projectFiles,
+      options.patterns.flatMap((pattern) => pathsMatching(pattern, paths)),
+    );
+    return buildInspectResult(facts, options.patterns, typescript);
+  });

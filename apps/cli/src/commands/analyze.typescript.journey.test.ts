@@ -1,4 +1,4 @@
-import { Report } from "@codesaga/engine";
+import { InspectResult, Report } from "@codesaga/engine";
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 
@@ -55,19 +55,34 @@ describe("codesaga analyze --json deep dive", () => {
         expect(JSON.parse(result.stdout)).not.toHaveProperty("deepDives");
       }).pipe(Effect.scoped),
   );
+});
 
-  it.live("does not load the parser for inspect", () =>
-    Effect.gen(function* () {
-      const repo = yield* makeTeamProject;
+describe("codesaga inspect --json TypeScript figures", () => {
+  it.live(
+    "answers inspect with the TypeScript figures of the matched file",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
 
-      const result = yield* journey({
-        args: ["inspect", "src/a.ts", "--json"],
-        cwd: repo.root,
-      });
+        const result = yield* journey({
+          args: ["inspect", "src/a.ts", "--json"],
+          cwd: repo.root,
+        });
 
-      expect(result.exitCode).toBe(0);
-      expect(JSON.parse(result.stdout)).not.toHaveProperty("deepDives");
-    }).pipe(Effect.scoped),
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toBe("");
+        const inspected = yield* Schema.decodeUnknownEffect(InspectResult)(
+          JSON.parse(result.stdout),
+        );
+        expect(inspected.matches[0]?.typescript).toMatchObject({
+          files: 1,
+          declarationFiles: 0,
+          skipped: 0,
+          importedBy: { files: 0, top: [] },
+          testedBy: { files: 0, top: [] },
+        });
+        expect(JSON.parse(result.stdout)).not.toHaveProperty("deepDives");
+      }).pipe(Effect.scoped),
   );
 });
 

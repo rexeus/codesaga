@@ -1,6 +1,8 @@
 // Owns the facts a territory's badge rules read, so the rules and the code that gathers the facts agree on one shape.
 // Types only: `territory-badge-inputs.ts` gathers them, `territory-badges.ts` judges them.
 
+import type { TerritoryTypeScript } from "../report/typescript-territory.js";
+
 /** An expert of the territory; times are seconds since the epoch. */
 export type TerritoryExpert = {
   /** Files of the territory the person is an expert on. */
@@ -67,6 +69,8 @@ export type TerritoryBadgeInput = {
   readonly peerRecentCommits: number;
   /** The time of the repository's first commit; a territory is `new-territory` only well after it. Undefined when unknown, as in a shallow clone: then no territory is `new-territory`. */
   readonly startTime: number | undefined;
+  /** The deep dive's figures for the territory's files; absent without a deep dive or a parsed file. */
+  readonly typescript?: TerritoryTypeScript | undefined;
   /** The first commit of every person who arrived after the repository started, with the paths it changed. */
   readonly firstCommits: ReadonlyArray<{
     readonly time: number;

@@ -51,7 +51,18 @@
       "newcomerDays": 90,
       "anniversaryWindowDays": 7,
       "cleanupMinNetDeletedLines": 200,
-      "renameRecordMinRenames": 3
+      "renameRecordMinRenames": 3,
+      "focusedTestMinCases": 1,
+      "complexCoreMinFunctions": 100,
+      "complexCoreMinComplexity": 25,
+      "coreTerritoryShare": 0.6,
+      "coreTerritoryMinTerritories": 5,
+      "typeTrendMonths": 12,
+      "typeTrendMinChange": 0.3,
+      "typeTrendMinEscapes": 10,
+      "typeTrendMinLines": 1000,
+      "moduleEraMinFiles": 10,
+      "moduleEraCommonjsShare": 0.5
     },
     "badges": {
       "sharedActiveExperts": 4,
@@ -111,7 +122,10 @@
       "simplifierMinDrop": 3,
       "testCompanionCommits": 10,
       "testCompanionShare": 0.5,
-      "reviewerReviews": 10
+      "reviewerReviews": 10,
+      "typeSafeMinFiles": 10,
+      "complexLogicMinFunctions": 20,
+      "complexLogicShare": 0.1
     },
     "achievements": {
       "firstCommitsTiers": [1000, 10000],
@@ -124,7 +138,11 @@
       "unbrokenDays": 30,
       "springCleaningNetLines": 1000,
       "freshBloodPeople": 5,
-      "freshBloodDays": 90
+      "freshBloodDays": 90,
+      "anyFreeMinFiles": 50,
+      "typeScriptMinFiles": 10,
+      "tightenedFall": 0.5,
+      "tightenedMinPeakEscapes": 20
     },
     "typescript": {
       "complexityBands": [5, 10, 15, 25],
@@ -2638,6 +2656,12 @@
               "category": "knowledge",
               "label": "Handover",
               "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
+            },
+            {
+              "kind": "strict",
+              "category": "code",
+              "label": "Strict",
+              "evidence": "Every tsconfig that governs its files sets strict and noUncheckedIndexedAccess."
             }
           ],
           "totalTerritories": 3,
@@ -3169,9 +3193,13 @@
           "typescript": {
             "files": 38,
             "codeLines": 4300,
+            "productionTypeScriptFiles": 34,
             "escapesPer1000": 4.1,
             "strict": true,
+            "noUncheckedIndexedAccess": true,
             "esmShare": 1,
+            "functions": 380,
+            "complexFunctions": 8,
             "over15Share": 0.0211,
             "maxComplexity": 33,
             "importsCount": 0,
@@ -3292,9 +3320,13 @@
           "typescript": {
             "files": 14,
             "codeLines": 1700,
+            "productionTypeScriptFiles": 12,
             "escapesPer1000": 2.4,
             "strict": "unknown",
+            "noUncheckedIndexedAccess": false,
             "esmShare": 1,
+            "functions": 120,
+            "complexFunctions": 0,
             "over15Share": 0.0,
             "maxComplexity": 12,
             "importsCount": 1,
@@ -3402,6 +3434,12 @@
               "category": "knowledge",
               "label": "Knowledge fading",
               "evidence": "Aiko Tanaka, expert on 42 of 58 files, last committed 148 days ago."
+            },
+            {
+              "kind": "complex-logic",
+              "category": "code",
+              "label": "Complex logic",
+              "evidence": "40 of 325 production functions (12%) score 15 or more; the hardest scores 29."
             }
           ],
           "totalTerritories": 0,
@@ -3409,10 +3447,14 @@
           "typescript": {
             "files": 40,
             "codeLines": 4700,
+            "productionTypeScriptFiles": 36,
             "escapesPer1000": 9.8,
             "strict": "mixed",
+            "noUncheckedIndexedAccess": false,
             "esmShare": 0.9167,
-            "over15Share": 0.0402,
+            "functions": 325,
+            "complexFunctions": 40,
+            "over15Share": 0.1233,
             "maxComplexity": 29,
             "importsCount": 3,
             "importedByCount": 0,
@@ -3513,15 +3555,26 @@
               }
             }
           },
-          "badges": [],
+          "badges": [
+            {
+              "kind": "type-safe",
+              "category": "code",
+              "label": "Type-safe",
+              "evidence": "16 production TypeScript files with 0.0 escape hatches per 1,000 production lines."
+            }
+          ],
           "totalTerritories": 0,
           "territories": [],
           "typescript": {
             "files": 20,
             "codeLines": 2300,
-            "escapesPer1000": 1.3,
+            "productionTypeScriptFiles": 16,
+            "escapesPer1000": 0,
             "strict": true,
+            "noUncheckedIndexedAccess": false,
             "esmShare": 1,
+            "functions": 140,
+            "complexFunctions": 0,
             "over15Share": 0.0,
             "maxComplexity": 9,
             "importsCount": 1,
@@ -3727,9 +3780,13 @@
           "typescript": {
             "files": 6,
             "codeLines": 700,
+            "productionTypeScriptFiles": 5,
             "escapesPer1000": 0,
             "strict": true,
+            "noUncheckedIndexedAccess": false,
             "esmShare": 1,
+            "functions": 48,
+            "complexFunctions": 0,
             "over15Share": 0.0,
             "maxComplexity": 6,
             "importsCount": 0,
@@ -3844,9 +3901,13 @@
           "typescript": {
             "files": 5,
             "codeLines": 600,
+            "productionTypeScriptFiles": 4,
             "escapesPer1000": 8.3,
             "strict": true,
+            "noUncheckedIndexedAccess": false,
             "esmShare": 0.6,
+            "functions": 40,
+            "complexFunctions": 0,
             "over15Share": 0.0,
             "maxComplexity": 14,
             "importsCount": 1,
@@ -3978,6 +4039,12 @@
               "category": "knowledge",
               "label": "Newcomer-friendly",
               "evidence": "2 people made their first commit here in the last 180 days."
+            },
+            {
+              "kind": "strict",
+              "category": "code",
+              "label": "Strict",
+              "evidence": "Every tsconfig that governs its files sets strict and noUncheckedIndexedAccess."
             }
           ],
           "totalTerritories": 3,
@@ -4732,9 +4799,13 @@
           "typescript": {
             "files": 84,
             "codeLines": 9800,
+            "productionTypeScriptFiles": 78,
             "escapesPer1000": 5.1,
             "strict": true,
+            "noUncheckedIndexedAccess": true,
             "esmShare": 1,
+            "functions": 760,
+            "complexFunctions": 15,
             "over15Share": 0.0198,
             "maxComplexity": 26,
             "importsCount": 3,
@@ -4860,6 +4931,18 @@
               "category": "code",
               "label": "Well tested",
               "evidence": "46% of the files are tests (33 of 71)."
+            },
+            {
+              "kind": "strict",
+              "category": "code",
+              "label": "Strict",
+              "evidence": "Every tsconfig that governs its files sets strict and noUncheckedIndexedAccess."
+            },
+            {
+              "kind": "in-a-cycle",
+              "category": "code",
+              "label": "In a cycle",
+              "evidence": "Production files import each other by value in a cycle that runs through this territory and out of it."
             }
           ],
           "totalTerritories": 0,
@@ -4867,14 +4950,18 @@
           "typescript": {
             "files": 52,
             "codeLines": 6200,
+            "productionTypeScriptFiles": 44,
             "escapesPer1000": 6.4,
             "strict": true,
+            "noUncheckedIndexedAccess": true,
             "esmShare": 1,
+            "functions": 520,
+            "complexFunctions": 19,
             "over15Share": 0.0366,
             "maxComplexity": 41,
             "importsCount": 3,
             "importedByCount": 3,
-            "inCycle": false
+            "inCycle": true
           }
         },
         {
@@ -4995,6 +5082,12 @@
               "category": "knowledge",
               "label": "Shared knowledge",
               "evidence": "4 active experts and a truck factor of 4."
+            },
+            {
+              "kind": "in-a-cycle",
+              "category": "code",
+              "label": "In a cycle",
+              "evidence": "Production files import each other by value in a cycle that runs through this territory and out of it."
             }
           ],
           "totalTerritories": 0,
@@ -5002,14 +5095,18 @@
           "typescript": {
             "files": 70,
             "codeLines": 8100,
+            "productionTypeScriptFiles": 62,
             "escapesPer1000": 3.2,
             "strict": true,
+            "noUncheckedIndexedAccess": false,
             "esmShare": 1,
+            "functions": 700,
+            "complexFunctions": 9,
             "over15Share": 0.0123,
             "maxComplexity": 18,
             "importsCount": 1,
             "importedByCount": 3,
-            "inCycle": false
+            "inCycle": true
           }
         }
       ]
@@ -5162,11 +5259,11 @@
       "date": "2025-03-10"
     },
     {
-      "kind": "busiest-day",
-      "title": "Busiest day",
-      "detail": "31 commits landed on 2025-02-18, the most on a single day.",
-      "value": 31,
-      "date": "2025-02-18"
+      "kind": "complex-core",
+      "title": "Hard functions",
+      "detail": "The hardest function, reconcileInvoices in packages/api/src/billing/reconcile.ts, scores 41; the 47 of 1,840 functions at 15 or more hold 8% of the code.",
+      "value": 41,
+      "path": "packages/api/src/billing/reconcile.ts"
     },
     {
       "kind": "newcomers",
@@ -5840,7 +5937,8 @@
         "focusedFiles": [],
         "assertions": [88, 502, 610, 216],
         "snapshots": 31,
-        "typeTests": 12
+        "typeTests": 12,
+        "focusedFileCount": 0
       },
       "markers": {
         "files": 262,
@@ -5910,11 +6008,11 @@
               {
                 "size": 3,
                 "files": [
-                  "packages/api/src/orders/index.ts",
                   "packages/api/src/orders/pricing.ts",
-                  "packages/api/src/orders/totals.ts"
+                  "packages/api/src/orders/totals.ts",
+                  "packages/ui/src/format/money.ts"
                 ],
-                "territories": 1
+                "territories": 2
               },
               {
                 "size": 2,
@@ -6292,7 +6390,66 @@
             "removed": 0
           }
         }
-      }
+      },
+      "achievements": [
+        {
+          "kind": "any-free",
+          "title": "Any-free",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "41 of 262 production TypeScript files use an explicit any.",
+          "progress": {
+            "value": 221,
+            "target": 262,
+            "unit": "production files without any"
+          }
+        },
+        {
+          "kind": "strict-throughout",
+          "title": "Strict throughout",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "232 of 276 files lie under a strict tsconfig.",
+          "progress": {
+            "value": 232,
+            "target": 276,
+            "unit": "files under a strict tsconfig"
+          }
+        },
+        {
+          "kind": "esm-only",
+          "title": "ESM only",
+          "reached": true,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "No CommonJS in 301 production module files.",
+          "progress": null
+        },
+        {
+          "kind": "no-ts-ignore",
+          "title": "No ts-ignore",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "3 of 262 production files hold a @ts-ignore or @ts-nocheck.",
+          "progress": {
+            "value": 259,
+            "target": 262,
+            "unit": "production files without @ts-ignore or @ts-nocheck"
+          }
+        },
+        {
+          "kind": "tightened",
+          "title": "Tightened",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "milestone",
+          "detail": "The production code has not held 20 escape hatches, so there is no peak to fall from.",
+          "progress": null
+        }
+      ]
     }
   }
 }

@@ -7,7 +7,7 @@ import type { HistoryFacts } from "../history-facts.js";
 import { escapesByAutomation } from "./escapes-by-automation.js";
 import { factsLookupOf } from "./facts-lookup.js";
 import { MEASURES } from "./file-counts.js";
-import { monthOf, monthlyTotals } from "./replay.js";
+import { lastCommitDays, monthOf, monthlyTotals } from "./replay.js";
 import type { Totals } from "./replay.js";
 import { flagEventsOf } from "./tsconfig-events.js";
 
@@ -53,6 +53,13 @@ export type TrendsResult = {
   readonly trends: Trends;
   /** Every flip of `strict` and `noUncheckedIndexedAccess` over the whole history, oldest first; `trends.events` holds only the newest 20. */
   readonly allFlagEvents: ReadonlyArray<Trends["events"][number]>;
+  /**
+   * For each month of `trends.months`, the day of the first-parent commit its
+   * point is the state after: the last commit dated in that month or before
+   * it. The stories and achievements date what they find by it; the report
+   * does not carry it.
+   */
+  readonly lastCommitDays: ReadonlyArray<string>;
 };
 
 /**
@@ -97,5 +104,6 @@ export const trendsOf = (input: TrendsInput): TrendsResult | undefined => {
       escapesByAutomation: escapesByAutomation(input.window, lookup),
     },
     allFlagEvents,
+    lastCommitDays: lastCommitDays(chain, firstMonth, lastMonth),
   };
 };

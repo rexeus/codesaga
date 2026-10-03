@@ -10,7 +10,7 @@ const Count = Schema.Natural;
  * config shows on the configs that extend it. A flag that a config which
  * could not be read may have set is not reported.
  */
-export const FlagEvent = Schema.Struct({
+const FlagEvent = Schema.Struct({
   /** The day of the commit, `YYYY-MM-DD` in UTC. */
   date: Schema.String,
   /** Repository-relative path of the config, under the name it had at that commit. */
@@ -20,8 +20,6 @@ export const FlagEvent = Schema.Struct({
   from: Schema.NullOr(Schema.Boolean),
   to: Schema.Boolean,
 });
-
-export type FlagEvent = typeof FlagEvent.Type;
 
 /** What the commits of one class did to the escape hatches of the window, per commit and as a net sum over its TypeScript and JavaScript files. */
 const ClassEscapes = Schema.Struct({

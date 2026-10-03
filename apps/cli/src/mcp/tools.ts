@@ -49,7 +49,7 @@ const readOnlyHints = Context.make(Tool.Readonly, true).pipe(
 /** `codesaga analyze --json`: the story of the repository. */
 const AnalyzeTool = Tool.make("analyze", {
   description:
-    "Tell the story of a git repository: activity, people, knowledge and AI agent involvement. Returns the report document of `codesaga analyze --json`.",
+    "Tell the story of a git repository: activity, people, knowledge and AI agent involvement. Returns the report document of `codesaga analyze --json`. For repositories with TypeScript or JavaScript it holds `deepDives.typescript`: type safety, strictness, function complexity, imports and tests, and the TypeScript achievements; territories carry TypeScript figures and badges (type-safe, strict, complex-logic, in-a-cycle).",
   parameters: Schema.Struct({
     path,
     since,
@@ -87,7 +87,7 @@ const AnalyzeTool = Tool.make("analyze", {
 /** `codesaga inspect --json`: who knows a file, directory or glob. */
 const InspectTool = Tool.make("inspect", {
   description:
-    "Show who knows files, directories or globs and whether they are still around, before editing or picking reviewers. Returns the result document of `codesaga inspect --json`: one answer per pattern.",
+    "Show who knows files, directories or globs and whether they are still around, before editing or picking reviewers. Returns the result document of `codesaga inspect --json`: one answer per pattern. For TypeScript and JavaScript files an entry also answers how complex they are (`typescript.maxComplexity`, the hardest functions), how many escape hatches they hold, which files import them (`importedBy`) and which tests do (`testedBy`).",
   parameters: Schema.Struct({
     patterns: Schema.Array(Schema.String)
       .check(Schema.isMinLength(1))

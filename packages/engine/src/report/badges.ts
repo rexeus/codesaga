@@ -44,7 +44,16 @@ export const TerritoryBadge = Schema.Struct({
    * territories at the territory's level and a value of at least
    * `codeBadgeMedianFactor` times the median of those territories' values. `well-tested`: at least
    * `thresholds.badges.wellTestedShare` of the files are tests; never awarded to
-   * a territory whose own path is inside a test directory.
+   * a territory whose own path is inside a test directory. `type-safe`: at least
+   * `thresholds.badges.typeSafeMinFiles` production TypeScript files and no escape
+   * hatch per 1,000 production lines once the figure is rounded to one decimal.
+   * `strict`: every config that governs the territory's files is effectively
+   * strict, `noUncheckedIndexedAccess` included. `complex-logic`: at least
+   * `thresholds.badges.complexLogicMinFunctions` production functions, and at least
+   * `complexLogicShare` of them at or above `thresholds.typescript.complexityLimit`.
+   * `in-a-cycle`: a cycle of production files by value imports runs through the
+   * territory and out of it (`typescript.inCycle`); the only badge of the four
+   * that points at a cost, the coupling a cycle brings. They need the TypeScript deep dive.
    */
   kind: Schema.Literals([
     "island",
@@ -62,11 +71,15 @@ export const TerritoryBadge = Schema.Struct({
     "churning",
     "deeply-nested",
     "well-tested",
+    "type-safe",
+    "strict",
+    "complex-logic",
+    "in-a-cycle",
   ]),
   /**
    * What the badge is about: `knowledge` (`island`, `orphaned`, `one-expert`,
    * `shared-knowledge`, `knowledge-fading`, `handover`, `newcomer-friendly`),
-   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`heavyweight`, `hotspot`, `churning`, `deeply-nested`, `well-tested`).
+   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`heavyweight`, `hotspot`, `churning`, `deeply-nested`, `well-tested`, `type-safe`, `strict`, `complex-logic`, `in-a-cycle`).
    * Determined by `kind`.
    */
   category: Schema.Literals(["knowledge", "code", "activity"]),

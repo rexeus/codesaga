@@ -110,6 +110,7 @@ layer(analyzeServices)(
           assert.deepStrictEqual(byPath["lib"], {
             files: 3,
             codeLines: 3,
+            productionTypeScriptFiles: 3,
             escapesPer1000: 0,
             esmShare: 1,
             importsCount: 0,
@@ -265,6 +266,7 @@ layer(analyzeServices)("analyze the TypeScript deep dive's tests", (it) => {
         focused: 1,
         todo: 0,
         focusedFiles: ["src/hard.test.ts"],
+        focusedFileCount: 1,
         assertions: [0, 1, 0, 0],
         snapshots: 0,
         typeTests: 0,

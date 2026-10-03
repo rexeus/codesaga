@@ -68,3 +68,26 @@ describe("trendsOf events", () => {
     ).toBeUndefined();
   });
 });
+
+describe("trendsOf lastCommitDays", () => {
+  it("dates each month by the last commit of the chain in it or before it", () => {
+    // 40 commits from 2026-01-01 to 2026-02-09, and no commit in March.
+    const result = trendsOf({
+      historyFacts: flips(40),
+      window: [],
+      scope: ".",
+      now,
+    });
+
+    expect(result?.trends.months).toStrictEqual([
+      "2026-01",
+      "2026-02",
+      "2026-03",
+    ]);
+    expect(result?.lastCommitDays).toStrictEqual([
+      "2026-01-31",
+      "2026-02-09",
+      "2026-02-09",
+    ]);
+  });
+});
