@@ -93,12 +93,13 @@ export const chartSvg = (
 /**
  * Draws a chart into `host` and redraws it whenever the host's width changes,
  * so the layout always matches the pixels it has. A chart that had the
- * keyboard focus gets it back, on the point it had visited.
+ * keyboard focus gets it back, on the point it had visited. The returned
+ * function draws again at the current width, for a chart whose data changed.
  */
 export const responsiveChart = (
   host: HTMLElement,
   draw: (width: number) => SVGElement,
-): void => {
+): (() => void) => {
   let drawnWidth = 0;
   const render = (): void => {
     const width = Math.floor(host.clientWidth);
@@ -119,6 +120,10 @@ export const responsiveChart = (
   };
   new ResizeObserver(render).observe(host);
   render();
+  return () => {
+    drawnWidth = 0;
+    render();
+  };
 };
 
 /** A chart card with its title and subtitle; the caller fills `.chart-host`. */

@@ -1,3 +1,4 @@
+import type { StoryLine } from "../present/typescript-stories.js";
 import type {
   CoverageView,
   SummaryFigure,
@@ -14,6 +15,14 @@ const coverageNote = ({ headline, notes }: CoverageView): HTMLElement =>
     h("span", "", h("b", "", headline), ` · ${notes.join(" ")}`),
   );
 
+const storyLine = ({ icon: glyph, title, detail }: StoryLine): HTMLElement =>
+  h(
+    "p",
+    "ts-story",
+    icon(glyph, 15, 2),
+    h("span", "", h("b", "", title), ` — ${detail}`),
+  );
+
 const figure = ({ label, value, note }: SummaryFigure): HTMLElement =>
   h(
     "div",
@@ -24,11 +33,14 @@ const figure = ({ label, value, note }: SummaryFigure): HTMLElement =>
   );
 
 /**
- * The top of the section: a strip of the figures that sum up the code, and
- * what the analysis could read. When the parser did not load or no file could
+ * The top of the section: the stories about the TypeScript code as lines, a
+ * strip of the figures that sum up the code, and what the analysis could read. When the parser did not load or no file could
  * be read there are no figures, and the card says so calmly.
  */
-export const summaryCard = (state: TypeScriptState): HTMLElement => {
+export const summaryCard = (
+  state: TypeScriptState,
+  stories: readonly StoryLine[],
+): HTMLElement => {
   if (state.kind !== "ready") {
     return h(
       "section",
@@ -46,6 +58,9 @@ export const summaryCard = (state: TypeScriptState): HTMLElement => {
   return h(
     "section",
     "card panel ts-summary",
+    ...(stories.length === 0
+      ? []
+      : [h("div", "ts-stories", ...stories.map((story) => storyLine(story)))]),
     figures,
     coverageNote(state.coverage),
   );

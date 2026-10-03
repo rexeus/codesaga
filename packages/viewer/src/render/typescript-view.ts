@@ -1,5 +1,6 @@
 import type { Report } from "@codesaga/engine";
 
+import { typeScriptStoryLines } from "../present/typescript-stories.js";
 import {
   hasTypeScriptFiles,
   typeScriptState,
@@ -7,19 +8,19 @@ import {
 import type { TypeScriptDeepDive } from "../present/typescript-summary.js";
 import { h } from "./dom.js";
 import { section } from "./section.js";
-import { ecosystemCard, modulesCard } from "./typescript-code-facts-view.js";
+import { eventsBlock } from "./typescript-events-view.js";
 import {
   changeCard,
   functionHistograms,
   topFunctionsCard,
 } from "./typescript-functions-view.js";
-import { idiomsCard } from "./typescript-idioms-view.js";
 import { fileGraphCard } from "./typescript-import-files-view.js";
 import { couplingCard, importMapCard } from "./typescript-imports-view.js";
+import { moreFacts } from "./typescript-more-view.js";
 import { counterpartsCard, escapesCard } from "./typescript-safety-view.js";
 import { strictnessCard } from "./typescript-strictness-view.js";
 import { summaryCard } from "./typescript-summary-view.js";
-import { markersCard, testsCard } from "./typescript-test-facts-view.js";
+import { trendCard } from "./typescript-trend-view.js";
 
 const DESCRIPTION =
   "Read from the syntax of every TypeScript and JavaScript file at HEAD; no type checker runs. Counts and rates, never a score.";
@@ -49,28 +50,42 @@ const untyped = (): HTMLElement =>
     ),
   );
 
-const typeSafety = (
-  { typeSafety: safety, strictness }: TypeScriptDeepDive,
-  typed: boolean,
-): HTMLElement[] => {
+type Context = {
+  readonly deepDive: TypeScriptDeepDive;
+  readonly typed: boolean;
+  readonly firstCommitAt: string | null;
+};
+
+const typeSafety = ({
+  deepDive,
+  typed,
+  firstCommitAt,
+}: Context): HTMLElement[] => {
+  const { typeSafety: safety, strictness, trends } = deepDive;
+  const trend =
+    trends === undefined ? null : trendCard(trends, typed, firstCommitAt);
   if (!typed) {
     return [
       group("Type safety", "Where the code leaves the type system"),
       untyped(),
+      ...(trend === null ? [] : [trend]),
     ];
   }
-  return safety === undefined && strictness === undefined
-    ? []
-    : [
-        group(
-          "Type safety",
-          "Where the code leaves the type system, and how strictly the compiler is set",
-        ),
-        ...(safety === undefined
-          ? []
-          : [row(escapesCard(safety), counterpartsCard(safety))]),
-        ...(strictness === undefined ? [] : [strictnessCard(strictness)]),
-      ];
+  if (safety === undefined && strictness === undefined) {
+    return [];
+  }
+  const events = trends === undefined ? null : eventsBlock(trends.events);
+  return [
+    group(
+      "Type safety",
+      "Where the code leaves the type system, how that changed, and how strictly the compiler is set",
+    ),
+    ...(safety === undefined
+      ? []
+      : [row(escapesCard(safety), counterpartsCard(safety))]),
+    ...(trend === null ? [] : [trend]),
+    ...(strictness === undefined ? [] : [strictnessCard(strictness, events)]),
+  ];
 };
 
 const functions = ({
@@ -112,28 +127,6 @@ const imports = ({ imports: graph }: TypeScriptDeepDive): HTMLElement[] =>
         fileGraphCard(graph),
       ];
 
-const more = ({
-  idioms,
-  modules,
-  ecosystem,
-  tests,
-  markers,
-}: TypeScriptDeepDive): HTMLElement[] => {
-  const cards = [
-    idioms === undefined ? null : idiomsCard(idioms),
-    modules === undefined ? null : modulesCard(modules),
-    ecosystem === undefined ? null : ecosystemCard(ecosystem),
-    tests === undefined ? null : testsCard(tests),
-    markers === undefined ? null : markersCard(markers),
-  ].filter((card) => card !== null);
-  return cards.length === 0
-    ? []
-    : [
-        group("More facts", "Open a card to read it"),
-        h("div", "fold-grid", ...cards),
-      ];
-};
-
 /**
  * The Deep dive: TypeScript section, or null when the report has no
  * `deepDives.typescript`. A parser that did not load leaves only the
@@ -149,6 +142,11 @@ export const renderTypeScript = (report: Report): HTMLElement | null => {
     deepDive,
     hasTypeScriptFiles(report.stats.languages),
   );
+  const context = {
+    deepDive,
+    typed: state.kind === "ready" && state.typed,
+    firstCommitAt: report.repository.firstCommitAt,
+  };
   return section(
     "typescript",
     "Deep dive: TypeScript",
@@ -157,13 +155,13 @@ export const renderTypeScript = (report: Report): HTMLElement | null => {
     h(
       "div",
       "ts-stack",
-      summaryCard(state),
+      summaryCard(state, typeScriptStoryLines(report.stories)),
       ...(state.kind === "ready"
         ? [
-            ...typeSafety(deepDive, state.typed),
+            ...typeSafety(context),
             ...functions(deepDive),
             ...imports(deepDive),
-            ...more(deepDive),
+            ...moreFacts(deepDive, report.stories),
           ]
         : []),
     ),

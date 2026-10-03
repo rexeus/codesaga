@@ -127,9 +127,13 @@ const body = (strictness: Strictness): Node[] => {
  * what their config sets. A `tsconfig` that could not be read leaves its
  * files `unknown`, never guessed. The configs follow in a collapsed list.
  */
-export const strictnessCard = (strictness: Strictness): HTMLElement =>
+export const strictnessCard = (
+  strictness: Strictness,
+  events: HTMLElement | null,
+): HTMLElement =>
   card(
     "Compiler strictness",
     "What the tsconfig files make the compiler check, over the files each one governs",
     ...body(strictness),
+    ...(events === null ? [] : [events]),
   );

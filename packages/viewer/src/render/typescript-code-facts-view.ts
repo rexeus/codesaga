@@ -20,12 +20,15 @@ type Modules = NonNullable<TypeScriptDeepDive["modules"]>;
 type Ecosystem = NonNullable<TypeScriptDeepDive["ecosystem"]>;
 
 /** Which module systems the files use, whether Node could run them unbuilt, and how the packages are typed. */
-export const modulesCard = (modules: Modules): HTMLElement => {
+export const modulesCard = (
+  modules: Modules,
+  era: { readonly chart: HTMLElement | null; readonly story: string | null },
+): HTMLElement => {
   const view = modulesView(modules);
   const segments = moduleSegments(modules);
   return foldCard(
     "Modules and era",
-    "ES modules and CommonJS, and the syntax Node cannot run unbuilt",
+    "ES modules and CommonJS over time, and the syntax Node cannot run unbuilt",
     view.teaser,
     h(
       "div",
@@ -39,6 +42,8 @@ export const modulesCard = (modules: Modules): HTMLElement => {
         legendItem(entity, label, formatCount(files)),
       ),
     ),
+    ...(era.story === null ? [] : [h("p", "ts-lead", era.story)]),
+    ...(era.chart === null ? [] : [era.chart]),
     h("p", "ts-lead", view.nonErasableLine),
     h(
       "div",
