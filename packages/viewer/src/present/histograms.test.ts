@@ -30,6 +30,19 @@ describe("histogramViews", () => {
     ]);
   });
 
+  it("counts files in every histogram and leaves the small bars unmarked", () => {
+    expect(
+      [length, churn, complexity].map((view) => [
+        view?.noun,
+        view?.annotateAll,
+      ]),
+    ).toEqual([
+      ["files", false],
+      ["files", false],
+      ["files", false],
+    ]);
+  });
+
   it("sums each up in three figures and names the file that stands out", () => {
     expect(length?.facts).toEqual([
       { value: "5", label: "shortest" },

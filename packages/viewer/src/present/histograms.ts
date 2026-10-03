@@ -22,7 +22,11 @@ const COMPLEXITY_LABELS = [
 ];
 
 /** One bucket of a histogram. */
-export type HistogramBin = { readonly label: string; readonly files: number };
+export type HistogramBin = {
+  readonly label: string;
+  /** The count of what the histogram counts, see `HistogramView.noun`. */
+  readonly files: number;
+};
 
 /** A figure with what it counts, under a histogram. */
 type Fact = { readonly value: string; readonly label: string };
@@ -33,6 +37,8 @@ export type HistogramView = {
   readonly subtitle: string;
   /** What a bucket's range measures, for its tooltip: `lines`, `revisions`. */
   readonly unit: string;
+  /** What the buckets count, plural: `files`, `functions`. */
+  readonly noun: string;
   readonly bins: readonly HistogramBin[];
   readonly facts: readonly Fact[];
   /** A file worth naming under the facts, with what makes it so; null when there is none. */
@@ -43,6 +49,8 @@ export type HistogramView = {
   } | null;
   /** The label of the first column of the table view. */
   readonly rangeHeading: string;
+  /** Whether every bar carries its count, for a histogram so skewed that the small bars would otherwise go unread. */
+  readonly annotateAll: boolean;
 };
 
 /** The files per bucket in the report's own `stats`, which alone carries histograms; a missing one counts as empty. */
@@ -63,6 +71,7 @@ const fileLengthView = ({
   title: "Size and file length",
   subtitle: `${formatNoun(files, "file")}, ${formatNoun(codeLines, "line")}. Files by length in lines`,
   unit: "lines",
+  noun: "files",
   bins: binsOf(fileLength.histogram, FILE_LENGTH_LABELS),
   facts: [
     { value: formatCount(fileLength.min), label: "shortest" },
@@ -78,12 +87,14 @@ const fileLengthView = ({
           note: "longest file",
         },
   rangeHeading: "Lines per file",
+  annotateAll: false,
 });
 
 const churnView = ({ churn }: CodeStats): HistogramView => ({
   title: "How often files change",
   subtitle: "Files by number of revisions (commits that touched them)",
   unit: "revisions",
+  noun: "files",
   bins: binsOf(churn.histogram, CHURN_LABELS),
   facts: [
     { value: formatWhole(churn.median), label: "median revisions" },
@@ -92,12 +103,14 @@ const churnView = ({ churn }: CodeStats): HistogramView => ({
   ],
   named: null,
   rangeHeading: "Revisions",
+  annotateAll: false,
 });
 
 const complexityView = ({ complexity }: CodeStats): HistogramView => ({
   title: "Indentation complexity",
   subtitle: "Files by indentation levels per non-blank line (as in codeheat)",
   unit: "levels per line",
+  noun: "files",
   bins: binsOf(complexity.histogram, COMPLEXITY_LABELS),
   facts: [
     { value: formatLevels(complexity.perLine), label: "levels per line" },
@@ -113,6 +126,7 @@ const complexityView = ({ complexity }: CodeStats): HistogramView => ({
           note: `deepest on average, ${complexity.deepestFile.perLine.toFixed(1)} per line`,
         },
   rangeHeading: "Levels per line",
+  annotateAll: false,
 });
 
 /** The three histograms of the Stats section: file length, revisions and complexity. */

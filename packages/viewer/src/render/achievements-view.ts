@@ -76,6 +76,9 @@ const card = (medal: Medal): HTMLElement => {
   const element = h(
     "article",
     `card ach ${medal.tint} ${medal.reached ? "reached" : "locked"}`,
+    ...(medal.typescript
+      ? [h("span", "ach-tag", icon("file-code", 12, 2), "TypeScript")]
+      : []),
     medallion(medal),
     h("h3", "", medal.title),
     ...tierLine(medal),
@@ -89,18 +92,49 @@ const card = (medal: Medal): HTMLElement => {
   return element;
 };
 
+const typescriptGroup = (
+  achievements: Parameters<typeof medals>[0],
+): HTMLElement[] => {
+  const { strong, rest } = achievementSummary(achievements);
+  return [
+    h(
+      "div",
+      "ts-group ach-group",
+      h("h3", "", "TypeScript"),
+      h(
+        "p",
+        "",
+        h("b", "", strong),
+        `${rest}. About the production code at HEAD, from the Deep dive.`,
+      ),
+    ),
+    h(
+      "div",
+      "ach-grid",
+      ...medals(achievements, true).map((medal) => card(medal)),
+    ),
+  ];
+};
+
 /**
  * The repository's milestones as medallions, the reached ones first: a ring
  * and a Lucide icon, a check or a lock, tier pips, the day it was reached or
  * that it holds today, and for the ones with something ahead a progress bar.
+ * The achievements of the TypeScript deep dive follow in a group of their own,
+ * each card tagged TypeScript.
  */
-export const renderAchievements = ({ achievements }: Report): HTMLElement => {
+export const renderAchievements = ({
+  achievements,
+  deepDives,
+}: Report): HTMLElement => {
   const { strong, rest } = achievementSummary(achievements);
+  const typescript = deepDives?.typescript?.achievements ?? [];
   return section(
     "achievements",
     "Achievements",
     "Milestones reached",
     [h("b", "", strong), `${rest}. ${DESCRIPTION}`],
     h("div", "ach-grid", ...medals(achievements).map((medal) => card(medal))),
+    ...(typescript.length === 0 ? [] : typescriptGroup(typescript)),
   );
 };

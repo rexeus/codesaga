@@ -7,6 +7,7 @@ export type SectionId =
   | "pull-requests"
   | "knowledge"
   | "stats"
+  | "typescript"
   | "achievements"
   | "team"
   | "bots";
@@ -18,6 +19,7 @@ export const SECTION_ICONS: Record<SectionId, IconName> = {
   "pull-requests": "git-pull-request",
   knowledge: "brain",
   stats: "chart-column",
+  typescript: "file-code",
   achievements: "trophy",
   team: "users",
   bots: "bot",

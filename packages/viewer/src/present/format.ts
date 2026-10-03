@@ -3,9 +3,12 @@ const counts = new Intl.NumberFormat("en");
 /** An integer with thousands separators: `60,942`. */
 export const formatCount = (value: number): string => counts.format(value);
 
-/** A count with its noun, plural unless the count is one: `1 file`, `1,204 files`. */
-export const formatNoun = (value: number, noun: string): string =>
-  `${formatCount(value)} ${noun}${value === 1 ? "" : "s"}`;
+/** A count with its noun, plural unless the count is one: `1 file`, `1,204 files`; `plural` names an irregular one: `2 territories`. */
+export const formatNoun = (
+  value: number,
+  noun: string,
+  plural = `${noun}s`,
+): string => `${formatCount(value)} ${value === 1 ? noun : plural}`;
 
 const MINUS = "−";
 const THOUSAND = 1000;
@@ -34,9 +37,17 @@ export const formatSignedCompact = (value: number): string => {
   return `${value > 0 ? "+" : MINUS}${formatCompact(value)}`;
 };
 
+/** A rate per 1,000 lines with one decimal, `<0.1` for a small rate above zero: `15.8`. */
+export const formatPerThousand = (rate: number): string =>
+  rate > 0 && rate < 0.05 ? "<0.1" : rate.toFixed(1);
+
 /** A share between 0 and 1 as a whole percent: `0.4 → "40%"`. */
 export const formatPercent = (share: number): string =>
   `${Math.round(share * 100)}%`;
+
+/** A small share between 0 and 1 with one decimal: `0.0132 → "1.3%"`, `<0.1%` above zero and below that, `0%` for none. */
+export const formatPercentTenth = (share: number): string =>
+  share > 0 && share < 0.0005 ? "<0.1%" : `${(share * 100).toFixed(1)}%`;
 
 const signed = (value: number, unit: string): string => {
   if (value === 0) {

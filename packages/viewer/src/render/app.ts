@@ -11,6 +11,7 @@ import { renderKeyFigures } from "./kpis-view.js";
 import { renderPullRequests } from "./pull-requests-view.js";
 import { renderStats } from "./stats-view.js";
 import { renderStories } from "./stories-view.js";
+import { renderTypeScript } from "./typescript-view.js";
 
 const footer = ({ tool, generatedAt }: Report): HTMLElement =>
   h(
@@ -28,6 +29,7 @@ export const mountApp = (report: Report, root: HTMLElement): void => {
   const stories = renderStories(report);
   const pullRequests = renderPullRequests(report);
   const bots = renderBots(report);
+  const typescript = renderTypeScript(report);
   root.replaceChildren(
     renderHeader(report),
     h(
@@ -39,6 +41,7 @@ export const mountApp = (report: Report, root: HTMLElement): void => {
       ...(pullRequests === null ? [] : [pullRequests]),
       renderKnowledge(report),
       renderStats(report),
+      ...(typescript === null ? [] : [typescript]),
       renderAchievements(report),
       renderContributors(report),
       ...(bots === null ? [] : [bots]),

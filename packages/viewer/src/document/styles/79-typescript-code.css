@@ -1,0 +1,432 @@
+/* The Deep dive: TypeScript section, part two: functions, the import map and folded cards. */
+/* Functions and hotspots. */
+.ts-stack .fnlist {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.ts-stack .fn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(48px, 80px) 64px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.ts-stack .fn:first-child {
+  border-top: 0;
+}
+
+.ts-stack .fn-id {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ts-stack .fn-id .mono {
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-stack .fn-name {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+.ts-stack .fn-place {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-stack .fn-place .mono {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+.ts-stack .fn .bar,
+.ts-stack .ts-edge .bar,
+.ts-stack .cp .bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--grid);
+}
+
+.ts-stack .fn .bar i,
+.ts-stack .ts-edge .bar i,
+.ts-stack .cp .bar i {
+  display: block;
+  position: relative;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.ts-stack .fn-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+
+.ts-stack .fn-fig b {
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-stack .fn-fig span {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+/* The import map. */
+.ts-stack .edges {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.ts-stack .ts-edge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 14px;
+  align-items: center;
+  padding: 9px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.ts-stack .ts-edge:first-child {
+  border-top: 0;
+}
+
+.ts-stack .ends {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 7px;
+  min-width: 0;
+}
+
+.ts-stack .ends .to {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ts-stack .ends svg {
+  flex: none;
+  align-self: center;
+  color: var(--ink-3);
+}
+
+.ts-stack .tname {
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.ts-stack .tname.other {
+  color: var(--ink-3);
+  font-family: var(--sans);
+  font-size: 12.5px;
+}
+
+.ts-stack .edge-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.ts-stack .edge-fig b {
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-stack .edge-fig .bar {
+  width: 100%;
+}
+
+.ts-stack .ts-edge .bar i .types {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  border-radius: 0;
+  background: var(--card, var(--surface));
+  opacity: 0.55;
+}
+
+.ts-stack .cptable {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.ts-stack .cp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 48px 48px 62px;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+.ts-stack .cp .num {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ts-stack .cp.head {
+  padding-top: 0;
+  border-top: 0;
+  color: var(--ink-3);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ts-stack .cp .inst {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.ts-stack .cp .inst .bar {
+  height: 4px;
+}
+
+.ts-stack .chips-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: baseline;
+}
+
+.ts-stack .chips-line .tname,
+.ts-stack .chips-line .mono {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+.ts-stack .group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 0;
+}
+
+.ts-stack .group .muted {
+  font-size: 12px;
+}
+
+.ts-stack .less {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 0;
+}
+
+.ts-stack .less .muted {
+  font-size: 12px;
+}
+
+.ts-stack .cycle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 0;
+  border-top: 1px solid var(--grid);
+  font-size: 13px;
+}
+
+/* A card that folds, and the grid the folded cards sit in. */
+.ts-stack .fold-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.ts-stack .fold[open] {
+  grid-column: 1 / -1;
+}
+
+.ts-stack .fold-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ts-stack .fold-head::-webkit-details-marker {
+  display: none;
+}
+
+.ts-stack .fold-head:hover .fold-chevron {
+  background: var(--grid);
+}
+
+.ts-stack .fold-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ts-stack .fold-teaser {
+  margin-top: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.ts-stack .fold[open] .fold-teaser {
+  display: none;
+}
+
+.ts-stack .fold-chevron {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--wash);
+  color: var(--ink-2);
+  transition: transform 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-stack .fold-chevron {
+    transition: none;
+  }
+}
+
+.ts-stack .fold[open] .fold-chevron {
+  transform: rotate(180deg);
+}
+
+.ts-stack .fold-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 20px 18px;
+}
+
+.ts-stack .idioms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 32px;
+}
+
+.ts-stack .idiom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ts-stack .idiom .slabel {
+  margin-top: 0;
+}
+
+.ts-stack .idiom .legend strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-stack .idiom .legend .muted {
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-stack .tool-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 32px;
+}
+
+.ts-stack .tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ts-stack .tool-group .slabel {
+  margin-top: 0;
+}
+
+.ts-stack .tool-group .pill {
+  gap: 6px;
+  height: auto;
+  min-height: 22px;
+  padding: 2px 9px;
+  white-space: normal;
+}
+
+.ts-stack .tool-group .pill .muted {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+@media (max-width: 900px) {
+  .ts-stack .idioms,
+  .ts-stack .tool-groups,
+  .ts-stack .fold-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ts-stack .fn {
+    grid-template-columns: minmax(0, 1fr) 64px;
+    gap: 6px 12px;
+  }
+
+  .ts-stack .fn .bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .ts-stack .ts-edge {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 10px;
+  }
+
+  .ts-stack .cp {
+    grid-template-columns: minmax(0, 1fr) 34px 40px 40px 52px;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+
+  .ts-stack .fold-head {
+    padding: 16px;
+  }
+
+  .ts-stack .fold-body {
+    padding: 0 16px 16px;
+  }
+}
