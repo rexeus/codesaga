@@ -3,9 +3,18 @@ import type { Report } from "@codesaga/engine";
 import { formatCount, formatDateLong } from "./format.js";
 import type { IconName } from "./icons.js";
 
-type Achievement = Report["achievements"][number];
+type RepositoryAchievement = Report["achievements"][number];
+type Achievement = RepositoryAchievement | TypeScriptAchievement;
+type TypeScriptAchievement = NonNullable<
+  NonNullable<NonNullable<Report["deepDives"]>["typescript"]>["achievements"]
+>[number];
 
 const LOOKS: Record<Achievement["kind"], { icon: IconName; slot: number }> = {
+  "any-free": { icon: "shield-check", slot: 1 },
+  "strict-throughout": { icon: "lock", slot: 7 },
+  "esm-only": { icon: "package", slot: 3 },
+  "no-ts-ignore": { icon: "circle-slash", slot: 5 },
+  tightened: { icon: "shrink", slot: 4 },
   "first-commits": { icon: "git-commit-horizontal", slot: 1 },
   marathon: { icon: "footprints", slot: 2 },
   community: { icon: "users-round", slot: 3 },
@@ -35,6 +44,8 @@ type Progress = {
 /** An achievement as a medallion. */
 export type Medal = {
   readonly kind: Achievement["kind"];
+  /** True for an achievement of the TypeScript deep dive, which the card marks. */
+  readonly typescript: boolean;
   readonly title: string;
   readonly icon: IconName;
   /** The entity class that carries the medallion's color. */
@@ -91,10 +102,11 @@ const progressOf = ({ reached, progress }: Achievement): Progress | null => {
   };
 };
 
-const medalOf = (achievement: Achievement): Medal => {
+const medalOf = (achievement: Achievement, typescript: boolean): Medal => {
   const { kind, title, reached, progress, detail } = achievement;
   return {
     kind,
+    typescript,
     title,
     icon: LOOKS[kind].icon,
     tint: `slot-${LOOKS[kind].slot}`,
@@ -107,12 +119,19 @@ const medalOf = (achievement: Achievement): Medal => {
   };
 };
 
-/** The achievements as medallions, the reached ones first and each group in the report's order. */
-export const medals = (achievements: readonly Achievement[]): Medal[] =>
+/**
+ * The achievements as medallions, the reached ones first and each group in the
+ * report's order. `typescript` marks the achievements of the TypeScript deep
+ * dive, which the card tags.
+ */
+export const medals = (
+  achievements: readonly Achievement[],
+  typescript = false,
+): Medal[] =>
   [
     ...achievements.filter(({ reached }) => reached),
     ...achievements.filter(({ reached }) => !reached),
-  ].map((achievement) => medalOf(achievement));
+  ].map((achievement) => medalOf(achievement, typescript));
 
 /** The line above the medallions: `5 of 9` in strong type, then `reached · 4 still ahead`. */
 export const achievementSummary = (
