@@ -8,9 +8,8 @@ import { cacheFile, writeFileAtomically } from "../cache/cache-store.js";
 import { groupBy } from "../collections/group-by.js";
 import type { Git } from "../git/git.js";
 import { SkipReason } from "../report/typescript-deep-dive.js";
-import type { FactsResult } from "./facts-of-source.js";
-import { FILE_FACTS_VERSION } from "./file-facts.js";
-import type { FileFacts } from "./file-facts.js";
+import { FILE_DIGEST_VERSION, isFileDigest } from "./digest/file-digest.js";
+import type { DigestResult } from "./facts-of-source.js";
 import { INPUT_GUARD_LIMITS } from "./input-guards.js";
 import { parseOptionsOf } from "./source-kinds.js";
 import type { ParserStatus } from "./typescript-parser.js";
@@ -51,20 +50,14 @@ const CacheDocument = Schema.fromJsonString(
 
 const isSkipped = Schema.is(Schema.Struct({ skipped: SkipReason }));
 
-const isFileFacts = (value: unknown): value is FileFacts =>
-  typeof value === "object" &&
-  value !== null &&
-  "version" in value &&
-  value.version === FILE_FACTS_VERSION;
-
-const resultOf = (entry: unknown): FactsResult | undefined => {
+const resultOf = (entry: unknown): DigestResult | undefined => {
   if (isSkipped(entry)) {
     return { kind: "skipped", reason: entry.skipped };
   }
-  return isFileFacts(entry) ? { kind: "parsed", facts: entry } : undefined;
+  return isFileDigest(entry) ? { kind: "parsed", facts: entry } : undefined;
 };
 
-const entryOf = (result: FactsResult): unknown =>
+const entryOf = (result: DigestResult): unknown =>
   result.kind === "parsed" ? result.facts : { skipped: result.reason };
 
 /**
@@ -78,7 +71,7 @@ export const factsFingerprint = (
   JSON.stringify({
     parser: parser.name,
     parserVersion: parser.version,
-    factsVersion: FILE_FACTS_VERSION,
+    digestVersion: FILE_DIGEST_VERSION,
     guards: INPUT_GUARD_LIMITS,
     options: OPTION_EXTENSIONS.map((extension) =>
       parseOptionsOf(`file.${extension}`),
@@ -99,7 +92,7 @@ const loadShard = (
   file: string,
   fingerprint: string,
 ): Effect.Effect<
-  ReadonlyArray<readonly [string, FactsResult]>,
+  ReadonlyArray<readonly [string, DigestResult]>,
   never,
   FileSystem.FileSystem
 > =>
@@ -129,7 +122,7 @@ export const loadFactsCache = (
   directory: string,
   fingerprint: string,
 ): Effect.Effect<
-  ReadonlyMap<string, FactsResult>,
+  ReadonlyMap<string, DigestResult>,
   never,
   FileSystem.FileSystem | Path.Path
 > =>
@@ -145,12 +138,13 @@ export const loadFactsCache = (
     return new Map(shards.flat());
   }).pipe(
     Effect.orElseSucceed(
-      () => new Map<string, FactsResult>() as ReadonlyMap<string, FactsResult>,
+      () =>
+        new Map<string, DigestResult>() as ReadonlyMap<string, DigestResult>,
     ),
   );
 
 const keysOf = (
-  entries: ReadonlyArray<readonly [string, FactsResult]> | undefined,
+  entries: ReadonlyArray<readonly [string, DigestResult]> | undefined,
 ): ReadonlySet<string> => new Set(entries?.map(([key]) => key));
 
 /** Whether the shard holds other keys than it did. */
@@ -164,7 +158,7 @@ const storeShard = (
   directory: string,
   id: string,
   fingerprint: string,
-  entries: ReadonlyArray<readonly [string, FactsResult]>,
+  entries: ReadonlyArray<readonly [string, DigestResult]>,
 ): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
@@ -194,8 +188,8 @@ const storeShard = (
 export const storeFactsCache = (
   directory: string,
   fingerprint: string,
-  kept: ReadonlyMap<string, FactsResult>,
-  loaded: ReadonlyMap<string, FactsResult>,
+  kept: ReadonlyMap<string, DigestResult>,
+  loaded: ReadonlyMap<string, DigestResult>,
 ): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> => {
   const now = groupBy(kept, ([key]) => shardOf(key));
   const before = groupBy(loaded, ([key]) => shardOf(key));

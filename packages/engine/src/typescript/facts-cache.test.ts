@@ -3,9 +3,9 @@ import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem } from "effect";
 
 import { loadFactsCache, storeFactsCache } from "./facts-cache.js";
-import type { FactsResult } from "./facts-of-source.js";
+import type { DigestResult } from "./facts-of-source.js";
 
-const skipped: FactsResult = { kind: "skipped", reason: "syntax-error" };
+const skipped: DigestResult = { kind: "skipped", reason: "syntax-error" };
 
 const temporaryDirectory = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
@@ -13,7 +13,7 @@ const temporaryDirectory = Effect.gen(function* () {
   return `${directory}/syntax-v1`;
 });
 
-const none = new Map<string, FactsResult>();
+const none = new Map<string, DigestResult>();
 const key = (digit: string, tail = "ts:module") =>
   `${digit.repeat(40)}:${tail}`;
 

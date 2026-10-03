@@ -2,7 +2,13 @@
 // oxc-parser is the one external dependency of the bundle, because its native binding cannot be bundled, and it can crash its process on hostile input, so no parse runs in the application's own process.
 import { availableParallelism } from "node:os";
 
-import { TypeScriptParser, unavailableParser } from "@codesaga/engine";
+import {
+  isFileDigest,
+  isFileFacts,
+  TypeScriptParser,
+  unavailableParser,
+} from "@codesaga/engine";
+import type { FactsResult } from "@codesaga/engine";
 import { Effect, Layer } from "effect";
 
 import { forkWorker } from "./child-worker.js";
@@ -13,6 +19,18 @@ import type { PoolReadiness } from "./parse-pool.js";
 const PARSER_NAME = "oxc-parser";
 /** Children parsing at once; each holds up to a few hundred MB while it parses. */
 const MAX_PARSE_PROCESSES = 4;
+
+/** A verdict whose facts have the shape `isFacts` says, or `parser-error`: what crossed the process boundary is checked, not trusted. */
+const checked =
+  <Facts>(isFacts: (value: unknown) => value is Facts) =>
+  (result: FactsResult<unknown>): FactsResult<Facts> => {
+    if (result.kind === "skipped") {
+      return result;
+    }
+    return isFacts(result.facts)
+      ? { kind: "parsed", facts: result.facts }
+      : { kind: "skipped", reason: "parser-error" };
+  };
 
 /** One process fewer than the cores, so the application keeps one, and at least one. */
 const poolSize = (): number =>
@@ -36,6 +54,15 @@ const statusOf = (readiness: PoolReadiness) =>
         name: PARSER_NAME,
         reason: readiness.reason,
       } as const);
+
+/** The verdicts of one pool call, checked. */
+const verdictsOf = <Facts>(
+  work: () => Promise<ReadonlyArray<FactsResult<unknown>>>,
+  isFacts: (value: unknown) => value is Facts,
+) =>
+  Effect.promise(work).pipe(
+    Effect.map((results) => results.map((result) => checked(isFacts)(result))),
+  );
 
 /**
  * The oxc-backed `TypeScriptParser`: sources are parsed in up to four child
@@ -64,8 +91,14 @@ export const makeOxcParserLayer = (program: ChildCommand) =>
         factsOf: (sources) =>
           Effect.flatMap(readiness, (state) =>
             state.kind === "ready"
-              ? Effect.promise(() => pool.factsOf(sources))
+              ? verdictsOf(() => pool.factsOf(sources), isFileFacts)
               : unavailableParser(PARSER_NAME, state.reason).factsOf(sources),
+          ),
+        digestsOf: (sources) =>
+          Effect.flatMap(readiness, (state) =>
+            state.kind === "ready"
+              ? verdictsOf(() => pool.digestsOf(sources), isFileDigest)
+              : unavailableParser(PARSER_NAME, state.reason).digestsOf(sources),
           ),
       });
     }),

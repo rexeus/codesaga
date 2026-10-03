@@ -4,7 +4,10 @@ import { Effect, Layer } from "effect";
 
 import { Git } from "../git/git.js";
 import { readHistory } from "../history/history.js";
-import { factsOfSource } from "../typescript/facts-of-source.js";
+import {
+  digestOfSource,
+  factsOfSource,
+} from "../typescript/facts-of-source.js";
 import { gatherHistoryFacts } from "../typescript/history-facts.js";
 import { ParseProgress } from "../typescript/parse-progress.js";
 import { TypeScriptParser } from "../typescript/typescript-parser.js";
@@ -22,6 +25,11 @@ export const countingParser = (version = "1") => {
         Effect.sync(() => {
           calls.push(sources.length);
           return sources.map((source) => factsOfSource(oxcParse, source));
+        }),
+      digestsOf: (sources) =>
+        Effect.sync(() => {
+          calls.push(sources.length);
+          return sources.map((source) => digestOfSource(oxcParse, source));
         }),
     }),
   );

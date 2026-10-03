@@ -6,7 +6,7 @@ import { readBlobs } from "../git/blob-reader.js";
 import type { BlobRead, SkipReason } from "../git/blob-reader.js";
 import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
-import type { FactsResult } from "./facts-of-source.js";
+import type { DigestResult } from "./facts-of-source.js";
 import { factsKey } from "./history-blobs.js";
 import type { HistoryBlob } from "./history-blobs.js";
 import { INPUT_GUARD_LIMITS } from "./input-guards.js";
@@ -23,10 +23,10 @@ const BATCH_BLOBS = 2_000;
 const BATCH_CHARACTERS = 32_000_000;
 
 /** A verdict, and whether it holds for the blob's content whenever it is asked. */
-export type Verdict = { readonly result: FactsResult; readonly keep: boolean };
+export type Verdict = { readonly result: DigestResult; readonly keep: boolean };
 
 /** What the content alone decides, under limits the fingerprint holds; a crash or an unreadable blob may not stay true. */
-const isDeterministic = (result: FactsResult): boolean =>
+const isDeterministic = (result: DigestResult): boolean =>
   result.kind === "parsed" ||
   ["syntax-error", "too-deep", "too-large", "minified"].includes(result.reason);
 
@@ -81,9 +81,9 @@ const verdictsOf = (
           }))
         : [],
     );
-    const parsed = yield* parser.factsOf(sources.map(({ source }) => source));
+    const parsed = yield* parser.digestsOf(sources.map(({ source }) => source));
     const parsedByKey = new Map(
-      sources.map(({ key }, index): [string, FactsResult | undefined] => [
+      sources.map(({ key }, index): [string, DigestResult | undefined] => [
         key,
         parsed[index],
       ]),

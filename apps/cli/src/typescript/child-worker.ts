@@ -10,6 +10,7 @@ import {
   isParseReply,
   PARSE_CHILD_ENV,
 } from "./parse-protocol.js";
+import type { ParseKind } from "./parse-protocol.js";
 
 /** How to start the program again as a parse child. */
 export type ChildCommand = {
@@ -19,7 +20,7 @@ export type ChildCommand = {
   readonly execArgv: ReadonlyArray<string>;
 };
 
-type Verdicts = ReadonlyArray<FactsResult> | undefined;
+type Verdicts = ReadonlyArray<FactsResult<unknown>> | undefined;
 
 /**
  * Starts one child and resolves when it says whether the parser loaded.
@@ -40,12 +41,12 @@ export const forkWorker = (command: ChildCommand): Promise<WorkerStart> =>
     let started = false;
 
     const worker: PoolWorker = {
-      run: (sources: ReadonlyArray<SourceText>) =>
+      run: (sources: ReadonlyArray<SourceText>, kind: ParseKind) =>
         new Promise<Verdicts>((done) => {
           pending = (verdicts) => {
             done(verdicts?.length === sources.length ? verdicts : undefined);
           };
-          child.send({ type: "parse", sources }, (error) => {
+          child.send({ type: "parse", kind, sources }, (error) => {
             if (error !== null) {
               pending?.(undefined);
               pending = undefined;

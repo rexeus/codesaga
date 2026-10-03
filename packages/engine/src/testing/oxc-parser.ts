@@ -3,7 +3,10 @@ import { NodeServices } from "@effect/platform-node";
 import { Effect, Layer } from "effect";
 import { parseSync } from "oxc-parser";
 
-import { factsOfSource } from "../typescript/facts-of-source.js";
+import {
+  digestOfSource,
+  factsOfSource,
+} from "../typescript/facts-of-source.js";
 import type { ParseSource } from "../typescript/facts-of-source.js";
 import { TypeScriptParser } from "../typescript/typescript-parser.js";
 
@@ -23,6 +26,10 @@ const oxcParserLayer = Layer.succeed(
     factsOf: (sources) =>
       Effect.sync(() =>
         sources.map((source) => factsOfSource(oxcParse, source)),
+      ),
+    digestsOf: (sources) =>
+      Effect.sync(() =>
+        sources.map((source) => digestOfSource(oxcParse, source)),
       ),
   }),
 );

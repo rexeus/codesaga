@@ -1,6 +1,10 @@
 // Tests only: the real oxc parser as the TypeScript parser service, in the test's own process.
 // Journeys use it so that they do not start a child process per run; the pool has its own tests.
-import { factsOfSource, TypeScriptParser } from "@codesaga/engine";
+import {
+  digestOfSource,
+  factsOfSource,
+  TypeScriptParser,
+} from "@codesaga/engine";
 import { Effect, Layer } from "effect";
 
 import { loadOxcParser } from "../typescript/oxc-loader.js";
@@ -14,6 +18,10 @@ export const inProcessParserLayer = Layer.effect(
       factsOf: (sources) =>
         Effect.sync(() =>
           sources.map((source) => factsOfSource(parse, source)),
+        ),
+      digestsOf: (sources) =>
+        Effect.sync(() =>
+          sources.map((source) => digestOfSource(parse, source)),
         ),
     });
   }),

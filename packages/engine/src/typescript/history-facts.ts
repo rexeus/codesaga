@@ -20,7 +20,7 @@ import {
   loadFactsCache,
   storeFactsCache,
 } from "./facts-cache.js";
-import type { FactsResult } from "./facts-of-source.js";
+import type { DigestResult } from "./facts-of-source.js";
 import { blobsOfHistory, factsKey, readHeadBlobs } from "./history-blobs.js";
 import type { HistoryBlob } from "./history-blobs.js";
 import { parseMissing, UNREADABLE } from "./parse-blobs.js";
@@ -34,7 +34,7 @@ export type HistoryFacts = {
    * keyed by `factsKey`. Only the files the universe's path rules count are
    * here, and no symlink or submodule.
    */
-  readonly factsByBlob: ReadonlyMap<string, FactsResult>;
+  readonly factsByBlob: ReadonlyMap<string, DigestResult>;
 };
 
 export type HistoryFactsInput = Pick<
@@ -53,11 +53,11 @@ export type HistoryFactsInput = Pick<
 /** The verdicts worth keeping for the next run: those of `keys` that the cache had or that hold for the blob's content. */
 const keptOf = (
   keys: ReadonlyArray<string>,
-  cached: ReadonlyMap<string, FactsResult>,
+  cached: ReadonlyMap<string, DigestResult>,
   fresh: ReadonlyMap<string, Verdict>,
-): ReadonlyMap<string, FactsResult> =>
+): ReadonlyMap<string, DigestResult> =>
   new Map(
-    keys.flatMap((key): Array<[string, FactsResult]> => {
+    keys.flatMap((key): Array<[string, DigestResult]> => {
       const verdict = fresh.get(key);
       const result =
         cached.get(key) ??
@@ -137,7 +137,7 @@ export const gatherHistoryFacts = (
     const fingerprint = factsFingerprint(status);
     const cached =
       directory === undefined
-        ? new Map<string, FactsResult>()
+        ? new Map<string, DigestResult>()
         : yield* loadFactsCache(directory, fingerprint);
     const fresh = yield* parseMissing(
       wanted.filter(({ oid, path }) => !cached.has(factsKey(oid, path))),
@@ -150,7 +150,7 @@ export const gatherHistoryFacts = (
     }
     return {
       factsByBlob: new Map(
-        keys.map((key): [string, FactsResult] => [
+        keys.map((key): [string, DigestResult] => [
           key,
           kept.get(key) ?? fresh.get(key)?.result ?? UNREADABLE.result,
         ]),

@@ -295,3 +295,29 @@ describe("makePool with a worker that hangs", () => {
     expect(stopped).toStrictEqual([1]);
   });
 });
+
+describe("makePool digests", () => {
+  it("asks its workers for digests when the caller wants them", async () => {
+    const asked: Array<string> = [];
+    const pool = makePool(
+      () =>
+        Promise.resolve({
+          kind: "ready",
+          version: "1.2.3",
+          worker: {
+            run: (batch, kind) => {
+              asked.push(kind);
+              return Promise.resolve(batch.map(() => PARSED));
+            },
+            stop: () => undefined,
+          },
+        }),
+      1,
+    );
+
+    await pool.factsOf(sources("a"));
+    await pool.digestsOf(sources("a"));
+
+    expect(asked).toStrictEqual(["facts", "digest"]);
+  });
+});

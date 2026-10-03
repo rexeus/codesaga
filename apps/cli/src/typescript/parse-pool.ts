@@ -3,12 +3,18 @@
 // The pool knows nothing of processes; a `PoolWorker` is whatever can parse a batch or die trying; one that stays silent past a timeout that grows with the batch's text is treated as dead.
 import type { FactsResult, SourceText } from "@codesaga/engine";
 
+import type { ParseKind } from "./parse-protocol.js";
+
+/** A verdict as the pool passes it on; what its facts are depends on the `ParseKind` asked for. */
+type Verdict = FactsResult<unknown>;
+
 /** A parser that answers a batch of sources. */
 export type PoolWorker = {
   /** One verdict per source in order, or undefined when the worker died while parsing them. Never rejects; the pool gives up on one that stays silent. */
   readonly run: (
     sources: ReadonlyArray<SourceText>,
-  ) => Promise<ReadonlyArray<FactsResult> | undefined>;
+    kind: ParseKind,
+  ) => Promise<ReadonlyArray<Verdict> | undefined>;
   /** Ends the worker; safe to call on a dead one. */
   readonly stop: () => void;
 };
@@ -29,10 +35,14 @@ export type PoolReadiness =
 export type Pool = {
   /** Starts the first worker if none runs yet and says whether the parser loaded. */
   readonly ready: () => Promise<PoolReadiness>;
-  /** One verdict per source in order; never rejects, and files that crash the parser are `parser-crashed`. */
+  /** One verdict per source in order, with the full facts of each file; never rejects, and files that crash the parser are `parser-crashed`. */
   readonly factsOf: (
     sources: ReadonlyArray<SourceText>,
-  ) => Promise<ReadonlyArray<FactsResult>>;
+  ) => Promise<ReadonlyArray<Verdict>>;
+  /** The same with the digest of each file, as the history keeps it. */
+  readonly digestsOf: (
+    sources: ReadonlyArray<SourceText>,
+  ) => Promise<ReadonlyArray<Verdict>>;
   /** Ends every worker. */
   readonly stop: () => void;
 };
@@ -48,7 +58,7 @@ const MAX_CRASHES_PER_BATCH = 40;
 const BATCH_TIMEOUT_MS = 30_000;
 const BATCH_TIMEOUT_MS_PER_MEGABYTE = 1_000;
 
-const CRASHED: FactsResult = { kind: "skipped", reason: "parser-crashed" };
+const CRASHED: Verdict = { kind: "skipped", reason: "parser-crashed" };
 
 const batchesOf = (
   sources: ReadonlyArray<SourceText>,
@@ -101,6 +111,14 @@ type Lane = { worker: PoolWorker | undefined; crashes: number };
 
 type Batch = ReadonlyArray<SourceText>;
 
+/** One call of the pool: its batches, where the verdicts go, which batch is next, and what the verdicts hold. */
+type Call = {
+  readonly batches: ReadonlyArray<Batch>;
+  readonly results: Array<ReadonlyArray<Verdict> | undefined>;
+  readonly next: () => number;
+  readonly kind: ParseKind;
+};
+
 class WorkerPool implements Pool {
   readonly #start: () => Promise<WorkerStart>;
   readonly #size: number;
@@ -126,19 +144,30 @@ class WorkerPool implements Pool {
       : started;
   }
 
-  async factsOf(
+  factsOf(sources: ReadonlyArray<SourceText>): Promise<ReadonlyArray<Verdict>> {
+    return this.#parseAll(sources, "facts");
+  }
+
+  digestsOf(
     sources: ReadonlyArray<SourceText>,
-  ): Promise<ReadonlyArray<FactsResult>> {
+  ): Promise<ReadonlyArray<Verdict>> {
+    return this.#parseAll(sources, "digest");
+  }
+
+  async #parseAll(
+    sources: ReadonlyArray<SourceText>,
+    kind: ParseKind,
+  ): Promise<ReadonlyArray<Verdict>> {
     if ((await this.ready()).kind !== "ready") {
       return sources.map(() => CRASHED);
     }
     const batches = batchesOf(sources);
-    const results: Array<ReadonlyArray<FactsResult> | undefined> = [];
+    const results: Array<ReadonlyArray<Verdict> | undefined> = [];
     let cursor = 0;
     const next = () => cursor++;
     await Promise.all(
       Array.from({ length: Math.min(this.#size, batches.length) }, () =>
-        this.#runLane(batches, results, next),
+        this.#runLane({ batches, results, next, kind }),
       ),
     );
     return batches.flatMap(
@@ -189,11 +218,15 @@ class WorkerPool implements Pool {
   async #parse(
     lane: Lane,
     sources: Batch,
-  ): Promise<ReadonlyArray<FactsResult>> {
+    kind: ParseKind,
+  ): Promise<ReadonlyArray<Verdict>> {
     if (lane.worker === undefined) {
       return sources.map(() => CRASHED);
     }
-    const results = await within(lane.worker.run(sources), timeoutOf(sources));
+    const results = await within(
+      lane.worker.run(sources, kind),
+      timeoutOf(sources),
+    );
     if (results !== undefined) {
       return results;
     }
@@ -203,40 +236,35 @@ class WorkerPool implements Pool {
     }
     const middle = sources.length >> 1;
     return [
-      ...(await this.#parse(lane, sources.slice(0, middle))),
-      ...(await this.#parse(lane, sources.slice(middle))),
+      ...(await this.#parse(lane, sources.slice(0, middle), kind)),
+      ...(await this.#parse(lane, sources.slice(middle), kind)),
     ];
   }
 
-  async #runLane(
-    batches: ReadonlyArray<Batch>,
-    results: Array<ReadonlyArray<FactsResult> | undefined>,
-    next: () => number,
-  ): Promise<void> {
+  async #runLane(call: Call): Promise<void> {
     const lane: Lane = { worker: await this.#claimWorker(), crashes: 0 };
-    await this.#drain(lane, batches, results, next);
+    await this.#drain(lane, call);
     if (lane.worker !== undefined) {
       this.#idle.push(lane.worker);
     }
   }
 
   /** Takes the next unparsed batch until none is left or the lane has no worker. */
-  async #drain(
-    lane: Lane,
-    batches: ReadonlyArray<Batch>,
-    results: Array<ReadonlyArray<FactsResult> | undefined>,
-    next: () => number,
-  ): Promise<void> {
+  async #drain(lane: Lane, call: Call): Promise<void> {
     if (lane.worker === undefined) {
       return;
     }
-    const index = next();
-    if (index >= batches.length) {
+    const index = call.next();
+    if (index >= call.batches.length) {
       return;
     }
     lane.crashes = 0;
-    results[index] = await this.#parse(lane, batches[index] ?? []);
-    await this.#drain(lane, batches, results, next);
+    call.results[index] = await this.#parse(
+      lane,
+      call.batches[index] ?? [],
+      call.kind,
+    );
+    await this.#drain(lane, call);
   }
 }
 

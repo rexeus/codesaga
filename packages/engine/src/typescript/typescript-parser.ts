@@ -3,7 +3,11 @@
 
 import { Context, Effect } from "effect";
 
-import type { FactsResult, SourceText } from "./facts-of-source.js";
+import type {
+  DigestResult,
+  FactsResult,
+  SourceText,
+} from "./facts-of-source.js";
 
 /** Whether the parser is there to read files. */
 export type ParserStatus =
@@ -37,8 +41,21 @@ export class TypeScriptParser extends Context.Service<
     factsOf(
       sources: ReadonlyArray<SourceText>,
     ): Effect.Effect<ReadonlyArray<FactsResult>>;
+    /**
+     * The same verdicts with the digest of each file instead of its full
+     * facts: what the history keeps of every version of every file, at a
+     * fraction of the cost to compute, move and store.
+     */
+    digestsOf(
+      sources: ReadonlyArray<SourceText>,
+    ): Effect.Effect<ReadonlyArray<DigestResult>>;
   }
 >()("@codesaga/engine/typescript/TypeScriptParser") {}
+
+const UNAVAILABLE: FactsResult<never> = {
+  kind: "skipped",
+  reason: "parser-unavailable",
+};
 
 /** A parser that did not load: every source is skipped as `parser-unavailable`. */
 export const unavailableParser = (
@@ -47,11 +64,6 @@ export const unavailableParser = (
 ): TypeScriptParser["Service"] =>
   TypeScriptParser.of({
     status: Effect.succeed({ kind: "unavailable", name, reason }),
-    factsOf: (sources) =>
-      Effect.succeed(
-        sources.map((): FactsResult => ({
-          kind: "skipped",
-          reason: "parser-unavailable",
-        })),
-      ),
+    factsOf: (sources) => Effect.succeed(sources.map(() => UNAVAILABLE)),
+    digestsOf: (sources) => Effect.succeed(sources.map(() => UNAVAILABLE)),
   });

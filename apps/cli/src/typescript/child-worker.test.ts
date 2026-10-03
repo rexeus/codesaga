@@ -42,10 +42,13 @@ describe("forkWorker starting", () => {
 
     expect(started).toMatchObject({ kind: "ready", version: "7.7.7" });
     if (started.kind === "ready") {
-      const results = await started.worker.run([
-        { path: "a.ts", text: "a" },
-        { path: "b.ts", text: "b" },
-      ]);
+      const results = await started.worker.run(
+        [
+          { path: "a.ts", text: "a" },
+          { path: "b.ts", text: "b" },
+        ],
+        "facts",
+      );
       expect(results).toStrictEqual([PARSED, PARSED]);
       started.worker.stop();
     }
@@ -92,7 +95,7 @@ describe("forkWorker when the child dies", () => {
     expect(started.kind).toBe("ready");
     if (started.kind === "ready") {
       expect(
-        await started.worker.run([{ path: "a.ts", text: "a" }]),
+        await started.worker.run([{ path: "a.ts", text: "a" }], "facts"),
       ).toBeUndefined();
     }
   });
@@ -102,7 +105,7 @@ describe("forkWorker when the child dies", () => {
 
     if (started.kind === "ready") {
       expect(
-        await started.worker.run([{ path: "a.ts", text: "a" }]),
+        await started.worker.run([{ path: "a.ts", text: "a" }], "facts"),
       ).toBeUndefined();
       started.worker.stop();
     }
@@ -114,7 +117,7 @@ describe("forkWorker when the child dies", () => {
     if (started.kind === "ready") {
       started.worker.stop();
       expect(
-        await started.worker.run([{ path: "a.ts", text: "a" }]),
+        await started.worker.run([{ path: "a.ts", text: "a" }], "facts"),
       ).toBeUndefined();
     }
   });

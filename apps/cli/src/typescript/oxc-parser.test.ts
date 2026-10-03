@@ -25,28 +25,31 @@ const withParser = <A, E>(
   }).pipe(Effect.provide(makeOxcParserLayer(sourceProgram())));
 
 describe("makeOxcParserLayer", () => {
-  it.live("parses in a child process and says which version loaded", () =>
-    withParser((parser) =>
-      Effect.gen(function* () {
-        const status = yield* parser.status;
-        const results = yield* parser.factsOf([
-          { path: "a.ts", text: "const a = 1;\n" },
-          { path: "b.ts", text: "const b = ;\n" },
-        ]);
+  it.live(
+    "parses in a child process and says which version loaded",
+    () =>
+      withParser((parser) =>
+        Effect.gen(function* () {
+          const status = yield* parser.status;
+          const results = yield* parser.factsOf([
+            { path: "a.ts", text: "const a = 1;\n" },
+            { path: "b.ts", text: "const b = ;\n" },
+          ]);
 
-        assert.strictEqual(status.kind, "ready");
-        assert.strictEqual(status.name, "oxc-parser");
-        assert.match(
-          status.kind === "ready" ? status.version : "",
-          /^\d+\.\d+\.\d+$/u,
-        );
-        assert.deepStrictEqual(verdicts(results), ["parsed", "syntax-error"]);
-        assert.strictEqual(
-          results[0]?.kind === "parsed" ? results[0].facts.nodes : 0,
-          5,
-        );
-      }),
-    ),
+          assert.strictEqual(status.kind, "ready");
+          assert.strictEqual(status.name, "oxc-parser");
+          assert.match(
+            status.kind === "ready" ? status.version : "",
+            /^\d+\.\d+\.\d+$/u,
+          );
+          assert.deepStrictEqual(verdicts(results), ["parsed", "syntax-error"]);
+          assert.strictEqual(
+            results[0]?.kind === "parsed" ? results[0].facts.nodes : 0,
+            5,
+          );
+        }),
+      ),
+    20_000,
   );
 
   it.live(
@@ -72,5 +75,30 @@ describe("makeOxcParserLayer", () => {
         }),
       ),
     60_000,
+  );
+});
+
+describe("makeOxcParserLayer digests", () => {
+  it.live(
+    "answers a digest per source, with the counts the history keeps, from a real child",
+    () =>
+      withParser((parser) =>
+        Effect.gen(function* () {
+          const results = yield* parser.digestsOf([
+            { path: "a.ts", text: "export const a: any = 1;\n" },
+            { path: "b.ts", text: "const b = ;\n" },
+          ]);
+
+          assert.deepStrictEqual(
+            results.map((result) =>
+              result.kind === "parsed"
+                ? [result.facts.any, result.facts.lines, result.facts.esm]
+                : result.reason,
+            ),
+            [[1, 1, true], "syntax-error"],
+          );
+        }),
+      ),
+    20_000,
   );
 });
