@@ -31,20 +31,20 @@
 }
 
 /* The summary strip. */
-.ts-figs {
+.ts-stack .ts-figs {
   display: grid;
   grid-template-columns: repeat(var(--figs, 5), minmax(0, 1fr));
   gap: 18px 24px;
 }
 
-.ts-fig {
+.ts-stack .ts-fig {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
 }
 
-.ts-fig-value {
+.ts-stack .ts-fig-value {
   font-size: 32px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
@@ -52,12 +52,12 @@
   letter-spacing: -0.025em;
 }
 
-.ts-fig-note {
+.ts-stack .ts-fig-note {
   color: var(--ink-3);
   font-size: 12.5px;
 }
 
-.ts-note {
+.ts-stack .ts-note {
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -67,28 +67,28 @@
   font-size: 12.5px;
 }
 
-.ts-note svg {
+.ts-stack .ts-note svg {
   flex: none;
   margin-top: 2px;
 }
 
-.ts-note b {
+.ts-stack .ts-note b {
   color: var(--ink-2);
   font-weight: 650;
 }
 
-.ts-calm-text {
+.ts-stack .ts-calm-text {
   color: var(--ink-2);
   font-size: 15px;
 }
 
-.ts-lead {
+.ts-stack .ts-lead {
   margin-top: 6px;
   color: var(--ink-2);
   font-size: 13px;
 }
 
-.ts-subblock {
+.ts-stack .ts-subblock {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -97,26 +97,26 @@
   border-top: 1px solid var(--grid);
 }
 
-.chart > .note,
-.chart > .ts-lead {
+.ts-stack .chart > .note,
+.ts-stack .chart > .ts-lead {
   margin-top: 4px;
 }
 
 /* Rows of figures under a card's head, with a count of what they tell. */
-.ts-facts {
+.ts-stack .ts-facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px 16px;
   margin: 8px 0 4px;
 }
 
-.ts-facts > div {
+.ts-stack .ts-facts > div {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.ts-facts b {
+.ts-stack .ts-facts b {
   font-size: 20px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
@@ -124,51 +124,51 @@
   letter-spacing: -0.02em;
 }
 
-.ts-facts span {
+.ts-stack .ts-facts span {
   color: var(--ink-3);
   font-size: 12px;
 }
 
-.ts-cols {
+.ts-stack .ts-cols {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px 28px;
   margin: 10px 0 4px;
 }
 
-.ts-col {
+.ts-stack .ts-col {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
-.chart .slabel {
+.ts-stack .chart .slabel {
   margin-top: 8px;
 }
 
-.chart .tbar.big {
+.ts-stack .chart .tbar.big {
   margin: 2px 0;
 }
 
 /* Escape hatches. */
-.es-set {
+.ts-stack .es-set {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin-top: 10px;
 }
 
-.es-set .slabel {
+.ts-stack .es-set .slabel {
   margin-top: 0;
 }
 
-.es-fig {
+.ts-stack .es-fig {
   color: var(--ink-3);
   font-size: 13px;
 }
 
-.es-fig b {
+.ts-stack .es-fig b {
   color: var(--ink);
   font-size: 28px;
   font-variant-numeric: tabular-nums;
@@ -177,13 +177,13 @@
 }
 
 /* A table of rows that wrap into a grid: a name column and numeric columns. */
-.ktable {
+.ts-stack .ktable {
   display: flex;
   flex-direction: column;
   margin-top: 12px;
 }
 
-.kt {
+.ts-stack .kt {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 78px 66px 84px;
   gap: 8px;
@@ -193,22 +193,22 @@
   font-size: 13px;
 }
 
-.ktable.three .kt {
+.ts-stack .ktable.three .kt {
   grid-template-columns: minmax(0, 1fr) 66px 66px;
 }
 
-.kt .num {
+.ts-stack .kt .num {
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
-.kt .num:nth-child(2) {
+.ts-stack .kt .num:nth-child(2) {
   color: var(--ink);
   font-weight: 650;
 }
 
-.kt.head {
+.ts-stack .kt.head {
   padding-top: 0;
   border-top: 0;
   align-items: end;
@@ -219,66 +219,66 @@
   text-transform: uppercase;
 }
 
-.kt.head .num {
+.ts-stack .kt.head .num {
   color: var(--ink-3);
   font-weight: 400;
 }
 
-.kt .k {
+.ts-stack .kt .k {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
 
-.kt .k.two {
+.ts-stack .kt .k.two {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
 }
 
-.kt .k.two .muted {
+.ts-stack .kt .k.two .muted {
   font-size: 12px;
 }
 
-.kt .k.two .mono {
+.ts-stack .kt .k.two .mono {
   font-size: 12.5px;
 }
 
-.es-set.minor .es-fig b {
+.ts-stack .es-set.minor .es-fig b {
   font-size: 20px;
 }
 
 /* Strictness. */
-.strict-grid {
+.ts-stack .strict-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px 40px;
   margin-top: 6px;
 }
 
-.strict-bars {
+.ts-stack .strict-bars {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.strict-bars .legend {
+.ts-stack .strict-bars .legend {
   margin-top: 6px;
 }
 
-.strict-bars .note {
+.ts-stack .strict-bars .note {
   margin-top: 2px;
 }
-.opt {
+.ts-stack .opt {
   display: flex;
   flex-direction: column;
   gap: 5px;
   margin-top: 8px;
 }
 
-.opt-head {
+.ts-stack .opt-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -287,16 +287,16 @@
   font-size: 13px;
 }
 
-.opt-head .mono {
+.ts-stack .opt-head .mono {
   font-family: var(--mono);
   font-size: 12.5px;
 }
 
-.opt-head .muted {
+.ts-stack .opt-head .muted {
   font-size: 12px;
 }
 
-.unknown-state {
+.ts-stack .unknown-state {
   --mark: transparent;
   background: repeating-linear-gradient(
     135deg,
@@ -305,7 +305,7 @@
   );
 }
 
-.swatch.unknown-state {
+.ts-stack .swatch.unknown-state {
   background: repeating-linear-gradient(
     135deg,
     var(--other) 0 2px,
@@ -313,24 +313,24 @@
   );
 }
 
-.cfg {
+.ts-stack .cfg {
   min-width: 0;
   margin-top: 8px;
   color: var(--ink-2);
   font-size: 12.5px;
 }
 
-.cfg .slabel {
+.ts-stack .cfg .slabel {
   margin-top: 0;
 }
 
-.cfg-list {
+.ts-stack .cfg-list {
   display: flex;
   flex-direction: column;
   margin-top: 4px;
 }
 
-.cfg-row {
+.ts-stack .cfg-row {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -338,49 +338,49 @@
   border-top: 1px solid var(--grid);
 }
 
-.cfg-head {
+.ts-stack .cfg-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
 }
 
-.cfg-path {
+.ts-stack .cfg-path {
   min-width: 0;
   color: var(--ink);
   font-family: var(--mono);
   font-size: 12px;
 }
 
-.cfg-head .muted {
+.ts-stack .cfg-head .muted {
   flex: none;
   font-size: 12px;
 }
 
-.flags {
+.ts-stack .flags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
-.flag {
+.ts-stack .flag {
   padding: 1px 7px;
   border-radius: 999px;
   font-family: var(--mono);
   font-size: 11px;
 }
 
-.flag.on {
+.ts-stack .flag.on {
   background: var(--accent-wash);
   color: var(--accent-ink);
 }
 
-.flag.off {
+.ts-stack .flag.off {
   box-shadow: inset 0 0 0 1px var(--axis);
   color: var(--ink-3);
 }
 
-.flag.unknown {
+.ts-stack .flag.unknown {
   box-shadow: inset 0 0 0 1px var(--axis);
   background: repeating-linear-gradient(
     135deg,
@@ -390,43 +390,43 @@
   color: var(--ink-3);
 }
 
-.show-all {
+.ts-stack .show-all {
   margin-top: 8px;
 }
 
 @media (max-width: 900px) {
-  .strict-grid,
-  .ts-cols {
+  .ts-stack .strict-grid,
+  .ts-stack .ts-cols {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .ts-figs {
+  .ts-stack .ts-figs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px 20px;
   }
 
-  .ts-fig:last-child:nth-child(odd) {
+  .ts-stack .ts-fig:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
 
-  .ts-fig-value {
+  .ts-stack .ts-fig-value {
     font-size: 26px;
   }
 
-  .kt {
+  .ts-stack .kt {
     grid-template-columns: minmax(0, 1fr) 46px 56px 62px;
     gap: 6px;
   }
 
-  .ktable.three .kt {
+  .ts-stack .ktable.three .kt {
     grid-template-columns: minmax(0, 1fr) 58px 64px;
   }
 }
 
 /* The stories at the top of the section. */
-.ts-stories {
+.ts-stack .ts-stories {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -434,7 +434,7 @@
   border-bottom: 1px solid var(--grid);
 }
 
-.ts-story {
+.ts-stack .ts-story {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -442,18 +442,18 @@
   font-size: 14px;
 }
 
-.ts-story span {
+.ts-stack .ts-story span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.ts-story svg {
+.ts-stack .ts-story svg {
   flex: none;
   margin-top: 3px;
   color: var(--accent-ink);
 }
 
-.ts-story b {
+.ts-stack .ts-story b {
   color: var(--ink);
   font-weight: 650;
 }
@@ -463,7 +463,7 @@
   --mark: var(--accent);
 }
 
-svg .mark.trend {
+.ts-stack svg .mark.trend {
   fill: none;
   stroke: var(--accent);
   stroke-linecap: round;
@@ -471,45 +471,45 @@ svg .mark.trend {
   stroke-width: 2;
 }
 
-svg .trend-dot {
+.ts-stack svg .trend-dot {
   fill: var(--accent);
   stroke: var(--surface);
   stroke-width: 2;
 }
 
-.chart.trend .chart-head {
+.ts-stack .chart.trend .chart-head {
   flex-direction: column;
   gap: 10px;
 }
 
-.trend-picker {
+.ts-stack .trend-picker {
   flex-wrap: wrap;
 }
 
-.trend-picker button {
+.ts-stack .trend-picker button {
   height: 28px;
   font-size: 12.5px;
 }
 
-.trend-fig {
+.ts-stack .trend-fig {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin: 8px 0 4px;
 }
 
-.trend-fig .slabel {
+.ts-stack .trend-fig .slabel {
   margin-top: 0;
 }
 
 /* The timeline of compiler flag changes. */
-.flagev-list {
+.ts-stack .flagev-list {
   display: flex;
   flex-direction: column;
   margin-top: 4px;
 }
 
-.flagev {
+.ts-stack .flagev {
   position: relative;
   display: grid;
   grid-template-columns: 14px 104px minmax(0, 1fr);
@@ -518,7 +518,7 @@ svg .trend-dot {
   font-size: 13px;
 }
 
-.flagev::before {
+.ts-stack .flagev::before {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -528,15 +528,15 @@ svg .trend-dot {
   content: "";
 }
 
-.flagev:first-child::before {
+.ts-stack .flagev:first-child::before {
   top: 14px;
 }
 
-.flagev:last-child::before {
+.ts-stack .flagev:last-child::before {
   bottom: calc(100% - 14px);
 }
 
-.flagev-dot {
+.ts-stack .flagev-dot {
   position: relative;
   z-index: 1;
   align-self: start;
@@ -548,51 +548,49 @@ svg .trend-dot {
   background: var(--surface);
 }
 
-.flagev.on .flagev-dot {
+.ts-stack .flagev.on .flagev-dot {
   border-color: var(--accent);
   background: var(--accent);
 }
 
-.flagev-date {
+.ts-stack .flagev-date {
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
 }
 
-.flagev-what {
+.ts-stack .flagev-what {
   display: flex;
   flex-direction: column;
   min-width: 0;
   color: var(--ink-2);
 }
 
-.flagev-what .mono {
+.ts-stack .flagev-what .mono {
   color: var(--ink);
   font-family: var(--mono);
   font-size: 12.5px;
 }
 
-.flagev-where {
-  overflow: hidden;
+.ts-stack .flagev-where {
   font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
-.flagev-where .mono {
+.ts-stack .flagev-where .mono {
   color: var(--ink-3);
   font-size: 11.5px;
 }
 
 @media (max-width: 640px) {
-  .flagev {
+  .ts-stack .flagev {
     grid-template-columns: 14px minmax(0, 1fr);
   }
 
-  .flagev-date {
+  .ts-stack .flagev-date {
     grid-column: 2;
   }
 
-  .flagev-what {
+  .ts-stack .flagev-what {
     grid-column: 2;
   }
 }

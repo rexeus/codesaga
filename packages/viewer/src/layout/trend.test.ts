@@ -5,7 +5,7 @@ import { layoutTrend } from "./trend.js";
 // 344 x 190 leaves a 300 x 150 plot (margins: 14 top, 26 bottom, 38 left, 6 right).
 const SIZE = { width: 344, height: 190 };
 const months = ["2025-01", "2025-02", "2025-03", "2025-04"];
-const label = String;
+const label = { label: String, whole: false };
 
 describe("layoutTrend", () => {
   it("draws no line for fewer than two months", () => {
@@ -37,12 +37,10 @@ describe("layoutTrend", () => {
   });
 
   it("labels the value axis with the caller's format", () => {
-    const layout = layoutTrend(
-      months,
-      [0, 5, 10, 5],
-      SIZE,
-      (value) => `${value}%`,
-    );
+    const layout = layoutTrend(months, [0, 5, 10, 5], SIZE, {
+      label: (value) => `${value}%`,
+      whole: false,
+    });
 
     expect(layout?.ticks.map(({ label: text }) => text)).toEqual([
       "0%",
@@ -89,5 +87,52 @@ describe("layoutTrend zones", () => {
       300,
       6,
     );
+  });
+});
+
+describe("layoutTrend axis", () => {
+  const written = {
+    label: (value: number, digits: number) => value.toFixed(digits),
+    whole: false,
+  };
+  const ticksOf = (values: readonly number[], axis = written) =>
+    layoutTrend(months, values, SIZE, axis)?.ticks.map(
+      ({ label: text }) => text,
+    );
+
+  it("writes ticks of a series below one with the digits their step needs, so none repeats", () => {
+    expect(ticksOf([0.1, 0.2, 0.3, 0.4])).toEqual([
+      "0.0",
+      "0.1",
+      "0.2",
+      "0.3",
+      "0.4",
+    ]);
+    expect(ticksOf([0.01, 0.02, 0.03, 0.04])).toEqual([
+      "0.00",
+      "0.01",
+      "0.02",
+      "0.03",
+      "0.04",
+    ]);
+  });
+
+  it("writes a step of one or more without a fraction", () => {
+    expect(ticksOf([0, 5, 10, 5])).toEqual(["0", "5", "10"]);
+  });
+
+  it("writes a range of one with halves", () => {
+    expect(ticksOf([0, 0.5, 1, 1])).toEqual(["0.0", "0.5", "1.0"]);
+  });
+
+  it("gives a count only whole ticks, even for a range of one", () => {
+    expect(ticksOf([0, 1, 1, 1], { ...written, whole: true })).toEqual([
+      "0",
+      "1",
+    ]);
+    expect(ticksOf([0, 0, 0, 0], { ...written, whole: true })).toEqual([
+      "0",
+      "1",
+    ]);
   });
 });

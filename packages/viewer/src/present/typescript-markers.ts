@@ -1,4 +1,4 @@
-import { formatShare } from "./code-stats.js";
+import { formatShareExact } from "./code-stats.js";
 import { formatCount, formatNoun, formatPerThousand } from "./format.js";
 import type { TypeScriptDeepDive } from "./typescript-summary.js";
 
@@ -49,7 +49,7 @@ export const markersView = ({
     documented:
       exportedDeclarations === 0
         ? "No exported declaration."
-        : `${formatShare(documentedExports, exportedDeclarations)} of ${formatNoun(exportedDeclarations, "exported declaration")} have a JSDoc block`,
+        : `${formatShareExact(documentedExports, exportedDeclarations)} of ${formatNoun(exportedDeclarations, "exported declaration")} have a JSDoc block`,
     documentedShare,
   };
 };
@@ -68,7 +68,7 @@ export const markersTeaser = ({
     exportedDeclarations === 0
       ? []
       : [
-          `${formatShare(documentedExports, exportedDeclarations)} of exports documented`,
+          `${formatShareExact(documentedExports, exportedDeclarations)} of exports documented`,
         ];
   return [formatNoun(debt, "debt marker"), ...documented].join(" · ");
 };

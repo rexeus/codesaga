@@ -1,3 +1,4 @@
+import type { TrendAxis } from "../layout/trend.js";
 import {
   formatCompact,
   formatCount,
@@ -25,7 +26,7 @@ type TrendSpec = {
   /** The counts behind the value, for a tooltip. */
   readonly detail: (series: Series, index: number) => string;
   readonly format: (value: number) => string;
-  readonly axis: (value: number) => string;
+  readonly axis: TrendAxis;
 };
 
 type Series = (name: string, index: number) => number;
@@ -42,8 +43,22 @@ const formatRate = (value: number): string =>
 const formatPercentValue = (value: number): string =>
   value > 0 && value < 0.05 ? "<0.1%" : `${value.toFixed(1)}%`;
 
-const formatAxisRate = (value: number): string =>
-  Number.isInteger(value) ? formatCompact(value) : value.toFixed(1);
+const rateAxis: TrendAxis = {
+  label: (value, digits) =>
+    digits === 0 ? formatCompact(value) : value.toFixed(digits),
+  whole: false,
+};
+
+const percentAxis: TrendAxis = {
+  label: (value, digits) =>
+    `${digits === 0 ? formatCompact(value) : value.toFixed(digits)}%`,
+  whole: false,
+};
+
+const countAxis: TrendAxis = {
+  label: (value) => formatCompact(value),
+  whole: true,
+};
 
 const SPECS: readonly TrendSpec[] = [
   {
@@ -57,7 +72,7 @@ const SPECS: readonly TrendSpec[] = [
     detail: (at, index) =>
       `${formatNoun(at("production.escapes", index), "site")} in ${formatNoun(at("production.lines", index), "line")}`,
     format: formatRate,
-    axis: formatAxisRate,
+    axis: rateAxis,
   },
   {
     id: "any",
@@ -70,7 +85,7 @@ const SPECS: readonly TrendSpec[] = [
     detail: (at, index) =>
       `${formatNoun(at("production.any", index), "keyword")} in ${formatNoun(at("production.lines", index), "line")}`,
     format: formatRate,
-    axis: formatAxisRate,
+    axis: rateAxis,
   },
   {
     id: "complex",
@@ -86,7 +101,7 @@ const SPECS: readonly TrendSpec[] = [
     detail: (at, index) =>
       `${formatCount(at("production.complexFunctions", index))} of ${formatNoun(at("production.functions", index), "function")}`,
     format: formatPercentValue,
-    axis: (value) => `${formatCompact(value)}%`,
+    axis: percentAxis,
   },
   {
     id: "esm",
@@ -103,7 +118,7 @@ const SPECS: readonly TrendSpec[] = [
     detail: (at, index) =>
       `${formatNoun(at("production.esmFiles", index), "ES module file")}, ${formatCount(at("production.commonjsFiles", index))} CommonJS`,
     format: formatPercentValue,
-    axis: (value) => `${formatCompact(value)}%`,
+    axis: percentAxis,
   },
   {
     id: "cases",
@@ -115,7 +130,7 @@ const SPECS: readonly TrendSpec[] = [
     detail: (at, index) =>
       `${formatCount(at("tests.focusedTests", index))} focused, in ${formatNoun(at("tests.files", index), "test file")}`,
     format: formatCount,
-    axis: formatCompact,
+    axis: countAxis,
   },
 ];
 
@@ -139,7 +154,7 @@ export type TrendLine = {
   readonly months: readonly string[];
   readonly values: readonly (number | null)[];
   readonly details: readonly TrendMonth[];
-  readonly axis: (value: number) => string;
+  readonly axis: TrendAxis;
 };
 
 const seriesOf =

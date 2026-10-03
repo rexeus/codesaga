@@ -1,4 +1,4 @@
-import { formatCount } from "../present/format.js";
+import { formatNoun } from "../present/format.js";
 import { markersTeaser, markersView } from "../present/typescript-markers.js";
 import type { TypeScriptDeepDive } from "../present/typescript-summary.js";
 import { testsTeaser, testsView } from "../present/typescript-tests.js";
@@ -31,7 +31,7 @@ export const testsCard = (tests: Tests): HTMLElement => {
         weightedSegment(
           count,
           entity,
-          `${label}: ${formatCount(count)} cases (${share})`,
+          `${label}: ${formatNoun(count, "case")} (${share})`,
         ),
       ),
     ),

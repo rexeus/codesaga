@@ -5,7 +5,7 @@ import {
   configRows,
   optionRows,
   strictnessFacts,
-  strictShare,
+  strictFiles,
 } from "./typescript-strictness.js";
 
 const strictness = sampleBlock("strictness");
@@ -53,18 +53,41 @@ describe("optionRows", () => {
     });
   });
 
+  it("does not round almost all files to 100%", () => {
+    const config = firstOf(strictness.configs);
+    const rows = optionRows({
+      ...strictness,
+      configs: [
+        { ...config, files: 996, strict: true },
+        { ...config, files: 4, strict: false },
+      ],
+    });
+
+    expect(rows[0]?.share).toBe(">99%");
+  });
+
   it("has no bars when no config governs a file", () => {
     expect(optionRows({ ...strictness, configs: [] })).toEqual([]);
   });
 });
 
-describe("strictShare", () => {
-  it("is the share of governed files whose config has strict on", () => {
-    expect(strictShare(strictness)).toBeCloseTo(294 / 338, 6);
+describe("strictFiles", () => {
+  it("counts the files whose config has strict on, of the governed files", () => {
+    expect(strictFiles(strictness)).toEqual({
+      on: 294,
+      total: 338,
+      listedOnly: false,
+    });
+  });
+
+  it("says the files are those of the listed configs when the report lists fewer than it read", () => {
+    expect(strictFiles({ ...strictness, totalConfigs: 46 })?.listedOnly).toBe(
+      true,
+    );
   });
 
   it("is null without a governed file", () => {
-    expect(strictShare({ ...strictness, configs: [] })).toBeNull();
+    expect(strictFiles({ ...strictness, configs: [] })).toBeNull();
   });
 });
 

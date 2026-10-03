@@ -1,4 +1,4 @@
-import { formatCount } from "../present/format.js";
+import { formatCount, formatNoun } from "../present/format.js";
 import {
   ecosystemFacts,
   ecosystemTeaser,
@@ -34,7 +34,11 @@ export const modulesCard = (
       "div",
       "tbar big",
       ...segments.map(({ label, files, entity }) =>
-        weightedSegment(files, entity, `${label}: ${formatCount(files)} files`),
+        weightedSegment(
+          files,
+          entity,
+          `${label}: ${formatNoun(files, "file")}`,
+        ),
       ),
     ),
     legend(

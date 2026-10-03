@@ -34,6 +34,7 @@ describe("edgeRows", () => {
       from: { name: "apps/web", kind: "package" },
       to: { name: "packages/ui", kind: "package" },
       files: "64",
+      pairs: "64 file pairs",
       fraction: 1,
       typeOnlyFraction: 6 / 64,
       typeOnly: "6 types only",
@@ -146,5 +147,41 @@ describe("mapNotes", () => {
       "The report limits the lists to 9 territories and 13 edges.",
     );
     expect(notes.counts).toBe("43 territories, 61 edges");
+  });
+});
+
+describe("mapNotes in the singular", () => {
+  it("says one more group or edge in the singular", () => {
+    const notes = mapNotes({
+      ...imports,
+      territories: {
+        ...map,
+        mutualImports: [],
+        totalMutualImports: 1,
+        towardLessStable: [],
+        totalTowardLessStable: 1,
+      },
+    });
+
+    expect(notes.mutualMore).toBe("1 more group not listed");
+    expect(notes.towardMore).toBe("1 more edge not listed");
+  });
+
+  it("says one territory and one edge in the singular when the report limited the lists", () => {
+    const edge = firstOf(map.edges);
+    const notes = mapNotes({
+      ...imports,
+      territories: {
+        ...map,
+        territories: map.territories.slice(0, 1),
+        edges: [edge],
+        totalTerritories: 9,
+        totalEdges: 13,
+      },
+    });
+
+    expect(notes.truncated).toBe(
+      "The report limits the lists to 1 territory and 1 edge.",
+    );
   });
 });

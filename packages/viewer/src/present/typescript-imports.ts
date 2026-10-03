@@ -27,6 +27,8 @@ export type EdgeRow = {
   readonly to: TerritoryName;
   /** `211`; the file pairs where `from` imports `to`. */
   readonly files: string;
+  /** `211 file pairs`, for a tooltip. */
+  readonly pairs: string;
   /** The files over the largest edge's, 0 to 1. */
   readonly fraction: number;
   /** The part of them that imports only types, 0 to 1. */
@@ -42,6 +44,7 @@ export const edgeRows = ({ territories }: Imports): EdgeRow[] => {
     from: territoryName(from),
     to: territoryName(to),
     files: formatCount(files),
+    pairs: formatNoun(files, "file pair"),
     fraction: files / largest,
     typeOnlyFraction: files === 0 ? 0 : typeOnlyFiles / files,
     typeOnly:
@@ -98,9 +101,14 @@ export type MapNotes = {
   readonly towardMore: string | null;
 };
 
-const moreOf = (shown: number, total: number, noun: string): string | null =>
+const moreOf = (
+  shown: number,
+  total: number,
+  singular: string,
+  plural: string,
+): string | null =>
   shown < total
-    ? `${formatCount(total - shown)} more ${noun} not listed`
+    ? `${formatNoun(total - shown, `more ${singular}`, `more ${plural}`)} not listed`
     : null;
 
 /** The facts around the edge list: counts, mutual imports and edges toward less stable territories. */
@@ -112,7 +120,7 @@ export const mapNotes = ({ territories }: Imports): MapNotes => {
     detail: territories.detail,
     counts: `${formatNoun(territories.totalTerritories, "territory", "territories")}, ${formatNoun(territories.totalEdges, "edge")}`,
     truncated: cut
-      ? `The report limits the lists to ${formatCount(territories.territories.length)} territories and ${formatCount(territories.edges.length)} edges.`
+      ? `The report limits the lists to ${formatNoun(territories.territories.length, "territory", "territories")} and ${formatNoun(territories.edges.length, "edge")}.`
       : null,
     mutual: territories.mutualImports.map((group) =>
       group.territories.map(territoryName),
@@ -120,6 +128,7 @@ export const mapNotes = ({ territories }: Imports): MapNotes => {
     mutualMore: moreOf(
       territories.mutualImports.length,
       territories.totalMutualImports,
+      "group",
       "groups",
     ),
     towardLessStable: territories.towardLessStable.map((edge) => ({
@@ -132,6 +141,7 @@ export const mapNotes = ({ territories }: Imports): MapNotes => {
     towardMore: moreOf(
       territories.towardLessStable.length,
       territories.totalTowardLessStable,
+      "edge",
       "edges",
     ),
   };

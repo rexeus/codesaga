@@ -1,4 +1,4 @@
-import { formatShare } from "./code-stats.js";
+import { formatShareExact } from "./code-stats.js";
 import { formatCount, formatNoun } from "./format.js";
 import type { TypeScriptDeepDive } from "./typescript-summary.js";
 
@@ -53,7 +53,7 @@ export const testsView = ({
     assertionSegments: ASSERTION_LABELS.map((label, index) => ({
       label,
       count: assertions[index] ?? 0,
-      share: formatShare(assertions[index] ?? 0, withBody),
+      share: formatShareExact(assertions[index] ?? 0, withBody),
       entity: ASSERTION_ENTITIES[index] ?? "slot-other",
     })),
     marks: [

@@ -168,3 +168,40 @@ describe("hasTypeScriptFiles", () => {
     );
   });
 });
+
+describe("the strict figure of listed configs", () => {
+  it("names the listed configs when the report lists fewer than it read", () => {
+    const state = stateOf({
+      ...deepDive,
+      strictness: { ...sampleBlock("strictness"), totalConfigs: 46 },
+    });
+
+    expect(
+      state.kind === "ready" &&
+        state.figures.find(({ label }) => label === "Strict mode")?.note,
+    ).toBe("of the files of the 7 listed configs compile with strict");
+  });
+
+  it("does not round almost all files to 100%", () => {
+    const strictness = sampleBlock("strictness");
+    const [config] = strictness.configs;
+    const state = stateOf({
+      ...deepDive,
+      strictness: {
+        ...strictness,
+        configs:
+          config === undefined
+            ? []
+            : [
+                { ...config, files: 996, strict: true },
+                { ...config, files: 4, strict: false },
+              ],
+      },
+    });
+
+    expect(
+      state.kind === "ready" &&
+        state.figures.find(({ label }) => label === "Strict mode")?.value,
+    ).toBe(">99%");
+  });
+});

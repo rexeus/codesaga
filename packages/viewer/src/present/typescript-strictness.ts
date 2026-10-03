@@ -1,4 +1,5 @@
-import { formatCount, formatNoun, formatPercent } from "./format.js";
+import { formatShareExact } from "./code-stats.js";
+import { formatCount, formatNoun } from "./format.js";
 import type { TypeScriptDeepDive } from "./typescript-summary.js";
 
 type Strictness = NonNullable<TypeScriptDeepDive["strictness"]>;
@@ -71,16 +72,34 @@ export const optionRows = ({ configs }: Strictness): OptionRow[] => {
     const on = filesIn(configs, option, "on");
     return {
       option,
-      share: formatPercent(on / total),
+      share: formatShareExact(on, total),
       segments,
     };
   });
 };
 
-/** The share of governed files whose config has `strict` on, 0 to 1; null when no config governs a file. */
-export const strictShare = ({ configs }: Strictness): number | null => {
+/**
+ * The files whose config has `strict` on, of the files the listed configs
+ * govern; null when no config governs a file. When the report lists fewer
+ * configs than it read, these are the files of the listed ones, and
+ * `listedOnly` says so.
+ */
+export const strictFiles = ({
+  configs,
+  totalConfigs,
+}: Strictness): {
+  readonly on: number;
+  readonly total: number;
+  readonly listedOnly: boolean;
+} | null => {
   const total = configs.reduce((sum, { files }) => sum + files, 0);
-  return total === 0 ? null : filesIn(configs, "strict", "on") / total;
+  return total === 0
+    ? null
+    : {
+        on: filesIn(configs, "strict", "on"),
+        total,
+        listedOnly: configs.length < totalConfigs,
+      };
 };
 
 /** A config with the five options as small flags. */

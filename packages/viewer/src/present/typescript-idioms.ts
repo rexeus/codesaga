@@ -1,4 +1,4 @@
-import { formatShare } from "./code-stats.js";
+import { formatShareExact } from "./code-stats.js";
 import { formatCount, formatNoun } from "./format.js";
 import type { TypeScriptDeepDive } from "./typescript-summary.js";
 
@@ -32,7 +32,7 @@ const row = (
       label,
       count,
       figure: formatCount(count),
-      share: formatShare(count, total),
+      share: formatShareExact(count, total),
       entity: ENTITIES[index] ?? "slot-other",
     })),
   };

@@ -4,7 +4,8 @@ import { h } from "./dom.js";
 
 /**
  * Rows of a list that builds only the first `limit.rows` until the reader asks
- * for all of them. The button disappears when nothing is left to show.
+ * for all of them. The button disappears when nothing is left to show, and
+ * the focus moves to the first row it revealed.
  */
 export const limitedList = <Row>(
   rows: readonly Row[],
@@ -23,6 +24,12 @@ export const limitedList = <Row>(
   more.addEventListener("click", () => {
     draw(true);
     more.hidden = true;
+    // The button that held the focus is gone: hand it to the first new row.
+    const firstNew = list.children[limit.rows];
+    if (firstNew instanceof HTMLElement) {
+      firstNew.tabIndex = -1;
+      firstNew.focus();
+    }
   });
   draw(false);
   return h("div", "limited", list, more);

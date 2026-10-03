@@ -40,7 +40,7 @@ export const automationView = (classes: Classes): AutomationView | null => {
       : [
           {
             label,
-            commits: formatCount(commits),
+            commits: formatNoun(commits, "commit"),
             added: formatCount(added),
             removed: formatCount(removed),
           },

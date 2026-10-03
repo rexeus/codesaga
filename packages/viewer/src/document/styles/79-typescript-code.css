@@ -1,12 +1,12 @@
 /* The Deep dive: TypeScript section, part two: functions, the import map and folded cards. */
 /* Functions and hotspots. */
-.fnlist {
+.ts-stack .fnlist {
   display: flex;
   flex-direction: column;
   margin-top: 6px;
 }
 
-.fn {
+.ts-stack .fn {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(48px, 80px) 64px;
   gap: 12px;
@@ -16,18 +16,18 @@
   font-size: 13px;
 }
 
-.fn:first-child {
+.ts-stack .fn:first-child {
   border-top: 0;
 }
 
-.fn-id {
+.ts-stack .fn-id {
   display: flex;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
 }
 
-.fn-id .mono {
+.ts-stack .fn-id .mono {
   overflow: hidden;
   font-family: var(--mono);
   font-size: 12.5px;
@@ -35,12 +35,12 @@
   white-space: nowrap;
 }
 
-.fn-name {
+.ts-stack .fn-name {
   font-family: var(--mono);
   font-size: 12.5px;
 }
 
-.fn-place {
+.ts-stack .fn-place {
   overflow: hidden;
   color: var(--ink-3);
   font-size: 12px;
@@ -48,14 +48,14 @@
   white-space: nowrap;
 }
 
-.fn-place .mono {
+.ts-stack .fn-place .mono {
   color: var(--ink-3);
   font-size: 11.5px;
 }
 
-.fn .bar,
-.edge .bar,
-.cp .bar {
+.ts-stack .fn .bar,
+.ts-stack .ts-edge .bar,
+.ts-stack .cp .bar {
   display: block;
   height: 6px;
   overflow: hidden;
@@ -63,9 +63,9 @@
   background: var(--grid);
 }
 
-.fn .bar i,
-.edge .bar i,
-.cp .bar i {
+.ts-stack .fn .bar i,
+.ts-stack .ts-edge .bar i,
+.ts-stack .cp .bar i {
   display: block;
   position: relative;
   height: 100%;
@@ -74,30 +74,30 @@
   opacity: 0.6;
 }
 
-.fn-fig {
+.ts-stack .fn-fig {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   line-height: 1.25;
 }
 
-.fn-fig b {
+.ts-stack .fn-fig b {
   font-variant-numeric: tabular-nums;
 }
 
-.fn-fig span {
+.ts-stack .fn-fig span {
   color: var(--ink-3);
   font-size: 11.5px;
 }
 
 /* The import map. */
-.edges {
+.ts-stack .edges {
   display: flex;
   flex-direction: column;
   margin-top: 6px;
 }
 
-.edge {
+.ts-stack .ts-edge {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 96px;
   gap: 14px;
@@ -107,11 +107,11 @@
   font-size: 13px;
 }
 
-.edge:first-child {
+.ts-stack .ts-edge:first-child {
   border-top: 0;
 }
 
-.ends {
+.ts-stack .ends {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -119,20 +119,20 @@
   min-width: 0;
 }
 
-.ends .to {
+.ts-stack .ends .to {
   display: inline-flex;
   align-items: baseline;
   gap: 7px;
   min-width: 0;
 }
 
-.ends svg {
+.ts-stack .ends svg {
   flex: none;
   align-self: center;
   color: var(--ink-3);
 }
 
-.tname {
+.ts-stack .tname {
   min-width: 0;
   color: var(--ink);
   font-family: var(--mono);
@@ -140,28 +140,28 @@
   overflow-wrap: anywhere;
 }
 
-.tname.other {
+.ts-stack .tname.other {
   color: var(--ink-3);
   font-family: var(--sans);
   font-size: 12.5px;
 }
 
-.edge-fig {
+.ts-stack .edge-fig {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
 }
 
-.edge-fig b {
+.ts-stack .edge-fig b {
   font-variant-numeric: tabular-nums;
 }
 
-.edge-fig .bar {
+.ts-stack .edge-fig .bar {
   width: 100%;
 }
 
-.edge .bar i .types {
+.ts-stack .ts-edge .bar i .types {
   position: absolute;
   top: 0;
   right: 0;
@@ -171,13 +171,13 @@
   opacity: 0.55;
 }
 
-.cptable {
+.ts-stack .cptable {
   display: flex;
   flex-direction: column;
   margin-top: 6px;
 }
 
-.cp {
+.ts-stack .cp {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px 48px 48px 62px;
   gap: 8px;
@@ -187,13 +187,13 @@
   font-size: 13px;
 }
 
-.cp .num {
+.ts-stack .cp .num {
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
-.cp.head {
+.ts-stack .cp.head {
   padding-top: 0;
   border-top: 0;
   color: var(--ink-3);
@@ -202,26 +202,26 @@
   text-transform: uppercase;
 }
 
-.cp .inst {
+.ts-stack .cp .inst {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 3px;
 }
 
-.cp .inst .bar {
+.ts-stack .cp .inst .bar {
   height: 4px;
 }
 
-.chips-line {
+.ts-stack .chips-line {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 6px;
   align-items: baseline;
 }
 
-.chips-line .tname,
-.chips-line .mono {
+.ts-stack .chips-line .tname,
+.ts-stack .chips-line .mono {
   padding: 1px 8px;
   border-radius: 999px;
   background: var(--surface-2);
@@ -230,29 +230,29 @@
   font-size: 11.5px;
 }
 
-.group {
+.ts-stack .group {
   display: flex;
   flex-direction: column;
   gap: 3px;
   padding: 6px 0;
 }
 
-.group .muted {
+.ts-stack .group .muted {
   font-size: 12px;
 }
 
-.less {
+.ts-stack .less {
   display: flex;
   flex-direction: column;
   gap: 1px;
   padding: 4px 0;
 }
 
-.less .muted {
+.ts-stack .less .muted {
   font-size: 12px;
 }
 
-.cycle {
+.ts-stack .cycle {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -262,18 +262,18 @@
 }
 
 /* A card that folds, and the grid the folded cards sit in. */
-.fold-grid {
+.ts-stack .fold-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
 }
 
-.fold[open] {
+.ts-stack .fold[open] {
   grid-column: 1 / -1;
 }
 
-.fold-head {
+.ts-stack .fold-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -283,31 +283,31 @@
   list-style: none;
 }
 
-.fold-head::-webkit-details-marker {
+.ts-stack .fold-head::-webkit-details-marker {
   display: none;
 }
 
-.fold-head:hover .fold-chevron {
+.ts-stack .fold-head:hover .fold-chevron {
   background: var(--grid);
 }
 
-.fold-title {
+.ts-stack .fold-title {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.fold-teaser {
+.ts-stack .fold-teaser {
   margin-top: 8px;
   color: var(--ink-2);
   font-size: 13px;
 }
 
-.fold[open] .fold-teaser {
+.ts-stack .fold[open] .fold-teaser {
   display: none;
 }
 
-.fold-chevron {
+.ts-stack .fold-chevron {
   display: inline-grid;
   flex: none;
   place-items: center;
@@ -319,61 +319,67 @@
   transition: transform 0.15s;
 }
 
-.fold[open] .fold-chevron {
+@media (prefers-reduced-motion: reduce) {
+  .ts-stack .fold-chevron {
+    transition: none;
+  }
+}
+
+.ts-stack .fold[open] .fold-chevron {
   transform: rotate(180deg);
 }
 
-.fold-body {
+.ts-stack .fold-body {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 0 20px 18px;
 }
 
-.idioms {
+.ts-stack .idioms {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px 32px;
 }
 
-.idiom {
+.ts-stack .idiom {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
-.idiom .slabel {
+.ts-stack .idiom .slabel {
   margin-top: 0;
 }
 
-.idiom .legend strong {
+.ts-stack .idiom .legend strong {
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
-.idiom .legend .muted {
+.ts-stack .idiom .legend .muted {
   font-variant-numeric: tabular-nums;
 }
 
-.tool-groups {
+.ts-stack .tool-groups {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 32px;
 }
 
-.tool-group {
+.ts-stack .tool-group {
   display: flex;
   flex-direction: column;
   gap: 5px;
   min-width: 0;
 }
 
-.tool-group .slabel {
+.ts-stack .tool-group .slabel {
   margin-top: 0;
 }
 
-.tool-group .pill {
+.ts-stack .tool-group .pill {
   gap: 6px;
   height: auto;
   min-height: 22px;
@@ -381,46 +387,46 @@
   white-space: normal;
 }
 
-.tool-group .pill .muted {
+.ts-stack .tool-group .pill .muted {
   font-size: 11px;
   font-weight: 400;
 }
 
 @media (max-width: 900px) {
-  .idioms,
-  .tool-groups,
-  .fold-grid {
+  .ts-stack .idioms,
+  .ts-stack .tool-groups,
+  .ts-stack .fold-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .fn {
+  .ts-stack .fn {
     grid-template-columns: minmax(0, 1fr) 64px;
     gap: 6px 12px;
   }
 
-  .fn .bar {
+  .ts-stack .fn .bar {
     grid-column: 1 / -1;
     grid-row: 2;
   }
 
-  .edge {
+  .ts-stack .ts-edge {
     grid-template-columns: minmax(0, 1fr) 72px;
     gap: 10px;
   }
 
-  .cp {
+  .ts-stack .cp {
     grid-template-columns: minmax(0, 1fr) 34px 40px 40px 52px;
     gap: 6px;
     font-size: 12.5px;
   }
 
-  .fold-head {
+  .ts-stack .fold-head {
     padding: 16px;
   }
 
-  .fold-body {
+  .ts-stack .fold-body {
     padding: 0 16px 16px;
   }
 }

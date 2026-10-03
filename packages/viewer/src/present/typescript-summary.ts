@@ -1,13 +1,13 @@
 import type { Report } from "@codesaga/engine";
 
+import { formatShareExact } from "./code-stats.js";
 import {
   formatCount,
   formatNoun,
-  formatPercent,
   formatPercentTenth,
   formatPerThousand,
 } from "./format.js";
-import { strictShare } from "./typescript-strictness.js";
+import { strictFiles } from "./typescript-strictness.js";
 
 /** The TypeScript deep dive of a report, which only reports with TypeScript or JavaScript files carry. */
 export type TypeScriptDeepDive = NonNullable<
@@ -95,18 +95,21 @@ const escapeFigure = ({ production }: Block<"typeSafety">): SummaryFigure => ({
 });
 
 const strictFigure = (strictness: Block<"strictness">): SummaryFigure => {
-  const strict = strictShare(strictness);
-  return strict === null
-    ? {
-        label: "Strict mode",
-        value: "No tsconfig",
-        note: "no config governs a file",
-      }
-    : {
-        label: "Strict mode",
-        value: formatPercent(strict),
-        note: "of governed files compile with strict",
-      };
+  const strict = strictFiles(strictness);
+  if (strict === null) {
+    return {
+      label: "Strict mode",
+      value: "No tsconfig",
+      note: "no config governs a file",
+    };
+  }
+  return {
+    label: "Strict mode",
+    value: formatShareExact(strict.on, strict.total),
+    note: strict.listedOnly
+      ? `of the files of the ${formatNoun(strictness.configs.length, "listed config")} compile with strict`
+      : "of governed files compile with strict",
+  };
 };
 
 const complexFigure = ({ production }: Block<"functions">): SummaryFigure => ({

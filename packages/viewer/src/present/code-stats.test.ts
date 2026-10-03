@@ -4,6 +4,7 @@ import {
   compareOnBar,
   formatWhole,
   formatShare,
+  formatShareExact,
   indentationOf,
   pathTail,
   rangePosition,
@@ -91,5 +92,31 @@ describe("rangePosition", () => {
       rangePosition(1, 100, 100),
       rangePosition(7, 7, 7),
     ]).toEqual([0.04, 0.96, 0.5]);
+  });
+});
+
+describe("formatShareExact", () => {
+  it("says none and all only for none and all", () => {
+    expect([
+      formatShareExact(0, 10),
+      formatShareExact(10, 10),
+      formatShareExact(0, 0),
+    ]).toEqual(["0%", "100%", "0%"]);
+  });
+
+  it("names a share that rounds to 0% or 100% as below 1% and above 99%", () => {
+    expect([
+      formatShareExact(1, 1000),
+      formatShareExact(999, 1000),
+      formatShareExact(996, 1000),
+    ]).toEqual(["<1%", ">99%", ">99%"]);
+  });
+
+  it("rounds the rest to a whole percent", () => {
+    expect([
+      formatShareExact(1, 3),
+      formatShareExact(2, 3),
+      formatShareExact(99, 100),
+    ]).toEqual(["33%", "67%", "99%"]);
   });
 });

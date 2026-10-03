@@ -38,12 +38,7 @@ export const automationCard = (classes: Classes): HTMLElement | null => {
         h(
           "div",
           "kt",
-          h(
-            "span",
-            "k two",
-            h("span", "", label),
-            h("span", "muted", `${commits} commits`),
-          ),
+          h("span", "k two", h("span", "", label), h("span", "muted", commits)),
           ...cells(added, removed),
         ),
       ),

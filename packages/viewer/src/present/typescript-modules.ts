@@ -1,5 +1,5 @@
-import { formatShare } from "./code-stats.js";
-import { formatCount, formatNoun, formatPercent } from "./format.js";
+import { formatShareExact } from "./code-stats.js";
+import { formatCount, formatNoun } from "./format.js";
 import type { TypeScriptDeepDive } from "./typescript-summary.js";
 
 type Modules = NonNullable<TypeScriptDeepDive["modules"]>;
@@ -63,11 +63,11 @@ const packageLine = ({ packageTypes }: Modules): string => {
 export const modulesView = (modules: Modules): ModulesView => {
   const { files, esmFiles, imports, nonErasable } = modules;
   return {
-    teaser: `${formatShare(esmFiles, files)} of files are ES modules`,
+    teaser: `${formatShareExact(esmFiles, files)} of files are ES modules`,
     importLine:
       imports.declarations === 0
         ? "No import declaration binds anything."
-        : `${formatPercent(imports.typeOnly / imports.declarations)} of ${formatNoun(imports.declarations, "import")} bind only types.`,
+        : `${formatShareExact(imports.typeOnly, imports.declarations)} of ${formatNoun(imports.declarations, "import")} bind only types.`,
     packageLine: packageLine(modules),
     nonErasableLine: nonErasableLine(modules),
     nonErasable: [

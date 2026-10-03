@@ -71,21 +71,23 @@ const typeSafety = ({
       ...(trend === null ? [] : [trend]),
     ];
   }
-  if (safety === undefined && strictness === undefined) {
-    return [];
-  }
   const events = trends === undefined ? null : eventsBlock(trends.events);
-  return [
-    group(
-      "Type safety",
-      "Where the code leaves the type system, how that changed, and how strictly the compiler is set",
-    ),
+  const cards = [
     ...(safety === undefined
       ? []
       : [row(escapesCard(safety), counterpartsCard(safety))]),
     ...(trend === null ? [] : [trend]),
     ...(strictness === undefined ? [] : [strictnessCard(strictness, events)]),
   ];
+  return cards.length === 0
+    ? []
+    : [
+        group(
+          "Type safety",
+          "Where the code leaves the type system, how that changed, and how strictly the compiler is set",
+        ),
+        ...cards,
+      ];
 };
 
 const functions = ({

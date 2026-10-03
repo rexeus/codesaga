@@ -81,7 +81,9 @@ describe("trendLine", () => {
     expect(line.details[0]?.figure).toBe("–");
     expect(line.details[1]?.detail).toBe("3 ES module files, 1 CommonJS");
   });
+});
 
+describe("trendLine counts and gaps", () => {
   it("counts the test cases as they are", () => {
     const line = trendLine(trends, "cases");
 
@@ -98,11 +100,28 @@ describe("trendLine", () => {
     expect(line.values).toEqual([null]);
   });
 
-  it("labels the value axis as the line's values read", () => {
-    expect(trendLine(trends, "escapes").axis(20)).toBe("20");
-    expect(trendLine(trends, "escapes").axis(2.5)).toBe("2.5");
-    expect(trendLine(trends, "complex").axis(10)).toBe("10%");
-    expect(trendLine(trends, "cases").axis(1500)).toBe("1.5k");
+  it("writes the axis of a rate, a percent and a count with the digits of the step", () => {
+    const rate = trendLine(trends, "escapes").axis;
+    const percent = trendLine(trends, "complex").axis;
+    const cases = trendLine(trends, "cases").axis;
+
+    expect([
+      rate.label(20, 0),
+      rate.label(0.2, 1),
+      rate.label(0.05, 2),
+    ]).toEqual(["20", "0.2", "0.05"]);
+    // a maximum below 1 must not print 0% / 1% / 1%
+    expect([
+      percent.label(0, 1),
+      percent.label(0.5, 1),
+      percent.label(10, 0),
+    ]).toEqual(["0.0%", "0.5%", "10%"]);
+    expect(cases.label(1500, 0)).toBe("1.5k");
+    expect([rate.whole, percent.whole, cases.whole]).toEqual([
+      false,
+      false,
+      true,
+    ]);
   });
 });
 

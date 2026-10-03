@@ -1,4 +1,4 @@
-import { formatShare } from "./code-stats.js";
+import { formatShareExact } from "./code-stats.js";
 import { formatCount, formatNoun, formatPerThousand } from "./format.js";
 import type { TypeScriptDeepDive } from "./typescript-summary.js";
 
@@ -44,7 +44,7 @@ const escapeSet = (label: string, part: Part): EscapeSet | null =>
         label,
         rate: formatPerThousand(part.escapesPer1000),
         caption: `${formatNoun(part.escapes, "site")} in ${formatNoun(part.lines, "line")} of ${formatNoun(part.files, "file")}`,
-        fileShare: `${formatShare(part.filesWithEscape, part.files)} of the files have one`,
+        fileShare: `${formatShareExact(part.filesWithEscape, part.files)} of the files have one`,
         segments: ESCAPE_KINDS.map(({ key, label: kind, entity }) => ({
           label: kind,
           entity,

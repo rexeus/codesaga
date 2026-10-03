@@ -11,10 +11,10 @@ describe("automationView", () => {
     const view = automationView(classes);
 
     expect(view?.rows).toEqual([
-      { label: "Human", commits: "4", added: "6", removed: "9" },
+      { label: "Human", commits: "4 commits", added: "6", removed: "9" },
       {
         label: "Human with an AI agent",
-        commits: "1",
+        commits: "1 commit",
         added: "2",
         removed: "0",
       },

@@ -7,6 +7,18 @@ import { timeAxisOf } from "./time-axis.js";
 
 const Y_TICKS = 3;
 
+/** How a line's value axis is written. */
+export type TrendAxis = {
+  /** The tick's text, given the value and the fraction digits its step needs. */
+  readonly label: (value: number, digits: number) => string;
+  /** True for a count: only whole numbers get a tick. */
+  readonly whole: boolean;
+};
+
+/** The fraction digits that tell ticks `step` apart: none for a step of 1 or more, one for 0.5 or 0.1, two for 0.05. */
+const digitsOf = (step: number): number =>
+  step >= 1 ? 0 : Math.max(0, Math.ceil(-Math.log10(step) - 1e-9));
+
 /** A month of the series as a point in plot pixels; `y` is null where the series has no value. */
 type TrendPoint = {
   readonly x: number;
@@ -56,17 +68,31 @@ const dotsOf = (points: readonly TrendPoint[]): TrendLayout["dots"][number][] =>
     return alone || index === points.length - 1 ? [{ x, y }] : [];
   });
 
+const ticksOf = (
+  values: readonly number[],
+  { label, whole }: TrendAxis,
+): { value: number; label: string }[] => {
+  const shown = whole
+    ? values.filter((value) => Number.isInteger(value))
+    : values;
+  const [first, second] = values;
+  const step = first === undefined || second === undefined ? 1 : second - first;
+  const digits = whole ? 0 : digitsOf(step);
+  return shown.map((value) => ({ value, label: label(value, digits) }));
+};
+
 /**
  * Lays one value per month out as a line of `size`, from zero up to the
  * highest value, with the months spread by date. A month without a value
  * (`null`) breaks the line. Null for fewer than two months, which have no
- * line to draw.
+ * line to draw. The axis ticks are written with the fraction digits their
+ * step needs, so two ticks never read alike.
  */
 export const layoutTrend = (
   months: readonly string[],
   values: readonly (number | null)[],
   size: Size,
-  label: (value: number) => string,
+  valueAxis: TrendAxis,
 ): TrendLayout | null => {
   const first = months[0];
   const last = months.at(-1);
@@ -98,9 +124,10 @@ export const layoutTrend = (
     points,
     path,
     dots: dotsOf(points),
-    ticks: y
-      .ticks(Y_TICKS)
-      .map((value) => ({ position: y(value), label: label(value) })),
+    ticks: ticksOf(y.ticks(Y_TICKS), valueAxis).map(({ value, label }) => ({
+      position: y(value),
+      label,
+    })),
     timeTicks: axis.ticks,
     zones: zonesOf(
       points.map(({ x }) => x),

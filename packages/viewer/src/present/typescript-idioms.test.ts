@@ -51,6 +51,34 @@ describe("idiomRows", () => {
   });
 });
 
+describe("idiomRows rounding", () => {
+  it("never shows 100% next to a side that has occurrences", () => {
+    const rows = idiomRows({
+      ...idioms,
+      exports: { defaultExports: 12, namedExports: 12_761 },
+    });
+    const exports = rows.find(({ title }) => title === "Exports");
+
+    expect(exports?.sides.map(({ label, share }) => [label, share])).toEqual([
+      ["default", "<1%"],
+      ["named", ">99%"],
+    ]);
+  });
+
+  it("shows 100% and 0% for a pair where one side is the whole", () => {
+    const rows = idiomRows({
+      ...idioms,
+      exports: { defaultExports: 0, namedExports: 40 },
+    });
+
+    expect(
+      rows
+        .find(({ title }) => title === "Exports")
+        ?.sides.map(({ share }) => share),
+    ).toEqual(["0%", "100%"]);
+  });
+});
+
 describe("idiomRows without occurrences", () => {
   it("leaves out a pair that has no occurrence on either side", () => {
     const rows = idiomRows({

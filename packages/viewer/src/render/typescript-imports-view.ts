@@ -36,6 +36,7 @@ const edgeRow = ({
   from,
   to,
   files,
+  pairs,
   fraction,
   typeOnlyFraction,
   typeOnly,
@@ -46,10 +47,10 @@ const edgeRow = ({
   types.style.width = `${typeOnlyFraction * 100}%`;
   fill.append(types);
   const bar = h("span", "bar", fill);
-  bar.title = `${files} file pairs${typeOnly === null ? "" : `, ${typeOnly}`}`;
+  bar.title = `${pairs}${typeOnly === null ? "" : `, ${typeOnly}`}`;
   return h(
     "div",
-    "edge",
+    "ts-edge",
     ends(from, to),
     h("div", "edge-fig", h("b", "", files), bar),
   );
