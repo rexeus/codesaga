@@ -120,7 +120,7 @@ Badges of a contributor, grouped by category:
 - **Strict throughout** (`strict-throughout`, state) — every TypeScript file lies under a `tsconfig` that is effectively strict, among at least 10 production TypeScript files.
 - **ESM only** (`esm-only`, state) — no production file uses CommonJS, among at least 10 production module files; tool configuration files such as `jest.config.js` are left out.
 - **No ts-ignore** (`no-ts-ignore`, state) — no `@ts-ignore` and no `@ts-nocheck` in production code, among at least 10 production TypeScript files.
-- **Tightened** (`tightened`, milestone) — the production escape hatches per 1,000 lines fell by at least half from their peak (at least 20 escape hatches at the peak); `reachedAt` is the last day of the first month it showed. Listed once the history is read.
+- **Tightened** (`tightened`, milestone) — the production escape hatches per 1,000 lines fell by at least half from their peak (at least 20 escape hatches at the peak); it is reached at the first month whose rate is half of the highest peak before it, and stays reached however high a later peak grows. `reachedAt` is the day of the last first-parent commit dated in that month or before it. Listed once the history is read.
 
 A shallow clone misses the oldest history. Its milestones are reached when the commits it has show them, and their `detail` says the figures are at least that much, but `reachedAt` is null, since an older commit may have passed the threshold first. Bus-proof and Fresh blood read the whole history, so they are withheld there: not reached, without a `progress`.
 

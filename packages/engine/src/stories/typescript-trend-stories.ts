@@ -91,7 +91,8 @@ const strictSince = (
 /**
  * What the flip says: a switch from off to on, a config created strict, or
  * a config that was strict in the first commit the history read, which says
- * nothing of how it came to be.
+ * nothing of how it came to be: the chain may start long after the
+ * repository did, and a shallow clone starts at its boundary.
  */
 const strictWording = (
   { path, date, from }: FlagChange,
@@ -105,7 +106,7 @@ const strictWording = (
   }
   return date.slice(0, 7) === firstMonth
     ? {
-        title: "Strict from the start",
+        title: "Strict since the first commit read",
         detail: `strict has been on in ${path} since the first commit read, in ${firstMonth}.`,
       }
     : {
@@ -167,15 +168,19 @@ const moduleEra = (trends: TrendInput): ReadonlyArray<Story> => {
     (_, index) => seriesAt(trends, SERIES.commonjsFiles, index) > 0,
   );
   const since = trends.months[lastWithCommonjs + 1];
-  return lastWithCommonjs < 0 || since === undefined
+  const day = trends.lastCommitDays[lastWithCommonjs + 1];
+  return lastWithCommonjs < 0 ||
+    since === undefined ||
+    day === undefined ||
+    day === ""
     ? []
     : [
         {
           kind: "module-era",
           title: "ESM only",
-          detail: `No production file has used CommonJS since ${since}.`,
+          detail: `No production file has used CommonJS since the end of ${since}.`,
           value: 0,
-          date: `${since}-01`,
+          date: day,
         },
       ];
 };

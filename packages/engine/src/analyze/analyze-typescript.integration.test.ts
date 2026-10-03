@@ -266,6 +266,7 @@ layer(analyzeServices)("analyze the TypeScript deep dive's tests", (it) => {
         focused: 1,
         todo: 0,
         focusedFiles: ["src/hard.test.ts"],
+        focusedFileCount: 1,
         assertions: [0, 1, 0, 0],
         snapshots: 0,
         typeTests: 0,

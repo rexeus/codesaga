@@ -22,6 +22,8 @@ export const Tests = Schema.Struct({
   todo: Count,
   /** Files that hold a focused marker, first by path; at most five. */
   focusedFiles: Schema.Array(Schema.String).check(Schema.isMaxLength(5)),
+  /** Files that hold a focused marker, all of them, where `focusedFiles` lists the first five. */
+  focusedFileCount: Count,
   /**
    * The cases that have a body (every case but a `todo`) with 0, 1, 2 to 3, and
    * 4 or more direct assertions: `expect(...)`, `expect.soft`, `expect.poll`,

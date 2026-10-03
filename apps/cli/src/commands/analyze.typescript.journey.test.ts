@@ -76,7 +76,8 @@ describe("codesaga inspect --json TypeScript figures", () => {
         );
         expect(inspected.matches[0]?.typescript).toMatchObject({
           files: 1,
-          unparsed: 0,
+          declarationFiles: 0,
+          skipped: 0,
           importedBy: { files: 0, top: [] },
           testedBy: { files: 0, top: [] },
         });

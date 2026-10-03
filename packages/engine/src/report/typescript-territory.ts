@@ -43,6 +43,8 @@ export const TerritoryTypeScript = Schema.Struct({
   noUncheckedIndexedAccess: Schema.optionalKey(TerritoryStrict),
   /** The production functions of the territory, the denominator of `over15Share`; absent with it. */
   functions: Schema.optionalKey(Schema.Natural),
+  /** The production functions of the territory with a cognitive complexity of 15 or more, the numerator of `over15Share`; absent with it. */
+  complexFunctions: Schema.optionalKey(Schema.Natural),
   /**
    * The share of the territory's production functions with a cognitive
    * complexity of 15 or more, as `deepDives.typescript.functions` counts

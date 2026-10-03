@@ -13,8 +13,14 @@ import { stories } from "./stories.js";
 const kindsOf = (facts: Parameters<typeof storyFacts>[0]) =>
   stories(storyFacts(facts)).map(({ kind }) => kind);
 
-const focused = (focusedFiles: ReadonlyArray<string>, count = 1) =>
-  deepDiveWith({ tests: testsBlock({ focused: count, focusedFiles }) });
+const focused = (
+  focusedFiles: ReadonlyArray<string>,
+  count = 1,
+  focusedFileCount = focusedFiles.length,
+) =>
+  deepDiveWith({
+    tests: testsBlock({ focused: count, focusedFiles, focusedFileCount }),
+  });
 
 const hardest = {
   name: "reconcileInvoices",
@@ -86,6 +92,22 @@ describe("focused-test", () => {
     expect(story?.path).toBe("a\u001B[31m.test.ts");
   });
 
+  it("counts the files beyond the listed five", () => {
+    const [story] = stories(
+      storyFacts({
+        typescript: focused(
+          ["a.test.ts", "b.test.ts", "c.test.ts", "d.test.ts", "e.test.ts"],
+          12,
+          9,
+        ),
+      }),
+    );
+
+    expect(story?.detail).toBe(
+      "12 focused tests committed in a.test.ts and 8 other files: the runner skips every other test while one stays.",
+    );
+  });
+
   it("is not there without a focused case", () => {
     expect(kindsOf({ typescript: focused([], 0) })).toStrictEqual([]);
   });
@@ -111,6 +133,30 @@ describe("complex-core", () => {
         path: "packages/api/src/billing/reconcile.ts",
       },
     ]);
+  });
+
+  it("says an anonymous function in its file and line, and keeps a function bound to a name", () => {
+    const [story] = stories(
+      storyFacts({
+        typescript: functionsOf({
+          top: [{ ...hardest, name: "(anonymous)", line: 17 }],
+        }),
+      }),
+    );
+
+    expect(story?.detail).toContain(
+      "The hardest function, an anonymous function in packages/api/src/billing/reconcile.ts:17, scores 41;",
+    );
+    const [nested] = stories(
+      storyFacts({
+        typescript: functionsOf({
+          top: [{ ...hardest, name: "make > (anonymous)" }],
+        }),
+      }),
+    );
+    expect(nested?.detail).toContain(
+      "The hardest function, make > (anonymous) in packages/api",
+    );
   });
 
   it("says under 1% for a share that rounds to none", () => {
@@ -171,7 +217,30 @@ describe("core-territory", () => {
     });
     expect(kindsOf({ typescript: other })).toStrictEqual([]);
   });
+});
 
+const edgesTo = (to: string) =>
+  ["a", "b", "c"].map((from) => [from, to] as const);
+
+describe("core-territory ties", () => {
+  it("breaks a tie by code unit, so Zeta comes before alpha", () => {
+    const territories = ["alpha", "Zeta", "a", "b", "c", "d"];
+    const [story] = stories(
+      storyFacts({
+        typescript: deepDiveWith({
+          imports: importsBlock(territories, [
+            ...edgesTo("alpha"),
+            ...edgesTo("Zeta"),
+          ]),
+        }),
+      }),
+    );
+
+    expect(story?.path).toBe("Zeta");
+  });
+});
+
+describe("core-territory naming", () => {
   it("calls the root territory the repository root", () => {
     const [story] = stories(
       storyFacts({

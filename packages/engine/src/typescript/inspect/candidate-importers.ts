@@ -1,11 +1,11 @@
 // Owns finding the files that may import a given set of files without parsing them: a text scan for module specifiers, resolved like the import graph resolves them.
-// A superset by design: every static request of a file is a quoted string without whitespace, so a file with none that resolves into the set cannot import it; a false hit only costs one parse.
+// A superset by design: every static request of a file is a quoted string on one line, so a file with none that resolves into the set cannot import it; a false hit only costs one parse. A specifier written with an escape sequence is the one request the scan cannot read.
 
 import type { SourceText } from "../facts-of-source.js";
 import type { Resolution } from "../imports/resolve.js";
 
-/** A quote, then characters that hold neither quote nor whitespace nor a backslash, then the same quote. */
-const SPECIFIER_SHAPED = /(["'`])([^"'`\s\\]{1,300})\1/gu;
+/** A quote, then up to 300 characters that hold no quote, line break or backslash, then the same quote; spaces are allowed, since a specifier may hold some. */
+const SPECIFIER_SHAPED = /(["'`])([^"'`\r\n\\]{1,300})\1/gu;
 
 /** The distinct quoted strings of the text that could be a module specifier. */
 const specifiersIn = (text: string): ReadonlySet<string> =>

@@ -90,7 +90,9 @@ const ecosystemLine = ({
     .filter(({ category, files }) => STACK.has(category) && files > 0)
     .slice(0, TOP_TOOLS)
     .map(({ name }) => escapeForTerminal(name));
-  return names.length === 0 ? "no framework detected" : names.join(SEPARATOR);
+  return names.length === 0
+    ? "no framework detected"
+    : `Stack: ${names.join(", ")}`;
 };
 
 const importsLine = ({

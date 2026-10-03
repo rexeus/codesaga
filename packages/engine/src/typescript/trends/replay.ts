@@ -84,6 +84,23 @@ const lastCommitPerMonth = (
 };
 
 /**
+ * The day (`YYYY-MM-DD`, UTC) of the commit each month's point is the state
+ * after, per `lastCommitPerMonth`: the last commit of the chain dated in that
+ * month or before it. Empty for a month that no commit precedes.
+ */
+export const lastCommitDays = (
+  commits: ReadonlyArray<ReplayedCommit>,
+  firstMonth: number,
+  lastMonth: number,
+): ReadonlyArray<string> =>
+  lastCommitPerMonth(commits, firstMonth, lastMonth).map((index) => {
+    const time = commits[index]?.time;
+    return time === undefined
+      ? ""
+      : new Date(time * 1000).toISOString().slice(0, 10);
+  });
+
+/**
  * The totals of the files at the end of every month from `firstMonth` to
  * `lastMonth`, replaying `commits`, the first-parent chain oldest first. The
  * point of a month is the state after its last commit as `lastCommitPerMonth`

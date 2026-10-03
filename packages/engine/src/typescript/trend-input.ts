@@ -16,6 +16,8 @@ export type TrendInput = {
   readonly series: Readonly<Record<string, ReadonlyArray<number>>>;
   /** Every flip of the flags, oldest first; the report's `trends.events` keeps only the newest 20, so callers pass `allFlagEvents`. */
   readonly events: ReadonlyArray<FlagChange>;
+  /** For each month, the day (`YYYY-MM-DD`) of the first-parent commit that month's point is the state after; the report does not carry it. */
+  readonly lastCommitDays: ReadonlyArray<string>;
 };
 
 /** One month of the production escape hatches. */

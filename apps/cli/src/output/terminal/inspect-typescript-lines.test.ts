@@ -11,7 +11,9 @@ type TypeScript = NonNullable<Entry["typescript"]>;
 
 const typescript: TypeScript = {
   files: 3,
-  unparsed: 1,
+  testFiles: 1,
+  declarationFiles: 1,
+  skipped: 0,
   maxComplexity: 41,
   complexFunctions: 2,
   hardest: [
@@ -70,10 +72,35 @@ describe("renderInspect TypeScript figures", () => {
       "3 files · truck factor 0",
       "No expert found.",
       "No commits in the window.",
-      "3 TypeScript or JavaScript files · 1 not parsed · hardest function 41 · 2 at 15 or more · 12 escape hatches · 1 @ts directive · strict true",
+      "3 files parsed, 1 of them tests · 1 declaration file · hardest function 41 · 2 at 15 or more · 12 escape hatches · 1 @ts directive · strict true",
       "  41 reconcile at src/billing/reconcile.ts:88",
       "  33 build at src/query/build.ts:31",
       "imported by 7 files: src/a.ts, src/b.ts, src/c.ts, src/d.ts, src/e.ts and 2 more",
+      "tested by no file",
+    ]);
+  });
+});
+
+describe("renderInspect TypeScript figures of declarations", () => {
+  it("says 1 declaration file, and no figure of code, for a match that holds only declarations", () => {
+    const declarations: TypeScript = {
+      ...typescript,
+      files: 0,
+      testFiles: 0,
+      declarationFiles: 1,
+      maxComplexity: 0,
+      complexFunctions: 0,
+      hardest: [],
+      escapes: 0,
+      directives: 0,
+      importedBy: { files: 1, top: ["src/a.ts"] },
+    };
+
+    const lines = renderInspect(resultWith(declarations), plain).split("\n");
+
+    expect(lines.slice(6)).toStrictEqual([
+      "1 declaration file · strict true",
+      "imported by 1 file: src/a.ts",
       "tested by no file",
     ]);
   });

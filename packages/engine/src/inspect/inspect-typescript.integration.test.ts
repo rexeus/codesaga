@@ -26,6 +26,10 @@ const commitProject = Effect.gen(function* () {
       '// not an import: "./core"\nexport const note = "./core";\n',
     "test/core.test.ts":
       'import { core } from "../src/core";\nit("works", () => { core(true, true, 1); });\n',
+    "src/has space/x.ts": "export const x = 1;\n",
+    "src/e.ts": 'import { x } from "./has space/x";\nexport const e = x;\n',
+    "types/api.d.ts": "export declare const api: number;\n",
+    "test/noisy.test.ts": "export const t = (x?: number) => x!;\n",
     "README.md": "# hi\n",
   });
   return repo;
@@ -45,7 +49,9 @@ layer(analyzeServices)("inspect the TypeScript of an argument", (it) => {
 
         assert.deepStrictEqual(matches[0]?.typescript, {
           files: 1,
-          unparsed: 0,
+          testFiles: 0,
+          declarationFiles: 0,
+          skipped: 0,
           maxComplexity: 3,
           complexFunctions: 0,
           hardest: [],
@@ -75,7 +81,7 @@ layer(analyzeServices)("inspect the TypeScript of an argument", (it) => {
           files: 1,
           top: ["test/core.test.ts"],
         });
-        assert.strictEqual(typescript?.files, 6);
+        assert.strictEqual(typescript?.files, 8);
       }),
   );
 

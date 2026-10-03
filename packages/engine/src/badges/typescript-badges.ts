@@ -1,7 +1,7 @@
 // Owns the territory badges that read the TypeScript deep dive: type-safe, strict, complex logic and in a cycle.
 // Facts about the territory's own files; none compares it with its siblings. Only `in-a-cycle` points at a cost.
 
-import { nounOf, percentOf } from "../report/sentences.js";
+import { countOf, nounOf, percentOf } from "../report/sentences.js";
 import type { TerritoryTypeScript } from "../report/typescript-territory.js";
 import { TERRITORY_BADGE_THRESHOLDS } from "./territory-badge-thresholds.js";
 
@@ -38,15 +38,16 @@ export const strict = (typescript: TerritoryTypeScript | undefined) =>
       }
     : undefined;
 
-/** `complex-logic`: enough production functions and a share of them at or above the complexity limit. */
+/** `complex-logic`: enough production functions and a share of them at or above the complexity limit, decided on the counts and not on the rounded `over15Share`. */
 export const complexLogic = (typescript: TerritoryTypeScript | undefined) => {
   const functions = typescript?.functions ?? 0;
-  const share = typescript?.over15Share ?? 0;
-  return functions >= complexLogicMinFunctions && share >= complexLogicShare
+  const complex = typescript?.complexFunctions ?? 0;
+  return functions >= complexLogicMinFunctions &&
+    complex / functions >= complexLogicShare
     ? {
         kind: "complex-logic" as const,
         label: "Complex logic",
-        evidence: `${Math.round(share * functions)} of ${nounOf(functions, "production function")} (${percentOf(share)}) score 15 or more; the hardest scores ${typescript?.maxComplexity ?? 0}.`,
+        evidence: `${countOf(complex)} of ${nounOf(functions, "production function")} (${percentOf(complex / functions)}) score 15 or more; the hardest scores ${typescript?.maxComplexity ?? 0}.`,
       }
     : undefined;
 };

@@ -18,6 +18,7 @@ const figures = (
   strict: true,
   noUncheckedIndexedAccess: false,
   functions: 100,
+  complexFunctions: 5,
   over15Share: 0.05,
   maxComplexity: 20,
   inCycle: false,
@@ -101,16 +102,31 @@ describe("strict", () => {
 
 describe("complex-logic", () => {
   it("needs 20 production functions and 10% of them at 15 or more", () => {
-    expect(kindsOf({ functions: 20, over15Share: 0.1 })).toStrictEqual([
+    expect(kindsOf({ functions: 20, complexFunctions: 2 })).toStrictEqual([
       "complex-logic",
     ]);
-    expect(kindsOf({ functions: 19, over15Share: 0.1 })).toStrictEqual([]);
-    expect(kindsOf({ functions: 20, over15Share: 0.0999 })).toStrictEqual([]);
+    expect(kindsOf({ functions: 19, complexFunctions: 2 })).toStrictEqual([]);
+    expect(kindsOf({ functions: 20, complexFunctions: 1 })).toStrictEqual([]);
   });
 
-  it("says how many functions and the hardest score", () => {
+  it("decides on the counts, not on the share rounded to four decimals", () => {
+    // 2,999 of 30,000 is 9.9967%, which the report rounds to 0.1.
     expect(
-      badgesOf({ functions: 325, over15Share: 0.1233, maxComplexity: 29 })[0],
+      kindsOf({ functions: 30_000, complexFunctions: 2_999, over15Share: 0.1 }),
+    ).toStrictEqual([]);
+    expect(
+      kindsOf({ functions: 30_000, complexFunctions: 3_000, over15Share: 0.1 }),
+    ).toStrictEqual(["complex-logic"]);
+  });
+
+  it("says how many functions and the hardest score, from the same counts", () => {
+    expect(
+      badgesOf({
+        functions: 325,
+        complexFunctions: 40,
+        over15Share: 0.1231,
+        maxComplexity: 29,
+      })[0],
     ).toStrictEqual({
       kind: "complex-logic",
       category: "code",

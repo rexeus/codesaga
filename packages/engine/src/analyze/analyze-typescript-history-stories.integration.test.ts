@@ -71,9 +71,10 @@ layer(analyzeServices)("analyze the stories the history tells", (it) => {
             {
               kind: "module-era",
               title: "ESM only",
-              detail: "No production file has used CommonJS since 2025-03.",
+              detail:
+                "No production file has used CommonJS since the end of 2025-03.",
               value: 0,
-              date: "2025-03-01",
+              date: "2025-03-10",
             },
           ],
         );
@@ -91,7 +92,7 @@ layer(analyzeServices)("analyze the stories the history tells", (it) => {
       );
       assert.deepStrictEqual(
         [tightened?.reached, tightened?.reachedAt, tightened?.holds],
-        [true, "2025-03-31", "milestone"],
+        [true, "2025-03-10", "milestone"],
       );
     }),
   );

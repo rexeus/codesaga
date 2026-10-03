@@ -8,13 +8,6 @@ import type { TrendInput } from "../trend-input.js";
 import { stateAchievementsOf } from "./state-achievements.js";
 import { tightened } from "./tightened.js";
 
-/** What the history adds to the analysis: the trends, and the day of the analysis that caps a milestone reached this month. */
-export type HistoryInput = {
-  readonly trends: TrendInput;
-  /** `YYYY-MM-DD`. */
-  readonly today: string;
-};
-
 /**
  * The list as the section carries it, or nothing without a production
  * TypeScript file. `history` adds the achievements that need the trends.
@@ -22,17 +15,12 @@ export type HistoryInput = {
 export const achievementsOf = (
   parsed: ReadonlyArray<ParsedFile>,
   strictness: Strictness,
-  history: HistoryInput | undefined,
+  history: TrendInput | undefined,
 ): Pick<TypeScriptDeepDive, "achievements"> => {
   const states = stateAchievementsOf(parsed, strictness);
   return states.length === 0
     ? {}
     : {
-        achievements: [
-          ...states,
-          ...(history === undefined
-            ? []
-            : tightened(history.trends, history.today)),
-        ],
+        achievements: [...states, ...tightened(history)],
       };
 };

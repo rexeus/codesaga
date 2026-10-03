@@ -154,6 +154,7 @@ describe("productionFunctionFigures", () => {
   it("gives the share at 15 or more and the highest score of the production functions only", () => {
     expect(productionFunctionFigures(files)).toStrictEqual({
       functions: 6,
+      complexFunctions: 1,
       over15Share: 0.1667,
       maxComplexity: 16,
     });

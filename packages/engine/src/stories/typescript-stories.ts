@@ -2,6 +2,7 @@
 // Reads the report's own blocks, so a story and the dashboard say the same figures; the stories that need the history are in `typescript-trend-stories.ts`.
 // Cost: one pass over the import map's edges.
 
+import { compareCodeUnits } from "../collections/compare-code-units.js";
 import { countOf, nounOf, territoryNameOf } from "../report/sentences.js";
 import type { Story } from "../report/stories.js";
 import type { TypeScriptDeepDive } from "../report/typescript-deep-dive.js";
@@ -17,7 +18,7 @@ const {
 } = STORY_THRESHOLDS;
 
 const focusedTest = ({ tests }: TypeScriptDeepDive): ReadonlyArray<Story> => {
-  const [first, ...others] = tests?.focusedFiles ?? [];
+  const [first] = tests?.focusedFiles ?? [];
   if (
     tests === undefined ||
     first === undefined ||
@@ -25,10 +26,9 @@ const focusedTest = ({ tests }: TypeScriptDeepDive): ReadonlyArray<Story> => {
   ) {
     return [];
   }
+  const others = tests.focusedFileCount - 1;
   const where =
-    others.length === 0
-      ? first
-      : `${first} and ${nounOf(others.length, "other file")}`;
+    others <= 0 ? first : `${first} and ${nounOf(others, "other file")}`;
   return [
     {
       kind: "focused-test",
@@ -58,11 +58,15 @@ const complexCore = ({
     return [];
   }
   const { over15 } = production;
+  const where =
+    hardest.name === "(anonymous)"
+      ? `an anonymous function in ${hardest.path}:${hardest.line}`
+      : `${hardest.name} in ${hardest.path}`;
   return [
     {
       kind: "complex-core",
       title: "Hard functions",
-      detail: `The hardest function, ${hardest.name} in ${hardest.path}, scores ${hardest.complexity}; the ${countOf(over15.functions)} of ${nounOf(production.functions, "function")} at 15 or more hold ${lineShareOf(over15.lineShare)} of the code.`,
+      detail: `The hardest function, ${where}, scores ${hardest.complexity}; the ${countOf(over15.functions)} of ${nounOf(production.functions, "function")} at 15 or more hold ${lineShareOf(over15.lineShare)} of the code.`,
       value: hardest.complexity,
       path: hardest.path,
     },
@@ -92,7 +96,7 @@ const mostImported = ({
   const [top] = [...importers]
     .map(([path, from]) => ({ path, importers: from.size }))
     .toSorted(
-      (a, b) => b.importers - a.importers || a.path.localeCompare(b.path),
+      (a, b) => b.importers - a.importers || compareCodeUnits(a.path, b.path),
     );
   return top === undefined || named.length < coreTerritoryMinTerritories
     ? undefined

@@ -22,18 +22,30 @@ const fileListLine = (label: string, { files, top }: FileList): string => {
   return `${label} ${plural(files, "file")}: ${names}${more > 0 ? ` and ${count(more)} more` : ""}`;
 };
 
+/** The files by what became of them, then the figures of the parsed production code. */
 const figuresLine = (typescript: InspectedTypeScript): string =>
   [
-    plural(typescript.files, "TypeScript or JavaScript file"),
-    ...(typescript.unparsed === 0
+    ...(typescript.files === 0
       ? []
-      : [`${count(typescript.unparsed)} not parsed`]),
-    `hardest function ${count(typescript.maxComplexity)}`,
-    `${count(typescript.complexFunctions)} at 15 or more`,
-    `${count(typescript.escapes)} escape ${typescript.escapes === 1 ? "hatch" : "hatches"}`,
-    ...(typescript.directives === 0
+      : [
+          `${plural(typescript.files, "file")} parsed${typescript.testFiles === 0 ? "" : `, ${count(typescript.testFiles)} of them tests`}`,
+        ]),
+    ...(typescript.declarationFiles === 0
       ? []
-      : [plural(typescript.directives, "@ts directive")]),
+      : [plural(typescript.declarationFiles, "declaration file")]),
+    ...(typescript.skipped === 0
+      ? []
+      : [`${count(typescript.skipped)} skipped`]),
+    ...(typescript.files === 0
+      ? []
+      : [
+          `hardest function ${count(typescript.maxComplexity)}`,
+          `${count(typescript.complexFunctions)} at 15 or more`,
+          `${count(typescript.escapes)} escape ${typescript.escapes === 1 ? "hatch" : "hatches"}`,
+          ...(typescript.directives === 0
+            ? []
+            : [plural(typescript.directives, "@ts directive")]),
+        ]),
     ...(typescript.strict === undefined
       ? []
       : [`strict ${String(typescript.strict)}`]),

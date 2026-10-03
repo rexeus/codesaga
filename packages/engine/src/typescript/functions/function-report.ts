@@ -107,6 +107,7 @@ export const functionsReportOf = (
 /** What a territory carries of its production functions. */
 export type TerritoryFunctions = {
   readonly functions: number;
+  readonly complexFunctions: number;
   readonly over15Share: number;
   readonly maxComplexity: number;
 };
@@ -125,6 +126,7 @@ export const productionFunctionFigures = (
   );
   return {
     functions: count,
+    complexFunctions: over15,
     over15Share: ratioOf(over15, count),
     maxComplexity: maxScoreOf(production),
   };

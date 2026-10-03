@@ -12,15 +12,20 @@ type FlagChange = TrendInput["events"][number];
 import { stories } from "./stories.js";
 
 /** `count` months from 2024-01, with the given series; each value is the series at every month, or a function of the month's index. */
+const monthOf = (index: number): string =>
+  `${2024 + Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`;
+
+/** Months from 2024-01, whose last commit is on the 28th; each series value is a function of the month's index. */
 const trendsOf = (
   count: number,
   series: Record<string, (index: number) => number>,
   events: ReadonlyArray<FlagChange> = [],
 ): TrendInput => ({
-  months: Array.from({ length: count }, (_, index) => {
-    const month = index % 12;
-    return `${2024 + Math.floor(index / 12)}-${String(month + 1).padStart(2, "0")}`;
-  }),
+  months: Array.from({ length: count }, (_, index) => monthOf(index)),
+  lastCommitDays: Array.from(
+    { length: count },
+    (_, index) => `${monthOf(index)}-28`,
+  ),
   series: Object.fromEntries(
     Object.entries(series).map(([name, at]) => [
       name,
@@ -210,9 +215,10 @@ describe("module-era", () => {
       {
         kind: "module-era",
         title: "ESM only",
-        detail: "No production file has used CommonJS since 2024-07.",
+        detail:
+          "No production file has used CommonJS since the end of 2024-07.",
         value: 0,
-        date: "2024-07-01",
+        date: "2024-07-28",
       },
     ]);
   });
@@ -288,14 +294,14 @@ describe("strict-since wording", () => {
     });
   });
 
-  it("says a config that was strict in the first commit read has been on from the start", () => {
+  it("says only that a config strict in the first commit read has been on since then, which a shallow clone or a late first-parent chain makes no claim about", () => {
     const [story] = storiesFor(
       trendsOf(27, {}, [created("2024-01-15")]),
       dive(true),
     );
 
     expect(story).toMatchObject({
-      title: "Strict from the start",
+      title: "Strict since the first commit read",
       detail:
         "strict has been on in tsconfig.json since the first commit read, in 2024-01.",
       value: 26,

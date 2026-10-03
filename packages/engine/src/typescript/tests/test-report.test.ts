@@ -57,6 +57,7 @@ describe("testsOf", () => {
       focused: 0,
       todo: 1,
       focusedFiles: [],
+      focusedFileCount: 0,
       assertions: [1, 9, 3, 1],
       snapshots: 3,
       typeTests: 1,
@@ -76,6 +77,7 @@ describe("testsOf focused files", () => {
     );
 
     expect(tests.focused).toBe(6);
+    expect(tests.focusedFileCount).toBe(6);
     expect(tests.focusedFiles).toStrictEqual([
       "src/a.test.ts",
       "src/b.test.ts",

@@ -1,24 +1,39 @@
 // Owns the TypeScript part of a report: the deep dive at HEAD with, where the history was parsed, its trends.
 // Pure, like the rest of the report's composition.
-import { DateTime } from "effect";
-
 import type { Report } from "../report/report.js";
 import type { Imports } from "../report/typescript-imports.js";
-import type { FlagEvent } from "../report/typescript-trends.js";
 import { typescriptAnalysis } from "../typescript/deep-dive.js";
 import type { TypeScriptAnalysis } from "../typescript/deep-dive.js";
 import type { TypeScriptFacts } from "../typescript/gather-typescript.js";
+import type { TrendInput } from "../typescript/trend-input.js";
 import { factsLookupOf } from "../typescript/trends/facts-lookup.js";
 import type { FactsLookup } from "../typescript/trends/facts-lookup.js";
 import { trendsOf } from "../typescript/trends/trends.js";
+import type { TrendsResult } from "../typescript/trends/trends.js";
 import type { Analysis } from "./prepare.js";
 import type { ReportFacts } from "./report-facts.js";
 
 /** The deep dive, and what the sections beside it read of the trends before the report cuts them. */
 export type ReportTypeScript = TypeScriptAnalysis & {
-  /** Every flip of `strict` and `noUncheckedIndexedAccess` over the whole history, oldest first; `trends.events` keeps the newest 20. Empty without trends. */
-  readonly allFlagEvents: ReadonlyArray<FlagEvent>;
+  /**
+   * The trends as the stories and achievements read them: every flip of
+   * `strict` and `noUncheckedIndexedAccess` over the whole history, where
+   * `trends.events` keeps the newest 20, and the day of the commit each month's
+   * point is the state after. Undefined without trends.
+   */
+  readonly history: TrendInput | undefined;
 };
+
+/** The trends as the stories and achievements read them: every flag flip, and the day of each month's commit. */
+const trendInputOf = ({
+  trends,
+  allFlagEvents,
+  lastCommitDays,
+}: TrendsResult): TrendInput => ({
+  ...trends,
+  events: allFlagEvents,
+  lastCommitDays,
+});
 
 const hasParsedFile = ({ files }: TypeScriptFacts): boolean =>
   files.some(({ result }) => result.kind === "parsed");
@@ -47,20 +62,19 @@ export const typescriptOf = (
           scope: repository.scope,
           now,
         });
+  const history = built === undefined ? undefined : trendInputOf(built);
   const analysis = typescriptAnalysis(
     typescript,
     revisions,
     repository.shallow,
-    built === undefined
-      ? undefined
-      : { trends: built.trends, today: DateTime.formatIso(now).slice(0, 10) },
+    history,
   );
-  return built === undefined
-    ? { ...analysis, allFlagEvents: [] }
+  return history === undefined || built === undefined
+    ? { ...analysis, history: undefined }
     : {
         ...analysis,
         section: { ...analysis.section, trends: built.trends },
-        allFlagEvents: built.allFlagEvents,
+        history,
       };
 };
 

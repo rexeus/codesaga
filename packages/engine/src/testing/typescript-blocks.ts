@@ -32,6 +32,7 @@ export const testsBlock = (overrides: Partial<Tests> = {}): Tests => ({
   focused: 0,
   todo: 0,
   focusedFiles: [],
+  focusedFileCount: 0,
   assertions: [0, 0, 0, 0],
   snapshots: 0,
   typeTests: 0,

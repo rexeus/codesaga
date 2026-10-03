@@ -47,7 +47,7 @@ describe("renderAnalysis", () => {
       "                           strict in 6 of 7 tsconfigs · noUncheckedIndexedAccess in 2 · TypeScript ^5.9.2",
       "                           1,840 functions · hardest 41 · 47 at 15 or more hold 8% of the code",
       "                           312 ES module files · 9 CommonJS",
-      "                           React · Next.js · zod · Prisma",
+      "                           Stack: React, Next.js, zod, Prisma",
       "                           3 import cycles (largest 5 files)",
       "                           1,420 test cases in 76 files · Vitest",
       "Achievements               4 of 9 · First 1,000 commits · Marathon · Polyglot · Spring cleaning",
