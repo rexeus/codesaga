@@ -8,9 +8,9 @@ type ContributorBadge = Report["contributors"][number]["badges"][number];
 
 /**
  * How a badge is tinted. A badge wears the color of its category, except the
- * three territory badges that name a risk, which keep a warning color: `crit`
- * for orphaned knowledge, `warn` for an island and for fading knowledge. A
- * person's badge never wears a warning color.
+ * four territory badges that name a risk, which keep a warning color: `crit`
+ * for orphaned knowledge, `warn` for an island, for fading knowledge and for a
+ * territory in a cycle. A person's badge never wears a warning color.
  */
 type Tone =
   | TerritoryBadge["category"]
@@ -54,10 +54,10 @@ const TERRITORY_ICONS: Record<TerritoryBadge["kind"], IconName> = {
   churning: "refresh-cw",
   "deeply-nested": "indent-increase",
   "well-tested": "shield-check",
-  "type-safe": "shield-check",
+  "type-safe": "shield-half",
   strict: "lock",
-  "complex-logic": "brain",
-  "in-a-cycle": "repeat",
+  "complex-logic": "waypoints",
+  "in-a-cycle": "repeat-2",
 };
 
 const RISK_TONES: Partial<Record<TerritoryBadge["kind"], "crit" | "warn">> = {
@@ -81,9 +81,9 @@ const CONTRIBUTOR_ICONS: Record<ContributorBadge["kind"], IconName> = {
   "long-hauler": "mountain",
   explorer: "compass",
   toolsmith: "wrench",
-  "type-tightener": "crosshair",
+  "type-tightener": "shrink",
   sweeper: "brush-cleaning",
-  simplifier: "split",
+  simplifier: "minimize-2",
   "test-companion": "flask-conical",
   reviewer: "eye",
   founder: "flag",

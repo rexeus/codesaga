@@ -161,3 +161,65 @@ describe("contributorBadges", () => {
     expect(contributorBadges([])).toEqual({ chips: [], more: null, all: [] });
   });
 });
+
+const craft = (
+  kind: "type-tightener" | "sweeper" | "simplifier" | "test-companion",
+) => ({
+  kind,
+  category: "craft" as const,
+  label: kind,
+  evidence: "The commits show it",
+});
+
+describe("badges of the TypeScript code", () => {
+  it("gives the territory badges their glyph, in the warning tone only for a cycle", () => {
+    const row = territoryBadges([
+      badge("type-safe", "Type-safe", "code"),
+      badge("strict", "Strict", "code"),
+      badge("complex-logic", "Complex logic", "code"),
+      badge("in-a-cycle", "In a cycle", "code"),
+    ]);
+
+    expect(row.all.map(({ label, icon, tone }) => [label, icon, tone])).toEqual(
+      [
+        ["Type-safe", "shield-half", "code"],
+        ["Strict", "lock", "code"],
+        ["Complex logic", "waypoints", "code"],
+        ["In a cycle", "repeat-2", "warn"],
+      ],
+    );
+  });
+
+  it("does not share a glyph between a territory badge of the code and another territory badge", () => {
+    const kinds = [
+      "type-safe",
+      "strict",
+      "complex-logic",
+      "in-a-cycle",
+      "well-tested",
+      "hotspot",
+      "churning",
+    ] as const;
+    const icons = territoryBadges(
+      kinds.map((kind) => badge(kind, kind, "code")),
+    ).all.map(({ icon }) => icon);
+
+    expect(new Set(icons).size).toBe(kinds.length);
+  });
+
+  it("gives the craft badges of a person the craft tone and a glyph each", () => {
+    const row = contributorBadges([
+      craft("type-tightener"),
+      craft("sweeper"),
+      craft("simplifier"),
+      craft("test-companion"),
+    ]);
+
+    expect(row.all.map(({ icon, tone }) => [icon, tone])).toEqual([
+      ["shrink", "craft"],
+      ["brush-cleaning", "craft"],
+      ["minimize-2", "craft"],
+      ["flask-conical", "craft"],
+    ]);
+  });
+});
