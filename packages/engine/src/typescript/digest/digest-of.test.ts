@@ -49,8 +49,7 @@ describe("fileDigestOf", () => {
       testCases: 2,
       focusedTests: 1,
       declarations: 3,
-      topLevelFunctions: 2,
-      exportedDeclarations: 2,
+      exportedFunctions: 1,
     });
     expect(digest.functions).toBe(4);
     expect(digest.notable).toStrictEqual([["hard", 11]]);
@@ -71,6 +70,27 @@ describe("fileDigestOf", () => {
         facts.facts.functions.notable.map(({ name }) => name),
       );
     }
+  });
+});
+
+describe("fileDigestOf exports", () => {
+  it("counts exported functions where they are declared, and not an interface, a private function or an export list", () => {
+    const digest = digestOf(
+      "src/m.ts",
+      [
+        "function hidden() {}",
+        "export interface Shape { size: number }",
+        "export function shown() {}",
+        "export const arrow = () => 1;",
+        "export const value = 1;",
+        "function listed() {}",
+        "export { listed };",
+        "export default function () {}",
+      ].join("\n"),
+    );
+
+    expect(digest.exportedFunctions).toBe(3);
+    expect(digest.declarations).toBe(5);
   });
 
   it("counts a line that holds only whitespace, a carriage return included, as blank", () => {

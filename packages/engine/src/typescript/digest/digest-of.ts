@@ -1,8 +1,9 @@
 // Owns computing the digest of one parsed file: one walk with the collectors the history reads, and a look at the top-level statements.
 // The collectors that only HEAD needs (idioms, ecosystem, markers) do not run, which is most of the cost of a file's facts.
+import type { Node } from "@oxc-project/types";
+
 import { sum } from "../../stats/measures.js";
 import { functionCollector } from "../functions/function-collector.js";
-import { exportsOf } from "../markers/export-docs.js";
 import { moduleCollector } from "../modules/module-facts.js";
 import { declarationOf } from "../node-guards.js";
 import type { ParsedSource } from "../parsed-source.js";
@@ -25,29 +26,35 @@ const nonBlankLines = (text: string): number =>
 const isFunctionValue = (type: string | undefined): boolean =>
   type === "ArrowFunctionExpression" || type === "FunctionExpression";
 
-/** The classes, functions and arrow-function constants at the top of the program. */
+/** The classes, functions and arrow-function constants at the top of the program, and the functions among them that are exported where they are declared. */
 const topLevelOf = ({
   program,
-}: ParsedSource): { declarations: number; functions: number } => {
-  let classes = 0;
-  let functions = 0;
+}: ParsedSource): { declarations: number; exportedFunctions: number } => {
+  let declarations = 0;
+  let exportedFunctions = 0;
   for (const statement of program.body) {
     const declaration = declarationOf(statement);
-    if (declaration?.type === "ClassDeclaration") {
-      classes += 1;
-    } else if (declaration?.type === "FunctionDeclaration") {
-      functions += 1;
-    } else if (
-      declaration?.type === "VariableDeclaration" &&
-      declaration.kind === "const"
-    ) {
-      functions += declaration.declarations.filter(({ init }) =>
-        isFunctionValue(init?.type),
-      ).length;
-    }
+    const isExport =
+      statement.type === "ExportNamedDeclaration" ||
+      statement.type === "ExportDefaultDeclaration";
+    const functions =
+      declaration?.type === "FunctionDeclaration" ||
+      isFunctionValue(declaration?.type)
+        ? 1
+        : functionConstants(declaration);
+    declarations +=
+      functions + (declaration?.type === "ClassDeclaration" ? 1 : 0);
+    exportedFunctions += isExport ? functions : 0;
   }
-  return { declarations: classes + functions, functions };
+  return { declarations, exportedFunctions };
 };
+
+/** How many bindings of a `const` declaration hold an arrow function or a function expression. */
+const functionConstants = (declaration: Node | null | undefined): number =>
+  declaration?.type === "VariableDeclaration" && declaration.kind === "const"
+    ? declaration.declarations.filter(({ init }) => isFunctionValue(init?.type))
+        .length
+    : 0;
 
 /**
  * The digest of one parsed file; `text` is the source the parse read. Pure
@@ -99,7 +106,6 @@ export const fileDigestOf = (
     testCases: testFacts.cases,
     focusedTests: testFacts.focused,
     declarations: topLevel.declarations,
-    topLevelFunctions: topLevel.functions,
-    exportedDeclarations: exportsOf(parsed, text).exportedDeclarations,
+    exportedFunctions: topLevel.exportedFunctions,
   };
 };

@@ -5,7 +5,7 @@
  * The version of `FileDigest`. A cache holds digests under their version, so
  * it rises with every change to what a digest means or contains.
  */
-export const FILE_DIGEST_VERSION = 1;
+export const FILE_DIGEST_VERSION = 2;
 
 /** A function of 3 or more as the history follows it: its name within the file and its cognitive complexity. */
 type DigestFunction = readonly [name: string, complexity: number];
@@ -33,14 +33,12 @@ export type FileDigest = {
   readonly focusedTests: number;
   /** Top-level classes, functions and arrow-function constants, exported or not. */
   readonly declarations: number;
-  /** The part of them that are functions or arrow-function constants. */
-  readonly topLevelFunctions: number;
-  /** Exported declarations, as `markers` counts them. */
-  readonly exportedDeclarations: number;
+  /** The functions and arrow-function constants among them that are exported where they are declared (`export function f`, `export const f = () => ...`, `export default function`), never an `export { f }` list. */
+  readonly exportedFunctions: number;
 };
 
 /** The values of a `digestRow`. */
-const ROW_LENGTH = 13;
+const ROW_LENGTH = 12;
 
 const NUMBER_FIELDS = [
   "lines",
@@ -52,8 +50,7 @@ const NUMBER_FIELDS = [
   "testCases",
   "focusedTests",
   "declarations",
-  "topLevelFunctions",
-  "exportedDeclarations",
+  "exportedFunctions",
 ] as const;
 
 /** Whether a value read from a cache or a child process is a digest of the current version. */
@@ -74,7 +71,7 @@ export const isFileDigest = (value: unknown): value is FileDigest =>
  * of 59,000 digests would be half of the file. The order is the contract of
  * `FILE_DIGEST_VERSION`: lines, any, escapes, suppressions, functions,
  * complexFunctions, the module flags (1 for ESM, 2 for CommonJS), testCases,
- * focusedTests, declarations, topLevelFunctions, exportedDeclarations, notable.
+ * focusedTests, declarations, exportedFunctions, notable.
  */
 export const digestRow = (digest: FileDigest): ReadonlyArray<unknown> => [
   digest.lines,
@@ -87,8 +84,7 @@ export const digestRow = (digest: FileDigest): ReadonlyArray<unknown> => [
   digest.testCases,
   digest.focusedTests,
   digest.declarations,
-  digest.topLevelFunctions,
-  digest.exportedDeclarations,
+  digest.exportedFunctions,
   digest.notable,
 ];
 
@@ -109,8 +105,7 @@ export const digestOfRow = (row: unknown): FileDigest | undefined => {
     testCases,
     focusedTests,
     declarations,
-    topLevelFunctions,
-    exportedDeclarations,
+    exportedFunctions,
     notable,
   ] = values;
   const digest = {
@@ -127,8 +122,7 @@ export const digestOfRow = (row: unknown): FileDigest | undefined => {
     testCases,
     focusedTests,
     declarations,
-    topLevelFunctions,
-    exportedDeclarations,
+    exportedFunctions,
   };
   return isFileDigest(digest) ? digest : undefined;
 };
