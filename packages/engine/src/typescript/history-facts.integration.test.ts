@@ -120,6 +120,24 @@ layer(NodeServices.layer)("gatherHistoryFacts", (it) => {
   );
 });
 
+layer(NodeServices.layer)("gatherHistoryFacts and the tool's version", (it) => {
+  it.effect(
+    "parses again after an upgrade of the tool, which may have changed a collector",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitHistory(repo);
+        yield* run(repo, { toolVersion: "1.0.0" });
+
+        const same = yield* run(repo, { toolVersion: "1.0.0" });
+        const upgraded = yield* run(repo, { toolVersion: "1.1.0" });
+
+        assert.strictEqual(same.parsed, 0);
+        assert.strictEqual(upgraded.parsed, 3);
+      }),
+  );
+});
+
 layer(NodeServices.layer)("gatherHistoryFacts without the cache", (it) => {
   it.effect("neither reads nor writes the cache without it", () =>
     Effect.gen(function* () {

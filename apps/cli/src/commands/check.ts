@@ -15,7 +15,6 @@ import { NoGatesConfigured } from "../errors/no-gates-configured.js";
 import { ShallowClone } from "../errors/shallow-clone.js";
 import { printResult } from "../output/print-result.js";
 import { renderCheck } from "../output/terminal/check-view.js";
-import { parseProgressLayer } from "../typescript/parse-progress.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
 import { cacheFlag, jsonFlag, sinceFlag } from "./shared-flags.js";
@@ -103,10 +102,7 @@ export const checkCommand = Command.make(
       // The gates read no TypeScript facts, so the history is not parsed for them.
       typescriptHistory: false,
     };
-    const report = yield* analyze(options).pipe(
-      blameConfigSince(settings),
-      Effect.provide(parseProgressLayer(process.stderr)),
-    );
+    const report = yield* analyze(options).pipe(blameConfigSince(settings));
     // Missing history makes the truck factor and expertise numbers wrong in either direction.
     if (report.repository.shallow) {
       return yield* new ShallowClone();

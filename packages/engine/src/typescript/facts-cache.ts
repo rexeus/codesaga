@@ -62,16 +62,20 @@ const entryOf = (result: DigestResult): unknown =>
     : { skipped: result.reason };
 
 /**
- * A digest of what decides the digest of a blob besides its content: the
- * parser and its version, the version of `FileDigest`, the limits of the
- * input guards, and how each extension is read. Digests cached under another
- * fingerprint are stale.
+ * What decides the digest of a blob besides its content: the parser and its
+ * version, the version of `FileDigest`, the tool's own version, the limits of
+ * the input guards, and how each extension is read. Digests cached under
+ * another fingerprint are stale. The tool version is there so that a release
+ * that changed a collector never reuses digests even if nobody raised a
+ * version constant; the first run after an upgrade parses the history again.
  */
 export const factsFingerprint = (
   parser: Extract<ParserStatus, { kind: "ready" }>,
+  toolVersion: string,
 ): string =>
   JSON.stringify({
     parser: parser.name,
+    toolVersion,
     parserVersion: parser.version,
     digestVersion: FILE_DIGEST_VERSION,
     guards: INPUT_GUARD_LIMITS,

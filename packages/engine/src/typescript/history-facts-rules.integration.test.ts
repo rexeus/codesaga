@@ -161,6 +161,41 @@ layer(NodeServices.layer)("gatherHistoryFacts and git's ignore rules", (it) => {
   );
 });
 
+layer(NodeServices.layer)(
+  "gatherHistoryFacts and the first-parent chain",
+  (it) => {
+    it.effect("digests a blob only a merge names, and reports the chain", () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* repo.commit("2026-03-01T12:00:00Z", {
+          "a.ts": "export const a = 1;\n",
+        });
+        yield* repo.git("checkout", "-q", "-b", "side");
+        yield* repo.commit("2026-03-02T12:00:00Z", {
+          "side.ts": "export const s = 1;\n",
+        });
+        yield* repo.git("checkout", "-q", "-");
+        yield* repo.commit("2026-03-03T12:00:00Z", {
+          "main.ts": "export const m = 1;\n",
+        });
+        yield* repo.git("merge", "--no-ff", "--no-commit", "side");
+        yield* repo.commit("2026-03-04T12:00:00Z", {
+          "evil.ts": "export const e = 1;\n",
+        });
+        const evil = yield* blobOf(repo, "evil.ts");
+
+        const { facts } = yield* run(repo);
+
+        assert.strictEqual(
+          facts?.factsByBlob.get(`${evil}:ts:module`)?.kind,
+          "parsed",
+        );
+        assert.strictEqual(facts?.firstParent.length, 3);
+      }),
+    );
+  },
+);
+
 layer(NodeServices.layer)("gatherHistoryFacts progress", (it) => {
   it.effect(
     "reports the missing blobs as the total, and nothing when none is missing",

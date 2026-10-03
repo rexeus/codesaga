@@ -7,6 +7,8 @@ import type { ChildProcessSpawner } from "effect/process";
 import { skipBeforeReading } from "../git/blob-reader.js";
 import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
+import type { FirstParentCommit } from "../history/first-parent.js";
+import { readFirstParent } from "../history/first-parent.js";
 import type { HistoryCommit } from "../history/history.js";
 import type { InventoryOptions } from "../universe/inventory.js";
 import { namedAsCode } from "../universe/inventory.js";
@@ -21,7 +23,7 @@ import {
   storeFactsCache,
 } from "./facts-cache.js";
 import type { DigestResult } from "./facts-of-source.js";
-import { blobsOfHistory, factsKey, readHeadBlobs } from "./history-blobs.js";
+import { blobsOfChanges, factsKey } from "./history-blobs.js";
 import type { HistoryBlob } from "./history-blobs.js";
 import { parseMissing, UNREADABLE } from "./parse-blobs.js";
 import type { Verdict } from "./parse-blobs.js";
@@ -35,6 +37,12 @@ export type HistoryFacts = {
    * here, and no symlink or submodule.
    */
   readonly factsByBlob: ReadonlyMap<string, DigestResult>;
+  /**
+   * The first-parent chain of the head, oldest first, with every change under
+   * the name its path had then: the state of the files over time, which the
+   * trends replay. Whether a change counts is for `factsByBlob` to say.
+   */
+  readonly firstParent: ReadonlyArray<FirstParentCommit>;
 };
 
 export type HistoryFactsInput = Pick<
@@ -43,8 +51,10 @@ export type HistoryFactsInput = Pick<
 > & {
   /** The absolute root of the work tree. */
   readonly root: string;
-  /** The commit whose files are read besides the history's changes. */
+  /** The commit whose first-parent chain is read besides the history's changes. */
   readonly head: string;
+  /** The tool's own version: a release may change what a digest holds, so digests of another version are not reused. */
+  readonly toolVersion: string;
   readonly commits: ReadonlyArray<Pick<HistoryCommit, "changes">>;
   /** Whether verdicts are read from and written to the facts cache. */
   readonly useCache: boolean;
@@ -127,12 +137,16 @@ export const gatherHistoryFacts = (
     if (status.kind !== "ready") {
       return undefined;
     }
+    const firstParent = yield* readFirstParent(input.head);
     const wanted = yield* countedBlobs(
       input,
-      blobsOfHistory(input.commits, yield* readHeadBlobs(input.head)),
+      blobsOfChanges([
+        ...input.commits.flatMap(({ changes }) => changes),
+        ...firstParent.flatMap(({ changes }) => changes),
+      ]),
     );
     const file = input.useCache ? yield* factsCacheFile(input.root) : undefined;
-    const fingerprint = factsFingerprint(status);
+    const fingerprint = factsFingerprint(status, input.toolVersion);
     const cached =
       file === undefined
         ? new Map<string, DigestResult>()
@@ -147,6 +161,7 @@ export const gatherHistoryFacts = (
       yield* storeFactsCache(file, fingerprint, kept, cached);
     }
     return {
+      firstParent,
       factsByBlob: new Map(
         keys.map((key): [string, DigestResult] => [
           key,

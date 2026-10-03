@@ -57,6 +57,7 @@ export const analyze = (
         : yield* gatherHistoryFacts({
             root: facts.root,
             head,
+            toolVersion: options.toolVersion,
             commits: facts.commits,
             include: options.include,
             exclude: options.exclude,

@@ -69,6 +69,7 @@ type GatherOptions = {
   readonly useCache?: boolean;
   readonly include?: ReadonlyArray<string>;
   readonly exclude?: ReadonlyArray<string>;
+  readonly toolVersion?: string;
 };
 
 /** `gatherHistoryFacts` for the whole history of the repository's HEAD; the caller provides the parser and `recordingServices`. */
@@ -84,6 +85,7 @@ export const gatherOf = (repo: TempRepository, options: GatherOptions = {}) =>
     return yield* gatherHistoryFacts({
       root: repo.directory,
       head,
+      toolVersion: options.toolVersion ?? "test",
       commits,
       include: options.include ?? [],
       exclude: options.exclude ?? [],
