@@ -246,3 +246,23 @@ describe("the stories of the history", () => {
     );
   });
 });
+
+describe("strict-since without a flip of the config itself", () => {
+  it("reads the flip of the nearest base that has one", () => {
+    const child = {
+      ...configPosture("tsconfig.tests.json", 50, true),
+      extends: ["tsconfig.base.json"],
+    };
+    const typescript = deepDiveWith({ strictness: strictnessBlock([child]) });
+
+    const [story] = storiesFor(
+      trendsOf(27, {}, [strictOn("tsconfig.base.json")]),
+      typescript,
+    );
+
+    expect(story).toMatchObject({
+      date: "2024-03-11",
+      path: "tsconfig.base.json",
+    });
+  });
+});

@@ -14,6 +14,7 @@ type FlagChange = {
 export type TrendInput = {
   readonly months: ReadonlyArray<string>;
   readonly series: Readonly<Record<string, ReadonlyArray<number>>>;
+  /** Every flip of the flags, oldest first; the report's `trends.events` keeps only the newest 20, so callers pass `allFlagEvents`. */
   readonly events: ReadonlyArray<FlagChange>;
 };
 

@@ -24,6 +24,7 @@ import {
   historyLookupOf,
   typescriptOf,
 } from "./typescript-analysis.js";
+import type { ReportTypeScript } from "./typescript-analysis.js";
 
 const storiesOf = (
   { now, isCodePath, repository }: ReportFacts,
@@ -39,6 +40,16 @@ const storiesOf = (
     isCodePath,
     ...sections,
   });
+
+/** The trends the stories read: the report's months and series, and every flag flip, since `trends.events` keeps only the newest 20 and the oldest flip is the one `strict-since` needs. */
+const storyTrendsOf = (
+  typescript: ReportTypeScript | undefined,
+): StoryFacts["trends"] => {
+  const trends = typescript?.section.trends;
+  return typescript === undefined || trends === undefined
+    ? undefined
+    : { ...trends, events: typescript.allFlagEvents };
+};
 
 const achievementsOf = (
   { now, isCodePath, repository }: ReportFacts,
@@ -171,7 +182,7 @@ export const buildReport = (facts: ReportFacts): Report => {
       knowledge: knowledgeSection,
       territories: recommendedTerritories,
       typescript: deepDives.deepDives?.typescript,
-      trends: deepDives.deepDives?.typescript?.trends,
+      trends: storyTrendsOf(typescript),
     }),
     achievements: achievementsOf(
       facts,

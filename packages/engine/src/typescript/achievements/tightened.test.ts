@@ -48,7 +48,7 @@ describe("tightened", () => {
       reachedAt: null,
       holds: "milestone",
       detail:
-        "10.1 escape hatches per 1,000 production lines, 20 at the peak in 2024-02.",
+        "10.1 escape hatches per 1,000 production lines, 20 at the peak in 2024-02 (series from 2024-01).",
       progress: { value: 49, target: 50, unit: "% below the peak" },
     });
   });

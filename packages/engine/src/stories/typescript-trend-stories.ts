@@ -35,7 +35,9 @@ const monthsBetween = (day: string, month: string): number => {
  * `strict` is on in the config that governs the most files, since the commit
  * that last turned it on. A flip in a base config shows on every config that
  * extends it, so the story names the first config of the extends chain, base
- * first, that flipped on that day.
+ * first, that flipped on that day. A config that never flipped on its own
+ * (it was created strict, or its base was) is read through the configs it
+ * extends, the nearest first.
  */
 const strictSince = (
   { strictness }: TypeScriptDeepDive,
@@ -43,12 +45,17 @@ const strictSince = (
 ): ReadonlyArray<Story> => {
   const [main] = strictness?.configs ?? [];
   const last = trends.months.at(-1);
+  const strictEventsOf = (path: string) =>
+    trends.events.filter(
+      (event) => event.path === path && event.flag === "strict",
+    );
+  const lastFlipOf = (path: string) => strictEventsOf(path).at(-1);
   const turnedOn =
     main === undefined
       ? undefined
-      : trends.events.findLast(
-          ({ path, flag }) => path === main.path && flag === "strict",
-        );
+      : [main.path, ...main.extends.toReversed()]
+          .map((path) => lastFlipOf(path))
+          .find((event) => event !== undefined);
   if (
     main === undefined ||
     last === undefined ||

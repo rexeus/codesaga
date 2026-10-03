@@ -85,7 +85,7 @@ export const tightened = (
   if (reached === undefined) {
     return [
       locked(
-        `${figure(latest.per1000)} escape hatches per 1,000 production lines, ${figure(peak.per1000)} at the peak in ${peak.month}.`,
+        `${figure(latest.per1000)} escape hatches per 1,000 production lines, ${figure(peak.per1000)} at the peak in ${peak.month} (series from ${points[0]?.month ?? peak.month}).`,
         fall,
       ),
     ];

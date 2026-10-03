@@ -96,3 +96,56 @@ layer(analyzeServices)("analyze the stories the history tells", (it) => {
     }),
   );
 });
+
+const config = (strict: boolean, indexed: boolean) =>
+  `{ "compilerOptions": { "strict": ${strict}, "noUncheckedIndexedAccess": ${indexed} } }\n`;
+
+/** Strict is turned on first; then 22 commits flip noUncheckedIndexedAccess, so the newest 20 events do not reach back to it. */
+const commitManyFlips = Effect.gen(function* () {
+  yield* setNow;
+  const repo = yield* makeTempRepository;
+  yield* repo.commit("2025-01-10T09:00:00Z", {
+    "tsconfig.json": config(false, false),
+    "src/a.ts": CLEAN,
+  });
+  yield* repo.commit("2025-01-20T09:00:00Z", {
+    "tsconfig.json": config(true, false),
+  });
+  for (let index = 0; index < 22; index++) {
+    yield* repo.commit(
+      `2025-02-${String(index + 1).padStart(2, "0")}T09:00:00Z`,
+      {
+        "tsconfig.json": config(true, index % 2 === 0),
+      },
+    );
+  }
+  return repo;
+});
+
+layer(analyzeServices)(
+  "analyze strict-since over a long history of flips",
+  (it) => {
+    it.effect(
+      "still names the oldest flip that holds, which the newest 20 events no longer hold",
+      () =>
+        Effect.gen(function* () {
+          const repo = yield* commitManyFlips;
+
+          const { stories, deepDives } = yield* analyze(
+            analyzeOptionsFor(repo),
+          );
+
+          assert.strictEqual(deepDives?.typescript?.trends?.events.length, 20);
+          assert.isFalse(
+            deepDives?.typescript?.trends?.events.some(
+              ({ flag }) => flag === "strict",
+            ) ?? true,
+          );
+          assert.deepStrictEqual(
+            stories.find(({ kind }) => kind === "strict-since")?.date,
+            "2025-01-20",
+          );
+        }),
+    );
+  },
+);
