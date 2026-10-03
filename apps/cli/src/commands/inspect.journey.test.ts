@@ -160,7 +160,7 @@ describe("codesaga inspect --no-cache", () => {
   it.live("reads git every time and leaves no cache in the repository", () =>
     Effect.gen(function* () {
       const repo = yield* makeTeamProject;
-      const cacheFile = `${repo.root}/.git/codesaga/history-v1.json`;
+      const cacheFile = `${repo.root}/.git/codesaga/history-v2.json`;
 
       const uncached = yield* journey({
         args: ["inspect", "src/a.ts", "--json", "--no-cache"],

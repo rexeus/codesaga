@@ -58,7 +58,7 @@ const zip = (
  * `as unknown as T` is one; `doubleAssertions`, `asAny`, `benignAny` and the
  * `any` inside assertions are not added again.
  */
-const escapesOf = (facts: TypeSafetyFacts): number =>
+export const escapesOf = (facts: TypeSafetyFacts): number =>
   sum([
     facts.anyOutsideAssertions,
     facts.assertionChains,

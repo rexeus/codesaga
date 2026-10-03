@@ -10,15 +10,20 @@ export type ChildReady =
   | { readonly type: "ready"; readonly version: string }
   | { readonly type: "unavailable"; readonly reason: string };
 
+/** What a verdict holds: the full facts of a file at HEAD, or the digest the history keeps of each version. */
+export type ParseKind = "facts" | "digest";
+
 /** Sources to parse, answered by one verdict each, in order. */
 export type ParseRequest = {
   readonly type: "parse";
+  readonly kind: ParseKind;
   readonly sources: ReadonlyArray<SourceText>;
 };
 
+/** The verdicts of a `ParseRequest`; their facts are checked by whoever asked, as nothing here knows their shape. */
 export type ParseReply = {
   readonly type: "verdicts";
-  readonly results: ReadonlyArray<FactsResult>;
+  readonly results: ReadonlyArray<FactsResult<unknown>>;
 };
 
 const hasType = (value: unknown, type: string): value is { type: string } =>
@@ -41,4 +46,8 @@ export const isParseReply = (value: unknown): value is ParseReply =>
   Array.isArray(value.results);
 
 export const isParseRequest = (value: unknown): value is ParseRequest =>
-  hasType(value, "parse") && "sources" in value && Array.isArray(value.sources);
+  hasType(value, "parse") &&
+  "kind" in value &&
+  (value.kind === "facts" || value.kind === "digest") &&
+  "sources" in value &&
+  Array.isArray(value.sources);

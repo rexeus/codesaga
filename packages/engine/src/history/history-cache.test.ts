@@ -21,8 +21,23 @@ const commit: Commit = {
   ],
   markers: ["Generated with [Claude Code](https://claude.com/claude-code)"],
   changes: [
-    { path: "src/new.ts", renamedFrom: "src/old.ts", added: 1, deleted: 2 },
-    { path: "src/gone.ts", removed: true, added: 0, deleted: 9 },
+    {
+      path: "src/new.ts",
+      renamedFrom: "src/old.ts",
+      added: 1,
+      deleted: 2,
+      oid: "1".repeat(40),
+      previousOid: "2".repeat(40),
+      mode: "100644",
+      previousMode: "100755",
+    },
+    {
+      path: "src/gone.ts",
+      removed: true,
+      added: 0,
+      deleted: 9,
+      previousOid: "3".repeat(40),
+    },
     { path: "src/plain.ts", added: 3, deleted: 0 },
   ],
 };
@@ -54,14 +69,14 @@ layer(NodeServices.layer)("the history cache file", (effectIt) => {
         const directory = yield* fs.makeTempDirectoryScoped({
           prefix: "codesaga-cache-",
         });
-        const file = path.join(directory, "nested", "history-v1.json");
+        const file = path.join(directory, "nested", "history-v2.json");
 
         yield* storeCache(file, cache);
         const loaded = yield* loadCache(file);
 
         assert.deepStrictEqual(loaded, cache);
         assert.deepStrictEqual(yield* fs.readDirectory(path.dirname(file)), [
-          "history-v1.json",
+          "history-v2.json",
         ]);
       }),
   );
@@ -91,7 +106,7 @@ layer(NodeServices.layer)("storing the history cache", (effectIt) => {
         const directory = yield* fs.makeTempDirectoryScoped({
           prefix: "codesaga-cache-",
         });
-        const file = path.join(directory, "history-v1.json");
+        const file = path.join(directory, "history-v2.json");
         const now = Date.parse("2026-03-10T12:00:00Z");
         yield* TestClock.setTime(now);
         const hourAgo = now - 60 * 60 * 1000;
@@ -107,16 +122,34 @@ layer(NodeServices.layer)("storing the history cache", (effectIt) => {
                 ),
               ),
             );
-        yield* write("history-v1.json.dead.tmp", hourAgo - 60_000);
-        yield* write("history-v1.json.running.tmp", hourAgo + 60_000);
+        yield* write("history-v2.json.dead.tmp", hourAgo - 60_000);
+        yield* write("history-v2.json.running.tmp", hourAgo + 60_000);
         yield* write("unrelated.tmp", hourAgo - 60_000);
 
         yield* storeCache(file, cache);
 
         assert.deepStrictEqual(
           (yield* fs.readDirectory(directory)).toSorted(),
-          ["history-v1.json", "history-v1.json.running.tmp", "unrelated.tmp"],
+          ["history-v2.json", "history-v2.json.running.tmp", "unrelated.tmp"],
         );
+      }),
+  );
+
+  effectIt.effect(
+    "removes the history-v1.json that this cache superseded",
+    () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const directory = yield* fs.makeTempDirectoryScoped({
+          prefix: "codesaga-cache-",
+        });
+        const old = path.join(directory, "history-v1.json");
+        yield* fs.writeFileString(old, "{}");
+
+        yield* storeCache(path.join(directory, "history-v2.json"), cache);
+
+        assert.isFalse(yield* fs.exists(old));
       }),
   );
 });

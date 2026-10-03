@@ -94,3 +94,31 @@ export const withoutGeneratedFiles = (
     }
     return paths.filter((path) => !excluded.has(path));
   });
+
+/**
+ * The paths that today's ignore rules match, whether or not a file is there
+ * or tracked: the universe leaves out a tracked file that `.gitignore`
+ * matches, and a historical path is judged the same way. Order is kept.
+ */
+export const ignoredAmong = (
+  paths: ReadonlyArray<string>,
+): Effect.Effect<ReadonlyArray<string>, GitError, Git> =>
+  Effect.gen(function* () {
+    if (paths.length === 0) {
+      return paths;
+    }
+    const git = yield* Git;
+    // `check-ignore` exits with 1 when none of the paths is ignored.
+    const output = yield* git
+      .text(
+        ["check-ignore", "-z", "--stdin", "--no-index"],
+        paths.map((path) => `${path}\0`).join(""),
+      )
+      .pipe(
+        Effect.catchTag("GitCommandFailed", (failure) =>
+          failure.exitCode === 1 ? Effect.succeed("") : Effect.fail(failure),
+        ),
+      );
+    const ignored = new Set(splitNul(output));
+    return paths.filter((path) => ignored.has(path));
+  });

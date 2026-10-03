@@ -127,6 +127,13 @@ export type AnalyzeOptions = {
    * team. Every detail is reported either way.
    */
   readonly detail?: number | undefined;
+  /**
+   * Whether to parse every historical version of the TypeScript and
+   * JavaScript files, which the trends and the craft badges read. For callers
+   * that never read them, such as the gates of `check`, `false` leaves the
+   * history alone and only HEAD is parsed. Absent, `true`. Not a CLI flag.
+   */
+  readonly typescriptHistory?: boolean | undefined;
 };
 
 type Windows = Pick<RepositoryFacts, "since" | "previous">;

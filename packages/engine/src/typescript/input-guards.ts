@@ -8,6 +8,12 @@ export const MAX_SOURCE_CHARACTERS = 1_048_576;
 /** A source whose non-blank lines average more characters than this counts as minified, as in the universe. */
 export const MAX_MEAN_LINE_LENGTH = 300;
 
+/** The guards' limits, for whoever keeps their verdicts: a verdict outlives the limits it was made under only if they are part of its key. */
+export const INPUT_GUARD_LIMITS = {
+  maxSourceCharacters: MAX_SOURCE_CHARACTERS,
+  maxMeanLineLength: MAX_MEAN_LINE_LENGTH,
+} as const;
+
 const isMinified = (text: string): boolean => {
   const nonBlankLines = text
     .split("\n")

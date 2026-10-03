@@ -34,7 +34,30 @@ layer(NodeServices.layer)("Git", (it) => {
       );
     }),
   );
+});
 
+layer(NodeServices.layer)("Git bytes", (it) => {
+  it.effect("streams stdout as raw bytes, invalid UTF-8 included", () =>
+    Effect.gen(function* () {
+      const repo = yield* makeTempRepository;
+      yield* repo.commit("2026-03-01T12:00:00Z", {
+        "raw.bin": Uint8Array.of(0xff, 0x00, 0xc3, 0x28),
+      });
+      const git = yield* Git.make(repo.directory);
+
+      const chunks = yield* Stream.runCollect(
+        git.bytes(["cat-file", "blob", "HEAD:raw.bin"]),
+      );
+
+      assert.deepStrictEqual(
+        chunks.flatMap((chunk) => Array.from(chunk)),
+        [0xff, 0x00, 0xc3, 0x28],
+      );
+    }),
+  );
+});
+
+layer(NodeServices.layer)("Git exit codes", (it) => {
   it.effect(
     "fails with the exit code and stderr of a command that exits non-zero",
     () =>

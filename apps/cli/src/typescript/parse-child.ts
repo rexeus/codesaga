@@ -1,7 +1,7 @@
 // Owns the parse child: the process that holds oxc-parser and parses what the application sends it.
 // `bin.ts` runs this instead of the CLI when `fork` started the process with the parse-child switch.
 // A parse that kills this process costs the application one file, which it finds by bisecting.
-import { factsOfSource } from "@codesaga/engine";
+import { digestOfSource, factsOfSource } from "@codesaga/engine";
 
 import { loadOxcParser } from "./oxc-loader.js";
 import { isParseRequest } from "./parse-protocol.js";
@@ -26,7 +26,11 @@ try {
     if (isParseRequest(message)) {
       reply({
         type: "verdicts",
-        results: message.sources.map((source) => factsOfSource(parse, source)),
+        results: message.sources.map((source) =>
+          message.kind === "digest"
+            ? digestOfSource(parse, source)
+            : factsOfSource(parse, source),
+        ),
       });
     }
   });

@@ -1,0 +1,128 @@
+// Owns the digest of one file version: the few counts the history keeps for every version of every file.
+// `FileFacts` describes the files at HEAD in full and costs about 2 KB a file in a cache; the history needs far less to replay, so it keeps this projection of what the trends and the craft badges read.
+
+/**
+ * The version of `FileDigest`. A cache holds digests under their version, so
+ * it rises with every change to what a digest means or contains.
+ */
+export const FILE_DIGEST_VERSION = 2;
+
+/** A function of 3 or more as the history follows it: its name within the file and its cognitive complexity. */
+type DigestFunction = readonly [name: string, complexity: number];
+
+/** What the history reads of one file version. Every count is additive across files. */
+export type FileDigest = {
+  readonly version: typeof FILE_DIGEST_VERSION;
+  /** Non-blank lines, as the universe counts them. */
+  readonly lines: number;
+  /** Explicit `any` keywords. */
+  readonly any: number;
+  /** Escape sites, as `typeSafety` counts them. */
+  readonly escapes: number;
+  /** `@ts-` directives and lint disables. */
+  readonly suppressions: number;
+  readonly functions: number;
+  /** Functions of cognitive complexity 15 or more. */
+  readonly complexFunctions: number;
+  /** The functions of 3 or more, hardest first, at most 40 (`MAX_NOTABLE_PER_FILE`): a list of 40 may be cut. */
+  readonly notable: ReadonlyArray<DigestFunction>;
+  /** Whether the file uses ES module syntax, and whether it uses CommonJS. */
+  readonly esm: boolean;
+  readonly commonjs: boolean;
+  readonly testCases: number;
+  readonly focusedTests: number;
+  /** Top-level classes, functions and arrow-function constants, exported or not. */
+  readonly declarations: number;
+  /** The functions and arrow-function constants among them that are exported where they are declared (`export function f`, `export const f = () => ...`, `export default function`), never an `export { f }` list. */
+  readonly exportedFunctions: number;
+};
+
+/** The values of a `digestRow`. */
+const ROW_LENGTH = 12;
+
+const NUMBER_FIELDS = [
+  "lines",
+  "any",
+  "escapes",
+  "suppressions",
+  "functions",
+  "complexFunctions",
+  "testCases",
+  "focusedTests",
+  "declarations",
+  "exportedFunctions",
+] as const;
+
+/** Whether a value read from a cache or a child process is a digest of the current version. */
+export const isFileDigest = (value: unknown): value is FileDigest =>
+  typeof value === "object" &&
+  value !== null &&
+  "version" in value &&
+  value.version === FILE_DIGEST_VERSION &&
+  NUMBER_FIELDS.every(
+    (field) => typeof Reflect.get(value, field) === "number",
+  ) &&
+  Array.isArray(Reflect.get(value, "notable")) &&
+  typeof Reflect.get(value, "esm") === "boolean" &&
+  typeof Reflect.get(value, "commonjs") === "boolean";
+
+/**
+ * A digest as a row of values, the form a cache stores it in: the field names
+ * of 59,000 digests would be half of the file. The order is the contract of
+ * `FILE_DIGEST_VERSION`: lines, any, escapes, suppressions, functions,
+ * complexFunctions, the module flags (1 for ESM, 2 for CommonJS), testCases,
+ * focusedTests, declarations, exportedFunctions, notable.
+ */
+export const digestRow = (digest: FileDigest): ReadonlyArray<unknown> => [
+  digest.lines,
+  digest.any,
+  digest.escapes,
+  digest.suppressions,
+  digest.functions,
+  digest.complexFunctions,
+  (digest.esm ? 1 : 0) + (digest.commonjs ? 2 : 0),
+  digest.testCases,
+  digest.focusedTests,
+  digest.declarations,
+  digest.exportedFunctions,
+  digest.notable,
+];
+
+/** The digest a row stands for, or undefined when it is not one. */
+export const digestOfRow = (row: unknown): FileDigest | undefined => {
+  if (!Array.isArray(row) || row.length !== ROW_LENGTH) {
+    return undefined;
+  }
+  const values: ReadonlyArray<unknown> = row;
+  const [
+    lines,
+    anys,
+    escapes,
+    suppressions,
+    functions,
+    complexFunctions,
+    modules,
+    testCases,
+    focusedTests,
+    declarations,
+    exportedFunctions,
+    notable,
+  ] = values;
+  const digest = {
+    version: FILE_DIGEST_VERSION,
+    lines,
+    any: anys,
+    escapes,
+    suppressions,
+    functions,
+    complexFunctions,
+    notable,
+    esm: typeof modules === "number" && (modules & 1) === 1,
+    commonjs: typeof modules === "number" && (modules & 2) === 2,
+    testCases,
+    focusedTests,
+    declarations,
+    exportedFunctions,
+  };
+  return isFileDigest(digest) ? digest : undefined;
+};

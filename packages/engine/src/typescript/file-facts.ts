@@ -39,6 +39,13 @@ export type FileFacts = {
   readonly markers: MarkerFacts;
 };
 
+/** Whether a value that crossed a process boundary is the facts of the current version. */
+export const isFileFacts = (value: unknown): value is FileFacts =>
+  typeof value === "object" &&
+  value !== null &&
+  "version" in value &&
+  value.version === FILE_FACTS_VERSION;
+
 /**
  * The facts of one parsed file, from a single walk over its program; `text`
  * is the source the parse read, for the facts that need lines. Pure over the

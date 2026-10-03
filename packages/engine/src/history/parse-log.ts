@@ -6,16 +6,19 @@
 // The header fields are the parents, author time, committer time, author date with offset,
 // author and committer name and email, the unfolded trailers, and the message.
 // A raw entry is `:<modes> <ids> <status>` followed by one path token, or two
-// (old and new) for a rename or copy; it tells which files the commit deletes.
+// (old and new) for a rename or copy; it tells which files the commit deletes
+// and each file's blob ids and mode (see `raw-entry.ts`).
 // A numstat entry is `<added>\t<deleted>\t<path>`. A rename entry has an empty
 // path after the counts and is followed by two more tokens, the old and the
 // new path. Binary files show `-` for counts.
 
 import { parseMarkers, parseTrailers } from "./message.js";
 import type { Trailer } from "./message.js";
+import { parseRawEntry } from "./raw-entry.js";
+import type { BlobFields, RawEntry } from "./raw-entry.js";
 
 /** One file touched by a commit. */
-type Change = {
+type Change = BlobFields & {
   /** Path after the commit (the new path of a rename). */
   readonly path: string;
   /** Set when the commit renamed the file. */
@@ -56,7 +59,7 @@ export type Commit = {
 };
 
 /** Bump on any change to how commits, trailers, markers, subjects, renames or removals are parsed. */
-export const PARSER_VERSION = 4;
+export const PARSER_VERSION = 6;
 
 /**
  * Arguments that make `git log` print what `LogParser` reads. Merge commits
@@ -66,6 +69,7 @@ export const LOG_FORMAT_ARGS = [
   "--diff-merges=off",
   "-M",
   "--raw",
+  "--no-abbrev",
   "--numstat",
   "-z",
   "--use-mailmap",
@@ -77,7 +81,6 @@ const COMMIT_MARKER = "\u0001";
 const HEADER_FIELDS = 10;
 const OFFSET = /([+-])(\d{2}):(\d{2})$/u;
 const NUMSTAT = /^(\d+|-)\t(\d+|-)\t(.*)$/su;
-const RAW_STATUS = /^:\d+ \d+ \w+ \w+ ([A-Z])\d*$/u;
 
 type Phase = "header" | "entry" | "rawPath" | "renamedFrom" | "renamedTo";
 
@@ -136,10 +139,10 @@ export class LogParser {
   #header: Array<string> = [];
   #counts = { added: 0, deleted: 0 };
   #renamedFrom = "";
-  /** Paths the open commit deletes, from its raw entries. */
-  #removed = new Set<string>();
+  /** The raw entries of the open commit by the path they leave behind (a rename's new path). */
+  #raw = new Map<string, RawEntry>();
   #rawPaths = 0;
-  #rawStatus = "";
+  #rawEntry: RawEntry | undefined;
 
   /** Consumes the next piece of output and returns the commits it completed. */
   push(chunk: string): ReadonlyArray<Commit> {
@@ -182,6 +185,7 @@ export class LogParser {
       path,
       renamedFrom: this.#renamedFrom,
       ...this.#counts,
+      ...this.#raw.get(path)?.blob,
     });
     this.#phase = "entry";
     return [];
@@ -197,7 +201,7 @@ export class LogParser {
     const finished = this.#close();
     this.#sha = sha;
     this.#header = [];
-    this.#removed = new Set();
+    this.#raw = new Map();
     this.#phase = "header";
     return finished;
   }
@@ -211,21 +215,22 @@ export class LogParser {
   }
 
   #readRawPath(path: string): void {
-    if (this.#rawStatus === "D") {
-      this.#removed.add(path);
-    }
     this.#rawPaths -= 1;
     if (this.#rawPaths === 0) {
+      if (this.#rawEntry !== undefined) {
+        this.#raw.set(path, this.#rawEntry);
+      }
       this.#phase = "entry";
     }
   }
 
   #readEntry(token: string): ReadonlyArray<Commit> {
     const entry = token.replace(/^\n/u, "");
-    const status = RAW_STATUS.exec(entry)?.[1];
-    if (status !== undefined) {
-      this.#rawStatus = status;
-      this.#rawPaths = status === "R" || status === "C" ? 2 : 1;
+    const rawEntry = parseRawEntry(entry);
+    if (rawEntry !== undefined) {
+      this.#rawEntry = rawEntry;
+      this.#rawPaths =
+        rawEntry.status === "R" || rawEntry.status === "C" ? 2 : 1;
       this.#phase = "rawPath";
       return [];
     }
@@ -238,10 +243,12 @@ export class LogParser {
     if (path === "") {
       this.#phase = "renamedFrom";
     } else {
+      const raw = this.#raw.get(path);
       this.#open.changes.push({
         path,
         ...this.#counts,
-        ...(this.#removed.has(path) ? { removed: true } : {}),
+        ...raw?.blob,
+        ...(raw?.status === "D" ? { removed: true } : {}),
       });
     }
     return [];
