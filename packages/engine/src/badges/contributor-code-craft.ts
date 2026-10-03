@@ -1,5 +1,5 @@
 // Owns the craft badges that read code facts: type-tightener, sweeper, simplifier and test-companion.
-// They compare each TypeScript or JavaScript file before and after a person's own human commits of the last year; the evidence only ever counts what was removed or improved, never the inverse.
+// They compare each TypeScript or JavaScript file before and after a person's own human commits of the 365 days before now, whatever `--since` says; the evidence only ever counts what was removed or improved, never the inverse.
 import { isActiveWithin } from "../contributors/activeness.js";
 import { countOf, percentOf } from "../report/sentences.js";
 import type { EarnedContributorBadge } from "./contributor-badge-category.js";
@@ -32,7 +32,7 @@ const typeTightener = (deltas: ReadonlyArray<CommitDelta>) => {
         {
           kind: "type-tightener" as const,
           label: "Type tightener",
-          evidence: `Removed ${countOf(removed)} explicit any in the last year, in ${countOf(tightening.length)} commits that each removed some.`,
+          evidence: `Removed ${countOf(removed)} explicit any in the last 365 days, in ${countOf(tightening.length)} commits that each removed some.`,
         },
       ]
     : [];
@@ -45,7 +45,7 @@ const sweeper = (deltas: ReadonlyArray<CommitDelta>) => {
         {
           kind: "sweeper" as const,
           label: "Sweeper",
-          evidence: `Removed ${countOf(removed)} more top-level functions, classes and arrow-function constants than added in the last year.`,
+          evidence: `Removed ${countOf(removed)} more top-level functions, classes and arrow-function constants than added in the last 365 days.`,
         },
       ]
     : [];
@@ -58,7 +58,7 @@ const simplifier = (deltas: ReadonlyArray<CommitDelta>) => {
         {
           kind: "simplifier" as const,
           label: "Simplifier",
-          evidence: `Lowered the cognitive complexity of ${countOf(simplified)} functions by 3 or more in the last year, without adding functions to their files.`,
+          evidence: `Lowered the cognitive complexity of ${countOf(simplified)} functions by 3 or more in the last 365 days, without adding functions to their files.`,
         },
       ]
     : [];
@@ -75,7 +75,7 @@ const testCompanion = (deltas: ReadonlyArray<CommitDelta>) => {
         {
           kind: "test-companion" as const,
           label: "Test companion",
-          evidence: `${percentOf(tested / adding.length)} of their commits that add an exported function also add test cases (${countOf(tested)} of ${countOf(adding.length)}).`,
+          evidence: `${percentOf(tested / adding.length)} of their commits in the last 365 days that add an exported function also add test cases (${countOf(tested)} of ${countOf(adding.length)}).`,
         },
       ]
     : [];
@@ -100,7 +100,7 @@ export const codeCraftBadges = ({
       ({ class: commitClass, time }) =>
         commitClass === "human" && isActiveWithin(time, now, recentWindowDays),
     )
-    .flatMap(({ changes }) => commitDeltaOf(changes, factsLookup) ?? []);
+    .flatMap((commit) => commitDeltaOf(commit, factsLookup) ?? []);
   return [
     ...typeTightener(deltas),
     ...sweeper(deltas),

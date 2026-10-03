@@ -43,7 +43,7 @@ layer(analyzeServices)("analyze craft badges", (it) => {
         [
           [
             "type-tightener",
-            "Removed 24 explicit any in the last year, in 8 commits that each removed some.",
+            "Removed 24 explicit any in the last 365 days, in 8 commits that each removed some.",
           ],
         ],
       );

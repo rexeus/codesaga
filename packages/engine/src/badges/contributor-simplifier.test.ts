@@ -56,7 +56,7 @@ describe("simplifier", () => {
       category: "craft",
       label: "Simplifier",
       evidence:
-        "Lowered the cognitive complexity of 10 functions by 3 or more in the last year, without adding functions to their files.",
+        "Lowered the cognitive complexity of 10 functions by 3 or more in the last 365 days, without adding functions to their files.",
     });
   });
 
@@ -120,5 +120,54 @@ describe("simplifier and a commit that adds functions or a cut list", () => {
     );
 
     expect(kinds([ambiguous])).not.toContain("simplifier");
+  });
+});
+
+describe("simplifier and a rename or a swap", () => {
+  it("counts nothing for functions that were only renamed", () => {
+    const renamed = simplifying(
+      { count: 30, notable: functions(10, 8) },
+      {
+        count: 30,
+        notable: functions(10, 8).map(
+          ([name, complexity]): [string, number] => [
+            `renamed_${name}`,
+            complexity,
+          ],
+        ),
+      },
+    );
+
+    expect(kinds([renamed])).not.toContain("simplifier");
+  });
+
+  it("counts nothing for functions that swapped their complexity", () => {
+    const swapped = simplifying(
+      {
+        count: 40,
+        notable: [...functions(10, 8), ...functions(10, 3, 10)],
+      },
+      {
+        count: 40,
+        notable: [...functions(10, 3), ...functions(10, 8, 10)],
+      },
+    );
+
+    expect(kinds([swapped])).not.toContain("simplifier");
+  });
+
+  it("still counts functions made simpler while another one got a little harder", () => {
+    const genuine = simplifying(
+      {
+        count: 40,
+        notable: [...functions(10, 9), ...functions(1, 4, 10)],
+      },
+      {
+        count: 40,
+        notable: [...functions(10, 5), ...functions(1, 5, 10)],
+      },
+    );
+
+    expect(kinds([genuine])).toContain("simplifier");
   });
 });

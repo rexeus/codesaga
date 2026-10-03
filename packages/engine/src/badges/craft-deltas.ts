@@ -1,5 +1,6 @@
 // Owns what one commit did to the TypeScript and JavaScript files it changed, as the craft badges read it: the difference of the digests of each file before and after.
 // Moves between files cancel out in a commit's sum. A file whose version before or after has no digest says nothing and is left out.
+import type { ClassifiedCommit } from "../automation/classify.js";
 import type { FileChange } from "../history/history.js";
 import type { FileDigest } from "../typescript/digest/file-digest.js";
 import { MAX_NOTABLE_PER_FILE } from "../typescript/functions/function-thresholds.js";
@@ -39,14 +40,29 @@ const uniqueByName = (
   return new Map(functions.filter(([name]) => counts.get(name) === 1));
 };
 
+/** How one function moved: lowered by `simplifierMinDrop` or more, a little easier, or harder; nothing for one whose later complexity is unknown. */
+const movementOf = (
+  before: number,
+  after: number | undefined,
+): { lowered: number; simpler: number; harder: number } => {
+  if (after === undefined) {
+    return { lowered: 0, simpler: 0, harder: 0 };
+  }
+  return before - after >= simplifierMinDrop
+    ? { lowered: 1, simpler: before - after, harder: 0 }
+    : { lowered: 0, simpler: 0, harder: Math.max(0, after - before) };
+};
+
 /**
- * The functions of one file that a commit made simpler. A function is matched
- * by its name where that is unique in both versions. One that left the list of
- * functions of 3 or more counts as lowered to 2, as long as the file did not
- * lose functions, so that a deleted function is not taken for a simplified one.
- * A commit that adds functions to the file, or a file whose list was cut at
- * `MAX_NOTABLE_PER_FILE` in either version, counts nothing: absent and
- * truncated look alike there.
+ * The functions of one file that a commit made simpler, matched by their name
+ * where that is unique in both versions. One that left the list of functions
+ * of 3 or more counts as lowered to 2, but only when the list gained no
+ * name, so that a renamed function is not taken for a simplified one, and the
+ * file did not lose functions, so that a deleted one is not either. A commit
+ * that adds functions to the file, a file whose list was cut at
+ * `MAX_NOTABLE_PER_FILE` in either version (absent and truncated look
+ * alike), and a file whose functions got harder by as much as the lowered
+ * ones got simpler (a swap) count nothing.
  */
 const simplifiedIn = (before: FileDigest, after: FileDigest): number => {
   if (
@@ -56,22 +72,28 @@ const simplifiedIn = (before: FileDigest, after: FileDigest): number => {
   ) {
     return 0;
   }
-  const complexityAfter = uniqueByName(after.notable);
+  const namesBefore = new Set(before.notable.map(([name]) => name));
+  const newcomers = after.notable.filter(([name]) => !namesBefore.has(name));
   const namesAfter = new Set(after.notable.map(([name]) => name));
-  let simplified = 0;
+  const complexityAfter = uniqueByName(after.notable);
+  const vanishedTo =
+    after.functions === before.functions && newcomers.length === 0
+      ? VANISHED_COMPLEXITY
+      : undefined;
+  let lowered = 0;
+  let simpler = 0;
+  let harder = newcomers.reduce((sum, [, complexity]) => sum + complexity, 0);
   for (const [name, complexity] of uniqueByName(before.notable)) {
-    const found = complexityAfter.get(name);
-    const lowered =
-      found === undefined &&
-      !namesAfter.has(name) &&
-      after.functions === before.functions
-        ? VANISHED_COMPLEXITY
-        : found;
-    if (lowered !== undefined && complexity - lowered >= simplifierMinDrop) {
-      simplified += 1;
-    }
+    const move = movementOf(
+      complexity,
+      complexityAfter.get(name) ??
+        (namesAfter.has(name) ? undefined : vanishedTo),
+    );
+    lowered += move.lowered;
+    simpler += move.simpler;
+    harder += move.harder;
   }
-  return simplified;
+  return harder >= simpler ? 0 : lowered;
 };
 
 /** What `count` reads of a version, or 0 where the commit has no such version of the file. */
@@ -99,8 +121,7 @@ const deltaOfChange = (
       before === null || after === null ? 0 : simplifiedIn(before, after),
     addedExportedFunction:
       !isTestPath(change.path) &&
-      grew((digest) => digest.topLevelFunctions) > 0 &&
-      grew((digest) => digest.exportedDeclarations) > 0,
+      grew((digest) => digest.exportedFunctions) > 0,
     addedTestCases: isTestPath(change.path)
       ? grew((digest) => digest.testCases)
       : 0,
@@ -108,15 +129,16 @@ const deltaOfChange = (
 };
 
 /**
- * What the commit did to the files the facts cover, or undefined when it
- * changes more than `craftMaxFilesPerCommit` files (a mass change or a
- * codemod says nothing of a person's craft) or none of them is covered.
+ * What the commit did to the files the digests cover, or undefined when it
+ * changed more than `craftMaxFilesPerCommit` files in the whole repository,
+ * whatever the analysis scope (a mass change or a codemod says nothing of a
+ * person's craft), or none of them is covered.
  */
 export const commitDeltaOf = (
-  changes: ReadonlyArray<FileChange>,
+  { changes, changedFiles }: Pick<ClassifiedCommit, "changes" | "changedFiles">,
   lookup: FactsLookup,
 ): CommitDelta | undefined => {
-  if (changes.length > craftMaxFilesPerCommit) {
+  if (changedFiles > craftMaxFilesPerCommit) {
     return undefined;
   }
   const deltas = changes.flatMap(

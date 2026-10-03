@@ -15,8 +15,8 @@ const adding = (day: number, cases: number) =>
   commitOf(day, [
     change(
       `src/m${day}.ts`,
-      blob({ topLevelFunctions: 1, exportedDeclarations: 1 }),
-      blob({ topLevelFunctions: 0, exportedDeclarations: 0 }),
+      blob({ declarations: 1, exportedFunctions: 1 }),
+      blob({ declarations: 0, exportedFunctions: 0 }),
     ),
     ...(cases === 0
       ? []
@@ -44,7 +44,7 @@ describe("test-companion", () => {
       category: "craft",
       label: "Test companion",
       evidence:
-        "50% of their commits that add an exported function also add test cases (5 of 10).",
+        "50% of their commits in the last 365 days that add an exported function also add test cases (5 of 10).",
     });
   });
 
@@ -53,13 +53,13 @@ describe("test-companion", () => {
     expect(kinds(mix(9, 0))).not.toContain("test-companion");
   });
 
-  it("does not count a commit that adds a function without exporting it, or exports in a test file", () => {
+  it("does not count a commit that adds a private function beside an exported interface, as the digest says", () => {
     const hidden = Array.from({ length: 10 }, (_, i) =>
       commitOf(1 + i, [
         change(
           `src/h${i}.ts`,
-          blob({ topLevelFunctions: 1, exportedDeclarations: 0 }),
-          blob({ topLevelFunctions: 0, exportedDeclarations: 0 }),
+          blob({ declarations: 1, exportedFunctions: 0 }),
+          blob({ declarations: 0, exportedFunctions: 0 }),
         ),
         change(
           `src/h${i}.test.ts`,

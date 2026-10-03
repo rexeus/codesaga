@@ -15,8 +15,8 @@ const deleting = (day: number, count: number, path = "src/a.ts") =>
   commitOf(day, [
     change(
       path,
-      blob({ declarations: 30 - count, topLevelFunctions: 30 - count }),
-      blob({ declarations: 30, topLevelFunctions: 30 }),
+      blob({ declarations: 30 - count }),
+      blob({ declarations: 30 }),
     ),
   ]);
 
@@ -31,17 +31,13 @@ describe("sweeper", () => {
       category: "craft",
       label: "Sweeper",
       evidence:
-        "Removed 15 more top-level functions, classes and arrow-function constants than added in the last year.",
+        "Removed 15 more top-level functions, classes and arrow-function constants than added in the last 365 days.",
     });
   });
 
   it("is withheld at 14, and a commit that adds declarations takes from the net", () => {
     const adding = commitOf(3, [
-      change(
-        "src/b.ts",
-        blob({ declarations: 5, topLevelFunctions: 5 }),
-        blob({ declarations: 0, topLevelFunctions: 0 }),
-      ),
+      change("src/b.ts", blob({ declarations: 5 }), blob({ declarations: 0 })),
     ]);
 
     expect(kinds([deleting(1, 14)])).not.toContain("sweeper");
@@ -55,16 +51,8 @@ describe("sweeper", () => {
 
   it("does not count a function moved to another file", () => {
     const moved = commitOf(1, [
-      change(
-        "src/a.ts",
-        blob({ declarations: 5, topLevelFunctions: 5 }),
-        blob({ declarations: 20, topLevelFunctions: 20 }),
-      ),
-      change(
-        "src/b.ts",
-        blob({ declarations: 20, topLevelFunctions: 20 }),
-        blob({ declarations: 5, topLevelFunctions: 5 }),
-      ),
+      change("src/a.ts", blob({ declarations: 5 }), blob({ declarations: 20 })),
+      change("src/b.ts", blob({ declarations: 20 }), blob({ declarations: 5 })),
     ]);
 
     expect(kinds([moved])).not.toContain("sweeper");

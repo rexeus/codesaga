@@ -34,7 +34,7 @@ describe("type-tightener", () => {
       category: "craft",
       label: "Type tightener",
       evidence:
-        "Removed 24 explicit any in the last year, in 8 commits that each removed some.",
+        "Removed 24 explicit any in the last 365 days, in 8 commits that each removed some.",
     });
   });
 
@@ -61,11 +61,26 @@ describe("type-tightener", () => {
         changes: own.changes.concat(
           Array.from({ length: 50 }, (_, i) => change(`docs/${i}.md`, "x")),
         ),
+        changedFiles: 51,
       }),
     );
 
     expect(kinds(assisted)).not.toContain("type-tightener");
     expect(kinds(mass)).not.toContain("type-tightener");
+  });
+});
+
+describe("type-tightener and the analysis scope", () => {
+  it("applies the 50-file limit to the files a commit changed in the whole repository, not to the scoped ones", () => {
+    const scoped = tightening(8, 3).map((own) =>
+      Object.assign({}, own, { changedFiles: 51 }),
+    );
+    const within = tightening(8, 3).map((own) =>
+      Object.assign({}, own, { changedFiles: 50 }),
+    );
+
+    expect(kinds(scoped)).not.toContain("type-tightener");
+    expect(kinds(within)).toContain("type-tightener");
   });
 });
 
