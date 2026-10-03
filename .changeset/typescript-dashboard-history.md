@@ -1,0 +1,5 @@
+---
+"codesaga": minor
+---
+
+The "Deep dive: TypeScript" section of the dashboard shows the history of the code. A line chart with a series picker follows escape hatches and `any` per 1,000 lines, the share of complex functions, the share of ES modules and the test cases month by month, says where the series starts when the first-parent chain begins after the first commit, and can be read with the keyboard. A timeline lists when `strict` and `noUncheckedIndexedAccess` changed, the module card draws the ES module share over time, and a small table tells what human, human-with-an-agent, agent and bot commits added to and removed from the escape hatches (lower bounds for agents, never per person). The stories about the code open the section, the TypeScript achievements appear as tagged medallions in the Achievements section, and the territory badges `type-safe`, `strict`, `complex-logic` and `in-a-cycle` (a warning tone) and the craft badges `type-tightener`, `sweeper`, `simplifier` and `test-companion` get their own icons.
