@@ -11,6 +11,7 @@ import {
   LENGTH_EDGES,
   MAX_PARAMETERS,
 } from "./functions/function-thresholds.js";
+import { IMPORT_THRESHOLDS } from "./imports/thresholds.js";
 import { MAX_MEAN_LINE_LENGTH, MAX_SOURCE_CHARACTERS } from "./input-guards.js";
 import { ASSERTION_EDGES } from "./tests/test-facts.js";
 
@@ -28,4 +29,5 @@ export const TYPESCRIPT_THRESHOLDS: NonNullable<
   hotspotMinRevisions: HOTSPOT_MIN_REVISIONS,
   maxSourceCharacters: MAX_SOURCE_CHARACTERS,
   minifiedMeanLineLength: MAX_MEAN_LINE_LENGTH,
+  imports: IMPORT_THRESHOLDS,
 };

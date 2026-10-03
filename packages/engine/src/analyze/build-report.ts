@@ -11,6 +11,7 @@ import { contributors } from "../contributors/contributors.js";
 import { knowledge } from "../knowledge/knowledge.js";
 import { overview } from "../overview/overview.js";
 import type { Report } from "../report/report.js";
+import type { Imports } from "../report/typescript-imports.js";
 import { universeStats } from "../stats/universe-stats.js";
 import { stories } from "../stories/stories.js";
 import type { StoryFacts } from "../stories/stories.js";
@@ -78,6 +79,7 @@ const knowledgeOf = (
 ) =>
   knowledge({
     typescriptOf: measured.typescript?.forPaths,
+    importsAt: measured.typescript?.imports?.at,
     commits: scoped,
     universe: facts.universe,
     stats: measured.stats,
@@ -93,10 +95,18 @@ const knowledgeOf = (
 
 const deepDivesField = (
   typescript: TypeScriptAnalysis | undefined,
+  imports: Imports | undefined,
 ): Pick<Report, "deepDives"> =>
   typescript === undefined
     ? {}
-    : { deepDives: { typescript: typescript.section } };
+    : {
+        deepDives: {
+          typescript: {
+            ...typescript.section,
+            ...(imports === undefined ? {} : { imports }),
+          },
+        },
+      };
 
 const peopleOf = (
   facts: RepositoryFacts,
@@ -127,10 +137,10 @@ const optionalSections = (
   facts: RepositoryFacts,
   current: Analysis["commits"],
   previous: Analysis["previous"],
-  typescript: TypeScriptAnalysis | undefined,
+  deepDives: Pick<Report, "deepDives">,
 ): Pick<Report, "comparison" | "deepDives"> => ({
   ...comparisonField(facts, current, previous),
-  ...deepDivesField(typescript),
+  ...deepDives,
 });
 
 /** Builds the report from the facts, each section over the commits it covers. */
@@ -146,12 +156,11 @@ export const buildReport = (facts: RepositoryFacts): Report => {
   } = prepareAnalysis(facts);
   const stats = statsOf(facts, scoped, commits);
   const typescript = typescriptOf(facts, stats.revisions);
-  const { section: knowledgeSection, recommendedTerritories } = knowledgeOf(
-    facts,
-    scoped,
-    headTime,
-    { stats, typescript },
-  );
+  const {
+    section: knowledgeSection,
+    recommendedTerritories,
+    imports,
+  } = knowledgeOf(facts, scoped, headTime, { stats, typescript });
   const people = peopleOf(facts, { commits, scoped }, recommendedTerritories);
   return {
     schemaVersion: 1,
@@ -183,6 +192,11 @@ export const buildReport = (facts: RepositoryFacts): Report => {
       stats.repository,
       knowledgeSection,
     ),
-    ...optionalSections(facts, commits, previous, typescript),
+    ...optionalSections(
+      facts,
+      commits,
+      previous,
+      deepDivesField(typescript, imports),
+    ),
   };
 };

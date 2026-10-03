@@ -44,5 +44,20 @@ export const TerritoryTypeScript = Schema.Struct({
   ),
   /** The highest cognitive complexity of a production function of the territory; absent with `over15Share`. */
   maxComplexity: Schema.optionalKey(Schema.Natural),
+  /**
+   * How many territories of the import map
+   * (`deepDives.typescript.imports.territories`) this territory's production
+   * files import, leaving out any territory that shares a file with it; the
+   * map's `edges` say which. Absent without the import map.
+   */
+  importsCount: Schema.optionalKey(Schema.Natural),
+  /** How many territories of the import map import this territory's production files, on the same terms as `importsCount`. */
+  importedByCount: Schema.optionalKey(Schema.Natural),
+  /**
+   * A cycle of production files by value imports runs through the territory
+   * and out of it: it needs at least one file outside. Territories that import
+   * each other without a file cycle are in the map's `mutualImports`.
+   */
+  inCycle: Schema.optionalKey(Schema.Boolean),
 });
 export type TerritoryTypeScript = typeof TerritoryTypeScript.Type;

@@ -67,6 +67,32 @@ const limitTypeScript = (
   };
 };
 
+/** The import map's territories, edges, edges toward less stable territories and groups of territories that import each other cut to the first `limit`; `totalTerritories`, `totalEdges`, `totalTowardLessStable` and `totalMutualImports` keep their counts. */
+const limitImports = (
+  typescript: TypeScriptDeepDive,
+  limit: number,
+): TypeScriptDeepDive => {
+  const { imports } = typescript;
+  return imports === undefined
+    ? typescript
+    : {
+        ...typescript,
+        imports: {
+          ...imports,
+          territories: {
+            ...imports.territories,
+            territories: imports.territories.territories.slice(0, limit),
+            edges: imports.territories.edges.slice(0, limit),
+            towardLessStable: imports.territories.towardLessStable.slice(
+              0,
+              limit,
+            ),
+            mutualImports: imports.territories.mutualImports.slice(0, limit),
+          },
+        },
+      };
+};
+
 const limitDeepDives = (
   deepDives: NonNullable<Report["deepDives"]>,
   limit: number,
@@ -75,7 +101,10 @@ const limitDeepDives = (
     ? deepDives
     : {
         ...deepDives,
-        typescript: limitTypeScript(deepDives.typescript, limit),
+        typescript: limitImports(
+          limitTypeScript(deepDives.typescript, limit),
+          limit,
+        ),
       };
 
 /**

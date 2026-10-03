@@ -128,7 +128,11 @@
       "hotspotMinComplexity": 10,
       "hotspotMinRevisions": 2,
       "maxSourceCharacters": 1048576,
-      "minifiedMeanLineLength": 300
+      "minifiedMeanLineLength": 300,
+      "imports": {
+        "instabilityGap": 0.3,
+        "minEdges": 5
+      }
     }
   },
   "totals": {
@@ -3161,7 +3165,10 @@
             "strict": true,
             "esmShare": 1,
             "over15Share": 0.0211,
-            "maxComplexity": 33
+            "maxComplexity": 33,
+            "importsCount": 0,
+            "importedByCount": 4,
+            "inCycle": false
           }
         },
         {
@@ -3281,7 +3288,10 @@
             "strict": "unknown",
             "esmShare": 1,
             "over15Share": 0.0,
-            "maxComplexity": 12
+            "maxComplexity": 12,
+            "importsCount": 1,
+            "importedByCount": 3,
+            "inCycle": false
           }
         },
         {
@@ -3395,7 +3405,10 @@
             "strict": "mixed",
             "esmShare": 0.9167,
             "over15Share": 0.0402,
-            "maxComplexity": 29
+            "maxComplexity": 29,
+            "importsCount": 3,
+            "importedByCount": 0,
+            "inCycle": false
           }
         },
         {
@@ -3502,7 +3515,10 @@
             "strict": true,
             "esmShare": 1,
             "over15Share": 0.0,
-            "maxComplexity": 9
+            "maxComplexity": 9,
+            "importsCount": 1,
+            "importedByCount": 0,
+            "inCycle": false
           }
         },
         {
@@ -3707,7 +3723,10 @@
             "strict": true,
             "esmShare": 1,
             "over15Share": 0.0,
-            "maxComplexity": 6
+            "maxComplexity": 6,
+            "importsCount": 0,
+            "importedByCount": 0,
+            "inCycle": false
           }
         },
         {
@@ -3821,7 +3840,10 @@
             "strict": true,
             "esmShare": 0.6,
             "over15Share": 0.0,
-            "maxComplexity": 14
+            "maxComplexity": 14,
+            "importsCount": 1,
+            "importedByCount": 0,
+            "inCycle": false
           }
         },
         {
@@ -4706,7 +4728,10 @@
             "strict": true,
             "esmShare": 1,
             "over15Share": 0.0198,
-            "maxComplexity": 26
+            "maxComplexity": 26,
+            "importsCount": 3,
+            "importedByCount": 0,
+            "inCycle": false
           }
         },
         {
@@ -4838,7 +4863,10 @@
             "strict": true,
             "esmShare": 1,
             "over15Share": 0.0366,
-            "maxComplexity": 41
+            "maxComplexity": 41,
+            "importsCount": 3,
+            "importedByCount": 3,
+            "inCycle": false
           }
         },
         {
@@ -4970,7 +4998,10 @@
             "strict": true,
             "esmShare": 1,
             "over15Share": 0.0123,
-            "maxComplexity": 18
+            "maxComplexity": 18,
+            "importsCount": 1,
+            "importedByCount": 3,
+            "inCycle": false
           }
         }
       ]
@@ -5814,6 +5845,389 @@
         "exportedDeclarations": 1120,
         "documentedExports": 604,
         "documentedShare": 0.5393
+      },
+      "imports": {
+        "files": {
+          "files": 267,
+          "testFiles": 76,
+          "edges": {
+            "value": 612,
+            "typeOnly": 148,
+            "tests": 331
+          },
+          "external": 1184,
+          "assets": 23,
+          "dynamicUnresolvable": 9,
+          "unresolved": {
+            "count": 14,
+            "share": 0.0071,
+            "top": [
+              {
+                "specifier": "@aurora/ui/generated",
+                "files": 6
+              },
+              {
+                "specifier": "./env.generated.js",
+                "files": 4
+              },
+              {
+                "specifier": "../prisma/client",
+                "files": 2
+              },
+              {
+                "specifier": "./routeTree.gen",
+                "files": 1
+              },
+              {
+                "specifier": "@aurora/api/openapi",
+                "files": 1
+              }
+            ]
+          },
+          "cycles": {
+            "count": 3,
+            "largest": 5,
+            "top": [
+              {
+                "size": 5,
+                "files": [
+                  "apps/web/src/components/Sidebar.tsx",
+                  "apps/web/src/components/SidebarItem.tsx",
+                  "apps/web/src/components/SidebarMenu.tsx",
+                  "apps/web/src/hooks/useSidebar.ts",
+                  "apps/web/src/routes/layout.tsx"
+                ],
+                "territories": 1
+              },
+              {
+                "size": 3,
+                "files": [
+                  "packages/api/src/orders/index.ts",
+                  "packages/api/src/orders/pricing.ts",
+                  "packages/api/src/orders/totals.ts"
+                ],
+                "territories": 1
+              },
+              {
+                "size": 2,
+                "files": [
+                  "packages/db/src/queries/users.ts",
+                  "packages/db/src/queries/sessions.ts"
+                ],
+                "territories": 1
+              }
+            ],
+            "withTypes": {
+              "count": 4,
+              "largest": 9
+            },
+            "typeOnly": 1
+          },
+          "fanIn": {
+            "median": 1,
+            "top": [
+              {
+                "path": "packages/ui/src/cn.ts",
+                "count": 74
+              },
+              {
+                "path": "packages/api/src/client.ts",
+                "count": 41
+              },
+              {
+                "path": "packages/db/src/index.ts",
+                "count": 27
+              },
+              {
+                "path": "packages/auth/src/session.ts",
+                "count": 22
+              },
+              {
+                "path": "packages/ui/src/Button.tsx",
+                "count": 19
+              }
+            ]
+          },
+          "fanOut": {
+            "top": [
+              {
+                "path": "apps/web/src/routes/layout.tsx",
+                "count": 18
+              },
+              {
+                "path": "apps/admin/src/App.tsx",
+                "count": 16
+              },
+              {
+                "path": "packages/api/src/index.ts",
+                "count": 14
+              },
+              {
+                "path": "apps/web/src/main.tsx",
+                "count": 12
+              },
+              {
+                "path": "packages/db/src/index.ts",
+                "count": 11
+              }
+            ]
+          }
+        },
+        "territories": {
+          "detail": 1,
+          "totalTerritories": 9,
+          "territories": [
+            {
+              "path": "packages/ui",
+              "kind": "package",
+              "files": 60,
+              "ca": 98,
+              "ce": 2,
+              "instability": 0.02
+            },
+            {
+              "path": "apps/web",
+              "kind": "package",
+              "files": 90,
+              "ca": 0,
+              "ce": 94,
+              "instability": 1.0
+            },
+            {
+              "path": "packages/api",
+              "kind": "package",
+              "files": 40,
+              "ca": 38,
+              "ce": 28,
+              "instability": 0.4242
+            },
+            {
+              "path": "apps/admin",
+              "kind": "package",
+              "files": 31,
+              "ca": 0,
+              "ce": 50,
+              "instability": 1.0
+            },
+            {
+              "path": "packages/db",
+              "kind": "package",
+              "files": 20,
+              "ca": 27,
+              "ce": 0,
+              "instability": 0.0
+            },
+            {
+              "path": "packages/auth",
+              "kind": "package",
+              "files": 12,
+              "ca": 20,
+              "ce": 4,
+              "instability": 0.1667
+            },
+            {
+              "path": "infra",
+              "kind": "folder",
+              "files": 6,
+              "ca": 0,
+              "ce": 3,
+              "instability": 1.0
+            },
+            {
+              "path": "scripts",
+              "kind": "folder",
+              "files": 5,
+              "ca": 0,
+              "ce": 2,
+              "instability": 1.0
+            },
+            {
+              "path": ".",
+              "kind": "folder",
+              "files": 3,
+              "ca": 0,
+              "ce": 0
+            }
+          ],
+          "totalEdges": 13,
+          "edges": [
+            {
+              "from": {
+                "path": "apps/web",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "files": 64,
+              "typeOnlyFiles": 6
+            },
+            {
+              "from": {
+                "path": "apps/admin",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "files": 31,
+              "typeOnlyFiles": 3
+            },
+            {
+              "from": {
+                "path": "apps/web",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 22,
+              "typeOnlyFiles": 9
+            },
+            {
+              "from": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 18,
+              "typeOnlyFiles": 2
+            },
+            {
+              "from": {
+                "path": "apps/admin",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 14,
+              "typeOnlyFiles": 4
+            },
+            {
+              "from": {
+                "path": "apps/web",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "files": 8,
+              "typeOnlyFiles": 2
+            },
+            {
+              "from": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "files": 7,
+              "typeOnlyFiles": 1
+            },
+            {
+              "from": {
+                "path": "apps/admin",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "files": 5,
+              "typeOnlyFiles": 1
+            },
+            {
+              "from": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 4,
+              "typeOnlyFiles": 0
+            },
+            {
+              "from": {
+                "path": "infra",
+                "kind": "folder"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 3,
+              "typeOnlyFiles": 0
+            },
+            {
+              "from": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "files": 3,
+              "typeOnlyFiles": 3
+            },
+            {
+              "from": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 2,
+              "typeOnlyFiles": 2
+            },
+            {
+              "from": {
+                "path": "scripts",
+                "kind": "folder"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 2,
+              "typeOnlyFiles": 0
+            }
+          ],
+          "totalTowardLessStable": 1,
+          "towardLessStable": [
+            {
+              "from": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 2,
+              "fromInstability": 0.02,
+              "toInstability": 0.4242
+            }
+          ],
+          "totalMutualImports": 0,
+          "mutualImports": [],
+          "mutualImportsWithTypes": 1
+        }
       }
     }
   }

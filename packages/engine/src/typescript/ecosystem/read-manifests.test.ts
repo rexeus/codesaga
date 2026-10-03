@@ -48,6 +48,7 @@ layer(NodeServices.layer)("readManifests", (it) => {
             devDependencies: ["vitest", "typescript"],
             peerDependencies: ["react-dom"],
             typescript: "^5.9",
+            entry: { exports: undefined, imports: undefined, fields: [] },
           },
         ]);
       }),
@@ -72,6 +73,7 @@ layer(NodeServices.layer)("readManifests", (it) => {
             devDependencies: [],
             peerDependencies: [],
             typescript: null,
+            entry: { exports: undefined, imports: undefined, fields: [] },
           },
         ]);
       }),
@@ -104,6 +106,32 @@ layer(NodeServices.layer)("readManifests skipping", (it) => {
           manifests.map(({ path }) => path),
           ["d/package.json"],
         );
+      }),
+  );
+});
+
+layer(NodeServices.layer)("readManifests entry points", (it) => {
+  it.effect(
+    "reads the exports and imports fields and the entry fields in the order types, module, main",
+    () =>
+      Effect.gen(function* () {
+        const root = yield* directoryWith({
+          "package.json": JSON.stringify({
+            main: "./dist/index.cjs",
+            module: "./dist/index.js",
+            types: "./dist/index.d.ts",
+            exports: { ".": "./src/index.ts" },
+            imports: { "#a": "./src/a.ts" },
+          }),
+        });
+
+        const manifests = yield* readManifests(root, ["package.json"]);
+
+        assert.deepStrictEqual(manifests[0]?.entry, {
+          exports: { ".": "./src/index.ts" },
+          imports: { "#a": "./src/a.ts" },
+          fields: ["./dist/index.d.ts", "./dist/index.js", "./dist/index.cjs"],
+        });
       }),
   );
 });

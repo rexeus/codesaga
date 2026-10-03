@@ -94,8 +94,12 @@ const startDetail = (
     ? Math.floor(requested)
     : recommended;
 
+type ImportStructure = ReturnType<NonNullable<TerritoryInput["importsAt"]>>;
+
 type TerritoriesResult = {
   readonly section: NonNullable<Report["knowledge"]["territories"]>;
+  /** The import structure at the detail the section opens at. */
+  readonly imports: ImportStructure["section"] | undefined;
   /** The territories of the recommended detail with their files and experts, for the contributor badges and the stories. */
   readonly recommended: ReadonlyArray<ReturnType<typeof storyTerritoryOf>>;
 };
@@ -164,18 +168,30 @@ const territoriesSection = (
     model,
     facts.stats.repository,
   );
+  const detail = Math.min(
+    startDetail(facts.detail, recommendedDetail),
+    tree.maxDetail,
+  );
+  const imports = facts.importsAt?.(
+    territoriesAtDetail(territories, detail),
+    detail,
+  );
+  const shown: KnowledgeFacts = {
+    ...facts,
+    typescriptOf: imports
+      ? (paths) => imports.annotate(facts.typescriptOf?.(paths), paths)
+      : facts.typescriptOf,
+  };
   return {
+    imports: imports?.section,
     section: {
-      detail: Math.min(
-        startDetail(facts.detail, recommendedDetail),
-        tree.maxDetail,
-      ),
+      detail,
       recommendedDetail,
       maxDetail: tree.maxDetail,
       reason,
       totalTerritories: tree.territories.length,
       territories: territories.map((territory) =>
-        reportedTerritory(territory, inputs, facts),
+        reportedTerritory(territory, inputs, shown),
       ),
     },
     recommended: territoriesAtDetail(territories, recommendedDetail).map(
@@ -193,6 +209,8 @@ const territoriesSection = (
 type KnowledgeResult = {
   readonly section: Report["knowledge"];
   readonly recommendedTerritories: TerritoriesResult["recommended"];
+  /** The import structure the territories were annotated with; undefined without a deep dive. */
+  readonly imports: TerritoriesResult["imports"];
 };
 
 /**
@@ -223,5 +241,6 @@ export const knowledge = (facts: KnowledgeFacts): KnowledgeResult => {
       ...lineOwnersField(repository.lineOwners),
     },
     recommendedTerritories: territories.recommended,
+    imports: territories.imports,
   };
 };

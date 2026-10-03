@@ -11,6 +11,9 @@ import { complexityAndChangeOf } from "./functions/complexity-and-change.js";
 import { functionsReportOf } from "./functions/function-report.js";
 import type { TypeScriptFacts } from "./gather-typescript.js";
 import { idiomsOf } from "./idioms/idiom-report.js";
+import { aliasesByFile } from "./imports/aliases-by-file.js";
+import { importAnalysisOf } from "./imports/imports-analysis.js";
+import type { ImportAnalysis } from "./imports/imports-analysis.js";
 import { markersReportOf } from "./markers/marker-report.js";
 import { modulesOf } from "./modules/module-report.js";
 import { parsedFilesOf } from "./parsed-file.js";
@@ -50,6 +53,8 @@ const coverageOf = ({
 /** The deep dive and what each territory carries of it. */
 export type TypeScriptAnalysis = {
   readonly section: TypeScriptDeepDive;
+  /** The import graph, whose figures name territories and so are drawn up with them; undefined when no file was parsed. */
+  readonly imports: ImportAnalysis | undefined;
   /** The figures of the parsed files at `paths`, a territory's; undefined when there are none. */
   readonly forPaths: (
     paths: ReadonlyArray<string>,
@@ -79,6 +84,20 @@ export const typescriptAnalysis = (
   const ecosystem = ecosystemOf(parsed, facts.manifests);
   const changed = complexityAndChangeOf(parsed, revisions, shallow);
   return {
+    imports: hasFacts
+      ? importAnalysisOf({
+          paths: [
+            ...facts.declarationFiles,
+            ...facts.files.map(({ path }) => path),
+          ],
+          parsed,
+          manifests: facts.manifests,
+          aliasesFor: aliasesByFile(
+            facts.project.configs,
+            strictness.governingConfigOf,
+          ),
+        })
+      : undefined,
     section: {
       coverage: coverageOf(facts),
       ...(hasFacts

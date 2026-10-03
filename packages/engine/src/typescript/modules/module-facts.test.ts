@@ -68,6 +68,40 @@ describe("module facts: ESM", () => {
   });
 });
 
+describe("module facts: computed and template specifiers", () => {
+  it("reads a template literal without expressions as the specifier it spells", () => {
+    const facts = modules(
+      "a.ts",
+      "const a = await import(`./lazy`);\nconst b = require(`b`);\n",
+    );
+
+    expect(facts.requests).toStrictEqual([
+      { specifier: "./lazy", kind: "dynamic", isType: false },
+      { specifier: "b", kind: "require", isType: false },
+    ]);
+    expect(facts.dynamicUnresolvable).toBe(0);
+  });
+
+  it("counts import() and require() calls with a computed argument, each site once", () => {
+    const facts = modules(
+      "a.ts",
+      [
+        "const a = await import(name);",
+        "const b = await import(`./x/${name}`);",
+        'const c = require("./" + name);',
+        "const d = require(name);",
+        "const e = require();",
+        'const f = import("literal");',
+      ].join("\n"),
+    );
+
+    expect(facts.dynamicUnresolvable).toBe(4);
+    expect(facts.requests).toStrictEqual([
+      { specifier: "literal", kind: "dynamic", isType: false },
+    ]);
+  });
+});
+
 describe("module facts: CommonJS", () => {
   it("counts require calls, module.exports and exports.x, and lists the literal requires", () => {
     const facts = modules(

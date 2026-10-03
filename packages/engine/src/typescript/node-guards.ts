@@ -16,6 +16,19 @@ export const stringValue = (
     ? node.value
     : undefined;
 
+/**
+ * The text of a string literal or of a template literal without
+ * expressions, which names the same constant; undefined for any other node.
+ */
+export const staticString = (
+  node: Node | null | undefined,
+): string | undefined => {
+  if (node?.type === "TemplateLiteral" && node.expressions.length === 0) {
+    return node.quasis[0]?.value.cooked ?? undefined;
+  }
+  return stringValue(node);
+};
+
 /** The name in `callee.name(...)`, undefined for a call that is not a plain method call. */
 export const calledMethod = (
   callee: Node,

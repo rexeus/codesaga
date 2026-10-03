@@ -31,6 +31,8 @@ export type StrictnessAnalysis = {
   readonly strictOf: (
     paths: ReadonlyArray<string>,
   ) => TerritoryStrict | undefined;
+  /** The path of the config that governs the file at `path`; undefined when none does or the path was not assigned. */
+  readonly governingConfigOf: (path: string) => string | undefined;
 };
 
 /** Whether the file is a plain `tsconfig.json`, which is a project of its directory even when others extend it. */
@@ -124,6 +126,7 @@ export const strictnessOf = (
       ungovernedFiles: outside.length - jsOutside,
       jsFilesOutsideConfigs: jsOutside,
     },
+    governingConfigOf: (path) => governor.get(path),
     strictOf: (territoryPaths) =>
       summarize(
         new Set(
