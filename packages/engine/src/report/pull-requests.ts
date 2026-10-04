@@ -13,7 +13,7 @@ const Hours = Schema.NullOr(
  * are not mapped to git identities, so a person can appear here and in
  * `contributors` under different names. Counts give context, not a ranking.
  *
- * Bot logins (ending in `[bot]`) and deleted accounts (`ghost`) count in the
+ * Bot logins (ending in `[bot]`, `-bot` or `_bot`, or `bot`) and deleted accounts (`ghost`) count in the
  * totals but are not listed in `authors` or `reviewers`, and a reviewer's
  * reviews on their own pull requests do not count. Each list is possibly truncated (see `totals`).
  */

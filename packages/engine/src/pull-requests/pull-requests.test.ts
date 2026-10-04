@@ -149,16 +149,19 @@ describe("pullRequestsSection people", () => {
       pull(4, { author: "ada" }),
       pull(5, { author: "linus" }),
       pull(6, { author: "dependabot[bot]", ...merged }),
+      pull(7, { author: "effect-bot", ...merged }),
+      pull(8, { author: "Abbot" }),
     ]);
 
     expect(section.authors).toStrictEqual([
       { login: "ada", opened: 2, merged: 1 },
       { login: "grace", opened: 2, merged: 1 },
+      { login: "Abbot", opened: 1, merged: 0 },
       { login: "linus", opened: 1, merged: 0 },
     ]);
-    expect(section.totals.authors).toBe(3);
-    expect(section.opened).toBe(6);
-    expect(section.merged).toBe(3);
+    expect(section.totals.authors).toBe(4);
+    expect(section.opened).toBe(8);
+    expect(section.merged).toBe(4);
   });
 
   it("counts only reviews of others' pull requests submitted in the window, with approvals", () => {

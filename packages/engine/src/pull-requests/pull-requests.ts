@@ -3,6 +3,7 @@
 
 import { toEpochSeconds } from "../analyze/analysis-window.js";
 import type { TimeRange } from "../analyze/analysis-window.js";
+import { isBotAccount } from "../automation/classify.js";
 import { roundReported } from "../report/precision.js";
 import type { PullRequests } from "../report/pull-requests.js";
 
@@ -14,7 +15,7 @@ type ReviewRecord = {
   readonly submittedAt: string;
 };
 
-/** A pull request with the facts the section needs. Bot logins end in `[bot]`; a deleted account is `ghost`. */
+/** A pull request with the facts the section needs. Bot logins end in `[bot]`, `-bot` or `_bot`; a deleted account is `ghost`. */
 export type PullRequestRecord = {
   readonly number: number;
   readonly author: string;
@@ -43,10 +44,9 @@ const MONTH_LENGTH = "YYYY-MM".length;
 
 const GHOST = "ghost";
 
-const isBot = (login: string): boolean => login.endsWith("[bot]");
-
 /** Bots and deleted accounts are counted but never named: `ghost` stands for every deleted account at once. */
-const isNamed = (login: string): boolean => !isBot(login) && login !== GHOST;
+const isNamed = (login: string): boolean =>
+  !isBotAccount(login) && login !== GHOST;
 
 /** A review by the pull request's author; `ghost` never reviews itself, as it may be two people. */
 const isSelfReview = (pull: PullRequestRecord, author: string): boolean =>
@@ -132,7 +132,9 @@ const tally = (
 /** Hours from opening to the first review by a person other than the author; null when none came. */
 const hoursToFirstReview = (pull: PullRequestRecord): number | null => {
   const first = pull.reviews
-    .filter(({ author }) => !isSelfReview(pull, author) && !isBot(author))
+    .filter(
+      ({ author }) => !isSelfReview(pull, author) && !isBotAccount(author),
+    )
     .map(({ submittedAt }) => toEpochSeconds(submittedAt))
     .reduce<number | null>(
       (earliest, time) => (earliest === null ? time : Math.min(earliest, time)),

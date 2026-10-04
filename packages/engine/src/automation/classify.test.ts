@@ -69,6 +69,62 @@ describe("classifyCommit rules", () => {
   });
 });
 
+describe("classifyCommit bot accounts", () => {
+  it("classifies a machine account that ends in -bot or _bot, or is named bot, as a bot", () => {
+    const accounts = [
+      account(2_320_433, "effect-bot"),
+      account(7, "Release_Bot"),
+      account(9, "bot"),
+    ];
+
+    expect(
+      accounts.map((author) => classifyCommit(commit({ author }))),
+    ).toStrictEqual([bot("effect-bot"), bot("Release_Bot"), bot("bot")]);
+  });
+
+  it("finds a -bot login behind a display name that does not say bot", () => {
+    const withId = {
+      name: "Effect",
+      email: "5+effect-bot@users.noreply.github.com",
+    };
+    const withoutId = {
+      name: "Effect",
+      email: "effect-bot@users.noreply.github.com",
+    };
+
+    expect(classifyCommit(commit({ author: withId }))).toStrictEqual(
+      bot("effect-bot"),
+    );
+    expect(classifyCommit(commit({ author: withoutId }))).toStrictEqual(
+      bot("effect-bot"),
+    );
+  });
+
+  it("keeps people whose names merely end in the letters bot", () => {
+    const people = [
+      account(1, "Abbot"),
+      account(2, "Talbot"),
+      account(3, "Cabot"),
+      account(4, "robot"),
+      { name: "Bot Smith", email: "smith@example.com" },
+    ];
+
+    expect(
+      people.map((author) => classifyCommit(commit({ author })).class),
+    ).toStrictEqual(["human", "human", "human", "human", "human"]);
+  });
+
+  it("lets a custom agent signature win over the bot spelling", () => {
+    const custom = withCustomSignatures({
+      agents: [{ name: "House AI", names: ["house-bot"] }],
+    });
+
+    expect(
+      classifyCommit(commit({ author: account(8, "house-bot") }), custom),
+    ).toStrictEqual(agent("House AI"));
+  });
+});
+
 describe("classifyCommit matching", () => {
   it("matches trailer keys, emails and names case-insensitively", () => {
     const signals = commit({
@@ -185,6 +241,7 @@ describe("humanCoAuthorsOf", () => {
         "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
       ),
       coAuthor("House AI <house-ai@example.com>"),
+      coAuthor("effect-bot <2320433+effect-bot@users.noreply.github.com>"),
     ];
 
     expect(humanCoAuthorsOf(commit({ trailers }), custom)).toBe(1);

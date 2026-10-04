@@ -1,5 +1,6 @@
 // Owns deciding which class a commit has, and which tools made it.
 // First match wins: agent, bot, agent-assisted, human; signatures come from signatures.ts.
+// A bot is a row of the table or an account named like one: `[bot]`, `-bot`, `_bot`.
 // A missing marker means "not detected", so it classifies as human.
 
 import type { FileChange, HistoryCommit } from "../history/history.js";
@@ -23,7 +24,7 @@ type Classification = {
   readonly class: CommitClass;
   /**
    * The matched signatures' names, or the account name of a bot that only the
-   * generic `[bot]` rule matched; empty for a human commit. An agent-assisted
+   * generic bot-account rule matched; empty for a human commit. An agent-assisted
    * commit lists every agent it carries, once each, in table order.
    */
   readonly tools: ReadonlyArray<string>;
@@ -51,8 +52,8 @@ export type ClassifiedCommit = Classification & {
 };
 
 const GITHUB_NOREPLY = /^(\d+)\+.+@users\.noreply\.github\.com$/iu;
-const BOT_NAME = /\[bot\]$/iu;
-const NOREPLY_BOT = /^(?:\d+\+)?(.+\[bot\])@users\.noreply\.github\.com$/iu;
+const BOT_ACCOUNT = /(?:\[bot\]|(?:^|[-_])bot)$/iu;
+const NOREPLY_LOGIN = /^(?:\d+\+)?(.+)@users\.noreply\.github\.com$/iu;
 const PERSON_WITH_EMAIL = /^(.*?)\s*<([^>]*)>$/u;
 const ADDRESS = /^[^@\s]+@[^@\s]+$/u;
 const BODY_CO_AUTHOR = /^co-authored-by:\s*[^<>]*<([^<>]+)>\s*$/iu;
@@ -71,11 +72,22 @@ const isPerson = (pattern: PersonPattern, person: Person): boolean =>
 const isSignedBy = (signature: Signature, person: Person): boolean =>
   signature.people?.some((pattern) => isPerson(pattern, person)) === true;
 
-/** The account name of a `[bot]` author, in its name or in its noreply address. */
-const botAccountOf = (person: Person): string | undefined =>
-  BOT_NAME.test(person.name)
-    ? person.name
-    : NOREPLY_BOT.exec(person.email)?.[1];
+/**
+ * Whether a name or login is a machine account by its spelling: it ends in
+ * `[bot]`, `-bot` or `_bot`, or is `bot`, in any case. `Abbot` and `Talbot` end
+ * in the letters but not in the word.
+ */
+export const isBotAccount = (name: string): boolean =>
+  BOT_ACCOUNT.test(name.trim());
+
+/** The account name of a bot author by spelling, in its name or in its noreply address. */
+const botAccountOf = (person: Person): string | undefined => {
+  if (isBotAccount(person.name)) {
+    return person.name;
+  }
+  const login = NOREPLY_LOGIN.exec(person.email)?.[1];
+  return login !== undefined && isBotAccount(login) ? login : undefined;
+};
 
 /** A `Co-authored-by` value is `Name <email>`; a bare value counts as a name. */
 const coAuthorsOf = (signals: CommitSignals): ReadonlyArray<Person> =>
@@ -158,7 +170,7 @@ const automatedAuthorOf = (
  * `Co-authored-by` trailers name besides the author. A trailer counts only in
  * the shape `Name <address>`; `Co-authored-by: broken` names nobody. Addresses
  * are compared as written, since `.mailmap` does not apply to trailers. A person is anyone
- * who matches no row of `signatures` and no `[bot]` account, so a team's own
+ * who matches no row of `signatures` and no bot account, so a team's own
  * signatures count. Needs only the trailers: the human share of a commit's
  * help is a fact about the commit, whatever its class.
  */

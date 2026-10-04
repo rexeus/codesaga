@@ -168,7 +168,7 @@ const Automation = Schema.Struct({
       /**
        * The product name, with its variants merged: "Claude Code" covers the
        * CLI, the cloud and the GitHub app. A bot outside the known tools is
-       * listed under its account name, such as "deploy-bot[bot]".
+       * listed under its account name, such as "deploy-bot[bot]" or "effect-bot".
        */
       name: Schema.String,
       kind: Schema.Literals(["agent", "bot"]),
