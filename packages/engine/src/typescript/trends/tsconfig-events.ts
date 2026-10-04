@@ -19,8 +19,12 @@ const MAX_EXTENDS_DEPTH = 10;
 type Configs = ReadonlyMap<string, RawTsconfig>;
 type Flags = Readonly<Record<(typeof FLAGS)[number], boolean | "unknown">>;
 
-/** The flags of one config, with the path it has in the tree. */
-type ConfigFlags = { readonly path: string; readonly flags: Flags };
+/** The flags of one config, with the path it has in the tree and the line of history that holds it. */
+type ConfigFlags = {
+  readonly line: number;
+  readonly path: string;
+  readonly flags: Flags;
+};
 
 /** The configs of each line of history; an `extends` is followed within one line. */
 type Lines = Map<number, Map<string, RawTsconfig>>;
@@ -99,7 +103,7 @@ const allFlags = (lines: Lines): ReadonlyMap<string, ConfigFlags> =>
         const flags = flagsOf(configs, path);
         return flags === undefined
           ? []
-          : [[`${line}:${path}`, { path, flags }] as const];
+          : [[`${line}:${path}`, { line, path, flags }] as const];
       }),
     ),
   );
@@ -108,9 +112,30 @@ const dayOf = (seconds: number): string =>
   new Date(seconds * 1000).toISOString().slice(0, 10);
 
 /**
+ * What a merge's changes are judged against: the configs before it, with those
+ * of the histories it absorbs now held by its own line (what the merge's own
+ * changes then say is what the tree holds). A config the line already holds at
+ * the same path stays as it was.
+ */
+const handedOver = (
+  known: ReadonlyMap<string, ConfigFlags>,
+  absorbs: ReadonlyArray<number>,
+  line: number,
+): ReadonlyMap<string, ConfigFlags> => {
+  const handed = new Map(known);
+  for (const config of known.values()) {
+    const key = `${line}:${config.path}`;
+    if (absorbs.includes(config.line) && !handed.has(key)) {
+      handed.set(key, { ...config, line });
+    }
+  }
+  return handed;
+};
+
+/**
  * The flips between `before` and `after`: a definite value that changed in a
  * config that existed, and a flag first switched on, by a new config, where
- * no config had it on before. Only a value written down in the config or in
+ * no config of its line of history had it on before. Only a value written down in the config or in
  * one it extends counts: `true` that becomes unset (a key removed, a root that
  * turned into a solution-style config of references) or unresolvable is not
  * "turned off", since the default is no claim, and a flag that becomes
@@ -124,7 +149,7 @@ const flipsOf = (
 ): ReadonlyArray<FlagEvent> =>
   [...after]
     .toSorted(([, left], [, right]) => left.path.localeCompare(right.path))
-    .flatMap(([key, { path, flags }]) =>
+    .flatMap(([key, { line, path, flags }]) =>
       FLAGS.flatMap((flag): Array<FlagEvent> => {
         const to = flags[flag];
         const from = before.get(key)?.flags[flag];
@@ -134,7 +159,9 @@ const flipsOf = (
         const firstOn =
           from === undefined &&
           to &&
-          ![...before.values()].some((other) => other.flags[flag] === true);
+          ![...before.values()].some(
+            (other) => other.line === line && other.flags[flag] === true,
+          );
         return from !== undefined || firstOn
           ? [{ date, path, flag, from: from ?? null, to }]
           : [];
@@ -180,6 +207,7 @@ export const flagEventsOf = (
   const events: Array<FlagEvent> = [];
   for (const { time, changes, line = 0, absorbs = [] } of history.commits) {
     const own = changes.filter(({ path }) => isProjectTsconfigPath(path));
+    const before = handedOver(known, absorbs, line);
     for (const absorbed of absorbs) {
       lines.delete(absorbed);
     }
@@ -192,7 +220,7 @@ export const flagEventsOf = (
     }
     if (own.length > 0 || absorbs.length > 0) {
       const next = allFlags(lines);
-      events.push(...flipsOf(known, next, dayOf(time)));
+      events.push(...flipsOf(before, next, dayOf(time)));
       known = next;
     }
   }

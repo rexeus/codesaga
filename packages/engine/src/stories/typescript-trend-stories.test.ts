@@ -319,3 +319,28 @@ describe("strict-since wording", () => {
     );
   });
 });
+
+describe("strict-since beside a config that is gone", () => {
+  it("names the config that exists today and not a later strict config of an old history that was deleted", () => {
+    const events: ReadonlyArray<FlagChange> = [
+      { ...strictOn("tsconfig.json"), from: null },
+      {
+        ...strictOn("legacy/test/fixtures/tsconfig.json"),
+        date: "2024-06-01",
+        from: null,
+      },
+    ];
+
+    expect(storiesFor(trendsOf(27, {}, events), dive(true))).toStrictEqual([
+      {
+        kind: "strict-since",
+        title: "Strict since",
+        detail:
+          "strict has been on in tsconfig.json since the config was created on 2024-03-11.",
+        value: 24,
+        date: "2024-03-11",
+        path: "tsconfig.json",
+      },
+    ]);
+  });
+});
