@@ -119,6 +119,15 @@ describe("productionEscapesPer1000", () => {
     ).toBe(4);
   });
 
+  it("ignores the files of a test-support folder like tests", () => {
+    expect(
+      productionEscapesPer1000([
+        file("src/a.ts", 500, { nonNull: 2 }),
+        file("src/testing/helper.ts", 500, { nonNull: 50 }),
+      ]),
+    ).toBe(4);
+  });
+
   it("is undefined where no production line exists", () => {
     expect(
       productionEscapesPer1000([file("a.test.ts", 50, { any: 1 })]),

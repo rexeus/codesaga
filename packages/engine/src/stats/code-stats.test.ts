@@ -51,6 +51,15 @@ describe("codeStats of a small set", () => {
     expect(smallSet.tests).toStrictEqual({ files: 1, lines: 4 });
   });
 
+  it("counts the files of a test-support folder as tests", () => {
+    const stats = codeStats(
+      [A, inventoryFile("src/testing/helper.ts", "export const h = 1;\n")],
+      none,
+    );
+
+    expect(stats.tests).toStrictEqual({ files: 1, lines: 1 });
+  });
+
   it("counts revisions, giving a file without a known commit one", () => {
     // sorted by path: c.py 12, empty.ts 1, a.ts 3, b.test.ts 1;
     // median (1 + 3) / 2, p90 between rank 2 (3) and rank 3 (12): 3 + 9 * 0.7
