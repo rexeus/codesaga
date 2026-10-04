@@ -43,7 +43,12 @@ const jan = monthOf(at("2026-01-15"));
 
 /** `[files, any]` of production code after each of `months` months from January. */
 const replay = (
-  commits: ReadonlyArray<{ time: number; changes: ReadonlyArray<Change> }>,
+  commits: ReadonlyArray<{
+    time: number;
+    changes: ReadonlyArray<Change>;
+    line?: number;
+    absorbs?: ReadonlyArray<number>;
+  }>,
   months: number,
 ) =>
   monthlyTotals({
@@ -217,5 +222,81 @@ describe("monthlyTotals by path at the time", () => {
       production?.[0][ESM],
       production?.[0][MEASURES.indexOf("commonjsFiles")],
     ]).toStrictEqual([4, 1, 1]);
+  });
+});
+
+describe("monthlyTotals over absorbed histories", () => {
+  it("counts an absorbed history in the months before the chain begins, and its files once after the merge that took them in", () => {
+    const points = replay(
+      [
+        { time: at("2026-01-05"), line: 1, changes: [add("x.ts", "one")] },
+        {
+          time: at("2026-01-10"),
+          line: 1,
+          changes: [edit("x.ts", "three", "one")],
+        },
+        { time: at("2026-01-20"), changes: [add("a.ts", "two")] },
+        {
+          time: at("2026-03-10"),
+          absorbs: [1],
+          changes: [add("x.ts", "three")],
+        },
+      ],
+      3,
+    );
+
+    expect(points).toStrictEqual([
+      [2, 5],
+      [2, 5],
+      [2, 5],
+    ]);
+  });
+});
+
+describe("monthlyTotals over histories that share paths", () => {
+  it("keeps a path that two histories hold apart, and leaves the merge's own version of it", () => {
+    const points = replay(
+      [
+        { time: at("2026-01-05"), line: 1, changes: [add("a.ts", "one")] },
+        { time: at("2026-01-20"), changes: [add("a.ts", "two")] },
+        {
+          time: at("2026-02-10"),
+          absorbs: [1],
+          changes: [edit("a.ts", "three", "two")],
+        },
+      ],
+      2,
+    );
+
+    expect(points).toStrictEqual([
+      [2, 3],
+      [1, 3],
+    ]);
+  });
+
+  it("ends a history that an absorbed history absorbed where its own merge is", () => {
+    const points = replay(
+      [
+        { time: at("2026-01-05"), line: 2, changes: [add("q.ts", "one")] },
+        { time: at("2026-01-06"), line: 1, changes: [add("p.ts", "two")] },
+        {
+          time: at("2026-01-07"),
+          line: 1,
+          absorbs: [2],
+          changes: [add("q.ts", "one")],
+        },
+        {
+          time: at("2026-02-10"),
+          absorbs: [1],
+          changes: [add("p.ts", "two"), add("q.ts", "one")],
+        },
+      ],
+      2,
+    );
+
+    expect(points).toStrictEqual([
+      [2, 3],
+      [2, 3],
+    ]);
   });
 });

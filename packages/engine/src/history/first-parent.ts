@@ -8,7 +8,7 @@ import { parseRawEntry } from "./raw-entry.js";
 import type { BlobFields } from "./raw-entry.js";
 
 /** A file a commit on the chain changed, under the name it had then. */
-type FirstParentChange = BlobFields & { readonly path: string };
+export type FirstParentChange = BlobFields & { readonly path: string };
 
 /** A commit on the first-parent chain. */
 export type FirstParentCommit = {
@@ -16,6 +16,18 @@ export type FirstParentCommit = {
   /** Committer time in seconds, which follows the chain better than author time after rebases; NaN when git cannot read it. */
   readonly time: number;
   readonly changes: ReadonlyArray<FirstParentChange>;
+  /**
+   * The history the commit belongs to: absent for the chain of the head, a
+   * positive number for a history that a merge absorbed (see `readChains`).
+   * Paths of different lines do not meet: each line has its own path state.
+   */
+  readonly line?: number;
+  /**
+   * The lines whose files this commit takes in as changes of its own, a merge
+   * of a history that was reachable only through its second parent. Their
+   * state ends here, replaced by what this commit's changes say.
+   */
+  readonly absorbs?: ReadonlyArray<number>;
 };
 
 const COMMIT_MARKER = "\u0001";

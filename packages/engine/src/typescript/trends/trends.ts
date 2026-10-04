@@ -71,9 +71,9 @@ export type TrendsResult = {
  */
 export const trendsOf = (input: TrendsInput): TrendsResult | undefined => {
   const { historyFacts, scope } = input;
-  const chain = historyFacts.firstParent.map(({ time, changes }) => ({
-    time,
-    changes: changes.filter(({ path }) => isUnder(path, scope)),
+  const chain = historyFacts.firstParent.map((commit) => ({
+    ...commit,
+    changes: commit.changes.filter(({ path }) => isUnder(path, scope)),
   }));
   const lastMonth = monthOf(DateTime.toEpochMillis(input.now) / 1000);
   const dated = chain
