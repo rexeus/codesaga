@@ -1,5 +1,0 @@
----
-"codesaga": minor
----
-
-`analyze` now parses every historical version of the repository's TypeScript and JavaScript files once and keeps the facts in `.git/codesaga/syntax-v1.json`, keyed by blob id. The first run reads the whole history (about 100 seconds on four parse processes for a repository of Effect's size, 11,000 commits) and shows `Reading TypeScript history: n / total file versions` on a terminal's stderr; later runs parse only new blobs, except that the first run after an upgrade of codesaga parses the history again, because the version of the tool is part of what a cached digest was made under. Files the universe leaves out (committed `dist/`, vendored, generated and minified files) are never read. `--no-cache` skips the file, and `check` never reads the history's TypeScript. The history cache now keeps the full blob id and mode of every changed file, so it is `.git/codesaga/history-v2.json`, about twice as large (about 2.3 KB per commit instead of 1.2 KB), and the first run after the update reads the log once more; `rm .git/codesaga/history-v1.json` removes the old file.
