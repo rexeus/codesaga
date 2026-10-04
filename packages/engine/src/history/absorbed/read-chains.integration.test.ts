@@ -11,6 +11,7 @@ import { readHistory } from "../history.js";
 import { readChains } from "./read-chains.js";
 
 const isTs = (path: string) => path.endsWith(".ts");
+const libOnly = (path: string) => path === "lib.ts";
 
 const chainsOf = (
   repo: TempRepository,
@@ -145,6 +146,9 @@ const summary = (chain: ReadonlyArray<FirstParentCommit>) =>
     paths: changes.map(({ path }) => path).toSorted(),
   }));
 
+const absorbedPaths = (chain: ReadonlyArray<FirstParentCommit>) =>
+  summary(chain.filter(({ line }) => line === 1)).flatMap(({ paths }) => paths);
+
 layer(NodeServices.layer)("readChains over unrelated histories", (it) => {
   it.effect(
     "replays an unrelated history merged in before the chain begins, each history in its own path state until the merge replaces it",
@@ -262,54 +266,59 @@ layer(NodeServices.layer)("readChains over histories it leaves alone", (it) => {
         assert.deepStrictEqual(replayed(chain), { 0: yield* treeOf(repo) });
       }),
   );
+});
 
-  it.effect(
-    "leaves a history that merged the default branch before it was merged back, whose merge would add the branch's files again",
-    () =>
+layer(NodeServices.layer)(
+  "readChains over a history that merged the lineage",
+  (it) => {
+    it.effect(
+      "leaves a history that merged the default branch before it was merged back, whose merge would add the branch's files again",
+      () =>
+        Effect.gen(function* () {
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-03-01T12:00:00Z", {
+            "a.ts": "a\n",
+            "b.ts": "b\n",
+          });
+          const main = yield* mainBranch(repo);
+          yield* repo.git("switch", "--orphan", "other");
+          yield* repo.commit("2026-01-02T12:00:00Z", { "x.ts": "x\n" });
+          yield* repo.git(
+            "merge",
+            "--no-commit",
+            "--allow-unrelated-histories",
+            main,
+          );
+          yield* repo.commit("2026-03-05T12:00:00Z");
+          yield* repo.git("switch", main);
+          yield* repo.git("merge", "--no-ff", "--no-edit", "other");
+
+          const chain = yield* chainsOf(repo);
+
+          assert.deepStrictEqual(
+            chain.map(({ line }) => line),
+            [undefined, undefined],
+          );
+          assert.deepStrictEqual(replayed(chain), { 0: yield* treeOf(repo) });
+        }),
+    );
+
+    it.effect("reads no absorbed history in a shallow clone", () =>
       Effect.gen(function* () {
         const repo = yield* makeTempRepository;
-        yield* repo.commit("2026-03-01T12:00:00Z", {
-          "a.ts": "a\n",
-          "b.ts": "b\n",
-        });
-        const main = yield* mainBranch(repo);
-        yield* repo.git("switch", "--orphan", "other");
-        yield* repo.commit("2026-01-02T12:00:00Z", { "x.ts": "x\n" });
-        yield* repo.git(
-          "merge",
-          "--no-commit",
-          "--allow-unrelated-histories",
-          main,
-        );
-        yield* repo.commit("2026-03-05T12:00:00Z");
-        yield* repo.git("switch", main);
-        yield* repo.git("merge", "--no-ff", "--no-edit", "other");
+        yield* commitUnrelatedHistory(repo);
+        yield* mergeOther(repo);
 
-        const chain = yield* chainsOf(repo);
+        const chain = yield* chainsOf(repo, { shallow: true });
 
         assert.deepStrictEqual(
           chain.map(({ line }) => line),
           [undefined, undefined],
         );
-        assert.deepStrictEqual(replayed(chain), { 0: yield* treeOf(repo) });
       }),
-  );
-
-  it.effect("reads no absorbed history in a shallow clone", () =>
-    Effect.gen(function* () {
-      const repo = yield* makeTempRepository;
-      yield* commitUnrelatedHistory(repo);
-      yield* mergeOther(repo);
-
-      const chain = yield* chainsOf(repo, { shallow: true });
-
-      assert.deepStrictEqual(
-        chain.map(({ line }) => line),
-        [undefined, undefined],
-      );
-    }),
-  );
-});
+    );
+  },
+);
 
 layer(NodeServices.layer)("readChains with the cache", (it) => {
   it.effect(
@@ -331,7 +340,9 @@ layer(NodeServices.layer)("readChains with the cache", (it) => {
         assert.deepStrictEqual(replayed(second), { 0: yield* treeOf(repo) });
       }),
   );
+});
 
+layer(NodeServices.layer)("readChains with a changed cache rule", (it) => {
   it.effect(
     "reads the chains again when the fingerprint of the rule that picks the changes differs",
     () =>
@@ -339,12 +350,6 @@ layer(NodeServices.layer)("readChains with the cache", (it) => {
         const repo = yield* makeTempRepository;
         yield* commitUnrelatedHistory(repo);
         yield* mergeOther(repo);
-        const libOnly = (path: string) => path === "lib.ts";
-        const absorbedPaths = (chain: ReadonlyArray<FirstParentCommit>) =>
-          summary(chain.filter(({ line }) => line === 1)).flatMap(
-            ({ paths }) => paths,
-          );
-
         const first = yield* chainsOf(repo, {
           useCache: true,
           fingerprint: "1",

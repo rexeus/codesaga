@@ -112,7 +112,9 @@ export const absorptionsOf = (
     }
     const inner = new Set<string>();
     const history = visit(chain.commits.toReversed(), inner);
-    inner.forEach((commit) => own.add(commit));
+    for (const commit of inner) {
+      own.add(commit);
+    }
     return {
       found: history.tainted ? [] : [{ tip, mergedAt }, ...history.found],
       tainted: false,
