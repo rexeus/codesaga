@@ -76,7 +76,7 @@ The words codesaga uses in the report, the terminal, the dashboard and the code.
 
 **Agent-assisted commit** — a commit by a human author that carries an agent's co-author trailer, marker trailer or message line, or an agent committer. A `Co-authored-by:` line in the body that git did not parse as a trailer counts when its address is a known agent's. It counts for the human. A missing trailer means "not detected", not "human-written".
 
-**Bot commit** — a commit whose author is an automation account such as Dependabot, or any other machine account that is not an agent: a name or GitHub noreply login that ends in `[bot]`, `-bot` or `_bot`, or is `bot`, in any case. Other machine accounts are named in `signatures` of `.codesaga.json`.
+**Bot commit** — a commit whose author is an automation account such as Dependabot, or any other machine account that is not an agent: a name or GitHub noreply login that ends in `[bot]`, `-bot` or `_bot`, or is `bot`, in any case. Other machine accounts are named in `signatures` of `.codesaga.json`. A bot is no contributor, expert or badge holder and does not count toward the truck factor. A person the spelling misjudges is renamed by a `.mailmap` entry, such as `Jane <jane@real.io> <1234+jane-bot@users.noreply.github.com>`, and is a contributor again.
 
 ## Time
 

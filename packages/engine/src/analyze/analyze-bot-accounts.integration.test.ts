@@ -49,3 +49,42 @@ layer(analyzeServices)("analyze bot accounts without [bot]", (it) => {
       }),
   );
 });
+
+layer(analyzeServices)("analyze people with a bot-like login", (it) => {
+  it.effect(
+    "makes a person with a bot-like login a contributor again through .mailmap",
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
+        const repo = yield* makeTempRepository;
+        const janeBot = {
+          name: "jane-bot",
+          email: "1234+jane-bot@users.noreply.github.com",
+        };
+        yield* repo.commit(
+          "2026-02-01T09:00:00Z",
+          {
+            "a.ts": "1\n",
+            ".mailmap":
+              "Jane <jane@real.io> <1234+jane-bot@users.noreply.github.com>\n",
+          },
+          { author: ada },
+        );
+        yield* repo.commit(
+          "2026-02-02T09:00:00Z",
+          { "a.ts": "2\n" },
+          { author: janeBot },
+        );
+
+        const report = yield* analyze(analyzeOptionsFor(repo));
+
+        assert.deepStrictEqual(
+          report.contributors
+            .map(({ name, email }) => `${name} <${email}>`)
+            .toSorted(),
+          ["Ada Lovelace <ada@example.com>", "Jane <jane@real.io>"],
+        );
+        assert.deepStrictEqual(report.automation.tools, []);
+      }),
+  );
+});

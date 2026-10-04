@@ -1,17 +1,17 @@
 import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
-import { Effect } from "effect";
+import { Effect, FileSystem, Path } from "effect";
 
 import { Git } from "../git/git.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { readHistory } from "./history.js";
 
-const trailersOf = (directory: string, head: string) =>
+const trailersOf = (directory: string, head: string, useCache = false) =>
   readHistory({
     root: directory,
     head,
     shallowBoundary: new Set(),
-    useCache: false,
+    useCache,
   }).pipe(
     Effect.map(({ commits }) => commits.flatMap(({ trailers }) => trailers)),
     Effect.provide(Git.layer(directory)),
@@ -104,6 +104,50 @@ layer(NodeServices.layer)(
             { key: "Co-authored-by", value: "Grace <grace@old.example>" },
           ]);
         }),
+    );
+  },
+);
+
+layer(NodeServices.layer)(
+  "readHistory co-author trailers with the cache",
+  (it) => {
+    it.effect("maps a cached history with the mailmap of the current run", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const repo = yield* makeTempRepository;
+        yield* repo.commit(
+          "2026-03-02T12:00:00Z",
+          { "a.ts": "1\n" },
+          { message: message("Grace <grace@old.example>") },
+        );
+        const head = (yield* repo.git("rev-parse", "HEAD")).trim();
+        const mailmap = path.join(repo.directory, ".mailmap");
+        const grace = {
+          key: "Co-authored-by",
+          value: "Grace <grace@old.example>",
+        };
+
+        const asWritten = yield* trailersOf(repo.directory, head, true);
+        yield* fs.writeFileString(
+          mailmap,
+          "Grace Hopper <grace@example.com> <grace@old.example>\n",
+        );
+        const first = yield* trailersOf(repo.directory, head, true);
+        yield* fs.writeFileString(
+          mailmap,
+          "Grace B <grace@new.example> <grace@old.example>\n",
+        );
+        const second = yield* trailersOf(repo.directory, head, true);
+
+        assert.deepStrictEqual(asWritten, [grace]);
+        assert.deepStrictEqual(first, [
+          { key: "Co-authored-by", value: "Grace Hopper <grace@example.com>" },
+        ]);
+        assert.deepStrictEqual(second, [
+          { key: "Co-authored-by", value: "Grace B <grace@new.example>" },
+        ]);
+      }),
     );
   },
 );

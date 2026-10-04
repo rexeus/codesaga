@@ -99,6 +99,32 @@ describe("classifyCommit bot accounts", () => {
       bot("effect-bot"),
     );
   });
+});
+
+describe("classifyCommit bot spelling", () => {
+  it("reads the spelling of a name case-insensitively and trimmed", () => {
+    const names = ["BOT", "Bot", " Spacey-Bot ", "Ro_Bot"];
+
+    expect(
+      names.map(
+        (name) =>
+          classifyCommit(commit({ author: { name, email: "x@example.com" } }))
+            .class,
+      ),
+    ).toStrictEqual(["bot", "bot", "bot", "bot"]);
+  });
+
+  it("keeps a name that only contains the word bot, or ends in it without a separator, human", () => {
+    const names = ["the-bot-team", "Bot Smith", "Robot", "Mr. Bot"];
+
+    expect(
+      names.map(
+        (name) =>
+          classifyCommit(commit({ author: { name, email: "x@example.com" } }))
+            .class,
+      ),
+    ).toStrictEqual(["human", "human", "human", "human"]);
+  });
 
   it("keeps people whose names merely end in the letters bot", () => {
     const people = [
