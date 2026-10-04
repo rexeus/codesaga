@@ -16,6 +16,97 @@ const limitTerritories = (
     }),
   );
 
+type TypeScriptDeepDive = NonNullable<
+  NonNullable<Report["deepDives"]>["typescript"]
+>;
+
+type FunctionsPart = NonNullable<TypeScriptDeepDive["functions"]>["tests"];
+
+const limitFunctions = (part: FunctionsPart, limit: number): FunctionsPart => ({
+  ...part,
+  top: part.top.slice(0, limit),
+});
+
+/** The lists of the TypeScript deep dive cut to the first `limit`: the `tsconfig` postures (`totalConfigs` keeps their count), the hardest functions, the hotspot files and the focused test files. */
+const limitTypeScript = (
+  typescript: TypeScriptDeepDive,
+  limit: number,
+): TypeScriptDeepDive => {
+  const { strictness, functions, complexityAndChange, tests } = typescript;
+  return {
+    ...typescript,
+    ...(strictness === undefined
+      ? {}
+      : {
+          strictness: {
+            ...strictness,
+            configs: strictness.configs.slice(0, limit),
+          },
+        }),
+    ...(functions === undefined
+      ? {}
+      : {
+          functions: {
+            production: limitFunctions(functions.production, limit),
+            tests: limitFunctions(functions.tests, limit),
+          },
+        }),
+    ...(complexityAndChange === undefined
+      ? {}
+      : {
+          complexityAndChange: {
+            ...complexityAndChange,
+            hotspots: complexityAndChange.hotspots.slice(0, limit),
+          },
+        }),
+    ...(tests === undefined
+      ? {}
+      : {
+          tests: { ...tests, focusedFiles: tests.focusedFiles.slice(0, limit) },
+        }),
+  };
+};
+
+/** The import map's territories, edges, edges toward less stable territories and groups of territories that import each other cut to the first `limit`; `totalTerritories`, `totalEdges`, `totalTowardLessStable` and `totalMutualImports` keep their counts. */
+const limitImports = (
+  typescript: TypeScriptDeepDive,
+  limit: number,
+): TypeScriptDeepDive => {
+  const { imports } = typescript;
+  return imports === undefined
+    ? typescript
+    : {
+        ...typescript,
+        imports: {
+          ...imports,
+          territories: {
+            ...imports.territories,
+            territories: imports.territories.territories.slice(0, limit),
+            edges: imports.territories.edges.slice(0, limit),
+            towardLessStable: imports.territories.towardLessStable.slice(
+              0,
+              limit,
+            ),
+            mutualImports: imports.territories.mutualImports.slice(0, limit),
+          },
+        },
+      };
+};
+
+const limitDeepDives = (
+  deepDives: NonNullable<Report["deepDives"]>,
+  limit: number,
+): NonNullable<Report["deepDives"]> =>
+  deepDives.typescript === undefined
+    ? deepDives
+    : {
+        ...deepDives,
+        typescript: limitImports(
+          limitTypeScript(deepDives.typescript, limit),
+          limit,
+        ),
+      };
+
 /**
  * Applies `--limit` to a report: `contributors` is cut to its first `limit`
  * entries and so are the knowledge `directories`, the first-cut `territories` and
@@ -23,7 +114,10 @@ const limitTerritories = (
  * keeps the full count of each list), `0`
  * keeps everything, and `totals` still describes the untruncated size.
  * The pull request authors and reviewers are cut the same way, with their
- * sizes in `pullRequests.totals`. Time series are never cut.
+ * sizes in `pullRequests.totals`, and so are the lists of the TypeScript deep
+ * dive: the `tsconfig` postures, with their number in `strictness.totalConfigs`,
+ * the hardest functions, the hotspot files and the focused test files. Time
+ * series are never cut.
  */
 export const limitReport = (report: Report, limit: number): Report =>
   limit === 0
@@ -42,6 +136,9 @@ export const limitReport = (report: Report, limit: number): Report =>
             ),
           },
         },
+        ...(report.deepDives === undefined
+          ? {}
+          : { deepDives: limitDeepDives(report.deepDives, limit) }),
         ...(report.pullRequests === undefined
           ? {}
           : {

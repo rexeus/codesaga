@@ -14,36 +14,25 @@ import { describeFileSet } from "../knowledge/file-set.js";
 import { knowledgeModel } from "../knowledge/model.js";
 import type { KnowledgeModel } from "../knowledge/model.js";
 import type { InspectResult } from "../report/inspect-result.js";
-import { ancestorsOf } from "../universe/ancestors.js";
-import { matchesAny } from "../universe/globs.js";
+import { inspectTypeScriptOf } from "../typescript/inspect/inspected-files.js";
+import type { InspectedTypeScript } from "../typescript/inspect/inspected-files.js";
 import { automationReasons } from "./automation-reasons.js";
+import { pathsMatching } from "./match-paths.js";
 
 type Entry = InspectResult["matches"][number];
 
-/**
- * The paths an argument matches: the file itself, files below a matching
- * directory, and every file when the argument names the repository root
- * (`.`, `./`, `/` or an empty string).
- */
-const pathsMatching = (
-  pattern: string,
-  paths: ReadonlyArray<string>,
-): ReadonlyArray<string> => {
-  const target = pattern.replace(/\/+$/u, "");
-  if (target === "" || target === ".") {
-    return paths;
-  }
-  const matches = matchesAny([target]);
-  return paths.filter((path) =>
-    [path, ...ancestorsOf(path)].some((candidate) => matches(candidate)),
-  );
+/** What every entry reads besides its own paths. */
+type Context = {
+  readonly model: KnowledgeModel;
+  /** The commits of the window, newest first. */
+  readonly windowed: ReadonlyArray<ClassifiedCommit>;
+  readonly typescript: InspectedTypeScript | undefined;
 };
 
 const entryOf = (
   pattern: string,
   paths: ReadonlyArray<string>,
-  model: KnowledgeModel,
-  windowed: ReadonlyArray<ClassifiedCommit>,
+  { model, windowed, typescript }: Context,
 ): Entry => {
   const set = describeFileSet(paths, model);
   const matched = new Set(paths);
@@ -54,6 +43,10 @@ const entryOf = (
     (max, { time }) => Math.max(max, time),
     -Infinity,
   );
+  const code =
+    typescript === undefined
+      ? undefined
+      : inspectTypeScriptOf(typescript, paths);
   return {
     pattern,
     files: set.files,
@@ -65,6 +58,7 @@ const entryOf = (
     commits: touching.length,
     lastCommitAt: touching.length === 0 ? null : isoOfEpochSeconds(last),
     automation: totalsOf(touching),
+    ...(code === undefined ? {} : { typescript: code }),
     reasons: [...set.reasons, ...automationReasons(touching)],
   };
 };
@@ -87,10 +81,13 @@ const resultOf = (
  * Answers every pattern from the facts: who knows the files it matches (over
  * the whole history) and how much recent work, by class, went into them (over
  * the window). A pattern that matches no universe file is listed as unmatched.
+ * `typescript` is what the gathering read of the matched TypeScript and
+ * JavaScript files, and absent without any.
  */
 export const buildInspectResult = (
   facts: RepositoryFacts,
   patterns: ReadonlyArray<string>,
+  typescript?: InspectedTypeScript,
 ): InspectResult => {
   const analysis = prepareAnalysis(facts);
   const model = knowledgeModel({
@@ -113,7 +110,11 @@ export const buildInspectResult = (
     matches.map(({ pattern, paths: matched }) =>
       matched.length === 0
         ? pattern
-        : entryOf(pattern, matched, model, analysis.commits),
+        : entryOf(pattern, matched, {
+            model,
+            windowed: analysis.commits,
+            typescript,
+          }),
     ),
     model.ownership === undefined || matchedPaths.length === 0
       ? undefined

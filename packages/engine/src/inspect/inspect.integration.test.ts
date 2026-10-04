@@ -1,10 +1,10 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { commitKnowledgeHistory, grace } from "../testing/knowledge-history.js";
+import { servicesWithoutParser } from "../testing/no-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { inspect } from "./inspect.js";
 
@@ -36,7 +36,7 @@ const srcXEntry = {
   reasons: ["Ada Lovelace is the only expert on 1 of 1 file"],
 };
 
-layer(NodeServices.layer)("inspect one argument", (it) => {
+layer(servicesWithoutParser)("inspect one argument", (it) => {
   it.effect("aggregates an exact file with its expert and window", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -96,7 +96,7 @@ layer(NodeServices.layer)("inspect one argument", (it) => {
   );
 });
 
-layer(NodeServices.layer)("inspect directories and globs", (it) => {
+layer(servicesWithoutParser)("inspect directories and globs", (it) => {
   it.effect("aggregates a glob that matches several files into one entry", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -118,7 +118,7 @@ layer(NodeServices.layer)("inspect directories and globs", (it) => {
   );
 });
 
-layer(NodeServices.layer)("inspect several arguments", (it) => {
+layer(servicesWithoutParser)("inspect several arguments", (it) => {
   it.effect("lists a pattern without a universe file as unmatched", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -139,7 +139,7 @@ layer(NodeServices.layer)("inspect several arguments", (it) => {
   );
 });
 
-layer(NodeServices.layer)("inspect the whole repository", (it) => {
+layer(servicesWithoutParser)("inspect the whole repository", (it) => {
   it.effect.each(["", ".", "./", "/"])(
     "treats %j as every universe file and keeps the argument as written",
     (pattern) =>
@@ -162,7 +162,7 @@ layer(NodeServices.layer)("inspect the whole repository", (it) => {
   );
 });
 
-layer(NodeServices.layer)("inspect window and agents", (it) => {
+layer(servicesWithoutParser)("inspect window and agents", (it) => {
   it.effect("narrows commits and automation to --since, not expertise", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -216,7 +216,7 @@ layer(NodeServices.layer)("inspect window and agents", (it) => {
 const lines = (count: number) =>
   Array.from({ length: count }, (_, index) => `line ${index}\n`).join("");
 
-layer(NodeServices.layer)("inspect a recreated file", (it) => {
+layer(servicesWithoutParser)("inspect a recreated file", (it) => {
   it.effect(
     "names only the recreating author as expert, while the activity counts every life",
     () =>

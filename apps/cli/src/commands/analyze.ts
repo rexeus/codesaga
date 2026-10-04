@@ -17,6 +17,7 @@ import { DEFAULT_LIMIT, limitReport } from "../output/limit-report.js";
 import { printResult } from "../output/print-result.js";
 import { warnIfShallow } from "../output/shallow-warning.js";
 import { renderAnalysis } from "../output/terminal/analysis-view.js";
+import { parseProgressLayer } from "../typescript/parse-progress.js";
 import { WorkingDirectory } from "../working-directory.js";
 import { resolveAnalysisTarget } from "./analysis-target.js";
 import {
@@ -133,7 +134,10 @@ export const analyzeCommand = Command.make(
     };
     const report = yield* (
       flags.github ? analyzeWithGithub(options) : analyze(options)
-    ).pipe(blameConfigSince(settings));
+    ).pipe(
+      blameConfigSince(settings),
+      Effect.provide(parseProgressLayer(process.stderr)),
+    );
     yield* warnIfShallow(report.repository.shallow);
     yield* warnIfBlameSkipped(report.knowledge.lineOwners);
     // The dashboard embeds the whole report: --limit bounds only the JSON document.

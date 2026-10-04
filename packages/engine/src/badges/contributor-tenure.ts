@@ -12,7 +12,7 @@ import {
   NEW_CONTRIBUTOR_DAYS,
   isNewContributor,
 } from "../contributors/status.js";
-import type { ContributorBadge } from "../report/badges.js";
+import type { EarnedContributorBadge } from "./contributor-badge-category.js";
 
 /** The rules behind steady, new here and back again, for the report's `thresholds.badges`. */
 export const TENURE_BADGE_THRESHOLDS = {
@@ -89,7 +89,7 @@ export const tenureBadges = (
   commits: ReadonlyArray<ClassifiedCommit>,
   repositoryStart: number | undefined,
   now: DateTime.Utc,
-): ReadonlyArray<ContributorBadge> => {
+): ReadonlyArray<EarnedContributorBadge> => {
   const tenure = {
     times: commits.map(({ time }) => time),
     repositoryStart,

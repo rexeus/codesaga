@@ -1,3 +1,4 @@
+import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
 import { samplePullRequests } from "../testing/sample-pull-requests.js";
@@ -79,5 +80,158 @@ describe("limitReport territories", () => {
     ]);
     expect(db?.territories[1]?.totalTerritories).toBe(2);
     expect(limited.detail).toBe(report.knowledge.territories.detail);
+  });
+});
+
+/** The sample report with three focused test files, which the sample itself has none of. */
+const withFocusedFiles = () => {
+  const report = sampleReport();
+  const typescript = report.deepDives?.typescript;
+  if (typescript?.tests === undefined) {
+    throw new Error("the sample report has no tests block");
+  }
+  const focusedFiles = ["a.test.ts", "b.test.ts", "c.test.ts"];
+  return {
+    ...report,
+    deepDives: {
+      typescript: {
+        ...typescript,
+        tests: { ...typescript.tests, focusedFiles },
+      },
+    },
+  };
+};
+
+/** The sample with three entries in each list of its import map that `--limit` cuts. */
+const crowdedReport = (): Report => {
+  const report = sampleReport();
+  const typescript = report.deepDives?.typescript;
+  const map = typescript?.imports?.territories;
+  const entry = map?.towardLessStable[0];
+  if (
+    typescript?.imports === undefined ||
+    map === undefined ||
+    entry === undefined
+  ) {
+    throw new Error("the sample has an import map");
+  }
+  const group = { territories: [entry.from] };
+  return {
+    ...report,
+    deepDives: {
+      typescript: {
+        ...typescript,
+        imports: {
+          ...typescript.imports,
+          territories: {
+            ...map,
+            totalTowardLessStable: 3,
+            towardLessStable: [entry, entry, entry],
+            totalMutualImports: 3,
+            mutualImports: [group, group, group],
+          },
+        },
+      },
+    },
+  };
+};
+
+describe("limitReport deep dives", () => {
+  it("cuts the tsconfig postures to the limit and keeps their number", () => {
+    const report = sampleReport();
+    const configs = report.deepDives?.typescript?.strictness?.configs ?? [];
+
+    const strictness = limitReport(report, 2).deepDives?.typescript?.strictness;
+
+    expect(strictness?.configs).toStrictEqual(configs.slice(0, 2));
+    expect(strictness?.totalConfigs).toBe(configs.length);
+  });
+
+  it("cuts the hardest functions, the hotspot files and the focused test files to the limit", () => {
+    const limited = limitReport(withFocusedFiles(), 2).deepDives?.typescript;
+
+    expect([
+      limited?.functions?.production.top.map(({ name }) => name),
+      limited?.functions?.tests.top.length,
+      limited?.complexityAndChange?.hotspots.map(({ path }) => path),
+      limited?.tests?.focusedFiles,
+      limited?.functions?.production.functions,
+    ]).toStrictEqual([
+      ["reconcileInvoices", "buildQuery"],
+      2,
+      [
+        "packages/api/src/billing/reconcile.ts",
+        "packages/db/src/query/build.ts",
+      ],
+      ["a.test.ts", "b.test.ts"],
+      1840,
+    ]);
+  });
+});
+
+describe("limitReport TypeScript achievements", () => {
+  it("never cuts the achievements and the badges of the territories", () => {
+    const report = sampleReport();
+    const limited = limitReport(report, 1);
+
+    expect(limited.deepDives?.typescript?.achievements).toStrictEqual(
+      report.deepDives?.typescript?.achievements,
+    );
+    expect(limited.deepDives?.typescript?.achievements).toHaveLength(5);
+    expect(limited.knowledge.territories.territories[0]?.badges).toStrictEqual(
+      report.knowledge.territories.territories[0]?.badges,
+    );
+  });
+});
+
+describe("limitReport import map", () => {
+  it("cuts the import map to the limit and keeps the totals", () => {
+    const limited = limitReport(sampleReport(), 2).deepDives?.typescript
+      ?.imports?.territories;
+
+    expect(limited?.territories.map(({ path }) => path)).toStrictEqual([
+      "packages/ui",
+      "apps/web",
+    ]);
+    expect(
+      limited?.edges.map(({ from, to }) => [from.path, to.path]),
+    ).toStrictEqual([
+      ["apps/web", "packages/ui"],
+      ["apps/admin", "packages/ui"],
+    ]);
+    expect([limited?.totalTerritories, limited?.totalEdges]).toStrictEqual([
+      9, 13,
+    ]);
+    expect(limited?.towardLessStable).toHaveLength(1);
+    expect(limited?.totalTowardLessStable).toBe(1);
+  });
+
+  it("cuts the lists toward less stable territories and of mutual imports and keeps their totals", () => {
+    const limited = limitReport(crowdedReport(), 2).deepDives?.typescript
+      ?.imports?.territories;
+
+    expect(limited?.towardLessStable).toHaveLength(2);
+    expect(limited?.mutualImports).toHaveLength(2);
+    expect([
+      limited?.totalTowardLessStable,
+      limited?.totalMutualImports,
+    ]).toStrictEqual([3, 3]);
+  });
+
+  it("leaves the trends' series, events and classes uncut", () => {
+    const report = sampleReport();
+
+    const limited = limitReport(report, 1);
+
+    expect(limited.deepDives?.typescript?.trends).toStrictEqual(
+      report.deepDives?.typescript?.trends,
+    );
+    expect(limited.deepDives?.typescript?.trends?.months).toHaveLength(5);
+  });
+
+  it("leaves a report without deep dives alone", () => {
+    const { deepDives: _deepDives, ...report } = sampleReport();
+
+    expect(limitReport(report, 2)).not.toHaveProperty("deepDives");
   });
 });

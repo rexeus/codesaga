@@ -253,7 +253,12 @@ layer(NodeServices.layer)("Report rejects story data with", (it) => {
     Effect.gen(function* () {
       const sample = decode(yield* readSample);
       const [first, ...others] = sample.contributors;
-      const badge = { kind: "night-owl", label: "Night owl", evidence: "" };
+      const badge = {
+        kind: "wizard",
+        category: "journey",
+        label: "Wizard",
+        evidence: "",
+      };
       const contributors = [{ ...first, badges: [badge] }, ...others];
 
       assert.throws(() => {
@@ -294,5 +299,29 @@ layer(NodeServices.layer)("Report rejects story data with", (it) => {
         decode({ ...rest, knowledge: { ...knowledge, territories } });
       }, /maxDetail/u);
     }),
+  );
+});
+
+layer(NodeServices.layer)("Report sample deep dive", (it) => {
+  it.effect(
+    "accounts for every TypeScript and JavaScript file in the coverage",
+    () =>
+      Effect.gen(function* () {
+        const report = decode(yield* readSample);
+        const coverage =
+          report.deepDives?.typescript?.coverage ??
+          assert.fail("the sample has no deep dive");
+        const scripts = report.overview.languages
+          .filter(({ name }) => name === "TypeScript" || name === "JavaScript")
+          .reduce((sum, { files }) => sum + files, 0);
+
+        assert.strictEqual(coverage.files, scripts);
+        assert.strictEqual(
+          coverage.parsed,
+          scripts -
+            coverage.declarationFiles -
+            Object.values(coverage.skipped).reduce((sum, n) => sum + n, 0),
+        );
+      }),
   );
 });

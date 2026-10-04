@@ -1,8 +1,10 @@
 /**
  * Bundles the CLI, its workspace packages, and Effect into one minified
  * `dist/codesaga.js`, so `npx codesaga` never depends on how a consumer's
- * package manager resolves Effect's peer ranges. Only Node built-ins stay
- * external; `scripts/verify-bundle-externals.mjs` enforces that.
+ * package manager resolves Effect's peer ranges. Only Node built-ins and
+ * `oxc-parser` stay external: its native binding cannot be bundled, so it is
+ * the package's one runtime dependency. `scripts/verify-bundle-externals.mjs`
+ * enforces that.
  */
 import { chmod } from "node:fs/promises";
 import path from "node:path";
@@ -15,9 +17,15 @@ const outfile = path.join(packageRoot, "dist/codesaga.js");
 const bundle = await rolldown({
   input: path.join(packageRoot, "src/bin.ts"),
   platform: "node",
+  external: ["oxc-parser"],
 });
 try {
-  await bundle.write({ file: outfile, format: "esm", minify: true });
+  await bundle.write({
+    file: outfile,
+    format: "esm",
+    minify: true,
+    codeSplitting: false,
+  });
 } finally {
   await bundle.close();
 }

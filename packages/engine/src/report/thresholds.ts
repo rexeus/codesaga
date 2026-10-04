@@ -2,6 +2,8 @@
 // Rules for territories and badges nest under their own key; the first five fields predate them and stay flat.
 import { Schema } from "effect";
 
+import { TypeScriptThresholds } from "./typescript-thresholds.js";
+
 const Count = Schema.Natural;
 const Share = Schema.Finite.check(Schema.isBetween({ minimum: 0, maximum: 1 }));
 
@@ -59,6 +61,28 @@ const StoryThresholds = Schema.Struct({
   cleanupMinNetDeletedLines: Count,
   /** `rename-record` shows when a file was renamed at least this often. */
   renameRecordMinRenames: Count,
+  /** `focused-test` shows when the test files hold at least this many focused cases. */
+  focusedTestMinCases: Count,
+  /** `complex-core` needs at least this many production functions ... */
+  complexCoreMinFunctions: Count,
+  /** ... and a hardest one of at least this cognitive complexity. */
+  complexCoreMinComplexity: Count,
+  /** `core-territory` shows when at least this share of the other named territories of the import map import the territory ... */
+  coreTerritoryShare: Share,
+  /** ... among at least this many named territories. */
+  coreTerritoryMinTerritories: Count,
+  /** `type-trend` compares the production escape hatches per 1,000 lines now with this many months ago ... */
+  typeTrendMonths: Count,
+  /** ... and shows when they changed by at least this share, in either direction ... */
+  typeTrendMinChange: Share,
+  /** ... with at least this many escape hatches at one of the two points ... */
+  typeTrendMinEscapes: Count,
+  /** ... and at least this many production lines at both. */
+  typeTrendMinLines: Count,
+  /** `module-era` needs at least this many production module files. */
+  moduleEraMinFiles: Count,
+  /** `module-era` also shows a CommonJS share of at least this much. */
+  moduleEraCommonjsShare: Share,
 });
 
 /** The rules behind the badges of territories and contributors; the meaning of each is on its badge kind. */
@@ -78,6 +102,12 @@ const BadgeThresholds = Schema.Struct({
   newcomerFriendlyFirstCommits: Count,
   newcomerFriendlyDays: Count,
   wellTestedShare: Share,
+  /** `type-safe` needs at least this many production TypeScript files ... */
+  typeSafeMinFiles: Count,
+  /** `complex-logic` needs at least this many production functions ... */
+  complexLogicMinFunctions: Count,
+  /** ... and at least this share of them at or above `thresholds.typescript.complexityLimit`. */
+  complexLogicShare: Share,
   /** `heavyweight`, `hotspot`, `churning` and `deeply-nested` need at least this many named territories at the territory's level of the tree, itself included. */
   codeBadgeMinSiblings: Count,
   /** `heavyweight` and `hotspot` need a share among those territories of at least this many times the fair share, one over their number. */
@@ -110,6 +140,53 @@ const BadgeThresholds = Schema.Struct({
   steadyMonths: Count,
   newHereDays: Count,
   backAgainGapDays: Count,
+  /** `night-owl`, `early-bird` and `weekend-regular` read the human commits of the last this many days ... */
+  rhythmWindowDays: Count,
+  /** ... need at least this many of them ... */
+  rhythmMinCommits: Count,
+  /** ... in at least this many calendar months ... */
+  rhythmMinMonths: Count,
+  /** ... and at least this share of them in the hours or on the days of the badge. */
+  rhythmShare: Share,
+  /** `night-owl` counts the hours from this one on, until `rhythmNightToHour` the next morning ... */
+  rhythmNightFromHour: Count,
+  /** ... and `early-bird` the hours from here until `rhythmEarlyToHour`. */
+  rhythmNightToHour: Count,
+  rhythmEarlyToHour: Count,
+  /** The rhythm badges are withheld when at least this share of a person's commits carry +00:00 while the history has other offsets. */
+  rhythmUtcShare: Share,
+  /** `pair-partner` and `toolsmith` read the commits of the last this many days. */
+  recentWindowDays: Count,
+  /** `pair-partner` needs this many commits with a human co-author. */
+  pairPartnerCommits: Count,
+  /** `long-hauler` needs a first commit at least this many years ago ... */
+  longHaulerYears: Count,
+  /** ... and a commit in each of this many last quarters. */
+  longHaulerQuarters: Count,
+  /** `explorer` counts first commits in territories within this many days ... */
+  explorerDays: Count,
+  /** ... in at least this many territories. */
+  explorerMinTerritories: Count,
+  /** `toolsmith` needs this share of the commits to change only tooling files ... */
+  toolsmithShare: Share,
+  /** ... out of at least this many commits that change files. */
+  toolsmithMinCommits: Count,
+  /** The craft badges that read code facts compare the commits of the last `recentWindowDays` days and skip a commit that changes more files than this. */
+  craftMaxFilesPerCommit: Count,
+  /** `type-tightener` needs this many explicit `any` net removed ... */
+  typeTightenerRemovedAny: Count,
+  /** ... in at least this many commits that each net-remove one. */
+  typeTightenerMinCommits: Count,
+  /** `sweeper` needs this many declarations net removed. */
+  sweeperRemovedDeclarations: Count,
+  /** `simplifier` needs this many functions made simpler ... */
+  simplifierFunctions: Count,
+  /** ... each by at least this many points of cognitive complexity. */
+  simplifierMinDrop: Count,
+  /** `test-companion` needs this many commits that add an exported function to production code ... */
+  testCompanionCommits: Count,
+  /** ... and this share of them also adding test cases. */
+  testCompanionShare: Share,
   reviewerReviews: Count,
 });
 
@@ -137,6 +214,14 @@ const AchievementThresholds = Schema.Struct({
   freshBloodPeople: Count,
   /** ... whose first commit lies at most this many days ago. */
   freshBloodDays: Count,
+  /** `any-free` needs at least this many production TypeScript files. */
+  anyFreeMinFiles: Count,
+  /** `strict-throughout`, `esm-only` and `no-ts-ignore` need at least this many production files of their kind, so a handful of files does not earn them. */
+  typeScriptMinFiles: Count,
+  /** `tightened` needs the production escape hatches per 1,000 lines to have fallen by at least this share from their peak ... */
+  tightenedFall: Share,
+  /** ... and the peak to hold at least this many escape hatches. */
+  tightenedMinPeakEscapes: Count,
 });
 
 /** The constants an analysis applied, reported so consumers see them. */
@@ -155,4 +240,6 @@ export const Thresholds = Schema.Struct({
   stories: StoryThresholds,
   badges: BadgeThresholds,
   achievements: AchievementThresholds,
+  /** The bands and limits of the TypeScript deep dive; always reported, whether or not the repository has TypeScript. */
+  typescript: Schema.optionalKey(TypeScriptThresholds),
 });

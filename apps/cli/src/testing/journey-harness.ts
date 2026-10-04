@@ -1,9 +1,11 @@
+import type { TypeScriptParser } from "@codesaga/engine";
 // Runs the real `runCli` in-process with captured output, as TESTING.md's CLI journeys do.
 import { NodeServices } from "@effect/platform-node";
 import { ConfigProvider, Console, Effect, Layer, Runtime, Stdio } from "effect";
 
 import { runCli } from "../cli.js";
 import { WorkingDirectory } from "../working-directory.js";
+import { inProcessParserLayer } from "./in-process-parser.js";
 import { stubGithub, unscripted } from "./stub-github.js";
 import type { GithubReply, GithubRequest } from "./stub-github.js";
 
@@ -16,6 +18,8 @@ export type JourneyOptions = {
   readonly env?: Record<string, string>;
   /** What GitHub answers; defaults to an error for every request. No journey reaches a real network. */
   readonly github?: (request: GithubRequest) => GithubReply;
+  /** The TypeScript parser; defaults to oxc-parser in the test's own process, since the pool has its own tests. */
+  readonly parser?: Layer.Layer<TypeScriptParser>;
   /** Whether standard output looks like a terminal; defaults to false. */
   readonly stdoutIsTerminal?: boolean;
 };
@@ -50,6 +54,7 @@ export const journey = (
     const github = stubGithub(options.github ?? (() => unscripted));
     const environment = Layer.mergeAll(
       NodeServices.layer,
+      options.parser ?? inProcessParserLayer,
       github.layer,
       Stdio.layerTest({
         stdoutIsTerminal: Effect.succeed(options.stdoutIsTerminal ?? false),

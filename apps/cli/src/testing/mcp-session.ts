@@ -14,6 +14,7 @@ import type { Cause, Scope } from "effect";
 
 import { runCli } from "../cli.js";
 import { WorkingDirectory } from "../working-directory.js";
+import { inProcessParserLayer } from "./in-process-parser.js";
 import { stubGithub, unscripted } from "./stub-github.js";
 import type { GithubReply, GithubRequest } from "./stub-github.js";
 
@@ -68,6 +69,7 @@ const startServer = (cwd: string, options: McpSessionOptions) =>
       Effect.provideService(WorkingDirectory, cwd),
       Effect.provide([
         NodeServices.layer,
+        inProcessParserLayer,
         stubGithub(options.github ?? (() => unscripted)).layer,
         Layer.succeed(
           ConfigProvider.ConfigProvider,

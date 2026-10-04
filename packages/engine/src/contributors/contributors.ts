@@ -9,8 +9,8 @@ import { localDayOf } from "../activity/buckets.js";
 import { isoOfEpochSeconds } from "../analyze/analysis-window.js";
 import { isContributorCommit } from "../automation/classify.js";
 import type { ClassifiedCommit } from "../automation/classify.js";
+import type { ContributorBadgeFacts } from "../badges/contributor-badge-facts.js";
 import { contributorBadges } from "../badges/contributor-badges.js";
-import type { ContributorBadgeFacts } from "../badges/contributor-badges.js";
 import { groupBy } from "../collections/group-by.js";
 import { countCodeLines } from "../history/history.js";
 import { contributionsByFile } from "../knowledge/contributions.js";
@@ -37,6 +37,8 @@ type ContributorsInput = {
   readonly shallow: boolean;
   /** The territories of the recommended detail; without them `all-rounder`, `specialist` and `keeper` are withheld. */
   readonly territories?: ContributorBadgeFacts["territories"];
+  /** The facts of the history's TypeScript and JavaScript file versions; without them the badges that compare code before and after a commit are withheld. */
+  readonly factsLookup?: ContributorBadgeFacts["factsLookup"] | undefined;
 };
 
 type Contributor = Report["contributors"][number];
@@ -76,6 +78,8 @@ type Context = Omit<ContributorsInput, "commits" | "history" | "shallow"> & {
   readonly created: ReadonlyMap<string, number>;
   /** How many people count as contributors over the full history. */
   readonly historyContributors: number;
+  /** Whether a human commit of the full history carries an offset other than +00:00. */
+  readonly historyHasOtherOffsets: boolean;
   /** The time of the first commit of anyone who counts as a contributor; undefined in a shallow clone. */
   readonly repositoryStart: number | undefined;
 };
@@ -89,8 +93,10 @@ const contributorOf = (
     isCodePath,
     universePaths,
     territories,
+    factsLookup,
     created,
     historyContributors,
+    historyHasOtherOffsets,
     repositoryStart,
   }: Context,
 ): Contributor => {
@@ -124,12 +130,14 @@ const contributorOf = (
       now,
       repositoryStart,
       historyContributors,
+      historyHasOtherOffsets,
       isCodePath,
       founded: {
         files: created.get(email) ?? 0,
         ofFiles: universePaths.length,
       },
       ...(territories === undefined ? {} : { territories }),
+      ...(factsLookup === undefined ? {} : { factsLookup }),
     }),
   };
 };
@@ -153,6 +161,10 @@ export const contributors = ({
     ...input,
     created: createdFilesByEmail(history, input.universePaths),
     historyContributors: everyone.size,
+    historyHasOtherOffsets: history.some(
+      ({ class: commitClass, offsetMinutes }) =>
+        commitClass === "human" && offsetMinutes !== 0,
+    ),
     repositoryStart: shallow
       ? undefined
       : [...everyone.values()]

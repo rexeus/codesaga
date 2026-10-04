@@ -7,12 +7,16 @@ type TerritoryBadge =
 type ContributorBadge = Report["contributors"][number]["badges"][number];
 
 /**
- * How a badge is tinted. A territory badge wears the color of its category,
- * except the three that name a risk, which keep a warning color: `crit` for
- * orphaned knowledge, `warn` for an island and for fading knowledge. A
- * contributor badge is plain, or `info` when it is news.
+ * How a badge is tinted. A badge wears the color of its category, except the
+ * four territory badges that name a risk, which keep a warning color: `crit`
+ * for orphaned knowledge, `warn` for an island, for fading knowledge and for a
+ * territory in a cycle. A person's badge never wears a warning color.
  */
-type Tone = TerritoryBadge["category"] | "crit" | "warn" | "info" | "plain";
+type Tone =
+  | TerritoryBadge["category"]
+  | ContributorBadge["category"]
+  | "crit"
+  | "warn";
 
 /** A badge ready to draw: its glyph and tint, its label, and the rule and numbers behind it for a tooltip. */
 export type BadgeChip = {
@@ -50,29 +54,42 @@ const TERRITORY_ICONS: Record<TerritoryBadge["kind"], IconName> = {
   churning: "refresh-cw",
   "deeply-nested": "indent-increase",
   "well-tested": "shield-check",
+  "type-safe": "shield-half",
+  strict: "lock",
+  "complex-logic": "waypoints",
+  "in-a-cycle": "repeat-2",
 };
 
 const RISK_TONES: Partial<Record<TerritoryBadge["kind"], "crit" | "warn">> = {
   orphaned: "crit",
   island: "warn",
   "knowledge-fading": "warn",
+  "in-a-cycle": "warn",
 };
 
-const CONTRIBUTOR_LOOKS: Record<
-  ContributorBadge["kind"],
-  { icon: IconName; tone: Tone }
-> = {
-  "all-rounder": { icon: "layers", tone: "plain" },
-  specialist: { icon: "target", tone: "plain" },
-  tidier: { icon: "trash-2", tone: "plain" },
-  founder: { icon: "flag", tone: "plain" },
-  keeper: { icon: "key-round", tone: "plain" },
-  tester: { icon: "shield-check", tone: "plain" },
-  documenter: { icon: "book-open", tone: "plain" },
-  steady: { icon: "calendar", tone: "plain" },
-  "new-here": { icon: "sparkles", tone: "info" },
-  "back-again": { icon: "repeat", tone: "info" },
-  reviewer: { icon: "eye", tone: "plain" },
+const CONTRIBUTOR_ICONS: Record<ContributorBadge["kind"], IconName> = {
+  "all-rounder": "layers",
+  specialist: "target",
+  keeper: "key-round",
+  tidier: "trash-2",
+  tester: "shield-check",
+  documenter: "book-open",
+  "night-owl": "moon",
+  "early-bird": "sunrise",
+  "weekend-regular": "calendar-days",
+  "pair-partner": "users",
+  "long-hauler": "mountain",
+  explorer: "compass",
+  toolsmith: "wrench",
+  "type-tightener": "shrink",
+  sweeper: "brush-cleaning",
+  simplifier: "minimize-2",
+  "test-companion": "flask-conical",
+  reviewer: "eye",
+  founder: "flag",
+  steady: "calendar",
+  "new-here": "sparkles",
+  "back-again": "repeat",
 };
 
 const rowOf = (chips: readonly BadgeChip[]): BadgeRow => {
@@ -109,8 +126,9 @@ export const contributorBadges = (
   badges: readonly ContributorBadge[],
 ): BadgeRow =>
   rowOf(
-    badges.map(({ kind, label, evidence }) => ({
-      ...CONTRIBUTOR_LOOKS[kind],
+    badges.map(({ kind, category, label, evidence }) => ({
+      icon: CONTRIBUTOR_ICONS[kind],
+      tone: category,
       label,
       evidence,
     })),

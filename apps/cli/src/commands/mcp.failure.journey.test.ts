@@ -12,6 +12,7 @@ import {
 } from "effect";
 
 import { runCli } from "../cli.js";
+import { inProcessParserLayer } from "../testing/in-process-parser.js";
 import { makeTeamProject } from "../testing/projects.js";
 import { stubGithub, unscripted } from "../testing/stub-github.js";
 import { WorkingDirectory } from "../working-directory.js";
@@ -47,6 +48,7 @@ describe("codesaga mcp when the server breaks", () => {
         Effect.provide(
           Layer.mergeAll(
             NodeServices.layer,
+            inProcessParserLayer,
             stubGithub(() => unscripted).layer,
             stdioWithoutStdin,
           ),

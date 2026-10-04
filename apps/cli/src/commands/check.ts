@@ -99,6 +99,8 @@ export const checkCommand = Command.make(
       ...target,
       ...engineOptions(settings),
       cache: flags.cache,
+      // The gates read no TypeScript facts, so the history is not parsed for them.
+      typescriptHistory: false,
     };
     const report = yield* analyze(options).pipe(blameConfigSince(settings));
     // Missing history makes the truck factor and expertise numbers wrong in either direction.

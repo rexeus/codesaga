@@ -23,8 +23,11 @@ import type { HistoryCommit } from "../history/history.js";
 import { readHistory } from "../history/history.js";
 import { packageRootsOf } from "../knowledge/package-roots.js";
 import type { Report } from "../report/report.js";
+import type { TypeScriptFacts } from "../typescript/gather-typescript.js";
 import type { InventoryFile } from "../universe/inventory.js";
 import { inventory, namedAsCode } from "../universe/inventory.js";
+import { projectFilesOf } from "../universe/project-files.js";
+import type { ProjectFiles } from "../universe/project-files.js";
 import { listTrackedFiles } from "../universe/tracked-files.js";
 import {
   InvalidCompare,
@@ -35,6 +38,8 @@ import type { InvalidSince, TimeRange } from "./analysis-window.js";
 
 /** Everything `analyze` and `inspect` read; gathering it is this module's job. */
 export type RepositoryFacts = {
+  /** Absolute path of the work tree root, where the universe's files lie. */
+  readonly root: string;
   readonly toolVersion: string;
   readonly now: DateTime.Utc;
   /** The resolved `--since` instant, or undefined for the first commit in scope. */
@@ -50,6 +55,8 @@ export type RepositoryFacts = {
   /** Author time in seconds of the HEAD commit itself; 0 on an unborn branch. */
   readonly headTime: number;
   readonly universe: ReadonlyArray<InventoryFile>;
+  /** The `package.json` and `tsconfig*.json` files of the project, from `projectFilesOf`: the manifests and configs the deep dives read. */
+  readonly projectFiles: ProjectFiles;
   /** The directories of the scope that hold a package manifest; "." is the repository root. */
   readonly packageRoots: ReadonlyArray<string>;
   /** The territory detail to start at, as requested; absent for the recommended one. */
@@ -60,6 +67,12 @@ export type RepositoryFacts = {
   readonly isCodePath: (path: string) => boolean;
   /** The table that classifies commits: the built-in rows, then the custom ones. */
   readonly signatures: ReadonlyArray<Signature>;
+  /**
+   * What the TypeScript parser made of the universe's TypeScript and
+   * JavaScript files; absent for `inspect`, which does not parse, and for a
+   * universe without such files.
+   */
+  readonly typescript?: TypeScriptFacts | undefined;
 };
 
 /** Every expected failure of `analyze`. */
@@ -114,6 +127,13 @@ export type AnalyzeOptions = {
    * team. Every detail is reported either way.
    */
   readonly detail?: number | undefined;
+  /**
+   * Whether to parse every historical version of the TypeScript and
+   * JavaScript files, which the trends and the craft badges read. For callers
+   * that never read them, such as the gates of `check`, `false` leaves the
+   * history alone and only HEAD is parsed. Absent, `true`. Not a CLI flag.
+   */
+  readonly typescriptHistory?: boolean | undefined;
 };
 
 type Windows = Pick<RepositoryFacts, "since" | "previous">;
@@ -180,6 +200,7 @@ const gatherInRepository = (
     const blame =
       options.blame === true ? yield* blameUniverse(head, universe) : undefined;
     return {
+      root,
       toolVersion: options.toolVersion,
       now: yield* DateTime.now,
       ...windows,
@@ -193,6 +214,7 @@ const gatherInRepository = (
       commits,
       headTime,
       universe,
+      projectFiles: yield* projectFilesOf(tracked),
       packageRoots: packageRootsOf(tracked),
       detail: options.detail,
       blame,

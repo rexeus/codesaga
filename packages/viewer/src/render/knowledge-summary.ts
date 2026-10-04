@@ -72,7 +72,9 @@ const cardLegend = (report: Report, solo: boolean): HTMLElement =>
     legendItem("cat-knowledge", "Knowledge"),
     legendItem("cat-code", "Code"),
     legendItem("cat-activity", "Activity"),
-    ...(solo ? [] : [legendItem("cat-risk", "Risk: orphaned, island, fading")]),
+    ...(solo
+      ? []
+      : [legendItem("cat-risk", "Risk: orphaned, island, fading, in a cycle")]),
   );
 
 /** What the buttons above the cards do to the open state of the whole tree. */

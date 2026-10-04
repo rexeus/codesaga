@@ -234,6 +234,30 @@ describe("contributors badges in a solo repository", () => {
   });
 });
 
+describe("contributors rhythm badges", () => {
+  const nightCommits = Array.from({ length: 40 }, (_, week) =>
+    classifiedCommit({
+      time: at("2025-08-04T23:00:00Z") + week * 7 * 86_400,
+    }),
+  );
+  const badgesOfAda = (others: Parameters<typeof run>[0]) =>
+    run([...nightCommits, ...others])
+      .find(({ name }) => name === "Ada")
+      ?.badges.map(({ kind }) => kind);
+
+  it("withholds night owl from a person whose commits all say UTC when a colleague's do not", () => {
+    const berlin = classifiedCommit({ author: grace, offsetMinutes: 120 });
+
+    expect(badgesOfAda([berlin])).not.toContain("night-owl");
+  });
+
+  it("awards it when nobody's commits carry another offset", () => {
+    expect(badgesOfAda([classifiedCommit({ author: grace })])).toContain(
+      "night-owl",
+    );
+  });
+});
+
 describe("contributors in a shallow clone", () => {
   const first = classifiedCommit({ time: at("2026-05-01T00:00:00Z") });
   const later = classifiedCommit({

@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -70,7 +70,7 @@ const commitSplitPackageAmongOthers = (repo: TempRepository) =>
     );
   });
 
-layer(NodeServices.layer)("analyze knowledge territories", (it) => {
+layer(analyzeServices)("analyze knowledge territories", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect(
@@ -98,7 +98,7 @@ layer(NodeServices.layer)("analyze knowledge territories", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze territory dates", (it) => {
+layer(analyzeServices)("analyze territory dates", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect(
@@ -140,7 +140,7 @@ layer(NodeServices.layer)("analyze territory dates", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze territory badges", (it) => {
+layer(analyzeServices)("analyze territory badges", (it) => {
   it.effect(
     "awards the badges that need territories to the sole active expert of each",
     () =>
@@ -159,13 +159,13 @@ layer(NodeServices.layer)("analyze territory badges", (it) => {
           [
             [
               "Ada Lovelace",
-              ["founder: Founder", "keeper: Keeper of apps/web"],
+              ["keeper: Keeper of apps/web", "founder: Founder"],
             ],
             [
               "Grace",
               [
-                "founder: Founder",
                 "keeper: Keeper of packages/cli",
+                "founder: Founder",
                 "new-here: New here",
               ],
             ],
@@ -193,7 +193,7 @@ layer(NodeServices.layer)("analyze territory badges", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
+layer(analyzeServices)("analyze knowledge territories options", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect(
@@ -249,7 +249,7 @@ layer(NodeServices.layer)("analyze knowledge territories options", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze knowledge territories detail", (it) => {
+layer(analyzeServices)("analyze knowledge territories detail", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect("starts at the requested detail", () =>
@@ -268,7 +268,7 @@ layer(NodeServices.layer)("analyze knowledge territories detail", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze knowledge territories scope", (it) => {
+layer(analyzeServices)("analyze knowledge territories scope", (it) => {
   const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
   it.effect("cuts only the packages inside the analyzed scope", () =>

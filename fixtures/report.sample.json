@@ -51,7 +51,18 @@
       "newcomerDays": 90,
       "anniversaryWindowDays": 7,
       "cleanupMinNetDeletedLines": 200,
-      "renameRecordMinRenames": 3
+      "renameRecordMinRenames": 3,
+      "focusedTestMinCases": 1,
+      "complexCoreMinFunctions": 100,
+      "complexCoreMinComplexity": 25,
+      "coreTerritoryShare": 0.6,
+      "coreTerritoryMinTerritories": 5,
+      "typeTrendMonths": 12,
+      "typeTrendMinChange": 0.3,
+      "typeTrendMinEscapes": 10,
+      "typeTrendMinLines": 1000,
+      "moduleEraMinFiles": 10,
+      "moduleEraCommonjsShare": 0.5
     },
     "badges": {
       "sharedActiveExperts": 4,
@@ -87,7 +98,34 @@
       "steadyMonths": 6,
       "newHereDays": 90,
       "backAgainGapDays": 183,
-      "reviewerReviews": 10
+      "rhythmWindowDays": 365,
+      "rhythmMinCommits": 40,
+      "rhythmMinMonths": 3,
+      "rhythmShare": 0.25,
+      "rhythmNightFromHour": 22,
+      "rhythmNightToHour": 5,
+      "rhythmEarlyToHour": 8,
+      "rhythmUtcShare": 0.9,
+      "recentWindowDays": 365,
+      "pairPartnerCommits": 5,
+      "longHaulerYears": 3,
+      "longHaulerQuarters": 4,
+      "explorerDays": 90,
+      "explorerMinTerritories": 3,
+      "toolsmithShare": 0.3,
+      "toolsmithMinCommits": 10,
+      "craftMaxFilesPerCommit": 50,
+      "typeTightenerRemovedAny": 20,
+      "typeTightenerMinCommits": 8,
+      "sweeperRemovedDeclarations": 15,
+      "simplifierFunctions": 10,
+      "simplifierMinDrop": 3,
+      "testCompanionCommits": 10,
+      "testCompanionShare": 0.5,
+      "reviewerReviews": 10,
+      "typeSafeMinFiles": 10,
+      "complexLogicMinFunctions": 20,
+      "complexLogicShare": 0.1
     },
     "achievements": {
       "firstCommitsTiers": [1000, 10000],
@@ -100,7 +138,27 @@
       "unbrokenDays": 30,
       "springCleaningNetLines": 1000,
       "freshBloodPeople": 5,
-      "freshBloodDays": 90
+      "freshBloodDays": 90,
+      "anyFreeMinFiles": 50,
+      "typeScriptMinFiles": 10,
+      "tightenedFall": 0.5,
+      "tightenedMinPeakEscapes": 20
+    },
+    "typescript": {
+      "complexityBands": [5, 10, 15, 25],
+      "complexityLimit": 15,
+      "lengthBands": [16, 31, 61],
+      "maxParameters": 4,
+      "assertionBands": [1, 2, 4],
+      "hotspotQuantile": 0.9,
+      "hotspotMinComplexity": 10,
+      "hotspotMinRevisions": 2,
+      "maxSourceCharacters": 1048576,
+      "minifiedMeanLineLength": 300,
+      "imports": {
+        "instabilityGap": 0.3,
+        "minEdges": 5
+      }
     }
   },
   "totals": {
@@ -1337,21 +1395,31 @@
       "badges": [
         {
           "kind": "all-rounder",
+          "category": "focus",
           "label": "All-rounder",
           "evidence": "Commits in 7 of 11 territories."
         },
         {
-          "kind": "founder",
-          "label": "Founder",
-          "evidence": "First author of 31% of today's files."
-        },
-        {
           "kind": "keeper",
+          "category": "focus",
           "label": "Keeper of docs",
           "evidence": "The only active expert of docs."
         },
         {
+          "kind": "pair-partner",
+          "category": "collaboration",
+          "label": "Pair partner",
+          "evidence": "9 commits in the last year with another person as co-author."
+        },
+        {
+          "kind": "founder",
+          "category": "journey",
+          "label": "Founder",
+          "evidence": "First author of 31% of today's files."
+        },
+        {
           "kind": "steady",
+          "category": "journey",
           "label": "Steady",
           "evidence": "A commit in each of the last 6 months."
         }
@@ -1391,11 +1459,25 @@
       "badges": [
         {
           "kind": "tester",
+          "category": "craft",
           "label": "Tester",
           "evidence": "44% of the changed files are tests."
         },
         {
+          "kind": "night-owl",
+          "category": "rhythm",
+          "label": "Night owl",
+          "evidence": "Often commits late: 28% of their commits in the last year between 22:00 and 05:00 (42 of 150)."
+        },
+        {
+          "kind": "explorer",
+          "category": "journey",
+          "label": "Explorer",
+          "evidence": "First commits in 3 territories in the last 90 days."
+        },
+        {
           "kind": "steady",
+          "category": "journey",
           "label": "Steady",
           "evidence": "A commit in each of the last 6 months."
         }
@@ -1432,7 +1514,14 @@
         0, 0, 0, 0
       ],
       "status": "active",
-      "badges": []
+      "badges": [
+        {
+          "kind": "early-bird",
+          "category": "rhythm",
+          "label": "Early bird",
+          "evidence": "Often commits early: 31% of their commits in the last year between 05:00 and 08:00 (37 of 118)."
+        }
+      ]
     },
     {
       "name": "Jonas Weber",
@@ -1468,6 +1557,7 @@
       "badges": [
         {
           "kind": "keeper",
+          "category": "focus",
           "label": "Keeper of packages/auth/src/providers",
           "evidence": "The only active expert of packages/auth/src/providers."
         }
@@ -1535,7 +1625,14 @@
       "status": "new",
       "badges": [
         {
+          "kind": "toolsmith",
+          "category": "craft",
+          "label": "Toolsmith",
+          "evidence": "46% of their commits in the last year change only tooling files, such as CI, containers, manifests and configuration (32 of 70)."
+        },
+        {
           "kind": "new-here",
+          "category": "journey",
           "label": "New here",
           "evidence": "First commit on 2026-07-08, 84 days ago."
         }
@@ -1571,6 +1668,7 @@
       "badges": [
         {
           "kind": "documenter",
+          "category": "craft",
           "label": "Documenter",
           "evidence": "56% of the commits touch documentation."
         }
@@ -2558,6 +2656,12 @@
               "category": "knowledge",
               "label": "Handover",
               "evidence": "Tomás Herrera is rising while Dmitri Volkov, the previous main expert, has been silent since 2024-12-03."
+            },
+            {
+              "kind": "strict",
+              "category": "code",
+              "label": "Strict",
+              "evidence": "Every tsconfig that governs its files sets strict and noUncheckedIndexedAccess."
             }
           ],
           "totalTerritories": 3,
@@ -3085,7 +3189,23 @@
               "totalTerritories": 0,
               "territories": []
             }
-          ]
+          ],
+          "typescript": {
+            "files": 38,
+            "codeLines": 4300,
+            "productionTypeScriptFiles": 34,
+            "escapesPer1000": 4.1,
+            "strict": true,
+            "noUncheckedIndexedAccess": true,
+            "esmShare": 1,
+            "functions": 380,
+            "complexFunctions": 8,
+            "over15Share": 0.0211,
+            "maxComplexity": 33,
+            "importsCount": 0,
+            "importedByCount": 4,
+            "inCycle": false
+          }
         },
         {
           "path": "packages/auth",
@@ -3196,7 +3316,23 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 14,
+            "codeLines": 1700,
+            "productionTypeScriptFiles": 12,
+            "escapesPer1000": 2.4,
+            "strict": "unknown",
+            "noUncheckedIndexedAccess": false,
+            "esmShare": 1,
+            "functions": 120,
+            "complexFunctions": 0,
+            "over15Share": 0.0,
+            "maxComplexity": 12,
+            "importsCount": 1,
+            "importedByCount": 3,
+            "inCycle": false
+          }
         },
         {
           "path": "apps/admin",
@@ -3298,10 +3434,32 @@
               "category": "knowledge",
               "label": "Knowledge fading",
               "evidence": "Aiko Tanaka, expert on 42 of 58 files, last committed 148 days ago."
+            },
+            {
+              "kind": "complex-logic",
+              "category": "code",
+              "label": "Complex logic",
+              "evidence": "40 of 325 production functions (12%) score 15 or more; the hardest scores 29."
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 40,
+            "codeLines": 4700,
+            "productionTypeScriptFiles": 36,
+            "escapesPer1000": 9.8,
+            "strict": "mixed",
+            "noUncheckedIndexedAccess": false,
+            "esmShare": 0.9167,
+            "functions": 325,
+            "complexFunctions": 40,
+            "over15Share": 0.1233,
+            "maxComplexity": 29,
+            "importsCount": 3,
+            "importedByCount": 0,
+            "inCycle": false
+          }
         },
         {
           "path": "infra",
@@ -3397,9 +3555,32 @@
               }
             }
           },
-          "badges": [],
+          "badges": [
+            {
+              "kind": "type-safe",
+              "category": "code",
+              "label": "Type-safe",
+              "evidence": "16 production TypeScript files with 0.0 escape hatches per 1,000 production lines."
+            }
+          ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 20,
+            "codeLines": 2300,
+            "productionTypeScriptFiles": 16,
+            "escapesPer1000": 0,
+            "strict": true,
+            "noUncheckedIndexedAccess": false,
+            "esmShare": 1,
+            "functions": 140,
+            "complexFunctions": 0,
+            "over15Share": 0.0,
+            "maxComplexity": 9,
+            "importsCount": 1,
+            "importedByCount": 0,
+            "inCycle": false
+          }
         },
         {
           "path": ".github",
@@ -3595,7 +3776,23 @@
           },
           "badges": [],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 6,
+            "codeLines": 700,
+            "productionTypeScriptFiles": 5,
+            "escapesPer1000": 0,
+            "strict": true,
+            "noUncheckedIndexedAccess": false,
+            "esmShare": 1,
+            "functions": 48,
+            "complexFunctions": 0,
+            "over15Share": 0.0,
+            "maxComplexity": 6,
+            "importsCount": 0,
+            "importedByCount": 0,
+            "inCycle": false
+          }
         },
         {
           "path": "scripts",
@@ -3700,7 +3897,23 @@
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 5,
+            "codeLines": 600,
+            "productionTypeScriptFiles": 4,
+            "escapesPer1000": 8.3,
+            "strict": true,
+            "noUncheckedIndexedAccess": false,
+            "esmShare": 0.6,
+            "functions": 40,
+            "complexFunctions": 0,
+            "over15Share": 0.0,
+            "maxComplexity": 14,
+            "importsCount": 1,
+            "importedByCount": 0,
+            "inCycle": false
+          }
         },
         {
           "path": "apps/web",
@@ -3826,6 +4039,12 @@
               "category": "knowledge",
               "label": "Newcomer-friendly",
               "evidence": "2 people made their first commit here in the last 180 days."
+            },
+            {
+              "kind": "strict",
+              "category": "code",
+              "label": "Strict",
+              "evidence": "Every tsconfig that governs its files sets strict and noUncheckedIndexedAccess."
             }
           ],
           "totalTerritories": 3,
@@ -4576,7 +4795,23 @@
               "totalTerritories": 0,
               "territories": []
             }
-          ]
+          ],
+          "typescript": {
+            "files": 84,
+            "codeLines": 9800,
+            "productionTypeScriptFiles": 78,
+            "escapesPer1000": 5.1,
+            "strict": true,
+            "noUncheckedIndexedAccess": true,
+            "esmShare": 1,
+            "functions": 760,
+            "complexFunctions": 15,
+            "over15Share": 0.0198,
+            "maxComplexity": 26,
+            "importsCount": 3,
+            "importedByCount": 0,
+            "inCycle": false
+          }
         },
         {
           "path": "packages/api",
@@ -4696,10 +4931,38 @@
               "category": "code",
               "label": "Well tested",
               "evidence": "46% of the files are tests (33 of 71)."
+            },
+            {
+              "kind": "strict",
+              "category": "code",
+              "label": "Strict",
+              "evidence": "Every tsconfig that governs its files sets strict and noUncheckedIndexedAccess."
+            },
+            {
+              "kind": "in-a-cycle",
+              "category": "code",
+              "label": "In a cycle",
+              "evidence": "Production files import each other by value in a cycle that runs through this territory and out of it."
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 52,
+            "codeLines": 6200,
+            "productionTypeScriptFiles": 44,
+            "escapesPer1000": 6.4,
+            "strict": true,
+            "noUncheckedIndexedAccess": true,
+            "esmShare": 1,
+            "functions": 520,
+            "complexFunctions": 19,
+            "over15Share": 0.0366,
+            "maxComplexity": 41,
+            "importsCount": 3,
+            "importedByCount": 3,
+            "inCycle": true
+          }
         },
         {
           "path": "packages/ui",
@@ -4819,10 +5082,32 @@
               "category": "knowledge",
               "label": "Shared knowledge",
               "evidence": "4 active experts and a truck factor of 4."
+            },
+            {
+              "kind": "in-a-cycle",
+              "category": "code",
+              "label": "In a cycle",
+              "evidence": "Production files import each other by value in a cycle that runs through this territory and out of it."
             }
           ],
           "totalTerritories": 0,
-          "territories": []
+          "territories": [],
+          "typescript": {
+            "files": 70,
+            "codeLines": 8100,
+            "productionTypeScriptFiles": 62,
+            "escapesPer1000": 3.2,
+            "strict": true,
+            "noUncheckedIndexedAccess": false,
+            "esmShare": 1,
+            "functions": 700,
+            "complexFunctions": 9,
+            "over15Share": 0.0123,
+            "maxComplexity": 18,
+            "importsCount": 1,
+            "importedByCount": 3,
+            "inCycle": true
+          }
         }
       ]
     }
@@ -4974,11 +5259,11 @@
       "date": "2025-03-10"
     },
     {
-      "kind": "busiest-day",
-      "title": "Busiest day",
-      "detail": "31 commits landed on 2025-02-18, the most on a single day.",
-      "value": 31,
-      "date": "2025-02-18"
+      "kind": "complex-core",
+      "title": "Hard functions",
+      "detail": "The hardest function, reconcileInvoices in packages/api/src/billing/reconcile.ts, scores 41; the 47 of 1,840 functions at 15 or more hold 8% of the code.",
+      "value": 41,
+      "path": "packages/api/src/billing/reconcile.ts"
     },
     {
       "kind": "newcomers",
@@ -5102,5 +5387,1069 @@
         "unit": "newcomers in 90 days"
       }
     }
-  ]
+  ],
+  "deepDives": {
+    "typescript": {
+      "coverage": {
+        "files": 345,
+        "parsed": 338,
+        "declarationFiles": 5,
+        "skipped": {
+          "minified": 1,
+          "syntax-error": 1
+        },
+        "parser": {
+          "name": "oxc-parser",
+          "version": "0.152.0"
+        }
+      },
+      "typeSafety": {
+        "production": {
+          "files": 262,
+          "lines": 38400,
+          "filesWithEscape": 121,
+          "escapeFileShare": 0.4618,
+          "escapes": 191,
+          "escapesPer1000": 4.974,
+          "counts": {
+            "any": 41,
+            "assertions": 118,
+            "doubleAssertions": 6,
+            "asAny": 9,
+            "assertionChains": 112,
+            "anyOutsideAssertions": 21,
+            "benignAny": 6,
+            "nonNull": 27,
+            "tsIgnore": 3,
+            "tsExpectError": 5,
+            "tsNocheck": 1,
+            "lintDisables": 22,
+            "satisfies": 34,
+            "unknown": 96,
+            "typePredicates": 12
+          },
+          "per1000": {
+            "any": 1.0677,
+            "assertions": 3.0729,
+            "doubleAssertions": 0.1562,
+            "asAny": 0.2344,
+            "assertionChains": 2.9167,
+            "anyOutsideAssertions": 0.5469,
+            "benignAny": 0.1562,
+            "nonNull": 0.7031,
+            "tsIgnore": 0.0781,
+            "tsExpectError": 0.1302,
+            "tsNocheck": 0.026,
+            "lintDisables": 0.5729,
+            "satisfies": 0.8854,
+            "unknown": 2.5,
+            "typePredicates": 0.3125
+          }
+        },
+        "tests": {
+          "files": 76,
+          "lines": 12100,
+          "filesWithEscape": 48,
+          "escapeFileShare": 0.6316,
+          "escapes": 257,
+          "escapesPer1000": 21.2397,
+          "counts": {
+            "any": 30,
+            "assertions": 210,
+            "doubleAssertions": 14,
+            "asAny": 18,
+            "assertionChains": 196,
+            "anyOutsideAssertions": 7,
+            "benignAny": 2,
+            "nonNull": 40,
+            "tsIgnore": 1,
+            "tsExpectError": 9,
+            "tsNocheck": 0,
+            "lintDisables": 4,
+            "satisfies": 3,
+            "unknown": 15,
+            "typePredicates": 0
+          },
+          "per1000": {
+            "any": 2.4793,
+            "assertions": 17.3554,
+            "doubleAssertions": 1.157,
+            "asAny": 1.4876,
+            "assertionChains": 16.1983,
+            "anyOutsideAssertions": 0.5785,
+            "benignAny": 0.1653,
+            "nonNull": 3.3058,
+            "tsIgnore": 0.0826,
+            "tsExpectError": 0.7438,
+            "tsNocheck": 0.0,
+            "lintDisables": 0.3306,
+            "satisfies": 0.2479,
+            "unknown": 1.2397,
+            "typePredicates": 0.0
+          }
+        },
+        "nocheckFiles": ["apps/admin/src/legacy/export-csv.ts"]
+      },
+      "strictness": {
+        "typescript": {
+          "declared": "^5.9.2",
+          "strictByDefault": false
+        },
+        "configs": [
+          {
+            "path": "apps/web/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 96,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": true,
+            "allowJs": true,
+            "checkJs": false,
+            "target": "ES2020",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/ui/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 72,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": true,
+            "isolatedModules": true,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/api/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 64,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": true,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": true,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext"
+          },
+          {
+            "path": "apps/admin/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 44,
+            "strict": false,
+            "strictExceptions": ["noImplicitAny"],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": true,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "packages/db/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 40,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext"
+          },
+          {
+            "path": "packages/auth/tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": ["@tsconfig/node20/tsconfig.json"],
+            "files": 14,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          },
+          {
+            "path": "tsconfig.json",
+            "extends": ["tsconfig.base.json"],
+            "unresolved": [],
+            "files": 8,
+            "strict": true,
+            "strictExceptions": [],
+            "noUncheckedIndexedAccess": false,
+            "exactOptionalPropertyTypes": false,
+            "noImplicitOverride": false,
+            "verbatimModuleSyntax": false,
+            "isolatedModules": false,
+            "allowJs": false,
+            "checkJs": false,
+            "target": "ES2022",
+            "module": "ESNext",
+            "moduleResolution": "Bundler"
+          }
+        ],
+        "totalConfigs": 7,
+        "governedFiles": 338,
+        "ungovernedFiles": 4,
+        "jsFilesOutsideConfigs": 3
+      },
+      "modules": {
+        "files": 338,
+        "esmFiles": 312,
+        "commonjsFiles": 9,
+        "bothFiles": 2,
+        "imports": {
+          "declarations": 1640,
+          "typeOnly": 402
+        },
+        "nonErasable": {
+          "files": 6,
+          "enums": 4,
+          "namespaces": 0,
+          "parameterProperties": 9,
+          "decorators": 0
+        },
+        "packageTypes": {
+          "module": 7,
+          "commonjs": 1,
+          "unspecified": 3
+        }
+      },
+      "idioms": {
+        "files": 262,
+        "declarations": {
+          "interfaces": 58,
+          "objectTypes": 131
+        },
+        "enums": {
+          "enums": 3,
+          "stringUnions": 47
+        },
+        "topLevel": {
+          "classes": 11,
+          "functions": 146,
+          "arrowConsts": 402
+        },
+        "async": {
+          "awaits": 418,
+          "thenCalls": 23
+        },
+        "privacy": {
+          "hashPrivate": 2,
+          "privateModifiers": 7
+        },
+        "exports": {
+          "defaultExports": 64,
+          "namedExports": 780
+        },
+        "bindings": {
+          "consts": 3120,
+          "lets": 214,
+          "vars": 3
+        },
+        "iteration": {
+          "forOf": 96,
+          "forEachCalls": 71
+        },
+        "mutation": {
+          "mutationCalls": 84,
+          "transformCalls": 512,
+          "spreads": 266
+        },
+        "nullish": {
+          "optionalChains": 390,
+          "nullishCoalescing": 171
+        }
+      },
+      "ecosystem": {
+        "tools": [
+          {
+            "name": "React",
+            "category": "framework",
+            "files": 141,
+            "declaredIn": 3
+          },
+          {
+            "name": "Next.js",
+            "category": "framework",
+            "files": 58,
+            "declaredIn": 1
+          },
+          {
+            "name": "Vitest",
+            "category": "test",
+            "files": 44,
+            "declaredIn": 4
+          },
+          {
+            "name": "zod",
+            "category": "validation",
+            "files": 31,
+            "declaredIn": 2
+          },
+          {
+            "name": "Prisma",
+            "category": "data",
+            "files": 12,
+            "declaredIn": 1
+          },
+          {
+            "name": "ESLint",
+            "category": "lint",
+            "files": 0,
+            "declaredIn": 3
+          },
+          {
+            "name": "Prettier",
+            "category": "format",
+            "files": 0,
+            "declaredIn": 1
+          },
+          {
+            "name": "Turborepo",
+            "category": "monorepo",
+            "files": 0,
+            "declaredIn": 1
+          }
+        ],
+        "packages": [
+          {
+            "name": "react",
+            "files": 141
+          },
+          {
+            "name": "next",
+            "files": 58
+          },
+          {
+            "name": "zod",
+            "files": 31
+          }
+        ],
+        "undeclared": 23,
+        "nodeBuiltins": [
+          {
+            "name": "path",
+            "files": 14
+          },
+          {
+            "name": "fs",
+            "files": 9
+          },
+          {
+            "name": "crypto",
+            "files": 6
+          }
+        ],
+        "dependencies": {
+          "manifests": 11,
+          "runtime": 38,
+          "dev": 41
+        },
+        "hooks": {
+          "calls": 412,
+          "files": 97
+        }
+      },
+      "functions": {
+        "production": {
+          "files": 262,
+          "codeLines": 38400,
+          "functions": 1840,
+          "complexity": {
+            "bands": [1403, 312, 78, 36, 11],
+            "p50": 1,
+            "p90": 6,
+            "max": 41
+          },
+          "over15": {
+            "functions": 47,
+            "share": 0.0255,
+            "lines": 3210,
+            "lineShare": 0.0836
+          },
+          "top": [
+            {
+              "name": "reconcileInvoices",
+              "path": "packages/api/src/billing/reconcile.ts",
+              "line": 88,
+              "complexity": 41,
+              "lines": 212
+            },
+            {
+              "name": "buildQuery",
+              "path": "packages/db/src/query/build.ts",
+              "line": 31,
+              "complexity": 33,
+              "lines": 164
+            },
+            {
+              "name": "AdminTable",
+              "path": "apps/admin/src/tables/admin-table.tsx",
+              "line": 17,
+              "complexity": 29,
+              "lines": 141
+            },
+            {
+              "name": "parseFilters",
+              "path": "apps/web/src/search/filters.ts",
+              "line": 52,
+              "complexity": 26,
+              "lines": 97
+            },
+            {
+              "name": "Session.refresh",
+              "path": "packages/auth/src/session.ts",
+              "line": 120,
+              "complexity": 24,
+              "lines": 88
+            }
+          ],
+          "lengths": [1210, 402, 168, 60],
+          "longParameterLists": 23,
+          "maxDepth": 7
+        },
+        "tests": {
+          "files": 76,
+          "codeLines": 12100,
+          "functions": 1260,
+          "complexity": {
+            "bands": [1190, 58, 9, 3, 0],
+            "p50": 0,
+            "p90": 3,
+            "max": 17
+          },
+          "over15": {
+            "functions": 3,
+            "share": 0.0024,
+            "lines": 402,
+            "lineShare": 0.0332
+          },
+          "top": [
+            {
+              "name": "seedDatabase",
+              "path": "packages/db/test/seed.ts",
+              "line": 14,
+              "complexity": 17,
+              "lines": 120
+            },
+            {
+              "name": "(anonymous)",
+              "path": "apps/web/test/checkout.test.ts",
+              "line": 9,
+              "complexity": 16,
+              "lines": 143
+            },
+            {
+              "name": "assertInvoice",
+              "path": "packages/api/test/helpers.ts",
+              "line": 40,
+              "complexity": 15,
+              "lines": 139
+            },
+            {
+              "name": "createFixture",
+              "path": "packages/ui/test/fixture.tsx",
+              "line": 22,
+              "complexity": 12,
+              "lines": 64
+            },
+            {
+              "name": "waitForIdle",
+              "path": "apps/admin/test/support.ts",
+              "line": 5,
+              "complexity": 11,
+              "lines": 38
+            }
+          ],
+          "lengths": [1007, 171, 56, 26],
+          "longParameterLists": 4,
+          "maxDepth": 5
+        }
+      },
+      "complexityAndChange": {
+        "files": 255,
+        "revisions": 4120,
+        "complexFiles": 19,
+        "complexRevisions": 530,
+        "complexRevisionShare": 0.1286,
+        "hotspots": [
+          {
+            "path": "packages/api/src/billing/reconcile.ts",
+            "complexity": 41,
+            "revisions": 38
+          },
+          {
+            "path": "packages/db/src/query/build.ts",
+            "complexity": 33,
+            "revisions": 27
+          },
+          {
+            "path": "apps/admin/src/tables/admin-table.tsx",
+            "complexity": 29,
+            "revisions": 24
+          }
+        ]
+      },
+      "tests": {
+        "files": 76,
+        "frameworks": ["Vitest"],
+        "cases": 1420,
+        "parameterized": 38,
+        "skipped": 9,
+        "focused": 0,
+        "todo": 4,
+        "focusedFiles": [],
+        "assertions": [88, 502, 610, 216],
+        "snapshots": 31,
+        "typeTests": 12,
+        "focusedFileCount": 0
+      },
+      "markers": {
+        "files": 262,
+        "lines": 38400,
+        "todo": 64,
+        "fixme": 11,
+        "hack": 3,
+        "xxx": 0,
+        "deprecated": 8,
+        "exportedDeclarations": 1120,
+        "documentedExports": 604,
+        "documentedShare": 0.5393
+      },
+      "imports": {
+        "files": {
+          "files": 267,
+          "testFiles": 76,
+          "edges": {
+            "value": 612,
+            "typeOnly": 148,
+            "tests": 331
+          },
+          "external": 1184,
+          "assets": 23,
+          "dynamicUnresolvable": 9,
+          "unresolved": {
+            "count": 14,
+            "share": 0.0071,
+            "top": [
+              {
+                "specifier": "@aurora/ui/generated",
+                "files": 6
+              },
+              {
+                "specifier": "./env.generated.js",
+                "files": 4
+              },
+              {
+                "specifier": "../prisma/client",
+                "files": 2
+              },
+              {
+                "specifier": "./routeTree.gen",
+                "files": 1
+              },
+              {
+                "specifier": "@aurora/api/openapi",
+                "files": 1
+              }
+            ]
+          },
+          "cycles": {
+            "count": 3,
+            "largest": 5,
+            "top": [
+              {
+                "size": 5,
+                "files": [
+                  "apps/web/src/components/Sidebar.tsx",
+                  "apps/web/src/components/SidebarItem.tsx",
+                  "apps/web/src/components/SidebarMenu.tsx",
+                  "apps/web/src/hooks/useSidebar.ts",
+                  "apps/web/src/routes/layout.tsx"
+                ],
+                "territories": 1
+              },
+              {
+                "size": 3,
+                "files": [
+                  "packages/api/src/orders/pricing.ts",
+                  "packages/api/src/orders/totals.ts",
+                  "packages/ui/src/format/money.ts"
+                ],
+                "territories": 2
+              },
+              {
+                "size": 2,
+                "files": [
+                  "packages/db/src/queries/users.ts",
+                  "packages/db/src/queries/sessions.ts"
+                ],
+                "territories": 1
+              }
+            ],
+            "withTypes": {
+              "count": 4,
+              "largest": 9
+            },
+            "typeOnly": 1
+          },
+          "fanIn": {
+            "median": 1,
+            "top": [
+              {
+                "path": "packages/ui/src/cn.ts",
+                "count": 74
+              },
+              {
+                "path": "packages/api/src/client.ts",
+                "count": 41
+              },
+              {
+                "path": "packages/db/src/index.ts",
+                "count": 27
+              },
+              {
+                "path": "packages/auth/src/session.ts",
+                "count": 22
+              },
+              {
+                "path": "packages/ui/src/Button.tsx",
+                "count": 19
+              }
+            ]
+          },
+          "fanOut": {
+            "top": [
+              {
+                "path": "apps/web/src/routes/layout.tsx",
+                "count": 18
+              },
+              {
+                "path": "apps/admin/src/App.tsx",
+                "count": 16
+              },
+              {
+                "path": "packages/api/src/index.ts",
+                "count": 14
+              },
+              {
+                "path": "apps/web/src/main.tsx",
+                "count": 12
+              },
+              {
+                "path": "packages/db/src/index.ts",
+                "count": 11
+              }
+            ]
+          }
+        },
+        "territories": {
+          "detail": 1,
+          "totalTerritories": 9,
+          "territories": [
+            {
+              "path": "packages/ui",
+              "kind": "package",
+              "files": 60,
+              "ca": 98,
+              "ce": 2,
+              "instability": 0.02
+            },
+            {
+              "path": "apps/web",
+              "kind": "package",
+              "files": 90,
+              "ca": 0,
+              "ce": 94,
+              "instability": 1.0
+            },
+            {
+              "path": "packages/api",
+              "kind": "package",
+              "files": 40,
+              "ca": 38,
+              "ce": 28,
+              "instability": 0.4242
+            },
+            {
+              "path": "apps/admin",
+              "kind": "package",
+              "files": 31,
+              "ca": 0,
+              "ce": 50,
+              "instability": 1.0
+            },
+            {
+              "path": "packages/db",
+              "kind": "package",
+              "files": 20,
+              "ca": 27,
+              "ce": 0,
+              "instability": 0.0
+            },
+            {
+              "path": "packages/auth",
+              "kind": "package",
+              "files": 12,
+              "ca": 20,
+              "ce": 4,
+              "instability": 0.1667
+            },
+            {
+              "path": "infra",
+              "kind": "folder",
+              "files": 6,
+              "ca": 0,
+              "ce": 3,
+              "instability": 1.0
+            },
+            {
+              "path": "scripts",
+              "kind": "folder",
+              "files": 5,
+              "ca": 0,
+              "ce": 2,
+              "instability": 1.0
+            },
+            {
+              "path": ".",
+              "kind": "folder",
+              "files": 3,
+              "ca": 0,
+              "ce": 0
+            }
+          ],
+          "totalEdges": 13,
+          "edges": [
+            {
+              "from": {
+                "path": "apps/web",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "files": 64,
+              "typeOnlyFiles": 6
+            },
+            {
+              "from": {
+                "path": "apps/admin",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "files": 31,
+              "typeOnlyFiles": 3
+            },
+            {
+              "from": {
+                "path": "apps/web",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 22,
+              "typeOnlyFiles": 9
+            },
+            {
+              "from": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 18,
+              "typeOnlyFiles": 2
+            },
+            {
+              "from": {
+                "path": "apps/admin",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 14,
+              "typeOnlyFiles": 4
+            },
+            {
+              "from": {
+                "path": "apps/web",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "files": 8,
+              "typeOnlyFiles": 2
+            },
+            {
+              "from": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "files": 7,
+              "typeOnlyFiles": 1
+            },
+            {
+              "from": {
+                "path": "apps/admin",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "files": 5,
+              "typeOnlyFiles": 1
+            },
+            {
+              "from": {
+                "path": "packages/auth",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 4,
+              "typeOnlyFiles": 0
+            },
+            {
+              "from": {
+                "path": "infra",
+                "kind": "folder"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 3,
+              "typeOnlyFiles": 0
+            },
+            {
+              "from": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "files": 3,
+              "typeOnlyFiles": 3
+            },
+            {
+              "from": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 2,
+              "typeOnlyFiles": 2
+            },
+            {
+              "from": {
+                "path": "scripts",
+                "kind": "folder"
+              },
+              "to": {
+                "path": "packages/db",
+                "kind": "package"
+              },
+              "files": 2,
+              "typeOnlyFiles": 0
+            }
+          ],
+          "totalTowardLessStable": 1,
+          "towardLessStable": [
+            {
+              "from": {
+                "path": "packages/ui",
+                "kind": "package"
+              },
+              "to": {
+                "path": "packages/api",
+                "kind": "package"
+              },
+              "files": 2,
+              "fromInstability": 0.02,
+              "toInstability": 0.4242
+            }
+          ],
+          "totalMutualImports": 0,
+          "mutualImports": [],
+          "mutualImportsWithTypes": 1
+        }
+      },
+      "trends": {
+        "months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05"],
+        "series": {
+          "production.files": [2, 3, 3, 4, 4],
+          "production.lines": [210, 300, 320, 410, 420],
+          "production.any": [9, 9, 7, 6, 4],
+          "production.escapes": [12, 13, 11, 9, 7],
+          "production.suppressions": [3, 3, 2, 2, 1],
+          "production.functions": [14, 20, 21, 25, 26],
+          "production.complexFunctions": [1, 1, 2, 2, 2],
+          "production.esmFiles": [2, 3, 3, 4, 4],
+          "production.commonjsFiles": [0, 0, 0, 0, 0],
+          "tests.files": [1, 1, 2, 2, 2],
+          "tests.lines": [40, 40, 90, 90, 120],
+          "tests.any": [1, 1, 1, 0, 0],
+          "tests.escapes": [1, 1, 1, 1, 0],
+          "tests.suppressions": [0, 0, 0, 0, 0],
+          "tests.functions": [3, 3, 5, 5, 6],
+          "tests.complexFunctions": [0, 0, 0, 0, 0],
+          "tests.esmFiles": [1, 1, 2, 2, 2],
+          "tests.commonjsFiles": [0, 0, 0, 0, 0],
+          "tests.testCases": [4, 4, 9, 9, 11],
+          "tests.focusedTests": [0, 0, 0, 0, 0]
+        },
+        "events": [
+          {
+            "date": "2026-02-11",
+            "path": "tsconfig.json",
+            "flag": "strict",
+            "from": false,
+            "to": true
+          }
+        ],
+        "escapesByAutomation": {
+          "human": {
+            "commits": 4,
+            "added": 6,
+            "removed": 9
+          },
+          "agent-assisted": {
+            "commits": 1,
+            "added": 2,
+            "removed": 0
+          },
+          "agent": {
+            "commits": 0,
+            "added": 0,
+            "removed": 0
+          },
+          "bot": {
+            "commits": 0,
+            "added": 0,
+            "removed": 0
+          }
+        }
+      },
+      "achievements": [
+        {
+          "kind": "any-free",
+          "title": "Any-free",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "41 of 262 production TypeScript files use an explicit any.",
+          "progress": {
+            "value": 221,
+            "target": 262,
+            "unit": "production files without any"
+          }
+        },
+        {
+          "kind": "strict-throughout",
+          "title": "Strict throughout",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "232 of 276 files lie under a strict tsconfig.",
+          "progress": {
+            "value": 232,
+            "target": 276,
+            "unit": "files under a strict tsconfig"
+          }
+        },
+        {
+          "kind": "esm-only",
+          "title": "ESM only",
+          "reached": true,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "No CommonJS in 301 production module files.",
+          "progress": null
+        },
+        {
+          "kind": "no-ts-ignore",
+          "title": "No ts-ignore",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "state",
+          "detail": "3 of 262 production files hold a @ts-ignore or @ts-nocheck.",
+          "progress": {
+            "value": 259,
+            "target": 262,
+            "unit": "production files without @ts-ignore or @ts-nocheck"
+          }
+        },
+        {
+          "kind": "tightened",
+          "title": "Tightened",
+          "reached": false,
+          "reachedAt": null,
+          "holds": "milestone",
+          "detail": "The production code has not held 20 escape hatches, so there is no peak to fall from.",
+          "progress": null
+        }
+      ]
+    }
+  }
 }

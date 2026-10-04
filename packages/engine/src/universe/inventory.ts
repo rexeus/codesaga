@@ -37,7 +37,7 @@ const EXCLUDED_DIRECTORIES = new Set([
 ]);
 const MINIFIED_NAME = /\.min\.[^/]+$/u;
 
-const inExcludedDirectory = (path: string): boolean =>
+export const inExcludedDirectory = (path: string): boolean =>
   path
     .split("/")
     .slice(0, -1)

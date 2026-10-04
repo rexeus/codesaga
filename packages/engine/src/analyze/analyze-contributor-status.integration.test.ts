@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
 
@@ -15,7 +15,7 @@ const lines = (prefix: string, count: number): string =>
 const ada = { name: "Ada Lovelace", email: "ada@example.com" };
 const grace = { name: "Grace", email: "grace@example.com" };
 
-layer(NodeServices.layer)("analyze contributor status", (it) => {
+layer(analyzeServices)("analyze contributor status", (it) => {
   it.effect(
     "judges a contributor as new by their first commit ever, not by the first in a narrowed window",
     () =>
@@ -53,7 +53,7 @@ layer(NodeServices.layer)("analyze contributor status", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze the all-time contributors", (it) => {
+layer(analyzeServices)("analyze the all-time contributors", (it) => {
   it.effect(
     "counts the contributors of the full history under a narrowed window",
     () =>
@@ -83,48 +83,45 @@ layer(NodeServices.layer)("analyze the all-time contributors", (it) => {
   );
 });
 
-layer(NodeServices.layer)(
-  "analyze contributor status and the overview",
-  (it) => {
-    it.effect(
-      "calls only the contributors of the overview's 90 days active or new, though an expert counts for 183",
-      () =>
-        Effect.gen(function* () {
-          yield* setNow;
-          const repo = yield* makeTempRepository;
-          yield* repo.commit(
-            "2025-10-01T09:00:00Z",
-            { "src/a.ts": lines("a", 3) },
-            { author: ada },
-          );
-          // 120 days before now: out of the 90 days, within the expert's 183
-          yield* repo.commit(
-            "2025-11-10T09:00:00Z",
-            { "src/b.ts": lines("b", 2) },
-            { author: grace },
-          );
-          yield* repo.commit(
-            "2026-03-02T09:00:00Z",
-            { "src/a.ts": lines("a", 5) },
-            { author: ada },
-          );
+layer(analyzeServices)("analyze contributor status and the overview", (it) => {
+  it.effect(
+    "calls only the contributors of the overview's 90 days active or new, though an expert counts for 183",
+    () =>
+      Effect.gen(function* () {
+        yield* setNow;
+        const repo = yield* makeTempRepository;
+        yield* repo.commit(
+          "2025-10-01T09:00:00Z",
+          { "src/a.ts": lines("a", 3) },
+          { author: ada },
+        );
+        // 120 days before now: out of the 90 days, within the expert's 183
+        yield* repo.commit(
+          "2025-11-10T09:00:00Z",
+          { "src/b.ts": lines("b", 2) },
+          { author: grace },
+        );
+        yield* repo.commit(
+          "2026-03-02T09:00:00Z",
+          { "src/a.ts": lines("a", 5) },
+          { author: ada },
+        );
 
-          const report = yield* analyze(analyzeOptionsFor(repo));
+        const report = yield* analyze(analyzeOptionsFor(repo));
 
-          assert.deepStrictEqual(
-            report.contributors.map((c) => [c.name, c.status, c.active]),
-            [
-              ["Ada Lovelace", "active", true],
-              ["Grace", "dormant", true],
-            ],
-          );
-          assert.strictEqual(report.overview.contributors.active90, 1);
-        }),
-    );
-  },
-);
+        assert.deepStrictEqual(
+          report.contributors.map((c) => [c.name, c.status, c.active]),
+          [
+            ["Ada Lovelace", "active", true],
+            ["Grace", "dormant", true],
+          ],
+        );
+        assert.strictEqual(report.overview.contributors.active90, 1);
+      }),
+  );
+});
 
-layer(NodeServices.layer)("analyze stories", (it) => {
+layer(analyzeServices)("analyze stories", (it) => {
   it.effect(
     "reports a streak and a rename record read off the whole history",
     () =>

@@ -1,6 +1,6 @@
 // Owns what each MCP tool does: the CLI's settings resolution and engine calls, answered as documents.
 import { analyze, analyzeWithGithub, inspect } from "@codesaga/engine";
-import type { AnalyzeOptions } from "@codesaga/engine";
+import type { AnalyzeOptions, TypeScriptParser } from "@codesaga/engine";
 import { Effect, Option } from "effect";
 import type { FileSystem, Path } from "effect";
 import type { HttpClient } from "effect/http";
@@ -32,7 +32,8 @@ type Services =
   | ChildProcessSpawner.ChildProcessSpawner
   | FileSystem.FileSystem
   | HttpClient.HttpClient
-  | Path.Path;
+  | Path.Path
+  | TypeScriptParser;
 
 type Params = {
   readonly path?: string | undefined;
@@ -78,6 +79,8 @@ const runAnalysis = (
   extras: {
     readonly compare?: string | undefined;
     readonly github?: boolean | undefined;
+    /** Whether to parse the TypeScript history; the report of `analyze` needs it, the gates of `check` do not. */
+    readonly typescriptHistory?: boolean | undefined;
   } = {},
 ) => {
   const options: AnalyzeOptions = {
@@ -86,6 +89,7 @@ const runAnalysis = (
     compare: extras.compare,
     cache: true,
     blame: settings.blame,
+    typescriptHistory: extras.typescriptHistory,
   };
   return (
     extras.github === true ? analyzeWithGithub(options) : analyze(options)
@@ -159,7 +163,7 @@ const checkGates = (
     if (!hasGates(limits)) {
       return yield* new NoGatesConfigured();
     }
-    const report = yield* runAnalysis(analysis);
+    const report = yield* runAnalysis(analysis, { typescriptHistory: false });
     if (report.repository.shallow) {
       return yield* new ShallowClone();
     }

@@ -1,6 +1,7 @@
 import type { Report } from "@codesaga/engine";
 import { describe, expect, it } from "vitest";
 
+import { firstOf, sampleBlock } from "../testing/reports.js";
 import { achievementSummary, medals } from "./achievements.js";
 
 type Achievement = Report["achievements"][number];
@@ -126,5 +127,66 @@ describe("achievementSummary", () => {
     expect(
       achievementSummary([achievement("marathon", { reached: true })]).rest,
     ).toBe(" reached");
+  });
+});
+
+describe("TypeScript medals", () => {
+  const typescript = sampleBlock("achievements");
+
+  it("gives each TypeScript achievement its own glyph and tint", () => {
+    const listed = medals(typescript, true);
+
+    expect(listed.map(({ kind, icon, tint }) => [kind, icon, tint])).toEqual([
+      ["esm-only", "package", "slot-3"],
+      ["any-free", "shield-check", "slot-1"],
+      ["strict-throughout", "lock", "slot-7"],
+      ["no-ts-ignore", "circle-slash", "slot-5"],
+      ["tightened", "shrink", "slot-4"],
+    ]);
+  });
+
+  it("marks them as TypeScript, and the repository's own as not", () => {
+    expect(medals(typescript, true).every((medal) => medal.typescript)).toBe(
+      true,
+    );
+    expect(
+      medals([achievement("marathon")]).every((medal) => !medal.typescript),
+    ).toBe(true);
+  });
+
+  it("says a state holds today and a milestone is reached on its day", () => {
+    const [holding] = medals(typescript, true);
+    const [tightened] = medals(
+      [
+        {
+          ...firstOf(typescript),
+          kind: "tightened",
+          holds: "milestone",
+          reached: true,
+          reachedAt: "2025-08-31",
+        },
+      ],
+      true,
+    );
+
+    expect(holding?.when?.text).toBe("Holds today");
+    expect(tightened?.when?.text).toBe("Reached 31 Aug 2025");
+  });
+
+  it("shows how far a locked one is", () => {
+    const locked = medals(typescript, true).find(
+      ({ kind }) => kind === "any-free",
+    );
+
+    expect(locked?.progress?.fraction).toBeGreaterThan(0);
+    expect(locked?.progress?.fraction).toBeLessThan(1);
+    expect(locked?.reached).toBe(false);
+  });
+
+  it("counts the TypeScript achievements apart", () => {
+    expect(achievementSummary(typescript)).toEqual({
+      strong: "1 of 5",
+      rest: " reached · 4 still ahead",
+    });
   });
 });

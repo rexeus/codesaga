@@ -12,6 +12,7 @@ import { Knowledge } from "./knowledge-report.js";
 import { PullRequests } from "./pull-requests.js";
 import { Story } from "./stories.js";
 import { Thresholds } from "./thresholds.js";
+import { DeepDives } from "./typescript-deep-dive.js";
 
 const Count = Schema.Natural;
 
@@ -227,5 +228,7 @@ export const Report = Schema.Struct({
   comparison: Schema.optionalKey(Comparison),
   /** Only with `--github`: pull requests and reviews read from GitHub. */
   pullRequests: Schema.optionalKey(PullRequests),
+  /** Absent when the universe has no TypeScript or JavaScript file. */
+  deepDives: Schema.optionalKey(DeepDives),
 });
 export type Report = typeof Report.Type;

@@ -9,7 +9,12 @@ import {
   commit,
   trailer,
 } from "../testing/commit-signals.js";
-import { classifyCommit, isContributorCommit } from "./classify.js";
+import {
+  classifyCommit,
+  humanCoAuthorsOf,
+  isContributorCommit,
+} from "./classify.js";
+import { withCustomSignatures } from "./custom-signatures.js";
 
 describe("classifyCommit rules", () => {
   it("classifies an author outside the table that ends in [bot] as a bot named after its account", () => {
@@ -165,5 +170,51 @@ describe("isContributorCommit", () => {
         isContributorCommit({ class: commitClass, tools: [] }),
       ),
     ).toStrictEqual([true, true, false, false]);
+  });
+});
+
+describe("humanCoAuthorsOf", () => {
+  it("counts a human co-author, and none for an agent, a bot or a custom signature", () => {
+    const custom = withCustomSignatures({
+      agents: [{ name: "House AI", emails: ["house-ai@example.com"] }],
+    });
+    const trailers = [
+      coAuthor("Grace <grace@example.com>"),
+      coAuthor("Claude <noreply@anthropic.com>"),
+      coAuthor(
+        "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+      ),
+      coAuthor("House AI <house-ai@example.com>"),
+    ];
+
+    expect(humanCoAuthorsOf(commit({ trailers }), custom)).toBe(1);
+    expect(humanCoAuthorsOf(commit({ trailers }))).toBe(2);
+  });
+
+  it("counts each person once, and not the author", () => {
+    const trailers = [
+      coAuthor("Grace <grace@example.com>"),
+      coAuthor("Grace H. <GRACE@example.com>"),
+      coAuthor("Ada <ada@example.com>"),
+      trailer("Made-with", "Vim"),
+    ];
+
+    expect(humanCoAuthorsOf(commit({ trailers }))).toBe(1);
+  });
+
+  it("does not count a malformed trailer without an address", () => {
+    const trailers = [
+      coAuthor("broken"),
+      coAuthor("Grace <not-an-address>"),
+      coAuthor("Grace <>"),
+    ];
+
+    expect(humanCoAuthorsOf(commit({ trailers }))).toBe(0);
+  });
+
+  it("is zero for a co-author line that git did not parse as a trailer", () => {
+    const markers = ["Co-authored-by: Grace <grace@example.com>"];
+
+    expect(humanCoAuthorsOf(commit({ markers }))).toBe(0);
   });
 });

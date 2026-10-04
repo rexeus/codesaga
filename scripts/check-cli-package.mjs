@@ -1,9 +1,11 @@
 // Proves the packed `codesaga` package works the way `npx codesaga` will run it:
-// one bundled file, no runtime dependencies, installable with npm and pnpm, and
-// able to analyze and inspect a real git repository, with `--json` documents that
-// decode with the engine's schemas, and to list its MCP tools over `codesaga mcp`.
+// one bundled file with `oxc-parser` as its one runtime dependency, installable
+// with npm and pnpm, and able to analyze and inspect a real git repository, with
+// `--json` documents that decode with the engine's schemas and a TypeScript deep
+// dive that parsed files, to list its MCP tools over `codesaga mcp`, and to
+// degrade to a coverage note when the parser's native binding is gone.
 // Run after `pnpm --filter codesaga build`.
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -18,7 +20,15 @@ import { join, resolve } from "node:path";
 
 import { makeRepository } from "./make-package-fixture.mjs";
 import { mcpToolsList } from "./mcp-tools-list.mjs";
-import { expectPackedLegalFiles } from "./packed-legal-files.mjs";
+import { expectBundledArtifact } from "./packed-artifact.mjs";
+import { removeParserBindings, valueAt } from "./parser-dependency.mjs";
+
+/**
+ * A counter read from untrusted JSON, or 0 when it is missing.
+ * @param {unknown} value
+ * @returns {number}
+ */
+const countOf = (value) => (typeof value === "number" ? value : 0);
 
 const repository = resolve(import.meta.dirname, "..");
 
@@ -81,57 +91,6 @@ const pack = () => {
   return join(destination, tarballs[0]);
 };
 
-/** @param {string} tarball */
-const expectBundledArtifact = (tarball) => {
-  const listing = execFileSync("tar", ["-tzf", tarball], { encoding: "utf8" });
-  const files = listing.trim().split("\n").toSorted();
-  const expected = new Set([
-    "package/dist/codesaga.js",
-    "package/package.json",
-    "package/THIRD_PARTY_NOTICES.md",
-  ]);
-  const unexpected = files.filter(
-    (file) =>
-      !expected.has(file) &&
-      !/^package\/(README|LICENSE|CHANGELOG)/u.test(file),
-  );
-  const required = [
-    "package/dist/codesaga.js",
-    "package/LICENSE",
-    "package/README.md",
-    "package/THIRD_PARTY_NOTICES.md",
-  ];
-  if (required.some((file) => !files.includes(file)) || unexpected.length > 0) {
-    throw new Error(`Unexpected package contents:\n${files.join("\n")}`);
-  }
-  // npm resolves relative links against the package directory, where the
-  // repository's docs do not exist; the packed README must link absolutely.
-  const packedReadme = execFileSync(
-    "tar",
-    ["-xOzf", tarball, "package/README.md"],
-    { encoding: "utf8" },
-  );
-  const relativeLinks = packedReadme.match(
-    /\]\((?!https?:|#|mailto:)[^)\s]+\)/gu,
-  );
-  if (relativeLinks !== null) {
-    throw new Error(
-      `The packed README has relative links: ${relativeLinks.join(", ")}`,
-    );
-  }
-  expectPackedLegalFiles(tarball, repository);
-  const packed = execFileSync(
-    "tar",
-    ["-xOzf", tarball, "package/package.json"],
-    { encoding: "utf8" },
-  );
-  if (fieldOf(packed, "dependencies") !== undefined) {
-    throw new Error(
-      "The packed manifest declares runtime dependencies; the CLI must stay bundled.",
-    );
-  }
-};
-
 /**
  * Runs a packed command with `--json` and decodes its output with the engine
  * schema from the workspace source, which the bundle itself does not ship.
@@ -182,13 +141,23 @@ const expectWorkingInstall = async (
       `codesaga from ${installer} reports:\n${version.stdout}${version.stderr}`,
     );
   }
-  const contributors = fieldOf(
-    decodedJson(bin, "analyze", repositoryRoot, installer),
-    "contributors",
-  );
+  const analysis = decodedJson(bin, "analyze", repositoryRoot, installer);
+  const contributors = fieldOf(analysis, "contributors");
   if (!Array.isArray(contributors) || contributors.length !== 1) {
     throw new Error(
       `codesaga from ${installer} did not analyze the repository.`,
+    );
+  }
+  const coverage = ["deepDives", "typescript", "coverage"];
+  const parsed = valueAt(analysis, ...coverage, "parsed");
+  // The payload crashes the native parser or overflows the walker, depending
+  // on the machine's stack size; either way exactly that one file is skipped.
+  const crashed = valueAt(analysis, ...coverage, "skipped", "parser-crashed");
+  const tooDeep = valueAt(analysis, ...coverage, "skipped", "too-deep");
+  const lost = countOf(crashed) + countOf(tooDeep);
+  if (typeof parsed !== "number" || parsed < 1 || lost !== 1) {
+    throw new Error(
+      `codesaga from ${installer} should parse the fixture's TypeScript and count its one file that crashes the parser: ${analysis}`,
     );
   }
   decodedJson(bin, "inspect", repositoryRoot, installer);
@@ -202,9 +171,51 @@ const expectWorkingInstall = async (
   }
 };
 
+/**
+ * @param {string} applicationRoot
+ * @param {string} installer
+ */
+const expectNoEffect = (applicationRoot, installer) => {
+  if (existsSync(join(applicationRoot, "node_modules", "effect"))) {
+    throw new Error(
+      `${installer} installed effect; the bundle must not need it.`,
+    );
+  }
+};
+
+/**
+ * Without the native binding the run still succeeds, and the deep dive says
+ * why it has no parser. Destroys the installation, so it runs last.
+ * @param {string} applicationRoot
+ * @param {string} installer
+ * @param {string} repositoryRoot
+ */
+const expectDegradedWithoutBinding = (
+  applicationRoot,
+  installer,
+  repositoryRoot,
+) => {
+  removeParserBindings(join(applicationRoot, "node_modules"));
+  const bin = join(applicationRoot, "node_modules", ".bin", binName);
+  const analysis = decodedJson(
+    bin,
+    "analyze",
+    repositoryRoot,
+    `${installer} without the binding`,
+  );
+  const coverage = ["deepDives", "typescript", "coverage"];
+  const unavailable = valueAt(analysis, ...coverage, "unavailable");
+  const parsed = valueAt(analysis, ...coverage, "parsed");
+  if (typeof unavailable !== "string" || unavailable === "" || parsed !== 0) {
+    throw new Error(
+      `Without its binding the parser should be unavailable and parse nothing: ${analysis}`,
+    );
+  }
+};
+
 try {
   const tarball = pack();
-  expectBundledArtifact(tarball);
+  expectBundledArtifact(tarball, repository);
   const repositoryRoot = makeRepository(join(temporary, "repository"));
 
   const pnpmApplication = join(temporary, "application-pnpm");
@@ -215,6 +226,8 @@ try {
   );
   run(pnpm, ["add", "--ignore-scripts", tarball], pnpmApplication);
   await expectWorkingInstall(pnpmApplication, "pnpm", repositoryRoot);
+  expectNoEffect(pnpmApplication, "pnpm");
+  expectDegradedWithoutBinding(pnpmApplication, "pnpm", repositoryRoot);
 
   // npm (and therefore npx) resolves dependencies differently from pnpm.
   const npmApplication = join(temporary, "application-npm");
@@ -228,13 +241,12 @@ try {
     ["install", "--ignore-scripts", "--no-audit", "--no-fund", tarball],
     npmApplication,
   );
-  if (existsSync(join(npmApplication, "node_modules", "effect"))) {
-    throw new Error("npm installed effect; the bundle must not need it.");
-  }
+  expectNoEffect(npmApplication, "npm");
   await expectWorkingInstall(npmApplication, "npm", repositoryRoot);
+  expectDegradedWithoutBinding(npmApplication, "npm", repositoryRoot);
 
   console.log(
-    `Package verified: codesaga v${expectedVersion} installs and runs with pnpm and npm.`,
+    `Package verified: codesaga v${expectedVersion} installs and runs with pnpm and npm, and without oxc-parser's binding it degrades.`,
   );
 } finally {
   rmSync(temporary, { recursive: true, force: true });

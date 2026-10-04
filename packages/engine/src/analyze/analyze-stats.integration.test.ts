@@ -1,9 +1,9 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -55,7 +55,7 @@ const reportOfHistory = Effect.gen(function* () {
   return yield* analyze(analyzeOptionsFor(repo));
 });
 
-layer(NodeServices.layer)("analyze stats", (it) => {
+layer(analyzeServices)("analyze stats", (it) => {
   it.effect("counts the files at HEAD and the revisions of renamed files", () =>
     Effect.gen(function* () {
       const { stats } = yield* reportOfHistory;
@@ -98,7 +98,7 @@ layer(NodeServices.layer)("analyze stats", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze territory stats", (it) => {
+layer(analyzeServices)("analyze territory stats", (it) => {
   it.effect(
     "gives a territory the stats of its own files, without the repository's commit habits",
     () =>

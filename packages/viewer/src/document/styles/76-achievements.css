@@ -33,6 +33,25 @@
   transform: translateX(-50%);
 }
 
+.ach-tag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  color: var(--tint-ink);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ach-group {
+  margin: 28px 0 16px;
+}
+
 .ach h3 {
   position: relative;
   font-size: 17px;
@@ -175,10 +194,16 @@
 }
 
 .nline b {
+  min-width: 0;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
   font-weight: 650;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.nline span {
+  flex: none;
 }
 
 .next,

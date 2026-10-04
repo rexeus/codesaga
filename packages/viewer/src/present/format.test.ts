@@ -7,6 +7,8 @@ import {
   formatDateLong,
   formatMonth,
   formatNoun,
+  formatPercentTenth,
+  formatPerThousand,
   formatSignedCompact,
 } from "./format.js";
 
@@ -85,5 +87,34 @@ describe("formatNoun", () => {
       formatNoun(0, "file"),
       formatNoun(1204, "line"),
     ]).toEqual(["1 file", "0 files", "1,204 lines"]);
+  });
+
+  it("takes the plural of an irregular noun", () => {
+    expect([
+      formatNoun(1, "territory", "territories"),
+      formatNoun(43, "territory", "territories"),
+    ]).toEqual(["1 territory", "43 territories"]);
+  });
+});
+
+describe("formatPerThousand", () => {
+  it("gives one decimal and names a small rate above zero", () => {
+    expect([
+      formatPerThousand(15.7967),
+      formatPerThousand(0),
+      formatPerThousand(0.026),
+      formatPerThousand(0.05),
+    ]).toEqual(["15.8", "0.0", "<0.1", "0.1"]);
+  });
+});
+
+describe("formatPercentTenth", () => {
+  it("gives one decimal and names a share too small for it", () => {
+    expect([
+      formatPercentTenth(0.0132),
+      formatPercentTenth(0),
+      formatPercentTenth(0.0002),
+      formatPercentTenth(1),
+    ]).toEqual(["1.3%", "0.0%", "<0.1%", "100.0%"]);
   });
 });

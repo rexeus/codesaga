@@ -44,7 +44,16 @@ export const TerritoryBadge = Schema.Struct({
    * territories at the territory's level and a value of at least
    * `codeBadgeMedianFactor` times the median of those territories' values. `well-tested`: at least
    * `thresholds.badges.wellTestedShare` of the files are tests; never awarded to
-   * a territory whose own path is inside a test directory.
+   * a territory whose own path is inside a test directory. `type-safe`: at least
+   * `thresholds.badges.typeSafeMinFiles` production TypeScript files and no escape
+   * hatch per 1,000 production lines once the figure is rounded to one decimal.
+   * `strict`: every config that governs the territory's files is effectively
+   * strict, `noUncheckedIndexedAccess` included. `complex-logic`: at least
+   * `thresholds.badges.complexLogicMinFunctions` production functions, and at least
+   * `complexLogicShare` of them at or above `thresholds.typescript.complexityLimit`.
+   * `in-a-cycle`: a cycle of production files by value imports runs through the
+   * territory and out of it (`typescript.inCycle`); the only badge of the four
+   * that points at a cost, the coupling a cycle brings. They need the TypeScript deep dive.
    */
   kind: Schema.Literals([
     "island",
@@ -62,11 +71,15 @@ export const TerritoryBadge = Schema.Struct({
     "churning",
     "deeply-nested",
     "well-tested",
+    "type-safe",
+    "strict",
+    "complex-logic",
+    "in-a-cycle",
   ]),
   /**
    * What the badge is about: `knowledge` (`island`, `orphaned`, `one-expert`,
    * `shared-knowledge`, `knowledge-fading`, `handover`, `newcomer-friendly`),
-   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`heavyweight`, `hotspot`, `churning`, `deeply-nested`, `well-tested`).
+   * `activity` (`new-territory`, `in-focus`, `quiet`) or `code` (`heavyweight`, `hotspot`, `churning`, `deeply-nested`, `well-tested`, `type-safe`, `strict`, `complex-logic`, `in-a-cycle`).
    * Determined by `kind`.
    */
   category: Schema.Literals(["knowledge", "code", "activity"]),
@@ -78,8 +91,9 @@ export const TerritoryBadge = Schema.Struct({
 export type TerritoryBadge = typeof TerritoryBadge.Type;
 
 /**
- * A badge of a contributor: positive or neutral, never comparative, and
- * never about working hours. Reviewing needs `--github`.
+ * A badge of a contributor: positive or neutral, and never comparative. It
+ * describes what the person's commits show and never ranks them. Reviewing
+ * needs `--github`.
  */
 export const ContributorBadge = Schema.Struct({
   /**
@@ -95,7 +109,43 @@ export const ContributorBadge = Schema.Struct({
    * touch documentation. `steady`: a commit in each of the last
    * `steadyMonths` months. `new-here`: the first commit lies at most
    * `newHereDays` days back. `back-again`: active again after a pause of at
-   * least `backAgainGapDays` days. `reviewer`: at least `reviewerReviews`
+   * least `backAgainGapDays` days. `night-owl`, `early-bird` and
+   * `weekend-regular`: at least `rhythmShare` of the person's human commits of
+   * the last `rhythmWindowDays` days fall between `rhythmNightFromHour` and
+   * `rhythmNightToHour` o'clock, between `rhythmNightToHour` and
+   * `rhythmEarlyToHour`, or on a Saturday or Sunday, in the author's local
+   * time. They need `rhythmMinCommits` such commits in `rhythmMinMonths`
+   * calendar months, and are withheld when `rhythmUtcShare` of them carry
+   * +00:00 while the history has other offsets. `pair-partner`: at least
+   * `pairPartnerCommits` commits of the last `recentWindowDays` days carry a
+   * `Co-authored-by` trailer that names another person, not an agent or a bot.
+   * `long-hauler`: a first commit at least `longHaulerYears` years ago and a
+   * commit in each of the last `longHaulerQuarters` quarters, counted back from
+   * now in blocks of three months; withheld in a shallow clone. `explorer`:
+   * first commits in at least `explorerMinTerritories` territories of the
+   * recommended detail within the last `explorerDays` days, for someone who is
+   * not `new-here`; withheld in a shallow clone. `toolsmith`: at least
+   * `toolsmithShare` of the human commits of the last `recentWindowDays` days
+   * (at least `toolsmithMinCommits`) change only tooling files: CI,
+   * containers, package manifests and lockfiles, and the configuration files
+   * of known tools such as `vite.config.ts` or `tsconfig.json`.
+   * `type-tightener`, `sweeper`, `simplifier` and `test-companion` read what the
+   * person's own human commits of the last `recentWindowDays` days did to the
+   * TypeScript and JavaScript files, by comparing the facts of each file before
+   * and after the commit; commits that change more than `craftMaxFilesPerCommit`
+   * files (mass changes and codemods) are left out, and agent-assisted commits
+   * are the agent's. `type-tightener`: the commits net-remove at least
+   * `typeTightenerRemovedAny` explicit `any` (as `as any` too), in at least
+   * `typeTightenerMinCommits` commits that each net-remove one; the inverse is
+   * never shown. `sweeper`: net removal of at least `sweeperRemovedDeclarations`
+   * top-level classes, functions and arrow-function constants; a move between
+   * files cancels out. `simplifier`: the commits lowered the cognitive
+   * complexity of at least `simplifierFunctions` functions by
+   * `simplifierMinDrop` or more, matched by name within the file, in commits
+   * that add no function to that file. `test-companion`: at least
+   * `testCompanionCommits` commits add an exported function to production code,
+   * and at least `testCompanionShare` of them also add test cases.
+   * `reviewer`: at least `reviewerReviews`
    * reviews; only with `--github`.
    */
   kind: Schema.Literals([
@@ -109,7 +159,34 @@ export const ContributorBadge = Schema.Struct({
     "steady",
     "new-here",
     "back-again",
+    "night-owl",
+    "early-bird",
+    "weekend-regular",
+    "pair-partner",
+    "long-hauler",
+    "explorer",
+    "toolsmith",
+    "type-tightener",
+    "sweeper",
+    "simplifier",
+    "test-companion",
     "reviewer",
+  ]),
+  /**
+   * What the badge is about: `focus` (`all-rounder`, `specialist`, `keeper`),
+   * `craft` (`tidier`, `tester`, `documenter`, `toolsmith`, `type-tightener`, `sweeper`,
+   * `simplifier`, `test-companion`), `rhythm`
+   * (`night-owl`, `early-bird`, `weekend-regular`), `collaboration`
+   * (`pair-partner`, `reviewer`) or `journey` (`founder`, `long-hauler`,
+   * `explorer`, `steady`, `new-here`, `back-again`).
+   * Determined by `kind`. A person's badges are ordered by category in that order.
+   */
+  category: Schema.Literals([
+    "focus",
+    "craft",
+    "rhythm",
+    "collaboration",
+    "journey",
   ]),
   /** Short text for the badge itself, such as "engine specialist". */
   label: Schema.String,

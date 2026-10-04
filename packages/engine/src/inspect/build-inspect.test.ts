@@ -28,6 +28,7 @@ const commitsTouchingA = (count: number): ReadonlyArray<HistoryCommit> =>
   }));
 
 const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
+  root: "/repo",
   toolVersion: "0.0.0",
   now: DateTime.makeUnsafe("2026-03-10T00:00:00Z"),
   since: undefined,
@@ -42,6 +43,7 @@ const factsOf = (commits: ReadonlyArray<HistoryCommit>): RepositoryFacts => ({
   commits,
   headTime: commits[0]?.time ?? 0,
   universe: [inventoryFile("src/a.ts", linesOf(10))],
+  projectFiles: { manifests: [], tsconfigs: [] },
   packageRoots: [],
   detail: undefined,
   blame: undefined,

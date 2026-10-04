@@ -11,12 +11,14 @@ export const at = (iso: string): number => Date.parse(iso) / 1000;
 export const classifiedCommit = (
   overrides: Partial<ClassifiedCommit> = {},
 ): ClassifiedCommit => ({
+  changedFiles: overrides.changes?.length ?? 0,
   class: "human",
   tools: [],
   time: at("2026-01-01T00:00:00Z"),
   offsetMinutes: 0,
   subject: "",
   author: { name: "Ada", email: "ada@example.com" },
+  humanCoAuthors: 0,
   changes: [],
   ...overrides,
 });

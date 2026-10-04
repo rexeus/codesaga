@@ -22,6 +22,10 @@ export const territoryNameOf = (path: string, sentenceStart = false): string =>
 export const percentOf = (share: number): string =>
   `${Math.round(share * 100)}%`;
 
+/** An hour 0 to 23 as a clock time, "05:00". */
+export const hourLabelOf = (hour: number): string =>
+  `${String(hour).padStart(2, "0")}:00`;
+
 const MAX_SUBJECT_CHARACTERS = 72;
 
 /** A commit subject in quotes, cut to 72 characters (grapheme clusters) with an ellipsis; empty without a subject. */

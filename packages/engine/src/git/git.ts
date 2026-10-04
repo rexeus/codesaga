@@ -1,5 +1,5 @@
 // Owns running git: one service per repository directory over ChildProcessSpawner.
-// Output is streamed as decoded text so large logs never sit in memory as one string.
+// Output is streamed, as decoded text or as raw bytes, so large logs never sit in memory as one string.
 // A non-zero exit becomes a GitCommandFailed; a missing binary becomes GitNotFound.
 import { Context, Effect, Fiber, Layer, Stream } from "effect";
 import type { PlatformError } from "effect";
@@ -42,12 +42,12 @@ const failUnlessSuccessful = (
     ),
   );
 
-const runStreaming = (
+const runBytes = (
   spawner: Spawner,
   directory: string,
   args: ReadonlyArray<string>,
   stdin: string | undefined,
-): Stream.Stream<string, GitError> =>
+): Stream.Stream<Uint8Array, GitError> =>
   Stream.unwrap(
     Effect.gen(function* () {
       const command = ChildProcess.make("git", args, {
@@ -81,7 +81,7 @@ const runStreaming = (
         Effect.orElseSucceed(() => ""),
         Effect.forkScoped,
       );
-      return Stream.decodeText(handle.stdout).pipe(
+      return handle.stdout.pipe(
         Stream.mapError((error) => spawnFailure(args, error)),
         Stream.concat(
           Stream.drain(
@@ -91,6 +91,14 @@ const runStreaming = (
       );
     }),
   );
+
+const runStreaming = (
+  spawner: Spawner,
+  directory: string,
+  args: ReadonlyArray<string>,
+  stdin: string | undefined,
+): Stream.Stream<string, GitError> =>
+  Stream.decodeText(runBytes(spawner, directory, args, stdin));
 
 /** Runs git in one directory. */
 export class Git extends Context.Service<
@@ -105,6 +113,16 @@ export class Git extends Context.Service<
       args: ReadonlyArray<string>,
       stdin?: string,
     ): Stream.Stream<string, GitError>;
+    /**
+     * The raw stdout of `git <args>`, emitted as it arrives in chunks of any
+     * size, for output that counts bytes (`cat-file --batch`). `stdin`, when
+     * given, is written to the process as UTF-8. Fails after the last chunk if
+     * git exits non-zero.
+     */
+    bytes(
+      args: ReadonlyArray<string>,
+      stdin?: string,
+    ): Stream.Stream<Uint8Array, GitError>;
     /** The whole stdout of `git <args>`; fails if git exits non-zero. */
     text(
       args: ReadonlyArray<string>,
@@ -118,6 +136,7 @@ export class Git extends Context.Service<
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
       return Git.of({
         stream: (args, stdin) => runStreaming(spawner, directory, args, stdin),
+        bytes: (args, stdin) => runBytes(spawner, directory, args, stdin),
         text: (args, stdin) =>
           Stream.mkString(runStreaming(spawner, directory, args, stdin)),
       });

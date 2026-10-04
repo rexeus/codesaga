@@ -1,10 +1,10 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem, Path } from "effect";
 import { TestClock } from "effect/testing";
 
 import { inspect } from "../inspect/inspect.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { analyze } from "./analyze.js";
@@ -90,7 +90,7 @@ const makeBlameFailFor = (repo: TempRepository, file: string) =>
     );
   });
 
-layer(NodeServices.layer)("analyze --blame", (it) => {
+layer(analyzeServices)("analyze --blame", (it) => {
   it.effect(
     "gives each directory the shares of the lines that exist today, by mailmapped identity",
     () =>
@@ -130,7 +130,7 @@ layer(NodeServices.layer)("analyze --blame", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze --blame territories", (it) => {
+layer(analyzeServices)("analyze --blame territories", (it) => {
   it.effect("gives each territory the line owners of its own files", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -167,7 +167,7 @@ layer(NodeServices.layer)("analyze --blame territories", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze --blame files git cannot blame", (it) => {
+layer(analyzeServices)("analyze --blame files git cannot blame", (it) => {
   it.effect("skips a file that git cannot blame instead of failing", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -212,7 +212,7 @@ layer(NodeServices.layer)("analyze --blame files git cannot blame", (it) => {
   );
 });
 
-layer(NodeServices.layer)("inspect --blame", (it) => {
+layer(analyzeServices)("inspect --blame", (it) => {
   it.effect("gives an entry the owners of the files it matches", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -236,7 +236,7 @@ layer(NodeServices.layer)("inspect --blame", (it) => {
   );
 });
 
-layer(NodeServices.layer)("inspect --blame skipped files", (it) => {
+layer(analyzeServices)("inspect --blame skipped files", (it) => {
   it.effect("counts no skipped file before the first commit", () =>
     Effect.gen(function* () {
       yield* setNow;

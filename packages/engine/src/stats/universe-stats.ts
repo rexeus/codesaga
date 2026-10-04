@@ -14,6 +14,8 @@ import { revisionsOf } from "./revisions.js";
 export type UniverseStats = {
   /** The stats of all universe files, with the commit habits of the activity window. */
   readonly repository: CodeStats;
+  /** The revisions of every path of the scope's history, in the current life of the path, as the stats count them. */
+  readonly revisions: ReadonlyMap<string, number>;
   /** The stats of the universe files at `paths`, without commit habits; a path that is not a universe file counts for nothing. */
   readonly forPaths: (paths: ReadonlyArray<string>) => CodeStats;
 };
@@ -39,6 +41,7 @@ export const universeStats = ({
   const files = new Map(universe.map((file) => [file.path, file]));
   const stats = codeStats(universe, revisions);
   return {
+    revisions,
     repository: {
       ...withRepositoryDetail(stats, universe, revisions),
       style: { ...stats.style, ...commitHabits(window, isCodePath) },

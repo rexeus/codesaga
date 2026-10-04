@@ -18,7 +18,7 @@ import { TERRITORY_MIN_FILES } from "./territory-tree.js";
 /** A territory with the universe files it holds, which the badges need and the report leaves out; badges, dates and stats are added from the history and the files. */
 export type TerritoryWithFiles = Omit<
   Territory,
-  "badges" | "lastChangedAt" | "stats" | "territories"
+  "badges" | "lastChangedAt" | "stats" | "territories" | "typescript"
 > & {
   /** The territory's universe files, repository-relative, including those of its children. */
   readonly paths: ReadonlyArray<string>;

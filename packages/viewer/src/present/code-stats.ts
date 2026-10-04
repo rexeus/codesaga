@@ -18,6 +18,26 @@ export const formatShare = (part: number, whole: number): string => {
   return part > 0 && share < 0.005 ? "<1%" : formatPercent(share);
 };
 
+/**
+ * A whole percent of `part` in `whole` that never rounds a share that is
+ * neither none nor all to `0%` or `100%`: `<1%` and `>99%` say the part is
+ * small, or nearly everything, without hiding the rest.
+ */
+export const formatShareExact = (part: number, whole: number): string => {
+  if (whole <= 0 || part <= 0) {
+    return "0%";
+  }
+  if (part >= whole) {
+    return "100%";
+  }
+  const share = part / whole;
+  if (share < 0.005) {
+    return "<1%";
+  }
+  const rounded = Math.round(share * 100);
+  return rounded >= 100 ? ">99%" : `${rounded}%`;
+};
+
 const TAIL_STEPS = 2;
 
 /** The last two steps of a path, which tell a file apart without the whole path: `github/context.ts`. */

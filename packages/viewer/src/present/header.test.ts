@@ -110,7 +110,7 @@ describe("chips", () => {
 });
 
 describe("navItems", () => {
-  it("links the sections the report has, Stories only with stories, Stats only with code files and Bots & Agents only with automation", () => {
+  it("links the sections the report has, Stories only with stories, Stats only with code files, TypeScript only with its deep dive and Bots & Agents only with automation", () => {
     const report = sampleReport();
     const withoutAutomation: Report = {
       ...report,
@@ -126,10 +126,14 @@ describe("navItems", () => {
       ["activity", "Activity"],
       ["knowledge", "Knowledge"],
       ["stats", "Stats"],
+      ["typescript", "TypeScript"],
       ["achievements", "Achievements"],
       ["team", "Team"],
       ["bots", "Bots & Agents"],
     ]);
+    expect(
+      navItems({ ...report, deepDives: {} }).map(({ id }) => id),
+    ).not.toContain("typescript");
     expect(
       navItems({ ...report, stories: [] }).map(({ id }) => id),
     ).not.toContain("stories");

@@ -1,10 +1,10 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect } from "effect";
 import { TestClock } from "effect/testing";
 
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { fieldsOf } from "../testing/error-fields.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
 import { InvalidCompare } from "./analysis-window.js";
@@ -106,7 +106,7 @@ const expectedComparison = {
   },
 };
 
-layer(NodeServices.layer)("analyze --compare", (it) => {
+layer(analyzeServices)("analyze --compare", (it) => {
   it.effect(
     "splits the history at the window start and reports both spans and the deltas",
     () =>

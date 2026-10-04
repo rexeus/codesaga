@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "@effect/vitest";
@@ -211,5 +211,27 @@ describe("codesaga check in a shallow clone", () => {
       );
       expect(result.exitCode).toBe(2);
     }).pipe(Effect.scoped),
+  );
+});
+
+describe("codesaga check and the TypeScript history", () => {
+  it.live(
+    "does not parse the history's TypeScript, which its gates never read",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTeamProject;
+
+        const checked = yield* journey({
+          args: ["check", "--min-truck-factor", "1"],
+          cwd: repo.root,
+        });
+        const cacheFile = join(repo.root, ".git", "codesaga", "syntax-v1.json");
+        const afterCheck = existsSync(cacheFile);
+        yield* journey({ args: ["analyze", "--json"], cwd: repo.root });
+
+        expect(checked.exitCode).toBe(0);
+        expect(afterCheck).toBe(false);
+        expect(existsSync(cacheFile)).toBe(true);
+      }).pipe(Effect.scoped),
   );
 });

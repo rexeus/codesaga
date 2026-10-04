@@ -1,4 +1,3 @@
-import { NodeServices } from "@effect/platform-node";
 import { assert, layer } from "@effect/vitest";
 import { Effect, FileSystem } from "effect";
 import { TestClock } from "effect/testing";
@@ -7,6 +6,7 @@ import { GitNotFound, NotAGitRepository } from "../git/git-errors.js";
 import { Git } from "../git/git.js";
 import { analyzeOptionsFor } from "../testing/analyze-options.js";
 import { fieldsOf } from "../testing/error-fields.js";
+import { analyzeServices } from "../testing/oxc-parser.js";
 import { setScopedEnv } from "../testing/scoped-env.js";
 import { makeTempRepository } from "../testing/temp-repository.js";
 import type { TempRepository } from "../testing/temp-repository.js";
@@ -15,7 +15,7 @@ import { analyze } from "./analyze.js";
 
 const setNow = TestClock.setTime(Date.parse("2026-03-10T00:00:00Z"));
 
-layer(NodeServices.layer)("analyze repository states", (it) => {
+layer(analyzeServices)("analyze repository states", (it) => {
   it.effect(
     "reports a null head and no commits for a repository without commits",
     () =>
@@ -50,7 +50,7 @@ layer(NodeServices.layer)("analyze repository states", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze shallow clones and includes", (it) => {
+layer(analyzeServices)("analyze shallow clones and includes", (it) => {
   it.effect("marks a shallow clone and leaves out its boundary commit", () =>
     Effect.gen(function* () {
       yield* setNow;
@@ -103,7 +103,7 @@ layer(NodeServices.layer)("analyze shallow clones and includes", (it) => {
   );
 });
 
-layer(NodeServices.layer)("analyze failures", (it) => {
+layer(analyzeServices)("analyze failures", (it) => {
   it.effect("fails with NotAGitRepository outside a git work tree", () =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
@@ -163,7 +163,7 @@ const commitAtRawTime = (repo: TempRepository, rawDate: string) =>
     yield* repo.git("update-ref", "HEAD", commit.trim());
   });
 
-layer(NodeServices.layer)("analyze implausible commit times", (it) => {
+layer(analyzeServices)("analyze implausible commit times", (it) => {
   it.effect(
     "leaves commits dated before the epoch or after now out of every section",
     () =>

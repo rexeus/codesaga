@@ -23,6 +23,7 @@ catalog:
   "@effect/language-service": 0.87.3
   "@effect/platform-node": 4.0.0-rc.118
   "@effect/vitest": 4.0.0-rc.118
+  "@oxc-project/types": 0.152.0
   "@types/d3-scale": 4.0.9
   "@types/d3-shape": 3.1.8
   "@types/node": 24.19.0
@@ -31,6 +32,7 @@ catalog:
   d3-shape: 3.2.0
   effect: 4.0.0-rc.118
   lucide-static: 1.48.0
+  oxc-parser: 0.152.0
   picomatch: 4.0.7
   rolldown: 1.2.11
   vitest: 5.0.2
