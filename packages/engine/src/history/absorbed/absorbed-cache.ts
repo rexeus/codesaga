@@ -1,5 +1,6 @@
 // Owns the cache of absorbed histories: the chain of each absorbed tip and the directory each merge put it under, in the git directory.
-// Both are functions of commit ids, which are content addresses, so an entry never goes stale; a run keeps only the entries it used.
+// Both are functions of commit ids, which are content addresses, and of the rule that picks the changes kept; the fingerprint names that rule, so an entry goes stale only with it.
+// A run keeps only the entries it used.
 // The cache is an optimization only: reading or writing it never fails.
 import { Effect, FileSystem, Schema } from "effect";
 import type { Path } from "effect";
@@ -34,6 +35,8 @@ const CachedChain = Schema.Array(
 const CacheDocument = Schema.fromJsonString(
   Schema.Struct({
     version: Schema.Literal(1),
+    /** What decides which changes a chain keeps: entries written under another fingerprint are not used. */
+    fingerprint: Schema.String,
     /** The chain of each absorbed tip, oldest first, with the changes the replay reads, by tip. */
     chains: Schema.Record(Schema.String, CachedChain),
     /** The directory each merge put the history under, by `prefixKey`. */
@@ -52,14 +55,18 @@ export const prefixKey = (tip: string, mergedAt: string): string =>
 
 const EMPTY: AbsorbedCache = { chains: new Map(), prefixes: new Map() };
 
-/** The cache in `file`, or an empty one when it is missing, unreadable or of another version. */
+/** The cache in `file`, or an empty one when it is missing, unreadable, of another version or written under another `fingerprint`. */
 export const loadAbsorbedCache = (
   file: string,
+  fingerprint: string,
 ): Effect.Effect<AbsorbedCache, never, FileSystem.FileSystem> =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const text = yield* fs.readFileString(file);
     const document = yield* Schema.decodeEffect(CacheDocument)(text);
+    if (document.fingerprint !== fingerprint) {
+      return EMPTY;
+    }
     return {
       chains: new Map(
         Object.entries(document.chains).map(([tip, chain]) => [
@@ -86,6 +93,7 @@ const sameKeys = (
  */
 export const storeAbsorbedCache = (
   file: string,
+  fingerprint: string,
   kept: AbsorbedCache,
   loaded: AbsorbedCache,
 ): Effect.Effect<void, never, FileSystem.FileSystem | Path.Path> =>
@@ -94,6 +102,7 @@ export const storeAbsorbedCache = (
     ? Effect.void
     : Schema.encodeEffect(CacheDocument)({
         version: 1,
+        fingerprint,
         chains: Object.fromEntries(
           Array.from(kept.chains, ([tip, chain]) => [
             tip,

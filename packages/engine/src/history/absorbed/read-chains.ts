@@ -35,6 +35,8 @@ export type ChainsInput = {
   readonly useCache: boolean;
   /** Whether a change to the path matters to the replay; an absorbed history keeps only those changes. */
   readonly isReplayed: (path: string) => boolean;
+  /** What decides `isReplayed`, such as the tool's version; cached chains written under another one are read again. */
+  readonly fingerprint: string;
 };
 
 /** Histories read at once; each is one `git log`. */
@@ -114,7 +116,7 @@ export const readChains = (
     const loaded =
       file === undefined
         ? { chains: new Map(), prefixes: new Map() }
-        : yield* loadAbsorbedCache(file);
+        : yield* loadAbsorbedCache(file, input.fingerprint);
     const chains = yield* Effect.forEach(
       absorptions,
       (absorption) => readAbsorbed(absorption, loaded, input.isReplayed),
@@ -123,6 +125,7 @@ export const readChains = (
     if (file !== undefined) {
       yield* storeAbsorbedCache(
         file,
+        input.fingerprint,
         {
           chains: new Map(
             absorptions.map(({ tip }, index) => [

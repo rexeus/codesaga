@@ -14,7 +14,12 @@ const isTs = (path: string) => path.endsWith(".ts");
 
 const chainsOf = (
   repo: TempRepository,
-  options: { readonly useCache?: boolean; readonly shallow?: boolean } = {},
+  options: {
+    readonly useCache?: boolean;
+    readonly shallow?: boolean;
+    readonly fingerprint?: string;
+    readonly isReplayed?: (path: string) => boolean;
+  } = {},
 ) =>
   Effect.gen(function* () {
     const head = (yield* repo.git("rev-parse", "HEAD")).trim();
@@ -30,7 +35,8 @@ const chainsOf = (
       commits,
       shallow: options.shallow ?? false,
       useCache: options.useCache ?? false,
-      isReplayed: isTs,
+      isReplayed: options.isReplayed ?? isTs,
+      fingerprint: options.fingerprint ?? "test",
     });
   }).pipe(Effect.provide(Git.layer(repo.directory)));
 
@@ -323,6 +329,45 @@ layer(NodeServices.layer)("readChains with the cache", (it) => {
         );
         assert.deepStrictEqual(second, first);
         assert.deepStrictEqual(replayed(second), { 0: yield* treeOf(repo) });
+      }),
+  );
+
+  it.effect(
+    "reads the chains again when the fingerprint of the rule that picks the changes differs",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* commitUnrelatedHistory(repo);
+        yield* mergeOther(repo);
+        const libOnly = (path: string) => path === "lib.ts";
+        const absorbedPaths = (chain: ReadonlyArray<FirstParentCommit>) =>
+          summary(chain.filter(({ line }) => line === 1)).flatMap(
+            ({ paths }) => paths,
+          );
+
+        const first = yield* chainsOf(repo, {
+          useCache: true,
+          fingerprint: "1",
+        });
+        const sameRule = yield* chainsOf(repo, {
+          useCache: true,
+          fingerprint: "1",
+          isReplayed: libOnly,
+        });
+        const newRule = yield* chainsOf(repo, {
+          useCache: true,
+          fingerprint: "2",
+          isReplayed: libOnly,
+        });
+
+        assert.deepStrictEqual(absorbedPaths(first), [
+          "lib.ts",
+          "shared.ts",
+          "lib.ts",
+          "util.ts",
+        ]);
+        assert.deepStrictEqual(sameRule, first);
+        assert.deepStrictEqual(absorbedPaths(newRule), ["lib.ts", "lib.ts"]);
       }),
   );
 });
