@@ -123,7 +123,7 @@ describe("productionEscapesPer1000", () => {
     expect(
       productionEscapesPer1000([
         file("src/a.ts", 500, { nonNull: 2 }),
-        file("src/testing/helper.ts", 500, { nonNull: 50 }),
+        file("src/test-utils/helper.ts", 500, { nonNull: 50 }),
       ]),
     ).toBe(4);
   });

@@ -3,14 +3,13 @@
 import { matchesAny } from "./globs.js";
 
 // Test directories and test-support directories at any depth, and the test file names of the common ecosystems.
-// The support names are the established ones only: `testing/` (Angular, Go), `test-utils/` and `test-helpers/` (Testing Library, many monorepos), and Jest's `__mocks__/` and `__fixtures__/`.
-// Plain `fixtures/`, `mocks/` and `testdata/` stay out: applications keep sample data and real stubs there, and the path alone cannot tell.
+// The support names are the unambiguous ones only: `test-utils/` and `test-helpers/` (Testing Library, many monorepos), and Jest's `__mocks__/` and `__fixtures__/`.
+// `testing/`, plain `fixtures/`, `mocks/` and `testdata/` stay out: a `testing/` folder is often shipped code (`effect/testing`, Go's `testing`, Angular's `*/testing` entry points, `@nestjs/testing`), and applications keep sample data and real stubs under the others, so the path alone cannot tell.
 const TEST_PATH_PATTERNS = [
   "**/test/**",
   "**/tests/**",
   "**/__tests__/**",
   "**/spec/**",
-  "**/testing/**",
   "**/test-utils/**",
   "**/test-helpers/**",
   "**/__mocks__/**",
@@ -116,10 +115,10 @@ const isDocumentation = matchesAny(DOC_PATH_PATTERNS);
 
 /**
  * Whether a repository-relative path is a test file or test support: inside a
- * `test`, `tests`, `__tests__`, `spec`, `testing`, `test-utils`,
- * `test-helpers`, `__mocks__` or `__fixtures__` directory at any depth, named
- * `*.test.*`, `*.spec.*`, `*_test.go`, `test_*.py` or `*_test.py`. `fixtures/`,
- * `mocks/` and `testdata/` are not, since production code and sample data live
+ * `test`, `tests`, `__tests__`, `spec`, `test-utils`, `test-helpers`,
+ * `__mocks__` or `__fixtures__` directory at any depth, named `*.test.*`,
+ * `*.spec.*`, `*_test.go`, `test_*.py` or `*_test.py`. `testing/`, `fixtures/`,
+ * `mocks/` and `testdata/` are not, since shipped code and sample data live
  * under those names too.
  */
 export const isTestPath: (path: string) => boolean =

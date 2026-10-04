@@ -40,6 +40,31 @@ const graph = graphOf([
 
 const map = territoryMapOf(graph, assignmentOf(graph, territories), 2);
 
+describe("territoryMapOf test-support folders", () => {
+  it("leaves a test-support folder out of the map, with the edges it has into production", () => {
+    const support = [
+      ...territories,
+      folder("src/test-utils", ["fake1.ts", "fake2.ts"]),
+    ];
+    const supported = graphOf([
+      ["app/p1.ts", "core/k1.ts"],
+      ["src/test-utils/fake1.ts", "app/p1.ts"],
+      ["src/test-utils/fake2.ts", "core/k1.ts"],
+    ]);
+
+    const result = territoryMapOf(
+      supported,
+      assignmentOf(supported, support),
+      2,
+    );
+
+    expect(result.territories.map(({ path }) => path).toSorted()).toStrictEqual(
+      ["app", "core"],
+    );
+    expect(result.edges).toHaveLength(1);
+  });
+});
+
 describe("territoryMapOf coupling", () => {
   it("counts afferent and efferent edges per territory, and instability as ce over ca plus ce", () => {
     expect(map.territories).toStrictEqual([

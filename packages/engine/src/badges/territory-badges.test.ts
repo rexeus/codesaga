@@ -196,7 +196,7 @@ describe("territoryBadges well tested", () => {
     "tests/fixtures",
     "src/__tests__",
     "spec",
-    "packages/a/src/testing",
+    "packages/a/src/__mocks__",
     "src/test-utils",
   ])("is not awarded to the test territory %s", (path) => {
     expect(kindsOf({ path, paths: withTests(10) })).not.toContain(
@@ -204,7 +204,7 @@ describe("territoryBadges well tested", () => {
     );
   });
 
-  it.each([".", "packages/contesting", "packages/latest", "src/fixtures"])(
+  it.each([".", "packages/contesting", "packages/testing", "src/fixtures"])(
     "is awarded to %s, which is no test directory",
     (path) => {
       expect(kindsOf({ path, paths: withTests(10) })).toContain("well-tested");

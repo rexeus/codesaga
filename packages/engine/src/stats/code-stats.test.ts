@@ -53,7 +53,7 @@ describe("codeStats of a small set", () => {
 
   it("counts the files of a test-support folder as tests", () => {
     const stats = codeStats(
-      [A, inventoryFile("src/testing/helper.ts", "export const h = 1;\n")],
+      [A, inventoryFile("src/test-utils/helper.ts", "export const h = 1;\n")],
       none,
     );
 
