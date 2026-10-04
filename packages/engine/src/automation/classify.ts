@@ -169,8 +169,8 @@ const automatedAuthorOf = (
  * The number of distinct people, by lowercased address, that the parsed
  * `Co-authored-by` trailers name besides the author. A trailer counts only in
  * the shape `Name <address>`; `Co-authored-by: broken` names nobody. Addresses
- * are compared as written, since `.mailmap` does not apply to trailers. A person is anyone
- * who matches no row of `signatures` and no bot account, so a team's own
+ * are compared as given, so the history has already resolved them through
+ * `.mailmap` (see `readHistory`). A person is anyone who matches no row of `signatures` and no bot account, so a team's own
  * signatures count. Needs only the trailers: the human share of a commit's
  * help is a fact about the commit, whatever its class.
  */
