@@ -71,7 +71,7 @@ export const parseProgressLayer = (output: ProgressOutput) =>
         update: (done: number, total: number) =>
           Effect.gen(function* () {
             const now = yield* Clock.currentTimeMillis;
-            startedAt ??= now;
+            startedAt = done === 0 ? now : (startedAt ?? now);
             if (done >= total) {
               yield* clear;
             } else if (now - lastWrite >= MIN_INTERVAL_MS) {

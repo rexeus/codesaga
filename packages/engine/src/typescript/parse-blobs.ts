@@ -20,7 +20,7 @@ import type { TypeScriptParser } from "./typescript-parser.js";
  */
 const BATCH_BLOBS = 2_000;
 /** Characters of text held per step. */
-const BATCH_CHARACTERS = 32_000_000;
+const BATCH_CHARACTERS = 16_000_000;
 
 /** A verdict, and whether it holds for the blob's content whenever it is asked. */
 export type Verdict = { readonly result: DigestResult; readonly keep: boolean };

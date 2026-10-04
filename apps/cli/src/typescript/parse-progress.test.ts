@@ -108,4 +108,24 @@ describe("parseProgressLayer time left", () => {
       );
     }).pipe(Effect.provide(layer));
   });
+
+  it.effect(
+    "starts the estimate again when a new parse reports nothing done",
+    () => {
+      const { writes, layer } = recording(true);
+      return Effect.gen(function* () {
+        const progress = yield* ParseProgress;
+        yield* progress.update(0, 100);
+        yield* TestClock.adjust(100_000);
+        yield* progress.update(0, 100);
+        yield* TestClock.adjust(10_000);
+        yield* progress.update(10, 100);
+
+        assert.strictEqual(
+          writes.at(-1),
+          "\r\u001B[KReading TypeScript history: 10 / 100 file versions, about 1m 30s left",
+        );
+      }).pipe(Effect.provide(layer));
+    },
+  );
 });
