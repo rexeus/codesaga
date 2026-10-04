@@ -198,7 +198,7 @@ layer(NodeServices.layer)(
 
 layer(NodeServices.layer)("gatherHistoryFacts progress", (it) => {
   it.effect(
-    "reports the missing blobs as the total, and nothing when none is missing",
+    "reports the missing blobs as the total, starting from none done, and nothing when none is missing",
     () =>
       Effect.gen(function* () {
         const repo = yield* makeTempRepository;
@@ -215,7 +215,10 @@ layer(NodeServices.layer)("gatherHistoryFacts progress", (it) => {
         const cold = yield* run(repo);
         const warm = yield* run(repo);
 
-        assert.deepStrictEqual(cold.progress, [[3, 3]]);
+        assert.deepStrictEqual(cold.progress, [
+          [0, 3],
+          [3, 3],
+        ]);
         assert.deepStrictEqual(warm.progress, []);
       }),
   );
