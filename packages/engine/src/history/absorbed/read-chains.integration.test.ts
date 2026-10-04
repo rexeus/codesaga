@@ -257,6 +257,38 @@ layer(NodeServices.layer)("readChains over histories it leaves alone", (it) => {
       }),
   );
 
+  it.effect(
+    "leaves a history that merged the default branch before it was merged back, whose merge would add the branch's files again",
+    () =>
+      Effect.gen(function* () {
+        const repo = yield* makeTempRepository;
+        yield* repo.commit("2026-03-01T12:00:00Z", {
+          "a.ts": "a\n",
+          "b.ts": "b\n",
+        });
+        const main = yield* mainBranch(repo);
+        yield* repo.git("switch", "--orphan", "other");
+        yield* repo.commit("2026-01-02T12:00:00Z", { "x.ts": "x\n" });
+        yield* repo.git(
+          "merge",
+          "--no-commit",
+          "--allow-unrelated-histories",
+          main,
+        );
+        yield* repo.commit("2026-03-05T12:00:00Z");
+        yield* repo.git("switch", main);
+        yield* repo.git("merge", "--no-ff", "--no-edit", "other");
+
+        const chain = yield* chainsOf(repo);
+
+        assert.deepStrictEqual(
+          chain.map(({ line }) => line),
+          [undefined, undefined],
+        );
+        assert.deepStrictEqual(replayed(chain), { 0: yield* treeOf(repo) });
+      }),
+  );
+
   it.effect("reads no absorbed history in a shallow clone", () =>
     Effect.gen(function* () {
       const repo = yield* makeTempRepository;

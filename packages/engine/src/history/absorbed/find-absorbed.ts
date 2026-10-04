@@ -40,55 +40,85 @@ const unseenChain = (
   return { commits, reachesRoot: false };
 };
 
+/** What visiting the commits of one history found. */
+type Visit = {
+  readonly found: ReadonlyArray<Absorption>;
+  /** Whether the history reaches a commit that is not its own, which makes it part of the lineage it merges into. */
+  readonly tainted: boolean;
+};
+
 /**
  * The histories that merges on the first-parent chain of `head` absorbed,
  * oldest merge first. A second parent counts when its first-parent chain runs
  * down to a root without meeting a commit that the chain before the merge
- * already reaches: the history was never part of the head's lineage, so its
- * files exist in no state of the head's chain before the merge. A branch
- * that forks from the lineage is an ordinary merge and is left to the chain
- * of the head, as is a history that reaches the lineage through another
- * history absorbed later. Histories absorbed by a history are found too.
+ * already reaches, and when nothing else of the history reaches such a
+ * commit either: the history was never part of the head's lineage, so its
+ * files exist in no state of the head's chain before the merge, and none of
+ * them is also the lineage's. A branch that forks from the lineage is an
+ * ordinary merge and is left to the chain of the head, as is a history that
+ * merged a commit of the lineage (an orphan branch that ran `git merge main`
+ * before it was merged back), one that shares a commit with another absorbed
+ * history, and one that reaches the lineage through another history absorbed
+ * later. Histories absorbed by a history are found too, unless that history
+ * is left to the head's chain: its merge then brings them in with the rest.
  */
 export const absorptionsOf = (
   graph: ParentGraph,
   head: string,
 ): ReadonlyArray<Absorption> => {
   const seen = new Set<string>();
-  const found: Array<Absorption> = [];
 
-  const markReachable = (start: string): void => {
+  /** Marks what is reachable from `start` as `own`, and tells whether it reached a commit that was seen and is not `own`. */
+  const claim = (start: string, own: Set<string>): boolean => {
+    let foreign = false;
     const pending = [start];
     for (let next = pending.pop(); next !== undefined; next = pending.pop()) {
       if (!seen.has(next)) {
         seen.add(next);
+        own.add(next);
         pending.push(...(graph.get(next) ?? []));
+      } else if (!own.has(next)) {
+        foreign = true;
       }
     }
+    return foreign;
   };
 
-  const visit = (oldestFirst: ReadonlyArray<string>): void => {
+  const visit = (
+    oldestFirst: ReadonlyArray<string>,
+    own: Set<string>,
+  ): Visit => {
+    const found: Array<Absorption> = [];
+    let tainted = false;
     for (const commit of oldestFirst) {
       for (const parent of (graph.get(commit) ?? []).slice(1)) {
-        join(parent, commit);
+        const side = join(parent, commit, own);
+        found.push(...side.found);
+        tainted = tainted || side.tainted;
       }
       seen.add(commit);
+      own.add(commit);
     }
+    return { found, tainted };
   };
 
-  const join = (tip: string, mergedAt: string): void => {
+  const join = (tip: string, mergedAt: string, own: Set<string>): Visit => {
     if (seen.has(tip)) {
-      return;
+      return { found: [], tainted: !own.has(tip) };
     }
     const chain = unseenChain(graph, seen, tip);
-    if (chain.reachesRoot) {
-      found.push({ tip, mergedAt });
-      visit(chain.commits.toReversed());
-    } else {
-      markReachable(tip);
+    if (!chain.reachesRoot) {
+      return { found: [], tainted: claim(tip, own) };
     }
+    const inner = new Set<string>();
+    const history = visit(chain.commits.toReversed(), inner);
+    inner.forEach((commit) => own.add(commit));
+    return {
+      found: history.tainted ? [] : [{ tip, mergedAt }, ...history.found],
+      tainted: false,
+    };
   };
 
-  visit(unseenChain(graph, seen, head).commits.toReversed());
-  return found;
+  return visit(unseenChain(graph, seen, head).commits.toReversed(), new Set())
+    .found;
 };

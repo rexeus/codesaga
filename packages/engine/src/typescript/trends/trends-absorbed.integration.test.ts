@@ -122,3 +122,43 @@ layer(NodeServices.layer)(
     );
   },
 );
+
+layer(NodeServices.layer)(
+  "trendsOf over a history that merged the lineage",
+  (it) => {
+    it.effect(
+      "counts the files of the default branch once, as the chain of HEAD has them",
+      () =>
+        Effect.gen(function* () {
+          const repo = yield* makeTempRepository;
+          yield* repo.commit("2026-03-10T12:00:00Z", {
+            "a.ts": "export const a = 1;\n",
+            "b.ts": "export const b = 1;\n",
+          });
+          const main = (yield* repo.git("branch", "--show-current")).trim();
+          yield* repo.git("switch", "--orphan", "other");
+          yield* repo.commit("2026-01-02T12:00:00Z", {
+            "x.ts": "export const x = 1;\n",
+          });
+          yield* repo.git(
+            "merge",
+            "--no-commit",
+            "--allow-unrelated-histories",
+            main,
+          );
+          yield* repo.commit("2026-03-12T12:00:00Z");
+          yield* repo.git("switch", main);
+          yield* repo.git("merge", "--no-ff", "--no-commit", "other");
+          yield* repo.commit("2026-04-02T12:00:00Z");
+
+          const result = yield* trendsAfter(repo, ".");
+
+          assert.deepStrictEqual(result?.trends.months, ["2026-03", "2026-04"]);
+          assert.deepStrictEqual(
+            result?.trends.series["production.files"],
+            [2, 3],
+          );
+        }),
+    );
+  },
+);

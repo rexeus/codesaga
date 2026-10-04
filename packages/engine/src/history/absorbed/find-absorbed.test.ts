@@ -98,3 +98,64 @@ describe("absorptionsOf over histories of histories", () => {
     ]);
   });
 });
+
+describe("absorptionsOf over histories that share commits with the lineage", () => {
+  it("leaves a history that merged a commit of the lineage before it was merged back", () => {
+    const graph = graphOf({
+      a: "",
+      b: "a",
+      x: "",
+      xm: "x b",
+      m: "b xm",
+    });
+
+    expect(absorptionsOf(graph, "m")).toStrictEqual([]);
+  });
+
+  it("leaves a history that merged a branch of the lineage, and keeps the histories merged beside it", () => {
+    const graph = graphOf({
+      a: "",
+      b: "a",
+      f: "a",
+      x: "",
+      xm: "x f",
+      q: "",
+      m1: "b xm",
+      m2: "m1 q",
+    });
+
+    expect(absorptionsOf(graph, "m2")).toStrictEqual([
+      { tip: "q", mergedAt: "m2" },
+    ]);
+  });
+
+  it("leaves a history that forks from an absorbed history, whose commits are part of the lineage by then", () => {
+    const graph = graphOf({
+      a: "",
+      b: "a",
+      x: "",
+      ay: "x",
+      bz: "x",
+      m1: "b ay",
+      m2: "m1 bz",
+    });
+
+    expect(absorptionsOf(graph, "m2")).toStrictEqual([
+      { tip: "ay", mergedAt: "m1" },
+    ]);
+  });
+
+  it("leaves the histories that a left-out history absorbed to its merge", () => {
+    const graph = graphOf({
+      a: "",
+      b: "a",
+      x: "",
+      q: "",
+      xq: "x q",
+      xm: "xq b",
+      m: "b xm",
+    });
+
+    expect(absorptionsOf(graph, "m")).toStrictEqual([]);
+  });
+});
