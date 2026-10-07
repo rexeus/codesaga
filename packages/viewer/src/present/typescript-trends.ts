@@ -205,8 +205,9 @@ export const trendLine = (trends: Trends, id: TrendId): TrendLine => {
 
 /**
  * Words for where the series starts, when that is later than the repository:
- * the replay follows the first-parent chain of HEAD, which can begin after the
- * first commit. Null when the series starts with the repository, and when
+ * the replay follows the first-parent chain of HEAD and the histories that
+ * merges absorbed, which can all begin after the first commit (a shallow
+ * clone, a history merged into a branch). Null when the series starts with the repository, and when
  * there is no month.
  */
 export const startNote = (
@@ -221,5 +222,5 @@ export const startNote = (
   if (started === undefined || first <= started) {
     return null;
   }
-  return `The series starts in ${formatMonth(first)}, where the first-parent chain of HEAD that it replays begins. The repository's first commit is from ${formatMonth(started)}.`;
+  return `The series starts in ${formatMonth(first)}, the month of the oldest commit it reads: the first-parent chain of HEAD and the histories that merges absorbed begin there. The repository's first commit is from ${formatMonth(started)}.`;
 };

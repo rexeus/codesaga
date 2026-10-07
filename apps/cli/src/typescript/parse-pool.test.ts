@@ -152,15 +152,15 @@ describe("makePool batches and workers", () => {
     ]);
   });
 
-  it("splits sources into batches of about 32 MB of text, and a larger source goes alone", async () => {
+  it("splits sources into batches of about 2 MB of text, and a larger source goes alone", async () => {
     const { start, batches } = fleet([]);
     const pool = makePool(start, 1);
 
     await pool.factsOf([
-      { path: "a", text: text(20) },
-      { path: "b", text: text(10) },
-      { path: "c", text: text(10) },
-      { path: "d", text: text(40) },
+      { path: "a", text: text(1) },
+      { path: "b", text: text(1) },
+      { path: "c", text: text(1) },
+      { path: "d", text: text(4) },
       { path: "e", text: text(1) },
     ]);
 

@@ -7,7 +7,10 @@ import type { FactsLookup } from "./facts-lookup.js";
 import { countsOf, MEASURES } from "./file-counts.js";
 
 /** A commit of the chain as the replay reads it. */
-type ReplayedCommit = Pick<FirstParentCommit, "time" | "changes">;
+type ReplayedCommit = Pick<
+  FirstParentCommit,
+  "time" | "changes" | "line" | "absorbs"
+>;
 
 /** Counts per group: production files first, then test files; each aligned with `MEASURES`. */
 export type Totals = readonly [ReadonlyArray<number>, ReadonlyArray<number>];
@@ -24,21 +27,49 @@ export const monthOf = (seconds: number): number => {
   return date.getUTCFullYear() * 12 + date.getUTCMonth();
 };
 
-/** The running totals and the version each path holds. */
+/** The running totals and the version each path holds, per line of history. */
 class Tally {
-  readonly #held = new Map<string, ReadonlyArray<number> | undefined>();
+  readonly #held = new Map<
+    number,
+    Map<string, ReadonlyArray<number> | undefined>
+  >();
   readonly #totals: [Array<number>, Array<number>] = [[...ZEROS], [...ZEROS]];
 
-  /** Makes `counts` the file at `path`; undefined removes the file. */
-  set(path: string, counts: ReadonlyArray<number> | undefined): void {
+  #add(path: string, counts: ReadonlyArray<number>, sign: 1 | -1): void {
     const total = this.#totals[groupOf(path)];
-    this.#held.get(path)?.forEach((count, index) => {
-      total[index] = (total[index] ?? 0) - count;
+    counts.forEach((count, index) => {
+      total[index] = (total[index] ?? 0) + sign * count;
     });
-    counts?.forEach((count, index) => {
-      total[index] = (total[index] ?? 0) + count;
-    });
-    this.#held.set(path, counts);
+  }
+
+  /** Makes `counts` the file at `path` in `line`; undefined removes the file. */
+  set(
+    line: number,
+    path: string,
+    counts: ReadonlyArray<number> | undefined,
+  ): void {
+    const held =
+      this.#held.get(line) ??
+      new Map<string, ReadonlyArray<number> | undefined>();
+    const before = held.get(path);
+    if (before !== undefined) {
+      this.#add(path, before, -1);
+    }
+    if (counts !== undefined) {
+      this.#add(path, counts, 1);
+    }
+    held.set(path, counts);
+    this.#held.set(line, held);
+  }
+
+  /** Removes every file the line holds. */
+  drop(line: number): void {
+    for (const [path, counts] of this.#held.get(line) ?? []) {
+      if (counts !== undefined) {
+        this.#add(path, counts, -1);
+      }
+    }
+    this.#held.delete(line);
   }
 
   snapshot(): Totals {
@@ -102,7 +133,9 @@ export const lastCommitDays = (
 
 /**
  * The totals of the files at the end of every month from `firstMonth` to
- * `lastMonth`, replaying `commits`, the first-parent chain oldest first. The
+ * `lastMonth`, replaying `commits`, the first-parent chain oldest first, with
+ * the chains of the histories it absorbed among them: each has its own path
+ * state, which a merge replaces by its own changes (see `FirstParentCommit`). The
  * point of a month is the state after its last commit as `lastCommitPerMonth`
  * finds it; the point of `lastMonth` is the state after the whole chain,
  * which is the head's committed tree, uncommitted edits not included. A
@@ -128,9 +161,12 @@ export const monthlyTotals = ({
   const tally = new Tally();
   const empty: Totals = [[...ZEROS], [...ZEROS]];
   const points: Array<Totals> = lastIndexes.map(() => empty);
-  commits.forEach(({ changes }, index) => {
+  commits.forEach(({ changes, line = 0, absorbs = [] }, index) => {
+    for (const absorbed of absorbs) {
+      tally.drop(absorbed);
+    }
     for (const { path, oid } of changes) {
-      tally.set(path, countsAt(lookup, path, oid));
+      tally.set(line, path, countsAt(lookup, path, oid));
     }
     const offsets = monthsEndingAt.get(index);
     if (offsets !== undefined) {

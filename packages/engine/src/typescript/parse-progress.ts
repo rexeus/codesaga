@@ -4,8 +4,9 @@ import { Context, Effect } from "effect";
 /** Receives the progress of parsing the history's file versions. */
 export type ParseProgressReport = {
   /**
-   * Called after every batch with the file versions done so far out of
-   * `total`; the parse is over when `done` reaches `total`.
+   * Called once before the first batch with nothing done, so that a listener
+   * can start its clock, and after every batch with the file versions done so
+   * far out of `total`; the parse is over when `done` reaches `total`.
    */
   readonly update: (done: number, total: number) => Effect.Effect<void>;
 };

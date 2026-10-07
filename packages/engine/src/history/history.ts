@@ -6,6 +6,7 @@ import type { FileSystem, Path } from "effect";
 
 import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
+import { resolveCoAuthors } from "./co-author-mailmap.js";
 import { readCommits } from "./commit-log.js";
 import type { Commit } from "./parse-log.js";
 import type { BlobFields } from "./raw-entry.js";
@@ -112,7 +113,8 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
 
 /**
  * Reads every non-merge commit of `options.head`, each before its parents,
- * author and committer after `.mailmap`. A rename makes every older commit that touched
+ * author and committer after `.mailmap`, and so the `Co-authored-by` trailers
+ * (see `resolveCoAuthors`). A rename makes every older commit that touched
  * the old path name the new one, so a file keeps its history under its
  * current name; deleted files keep the path they had when they were deleted.
  * A deletion ends the life of the file that had the deleted name: its own
@@ -129,18 +131,20 @@ const resolveLineage = (commit: Commit, lineage: Lineage): HistoryCommit => {
 export const readHistory = (
   options: HistoryOptions,
 ): Effect.Effect<History, GitError, Git | FileSystem.FileSystem | Path.Path> =>
-  Effect.map(readCommits(options), (all) => {
+  Effect.gen(function* () {
+    const all = yield* readCommits(options);
     const lineage: Lineage = {
       renamedTo: new Map(),
       deletedNames: new Set(),
     };
+    const kept = yield* resolveCoAuthors(
+      all.filter(
+        ({ parents, sha }) =>
+          parents.length <= 1 && !options.shallowBoundary.has(sha),
+      ),
+    );
     return {
-      commits: all
-        .filter(
-          ({ parents, sha }) =>
-            parents.length <= 1 && !options.shallowBoundary.has(sha),
-        )
-        .map((commit) => resolveLineage(commit, lineage)),
+      commits: kept.map((commit) => resolveLineage(commit, lineage)),
       headTime: all.find(({ sha }) => sha === options.head)?.time ?? 0,
     };
   });

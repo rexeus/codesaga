@@ -68,3 +68,64 @@ describe("parseProgressLayer", () => {
     }).pipe(Effect.provide(layer));
   });
 });
+
+describe("parseProgressLayer time left", () => {
+  it.effect(
+    "adds the time left at the pace since the first update once a few seconds of work are behind it",
+    () => {
+      const { writes, layer } = recording(true);
+      return Effect.gen(function* () {
+        const progress = yield* ParseProgress;
+        yield* progress.update(0, 100);
+        yield* TestClock.adjust(2_000);
+        yield* progress.update(10, 100);
+        yield* TestClock.adjust(8_000);
+        yield* progress.update(25, 100);
+        yield* TestClock.adjust(10_000);
+        yield* progress.update(30, 100);
+
+        assert.deepStrictEqual(writes, [
+          "\r\u001B[KReading TypeScript history: 0 / 100 file versions",
+          "\r\u001B[KReading TypeScript history: 10 / 100 file versions",
+          "\r\u001B[KReading TypeScript history: 25 / 100 file versions, about 30s left",
+          "\r\u001B[KReading TypeScript history: 30 / 100 file versions, about 50s left",
+        ]);
+      }).pipe(Effect.provide(layer));
+    },
+  );
+
+  it.effect("shows minutes once more than a minute is left", () => {
+    const { writes, layer } = recording(true);
+    return Effect.gen(function* () {
+      const progress = yield* ParseProgress;
+      yield* progress.update(0, 100);
+      yield* TestClock.adjust(10_000);
+      yield* progress.update(10, 100);
+
+      assert.strictEqual(
+        writes.at(-1),
+        "\r\u001B[KReading TypeScript history: 10 / 100 file versions, about 1m 30s left",
+      );
+    }).pipe(Effect.provide(layer));
+  });
+
+  it.effect(
+    "starts the estimate again when a new parse reports nothing done",
+    () => {
+      const { writes, layer } = recording(true);
+      return Effect.gen(function* () {
+        const progress = yield* ParseProgress;
+        yield* progress.update(0, 100);
+        yield* TestClock.adjust(100_000);
+        yield* progress.update(0, 100);
+        yield* TestClock.adjust(10_000);
+        yield* progress.update(10, 100);
+
+        assert.strictEqual(
+          writes.at(-1),
+          "\r\u001B[KReading TypeScript history: 10 / 100 file versions, about 1m 30s left",
+        );
+      }).pipe(Effect.provide(layer));
+    },
+  );
+});

@@ -32,6 +32,10 @@ const frameNamed = (
   frames: ReadonlyArray<Frame>,
   name: string,
 ): Frame | undefined => {
+  // Most calls name no function around them, and reading what each declares scans its body.
+  if (!frames.some(({ bindings }) => bindings.includes(name))) {
+    return undefined;
+  }
   for (const frame of frames.toReversed()) {
     if (frame.declared().has(name)) {
       return undefined;

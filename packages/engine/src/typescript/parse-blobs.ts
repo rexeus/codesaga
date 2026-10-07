@@ -20,7 +20,7 @@ import type { TypeScriptParser } from "./typescript-parser.js";
  */
 const BATCH_BLOBS = 2_000;
 /** Characters of text held per step. */
-const BATCH_CHARACTERS = 32_000_000;
+const BATCH_CHARACTERS = 16_000_000;
 
 /** A verdict, and whether it holds for the blob's content whenever it is asked. */
 export type Verdict = { readonly result: DigestResult; readonly keep: boolean };
@@ -115,6 +115,10 @@ export const parseMissing = (
     const progress = yield* ParseProgress;
     const blobsByOid = groupBy(missing, ({ oid }) => oid);
     const verdicts = new Map<string, Verdict>();
+    if (missing.length === 0) {
+      return verdicts;
+    }
+    yield* progress.update(0, missing.length);
     yield* readBlobs(
       [...blobsByOid.keys()].map((oid) => ({ oid })),
       {
@@ -122,6 +126,8 @@ export const parseMissing = (
       },
     ).pipe(
       inBatches,
+      // The next step is read while this one is parsed, so the parser never waits for git.
+      Stream.buffer({ capacity: 1 }),
       Stream.runForEach((batch) =>
         Effect.gen(function* () {
           for (const [key, verdict] of yield* verdictsOf(

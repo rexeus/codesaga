@@ -13,16 +13,31 @@ describe("isTestPath", () => {
     "pkg/a_test.go",
     "pkg/test_a.py",
     "pkg/a_test.py",
+    "src/test-utils/x.ts",
+    "src/test-utils/render.tsx",
+    "src/test-helpers/db.ts",
+    "src/components/__mocks__/api.ts",
+    "__fixtures__/user.json",
+    "src/__fixtures__/user.ts",
   ])("recognizes %s as a test file", (path) => {
     expect(isTestPath(path)).toBe(true);
   });
 
   it.each([
     "src/a.ts",
-    "src/testing/helper.ts",
     "src/latest.ts",
     "pkg/a_test.rs",
     "contest/a.ts",
+    "src/fixtures/sample.ts",
+    "packages/testing/index.ts",
+    "packages/effect/src/testing/TestClock.ts",
+    "src/testing/helper.ts",
+    "fixtures/report.sample.json",
+    "src/mocks/server.ts",
+    "pkg/testdata/a.txt",
+    "src/testing.ts",
+    "src/protesting/a.ts",
+    "src/test-utilities/a.ts",
   ])("does not take %s for a test file", (path) => {
     expect(isTestPath(path)).toBe(false);
   });

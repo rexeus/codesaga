@@ -86,7 +86,7 @@ const toolsOf = (
  * of the window, empty ones with zeros), and per tool the commits it authored
  * and the human commits it assisted, most commits first. A commit that several
  * agents assisted counts once in the totals and once for each of them. A bot matched only
- * by the generic `[bot]` rule is listed under its account name, which matches
+ * by the generic bot-account rule is listed under its account name, which matches
  * case-insensitively and shows the newest spelling.
  */
 export const automation = ({

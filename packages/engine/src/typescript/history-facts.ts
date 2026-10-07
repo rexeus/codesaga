@@ -8,7 +8,6 @@ import { skipBeforeReading } from "../git/blob-reader.js";
 import type { GitError } from "../git/git-errors.js";
 import type { Git } from "../git/git.js";
 import type { FirstParentCommit } from "../history/first-parent.js";
-import { readFirstParent } from "../history/first-parent.js";
 import type { HistoryCommit } from "../history/history.js";
 import type { InventoryOptions } from "../universe/inventory.js";
 import { namedAsCode } from "../universe/inventory.js";
@@ -25,6 +24,7 @@ import {
 import type { DigestResult } from "./facts-of-source.js";
 import { blobsOfChanges, factsKey } from "./history-blobs.js";
 import type { HistoryBlob } from "./history-blobs.js";
+import { readReplayedChains } from "./history-chains.js";
 import { readConfigTexts } from "./history-configs.js";
 import { parseMissing, UNREADABLE } from "./parse-blobs.js";
 import type { Verdict } from "./parse-blobs.js";
@@ -42,6 +42,9 @@ export type HistoryFacts = {
    * The first-parent chain of the head, oldest first, with every change under
    * the name its path had then: the state of the files over time, which the
    * trends replay. Whether a change counts is for `factsByBlob` to say.
+   * Histories that a merge absorbed through its second parent (see
+   * `readChains`) are in it, with the changes of scripts and project configs
+   * only, so the months before the head's chain begins are replayed too.
    */
   readonly firstParent: ReadonlyArray<FirstParentCommit>;
   /** The text of every version of a project `tsconfig*.json` that the chain changes, by blob id. */
@@ -56,9 +59,13 @@ export type HistoryFactsInput = Pick<
   readonly root: string;
   /** The commit whose first-parent chain is read besides the history's changes. */
   readonly head: string;
+  /** Whether the repository is a shallow clone, whose chains begin at the boundary. */
+  readonly shallow: boolean;
   /** The tool's own version: a release may change what a digest holds, so digests of another version are not reused. */
   readonly toolVersion: string;
-  readonly commits: ReadonlyArray<Pick<HistoryCommit, "changes">>;
+  readonly commits: ReadonlyArray<
+    Pick<HistoryCommit, "changes" | "sha" | "parents">
+  >;
   /** Whether verdicts are read from and written to the facts cache. */
   readonly useCache: boolean;
 };
@@ -140,7 +147,7 @@ export const gatherHistoryFacts = (
     if (status.kind !== "ready") {
       return undefined;
     }
-    const firstParent = yield* readFirstParent(input.head);
+    const firstParent = yield* readReplayedChains(input);
     const wanted = yield* countedBlobs(
       input,
       blobsOfChanges([

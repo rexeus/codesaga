@@ -85,6 +85,7 @@ export const gatherOf = (repo: TempRepository, options: GatherOptions = {}) =>
     return yield* gatherHistoryFacts({
       root: repo.directory,
       head,
+      shallow: false,
       toolVersion: options.toolVersion ?? "test",
       commits,
       include: options.include ?? [],

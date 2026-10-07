@@ -32,7 +32,7 @@ const ClassEscapes = Schema.Struct({
 });
 
 /**
- * The code over time, from the first commit's month to the current one.
+ * The code over time, from the month of the earliest commit replayed to the current one.
  *
  * `series` holds one array per name, aligned with `months`: `production.*`
  * and `tests.*` for `files`, `lines` (non-blank lines, as `typeSafety` counts them), `any` (explicit `any` keywords), `escapes`
@@ -42,7 +42,9 @@ const ClassEscapes = Schema.Struct({
  * such as `jest.config.js` are left out of these two); `tests.testCases`
  * and `tests.focusedTests` besides. Each point is the total over the files
  * that exist at the end of that month, replayed along the first-parent chain of
- * the head: the state after the last commit dated in that month or before it,
+ * the head, and along the chains of the histories that merges absorbed
+ * through their second parent, each until its merge: the state after the last
+ * commit dated in that month or before it,
  * so a commit dated earlier than the ones before it counts from its own month
  * on. The last point is the head's committed tree, not uncommitted edits.
  * Production and tests are told apart by the path a file had at that time.

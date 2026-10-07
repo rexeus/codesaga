@@ -128,7 +128,7 @@ describe("trendLine counts and gaps", () => {
 describe("startNote", () => {
   it("says where the series starts when that is after the repository's first commit", () => {
     expect(startNote(trends, "2023-10-10T08:12:31.000Z")).toBe(
-      "The series starts in Jan 2026, where the first-parent chain of HEAD that it replays begins. The repository's first commit is from Oct 2023.",
+      "The series starts in Jan 2026, the month of the oldest commit it reads: the first-parent chain of HEAD and the histories that merges absorbed begin there. The repository's first commit is from Oct 2023.",
     );
   });
 

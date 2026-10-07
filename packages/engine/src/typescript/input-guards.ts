@@ -2,6 +2,7 @@
 // Nesting is not judged here: a text scan cannot tell hostile nesting from legitimate code without false skips, so the application isolates the parser in child processes and counts the files that crash it.
 
 import type { SkipReason } from "../report/typescript-deep-dive.js";
+import { nonBlankLineCount } from "./text-lines.js";
 
 /** Longer sources are skipped; the universe's own limit, counted in characters. */
 export const MAX_SOURCE_CHARACTERS = 1_048_576;
@@ -15,9 +16,7 @@ export const INPUT_GUARD_LIMITS = {
 } as const;
 
 const isMinified = (text: string): boolean => {
-  const nonBlankLines = text
-    .split("\n")
-    .filter((line) => line.trim() !== "").length;
+  const nonBlankLines = nonBlankLineCount(text);
   return (
     nonBlankLines > 0 && text.length > MAX_MEAN_LINE_LENGTH * nonBlankLines
   );

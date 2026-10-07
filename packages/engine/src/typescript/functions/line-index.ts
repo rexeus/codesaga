@@ -9,22 +9,38 @@ export type LineIndex = {
   readonly nonBlankLines: (start: number, end: number) => number;
 };
 
+/** Whether a code unit is no content of a line: a space, a tab or a carriage return. */
+const isBlankUnit = (unit: number): boolean =>
+  unit === 32 || unit === 9 || unit === 13;
+
+const hasText = (text: string, start: number, end: number): boolean => {
+  for (let offset = start; offset < end; offset++) {
+    if (!isBlankUnit(text.codePointAt(offset) ?? 0)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 /** The first offset of each line, and how many non-blank lines come before each. */
 const scan = (text: string) => {
   const starts: number[] = [0];
   const nonBlankBefore: number[] = [0];
   let nonBlank = 0;
   let lineHasText = false;
-  for (let offset = 0; offset < text.length; offset++) {
-    const code = text.codePointAt(offset);
-    if (code === 10) {
-      nonBlank += lineHasText ? 1 : 0;
-      lineHasText = false;
-      starts.push(offset + 1);
-      nonBlankBefore.push(nonBlank);
-    } else if (code !== 32 && code !== 9 && code !== 13) {
-      lineHasText = true;
+  let start = 0;
+  for (;;) {
+    const newline = text.indexOf("\n", start);
+    const end = newline === -1 ? text.length : newline;
+    lineHasText = hasText(text, start, end);
+    if (newline === -1) {
+      break;
     }
+    nonBlank += lineHasText ? 1 : 0;
+    lineHasText = false;
+    starts.push(end + 1);
+    nonBlankBefore.push(nonBlank);
+    start = end + 1;
   }
   return { starts, nonBlankBefore, nonBlank, lineHasText };
 };

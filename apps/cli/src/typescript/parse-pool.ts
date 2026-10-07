@@ -49,8 +49,8 @@ export type Pool = {
 
 /** Sources per batch. */
 const BATCH_FILES = 500;
-/** Characters of text per batch, about 32 MB; a single larger source gets a batch to itself. */
-const BATCH_CHARACTERS = 32_000_000;
+/** Characters of text per batch, about 2 MB: a 16 MB step of the history gives each worker several, so none idles while another finishes one big batch; a single larger source gets a batch to itself. */
+const BATCH_CHARACTERS = 2_000_000;
 /** Worker deaths one batch may cause before the rest of it is given up; bisecting one culprit takes about two per level. */
 const MAX_CRASHES_PER_BATCH = 40;
 

@@ -120,8 +120,8 @@ const picker = (
 /**
  * The code over time as one line chart with a picker: escape hatches and
  * `any` per 1,000 lines, the share of complex functions, the share of ES
- * modules and the test cases. The months are those of the first-parent chain
- * the report replays, and the note says when that starts after the repository.
+ * modules and the test cases. The months are those of the history the report
+ * replays, and the note says when that starts after the repository.
  * The chart redraws to the card's width and is reachable with the keyboard.
  */
 export const trendCard = (

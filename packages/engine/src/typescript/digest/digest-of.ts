@@ -8,20 +8,19 @@ import { moduleCollector } from "../modules/module-facts.js";
 import { declarationOf } from "../node-guards.js";
 import type { ParsedSource } from "../parsed-source.js";
 import { testCollector } from "../tests/test-facts.js";
+import { nonBlankLineCount } from "../text-lines.js";
 import { typeSafetyCollector } from "../type-safety/type-safety-facts.js";
 import { escapesOf } from "../type-safety/type-safety-report.js";
 import { walk } from "../walk.js";
 import { FILE_DIGEST_VERSION } from "./file-digest.js";
 import type { FileDigest } from "./file-digest.js";
+import { kindOf } from "./type-nodes.js";
 
 /** Functions in the last two complexity bands, 15 or more. */
 const COMPLEX_BANDS = 2;
 
-const NON_BLANK = /\S/u;
-
-/** Non-blank lines, which is what the universe's `loc` counts. */
-const nonBlankLines = (text: string): number =>
-  text.split("\n").filter((line) => NON_BLANK.test(line)).length;
+/** A text without the word `any` has no `any` keyword, and the type-safety facts of the digest are about no other keyword. */
+const MENTIONS_ANY = /\bany\b/u;
 
 const isFunctionValue = (type: string | undefined): boolean =>
   type === "ArrowFunctionExpression" || type === "FunctionExpression";
@@ -70,15 +69,26 @@ export const fileDigestOf = (
   const functions = functionCollector(text);
   const tests = testCollector();
   const collectors = [typeSafety, modules, functions, tests];
+  const hasAny = MENTIONS_ANY.test(text);
   walk(parsed.program, {
     enter: (node) => {
-      for (const collector of collectors) {
-        collector.enter(node);
+      const kind = kindOf(node);
+      if (kind === "code") {
+        for (const collector of collectors) {
+          collector.enter(node);
+        }
+      } else if (kind === "type" && hasAny) {
+        typeSafety.enter(node);
       }
     },
     leave: (node) => {
-      for (const collector of collectors) {
-        collector.leave?.(node);
+      const kind = kindOf(node);
+      if (kind === "code") {
+        for (const collector of collectors) {
+          collector.leave?.(node);
+        }
+      } else if (kind === "type" && hasAny) {
+        typeSafety.leave?.(node);
       }
     },
   });
@@ -89,7 +99,7 @@ export const fileDigestOf = (
   const topLevel = topLevelOf(parsed);
   return {
     version: FILE_DIGEST_VERSION,
-    lines: nonBlankLines(text),
+    lines: nonBlankLineCount(text),
     any: safety.any,
     escapes: escapesOf(safety),
     suppressions: sum([
