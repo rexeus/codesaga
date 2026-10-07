@@ -1,5 +1,15 @@
 # codesaga
 
+## 0.3.1
+
+### Patch Changes
+
+- 1c393ed: Recognise machine accounts whose name or GitHub login ends in `-bot` or `_bot`, or is `bot`, such as `effect-bot`, as bots. They no longer count as contributors or earn person badges, and appear under Bots & Agents. People named `Abbot` or `Talbot` stay people. The same rule keeps such logins out of the pull request authors and reviewers lists.
+- 399ec67: Resolve `Co-authored-by` trailers through `.mailmap` (and `mailmap.file`, `mailmap.blob`), as authors already are, with one `git check-mailmap` call per run. One person who co-authors under two addresses, such as a GitHub noreply address, now counts once, and an author's own alias is no longer taken for another person, which affects the pair partner badge.
+- 2a9dec9: Shorten the first `analyze` of a large repository: the TypeScript and JavaScript history is digested in about half the time on Effect's 59,000 file versions (about 50 seconds instead of two minutes on a shared machine), and the digests, and so the report, are the same as before. The parse processes get smaller batches and the next batch is read while one is parsed, so none of them waits, the digest walk skips what it never reads, and the progress line on a terminal shows the time left.
+- 8b9c8d7: Count test-support folders as tests. Files in a `test-utils`, `test-helpers`, `__mocks__` or `__fixtures__` directory now belong to the test share, the tests side of the TypeScript deep dive (escape hatches, complexity, trends) and the `well-tested` and `tester` badges instead of production, and no longer show up as a production territory in the import map. The numbers of repositories with such folders change; `testing/`, `fixtures/` and `mocks/` folders stay production, since they are often shipped code or sample data.
+- c873374: The TypeScript trends no longer start late when a repository's history was absorbed through a merge. A history that shares no commit with the lineage of HEAD, such as the packages a monorepo migration merged in with `--allow-unrelated-histories` (with or without a directory), is replayed along its own first-parent chain until the merge that took it in, so the series start with the repository's first commit instead of the month HEAD's own chain begins. No file is counted twice, and the last point is still HEAD's committed tree. The `tsconfig` flag events follow those histories as well. On a repository of Effect's size the series now start in 2020-05 instead of 2023-12. Only a history that shares no commit with the lineage counts, so no file is counted twice; one that merged the default branch first, one merged into a branch before that branch was merged, and a shallow clone are replayed as before.
+
 ## 0.3.0
 
 ### Minor Changes
